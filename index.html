@@ -1415,18 +1415,23 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     /* [v23] Terms pane align with other panes */
     #terms-panel { background: var(--pane-terms-bg, #fffbe6) !important; }
 
-    /* ===== Terms card: unified look ===== */
-    .terms-card{
-        background: var(--panel-bg);
+    /* ===== Card shell (shared) ===== */
+    .card-shell{
+        background: var(--card-shell-bg, var(--panel-bg));
         border: 1px solid var(--border-color);
         border-radius: 8px;
         margin-bottom: 6px;
         cursor: grab;
         transition: box-shadow 0.2s, transform 0.15s;
         position: relative;
-        box-shadow: var(--shadow-soft, 0 1px 2px rgba(0,0,0,0.06));
+        box-shadow: var(--card-shadow, none);
     }
-    .terms-card:hover{ box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .card-shell:hover{ box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+    /* ===== Terms card: unified look ===== */
+    .terms-card{
+        --card-shadow: var(--shadow-soft, 0 1px 2px rgba(0,0,0,0.06));
+    }
     .terms-card.drag-over { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245,158,11,0.3); }
     .terms-card-title{
         display:flex;
@@ -1568,10 +1573,7 @@ body.theme-dark .structure-content {
 
     /* 構成カード */
     .structure-card {
-        background: var(--panel-bg); border: 1px solid var(--border-color);
-        border-radius: 8px; margin-bottom: 6px; cursor: grab;
-        transition: box-shadow 0.2s, transform 0.15s;
-        position: relative;
+        background: var(--panel-bg);
     }
     .structure-card.has-custom-color {
         background: var(--structure-card-bg, var(--panel-bg));
@@ -2412,11 +2414,9 @@ body.theme-dark .structure-content {
 body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
     .character-list { overflow: visible; }
 
-.character-card {
-        background: var(--pane-character-bg, #fdf2f8); border: 1px solid var(--border-color);
+	.character-card {
+        --card-shell-bg: var(--pane-character-bg, #fdf2f8);
         border-left: 3px solid #f9a8d4;
-        border-radius: 8px; margin-bottom: 6px; cursor: grab;
-        transition: box-shadow 0.2s, transform 0.15s; position: relative;
     }
     .character-card.has-custom-color { background: var(--character-card-bg, var(--panel-bg)); }
     .character-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -2562,9 +2562,7 @@ body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
     .world-list { overflow: visible; }
 
     .world-card {
-        background: var(--panel-bg); border: 1px solid var(--border-color);
-        border-radius: 8px; margin-bottom: 6px; cursor: grab;
-        transition: box-shadow 0.2s, transform 0.15s; position: relative;
+        background: var(--panel-bg);
     }
     .world-card.has-custom-color { background: var(--world-card-bg, var(--panel-bg)); }
     .world-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -14464,7 +14462,7 @@ function showPresetPanelColorPicker(paneId){
     const expandLevel = card.expandLevel || 0;
 
     const div = document.createElement('div');
-    div.className = `structure-card level-${card.level}`;
+    div.className = `structure-card card-shell level-${card.level}`;
     if (expandLevel > 0) div.classList.add('expanded');
     if (expandLevel === 3) div.classList.add('fully-expanded');
     if (card.collapsed) div.classList.add('collapsed');
@@ -16406,7 +16404,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
 
   function createCharacterCardElement(card, index) {
     const div = document.createElement('div');
-    div.className = `character-card role-${card.role} hide-labels`;
+    div.className = `character-card card-shell role-${card.role} hide-labels`;
     const level = card.expandLevel || 0;
     if (level === 1) div.classList.add('expand-1');
     else if (level === 2) div.classList.add('expand-2');
@@ -17723,7 +17721,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
 
   function createWorldCardElement(card, index) {
     const div = document.createElement('div');
-    div.className = `world-card level-${card.level} hide-labels`;
+    div.className = `world-card card-shell level-${card.level} hide-labels`;
     const expandLevel = card.expandLevel || 0;
     if (expandLevel === 1) div.classList.add('expand-1');
     else if (expandLevel === 2) div.classList.add('expand-2');
@@ -19168,7 +19166,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
 
     termsData.forEach(term => {
       const card = document.createElement('div');
-      card.className = 'terms-card';
+      card.className = 'terms-card card-shell';
       card.dataset.id = term.id;
       card.draggable = true;
 
