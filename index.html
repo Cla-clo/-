@@ -1441,12 +1441,15 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     .terms-card.lv0 .terms-card-meta,
     .terms-card.lv0 .terms-card-desc,
     .terms-card.lv0 .terms-linked-section,
-    .terms-card.lv0 .card-linked-section{ display:none !important; }
+    .terms-card.lv0 .card-linked-section,
+    .terms-card.lv0 .terms-card-actions{ display:none !important; }
     .terms-card.lv1 .terms-card-desc,
     .terms-card.lv1 .terms-linked-section,
-    .terms-card.lv1 .card-linked-section{ display:none !important; }
+    .terms-card.lv1 .card-linked-section,
+    .terms-card.lv1 .terms-card-actions{ display:none !important; }
     .terms-card.lv2 .terms-linked-section,
-    .terms-card.lv2 .card-linked-section{ display:none !important; }
+    .terms-card.lv2 .card-linked-section,
+    .terms-card.lv2 .terms-card-actions{ display:none !important; }
     /* ===== Terms card: unified look ===== */
     .terms-card{
         background: var(--panel-bg);
@@ -2387,7 +2390,7 @@ body.theme-dark .structure-content {
     #character-panel {
         position: fixed; top: var(--dock-top, 44px); left: 0; bottom: 0;
         width: 300px; max-width: 45vw;
-        background: var(--pane-character-bg, #fdf2f8);
+        background: var(--pane-character-bg, #fce7f3);
         border-right: 1px solid #f9a8d4;
         box-shadow: 2px 0 5px rgba(0,0,0,0.1);
         z-index: 200; transform: translateX(-100%); transition: transform 0.3s ease;
