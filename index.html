@@ -55,6 +55,10 @@ html.cc-boot #resizer-search {
   gap: 6px;
   flex-wrap: nowrap;
 }
+.panel-controls .panel-neighbor-swap-btn{
+  font-size: 0.8rem;
+  letter-spacing: -1px;
+}
 
 /* Icon/utility buttons in headers */
 .btn.panel-icon-btn,
@@ -1405,61 +1409,21 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     .main-container.terms-docked.terms-right #resizer-terms { order: 7; }
     .main-container.terms-docked:not(.terms-right) #resizer-terms { order: -4; }
     body.theme-dark #terms-panel .panel-header { background: var(--pane-terms-head, #164e63); border-color: #155e75; }
-.terms-content{ display:flex; flex-direction:column; overflow:auto; flex:1; padding:0; }
-    .terms-list{ padding: 10px; flex: 1; overflow: auto; box-sizing:border-box; }
+.terms-content{ flex: 1; overflow: auto; padding: 18px 10px 10px 10px; box-sizing: border-box; }
+    .terms-list{ overflow: visible; box-sizing:border-box; }
 
     /* [v23] Terms pane align with other panes */
     #terms-panel { background: var(--pane-terms-bg, #fffbe6) !important; }
-.terms-card { border-radius: 8px; }
 
-    .terms-card{
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        background: rgba(255,255,255,0.7);
-        padding: 10px 10px 10px 14px;
-        margin-bottom: 6px;
-        cursor: grab;
-        transition: box-shadow 0.2s, transform 0.15s;
-        position: relative;
-        box-shadow: var(--shadow-soft, 0 1px 2px rgba(0,0,0,0.06));
-    }
-    .terms-card::before{
-        content:'';
-        position:absolute;
-        left:0; top:0; bottom:0;
-        width:4px;
-        border-radius:10px 0 0 10px;
-        background: var(--pane-terms-accent, #f59e0b);
-    
-    body.theme-dark .terms-card{ background: rgba(17,24,39,0.45); }
-}
-
-    .terms-card-title{ font-weight: 600; font-size:  0.85rem; margin-bottom: 4px; display:flex; justify-content: space-between; gap: 8px; }
-    .terms-card-meta{ font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
-    .terms-card-desc{ white-space: pre-wrap; font-size: 0.82rem; line-height: 1.35; }
-    /* Terms expand levels (make changes obvious) */
-    .terms-card.lv0 .terms-card-meta,
-    .terms-card.lv0 .terms-card-desc,
-    .terms-card.lv0 .terms-linked-section,
-    .terms-card.lv0 .card-linked-section,
-    .terms-card.lv0 .terms-card-actions{ display:none !important; }
-    .terms-card.lv1 .terms-card-desc,
-    .terms-card.lv1 .terms-linked-section,
-    .terms-card.lv1 .card-linked-section,
-    .terms-card.lv1 .terms-card-actions{ display:none !important; }
-    .terms-card.lv2 .terms-linked-section,
-    .terms-card.lv2 .card-linked-section,
-    .terms-card.lv2 .terms-card-actions{ display:none !important; }
     /* ===== Terms card: unified look ===== */
     .terms-card{
         background: var(--panel-bg);
         border: 1px solid var(--border-color);
         border-radius: 8px;
         margin-bottom: 6px;
-        cursor: default;
+        cursor: grab;
         transition: box-shadow 0.2s, transform 0.15s;
         position: relative;
-        padding: 10px;
         box-shadow: var(--shadow-soft, 0 1px 2px rgba(0,0,0,0.06));
     }
     .terms-card:hover{ box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -1471,8 +1435,26 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
         gap: 8px;
         font-weight: 600;
         font-size:  0.85rem;
-        margin-bottom: 8px;
+        padding: 8px 10px;
+        border-bottom: 1px solid transparent;
     }
+    .terms-card.expanded .terms-card-title{ border-bottom-color: var(--border-color); }
+    .terms-card-body{
+        display: none;
+        padding: 8px 10px;
+        font-size: 0.8rem;
+        overflow-x: hidden;
+    }
+    .terms-card.expand-1 .terms-card-body,
+    .terms-card.expand-2 .terms-card-body,
+    .terms-card.expand-3 .terms-card-body{ display: block; }
+    .terms-card.expand-1 .terms-card-desc,
+    .terms-card.expand-1 .terms-linked-section,
+    .terms-card.expand-1 .card-linked-section{ display:none !important; }
+    .terms-card.expand-2 .terms-linked-section,
+    .terms-card.expand-2 .card-linked-section{ display:none !important; }
+    .terms-card-meta{ font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
+    .terms-card-desc{ white-space: pre-wrap; font-size: 0.82rem; line-height: 1.35; }
     .terms-card-head-left{
         display:flex;
         align-items:center;
@@ -1515,8 +1497,7 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     .terms-card-actions{
         margin-top: 8px;
         display: flex;
-        justify-content: flex-end;
-        gap: 6px;
+        gap: 4px;
         flex-wrap: wrap;
         padding-top: 8px;
         border-top: 1px dashed var(--border-color);
@@ -1608,8 +1589,7 @@ body.theme-dark .structure-content {
         border-left-color: var(--structure-card-accent, #6366f1);
         background: var(--structure-card-bg, var(--panel-bg));
     }
-    .structure-card.level-episode {
-        margin-left: 16px;
+.structure-card.level-episode {
         border-left: 3px solid #8b5cf6;
         background: linear-gradient(to right, rgba(139,92,246,0.03), transparent);
     }
@@ -1617,8 +1597,7 @@ body.theme-dark .structure-content {
         border-left-color: var(--structure-card-accent, #8b5cf6);
         background: var(--structure-card-bg, var(--panel-bg));
     }
-    .structure-card.level-scene {
-        margin-left: 32px;
+.structure-card.level-scene {
         border-left: 2px solid #a78bfa;
         font-size: 0.9em;
     }
@@ -1636,13 +1615,19 @@ body.theme-dark .structure-content {
         width: 14px; height: 14px; accent-color: #6366f1;
         cursor: pointer; flex-shrink: 0;
     }
-    .structure-move-group { display: flex; gap: 2px; align-items: center; }
-    .structure-move-btn {
+.structure-move-group { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
+.structure-move-btn {
+        width: 16px;
+        height: 12px;
+        font-size: 8px;
+        padding: 0;
         border: 1px solid var(--border-color);
+        border-radius: 2px;
         background: var(--panel-bg);
-        border-radius: 4px;
-        font-size: 0.65rem;
-        padding: 1px 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         color: var(--text-muted);
     }
     .structure-move-btn:hover { background: var(--pane-header-bg); color: var(--text-color); }
@@ -2427,8 +2412,9 @@ body.theme-dark .structure-content {
 body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
     .character-list { overflow: visible; }
 
-    .character-card {
+.character-card {
         background: var(--pane-character-bg, #fdf2f8); border: 1px solid var(--border-color);
+        border-left: 3px solid #f9a8d4;
         border-radius: 8px; margin-bottom: 6px; cursor: grab;
         transition: box-shadow 0.2s, transform 0.15s; position: relative;
     }
@@ -2442,9 +2428,9 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
     .character-card.has-custom-color.role-heroine { border-left-color: var(--character-card-accent, #f472b6); background: var(--character-card-bg, var(--panel-bg)); }
     .character-card.role-antagonist { border-left: 4px solid #be185d; }
     .character-card.has-custom-color.role-antagonist { border-left-color: var(--character-card-accent, #be185d); background: var(--character-card-bg, var(--panel-bg)); }
-    .character-card.role-supporting { margin-left: 16px; border-left: 3px solid #f9a8d4; }
+.character-card.role-supporting { border-left: 3px solid #f9a8d4; }
     .character-card.has-custom-color.role-supporting { border-left-color: var(--character-card-accent, #f9a8d4); background: var(--character-card-bg, var(--panel-bg)); }
-    .character-card.role-mob { margin-left: 32px; border-left: 2px solid #fbcfe8; font-size: 0.9em; }
+.character-card.role-mob { border-left: 2px solid #fbcfe8; font-size: 0.9em; }
     .character-card.has-custom-color.role-mob { border-left-color: var(--character-card-accent, #fbcfe8); }
 
     .character-card-header { display: flex; align-items: center; gap: 6px; padding: 8px 10px; cursor: pointer; border-bottom: 1px solid transparent; }
@@ -2588,9 +2574,9 @@ body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
     .world-card.drag-over { border-color: #10b981; box-shadow: 0 0 0 2px rgba(16,185,129,0.3); }
     .world-card.level-major { border-left: 4px solid #10b981; background: linear-gradient(to right, rgba(16,185,129,0.08), transparent); }
     .world-card.has-custom-color.level-major { border-left-color: var(--world-card-accent, #10b981); background: var(--world-card-bg, var(--panel-bg)); }
-    .world-card.level-middle { margin-left: 16px; border-left: 3px solid #34d399; background: linear-gradient(to right, rgba(52,211,153,0.05), transparent); }
+.world-card.level-middle { border-left: 3px solid #34d399; background: linear-gradient(to right, rgba(52,211,153,0.05), transparent); }
     .world-card.has-custom-color.level-middle { border-left-color: var(--world-card-accent, #34d399); background: var(--world-card-bg, var(--panel-bg)); }
-    .world-card.level-detail { margin-left: 32px; border-left: 2px solid #6ee7b7; font-size: 0.9em; }
+.world-card.level-detail { border-left: 2px solid #6ee7b7; font-size: 0.9em; }
     .world-card.has-custom-color.level-detail { border-left-color: var(--world-card-accent, #6ee7b7); }
 
     .world-card-header { display: flex; align-items: center; gap: 6px; padding: 8px 10px; cursor: pointer; border-bottom: 1px solid transparent; }
@@ -4506,6 +4492,7 @@ window.__ccInitPanelDnDAndResizers = function(){
     <span style="font-family: var(--font-ui);">📝 メモ</span>
     <div class="panel-controls">
 <button id="btn-memo-swap" class="btn panel-swap-btn" data-action="swap-side" data-pane="memo">左右入替</button>
+<button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor" data-pane="memo" title="隣のパネルと入替">◀▶</button>
 <button class="btn panel-icon-btn panel-pin-btn" id="btn-memo-pin" data-action="toggle-pin" data-pane="memo" title="固定/浮動切り替え">📌</button>
 <input type="checkbox" id="check-memo-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="memo">
       <button class="btn structure-fullscreen-btn" data-action="toggle-fullscreen" data-pane="memo">⛶</button>
@@ -4541,6 +4528,7 @@ window.__ccInitPanelDnDAndResizers = function(){
         <div class="panel-title"><span class="panel-emoji" aria-hidden="true">📋</span><span class="panel-title-text">構成</span></div>
         <div class="panel-controls">
             <button id="btn-structure-swap" class="btn panel-swap-btn" data-action="swap-side" data-pane="structure">左右入替</button>
+            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor" data-pane="structure" title="隣のパネルと入替">◀▶</button>
             <button class="btn panel-icon-btn panel-pin-btn" id="btn-structure-pin" data-action="toggle-pin" data-pane="structure" title="固定/浮動切り替え">📌</button>
             <input type="checkbox" id="check-structure-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="structure">
             <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="structure" data-args="true">✕</button>
@@ -4567,6 +4555,7 @@ window.__ccInitPanelDnDAndResizers = function(){
         <div class="panel-title"><span class="panel-emoji" aria-hidden="true">👤</span><span class="panel-title-text">登場人物</span></div>
         <div class="panel-controls">
             <button id="btn-character-swap" class="btn panel-swap-btn" data-action="swap-side" data-pane="character">左右入替</button>
+            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor" data-pane="character" title="隣のパネルと入替">◀▶</button>
             <button class="btn panel-icon-btn panel-pin-btn" id="btn-character-pin" data-action="toggle-pin" data-pane="character" title="固定/浮動切り替え">📌</button>
             <input type="checkbox" id="check-character-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="character">
             <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="character" data-args="true">✕</button>
@@ -4593,6 +4582,7 @@ window.__ccInitPanelDnDAndResizers = function(){
         <div class="panel-title"><span class="panel-emoji" aria-hidden="true">🌍</span><span class="panel-title-text">世界観</span></div>
         <div class="panel-controls">
             <button id="btn-world-swap" class="btn panel-swap-btn" data-action="swap-side" data-pane="world">左右入替</button>
+            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor" data-pane="world" title="隣のパネルと入替">◀▶</button>
             <button class="btn panel-icon-btn panel-pin-btn" id="btn-world-pin" data-action="toggle-pin" data-pane="world" title="固定/浮動切り替え">📌</button>
             <input type="checkbox" id="check-world-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="world">
             <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="world" data-args="true">✕</button>
@@ -4619,6 +4609,7 @@ window.__ccInitPanelDnDAndResizers = function(){
         <div class="panel-title"><span class="panel-emoji" aria-hidden="true">📚</span><span class="panel-title-text">用語</span></div>
         <div class="panel-controls">
             <button id="btn-terms-swap" class="btn panel-swap-btn" data-action="swap-side" data-pane="terms">左右入替</button>
+            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor" data-pane="terms" title="隣のパネルと入替">◀▶</button>
             <button class="btn panel-icon-btn panel-pin-btn" id="btn-terms-pin" data-action="toggle-pin" data-pane="terms" title="固定/浮動切り替え">📌</button>
             <input type="checkbox" id="check-terms-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="terms">
             <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="terms" data-args="true">✕</button>
@@ -4648,6 +4639,7 @@ window.__ccInitPanelDnDAndResizers = function(){
             <div class="panel-controls">
                 <button id="btn-outline-settings" class="btn panel-icon-btn" onclick="toggleOutlineSettings()" title="抽出ルール設定">⚙</button>
                 <button id="btn-outline-swap" class="btn panel-swap-btn" data-action="swap-side" data-pane="outline">左右入替</button>
+                <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor" data-pane="outline" title="隣のパネルと入替">◀▶</button>
                 <input type="checkbox" id="check-outline-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="outline">
                 <button class="btn panel-icon-btn panel-pin-btn" id="btn-outline-pin" data-action="toggle-pin" data-pane="outline" title="固定">📌</button>
                 <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="outline">✕</button>
@@ -11163,6 +11155,39 @@ function showBulkCardColorPicker(paneId){
 
 window.showBulkCardColorPicker = showBulkCardColorPicker;
 
+function darkenColor(color, amount = 0.12){
+    if (!color) return color;
+    const hex = color.trim();
+    const clamp = (v) => Math.max(0, Math.min(255, v));
+    if (hex.startsWith('#')) {
+      const raw = hex.slice(1);
+      const full = raw.length === 3
+        ? raw.split('').map(ch => ch + ch).join('')
+        : raw;
+      if (full.length !== 6) return color;
+      const num = parseInt(full, 16);
+      const r = clamp(((num >> 16) & 255) * (1 - amount));
+      const g = clamp(((num >> 8) & 255) * (1 - amount));
+      const b = clamp((num & 255) * (1 - amount));
+      return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+    }
+    const rgbMatch = hex.match(/rgba?\(([^)]+)\)/);
+    if (rgbMatch) {
+      const parts = rgbMatch[1].split(',').map(p => Number(p.trim()));
+      if (parts.length >= 3) {
+        const [r, g, b] = parts;
+        const nr = clamp(r * (1 - amount));
+        const ng = clamp(g * (1 - amount));
+        const nb = clamp(b * (1 - amount));
+        if (parts.length === 4) {
+          return `rgba(${Math.round(nr)}, ${Math.round(ng)}, ${Math.round(nb)}, ${parts[3]})`;
+        }
+        return `rgb(${Math.round(nr)}, ${Math.round(ng)}, ${Math.round(nb)})`;
+      }
+    }
+    return color;
+  }
+
 function applyPaneColors(colors){
     const defaults = getDefaultComputedColors();
     const root = document.documentElement.style;
@@ -11183,6 +11208,9 @@ function applyPaneColors(colors){
       const head = (colors && colors[k] && colors[k].head) ? colors[k].head : defaults[k].head;
       root.setProperty(bgVar, bg);
       root.setProperty(headVar, head);
+      if (k === 'character') {
+        root.setProperty('--pane-character-head-strong', darkenColor(head, 0.12));
+      }
     }
   }
 
@@ -11224,6 +11252,7 @@ function applyPaneColors(colors){
 #character-panel .panel-header,
 #character-panel .panel-toolbar,
 #character-panel .character-footer { background: var(--pane-character-head, #fdf2f8); }
+#character-panel .panel-header { background: var(--pane-character-head-strong, #fbcfe8); }
 
 #world-panel { background: var(--pane-world-bg, #ecfdf5); }
 #world-panel .panel-header,
@@ -13725,7 +13754,94 @@ panel.style.width = '320px';
     return v;
   }
 
+  const PANEL_ORDER_STORAGE_KEY = 'cc_panel_order_overrides_v1';
+  const PANEL_RESIZER_MAP = {
+    'memo-panel': 'resizer-memo',
+    'outline-panel': 'resizer-outline',
+    'structure-panel': 'resizer-structure',
+    'character-panel': 'resizer-character',
+    'world-panel': 'resizer-world',
+    'terms-panel': 'resizer-terms',
+  };
+
+  function readPanelOrderOverrides(){
+    try {
+      const raw = localStorage.getItem(PANEL_ORDER_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function savePanelOrderOverrides(overrides){
+    try {
+      localStorage.setItem(PANEL_ORDER_STORAGE_KEY, JSON.stringify(overrides));
+    } catch (e) {}
+  }
+
+  function applyPanelOrderOverrides(){
+    const overrides = readPanelOrderOverrides();
+    Object.entries(overrides).forEach(([id, order]) => {
+      const el = document.getElementById(id);
+      if (el) el.style.order = order;
+    });
+  }
+  window.applyPanelOrderOverrides = applyPanelOrderOverrides;
+
+  function getPanelOrderValue(el){
+    if (!el) return 0;
+    const order = getComputedStyle(el).order;
+    const num = Number(order);
+    return Number.isFinite(num) ? num : 0;
+  }
+
+  function collectSwappablePanels(){
+    const main = document.getElementById('main-container');
+    if (!main) return [];
+    const candidates = Object.keys(PANEL_RESIZER_MAP)
+      .map(id => document.getElementById(id))
+      .filter(Boolean)
+      .filter(panel => getComputedStyle(panel).display !== 'none');
+    return candidates
+      .map((panel, idx) => ({ panel, idx, order: getPanelOrderValue(panel) }))
+      .sort((a, b) => (a.order - b.order) || (a.idx - b.idx));
+  }
+
+  function swapPanelWithNeighbor(pane){
+    const panelId = String(pane || '').endsWith('-panel') ? String(pane) : `${pane}-panel`;
+    const list = collectSwappablePanels();
+    const currentIndex = list.findIndex(item => item.panel.id === panelId);
+    if (currentIndex === -1 || list.length < 2) return;
+    const neighborIndex = currentIndex < list.length - 1 ? currentIndex + 1 : currentIndex - 1;
+    const current = list[currentIndex]?.panel;
+    const neighbor = list[neighborIndex]?.panel;
+    if (!current || !neighbor) return;
+
+    const overrides = readPanelOrderOverrides();
+    const currentOrder = getPanelOrderValue(current);
+    const neighborOrder = getPanelOrderValue(neighbor);
+
+    current.style.order = neighborOrder;
+    neighbor.style.order = currentOrder;
+    overrides[current.id] = neighborOrder;
+    overrides[neighbor.id] = currentOrder;
+
+    const currentResizer = document.getElementById(PANEL_RESIZER_MAP[current.id]);
+    const neighborResizer = document.getElementById(PANEL_RESIZER_MAP[neighbor.id]);
+    if (currentResizer && neighborResizer) {
+      const currentResizerOrder = getPanelOrderValue(currentResizer);
+      const neighborResizerOrder = getPanelOrderValue(neighborResizer);
+      currentResizer.style.order = neighborResizerOrder;
+      neighborResizer.style.order = currentResizerOrder;
+      overrides[currentResizer.id] = neighborResizerOrder;
+      overrides[neighborResizer.id] = currentResizerOrder;
+    }
+
+    savePanelOrderOverrides(overrides);
+  }
+
   function finalizePanelLayout(){
+    try { if (typeof window.applyPanelOrderOverrides === 'function') window.applyPanelOrderOverrides(); } catch(e) {}
     try { if (typeof window.applyPaneWidthSettings === 'function') window.applyPaneWidthSettings(); } catch(e) {}
     try { if (typeof window.applyPaneHeightSettings === 'function') window.applyPaneHeightSettings(); } catch(e) {}
     try { if (typeof window.updateDockTopOffset === 'function') window.updateDockTopOffset(); } catch(e) {}
@@ -13738,6 +13854,11 @@ panel.style.width = '320px';
     if (!cap) return;
     if (action === 'swap-side') {
       window[`swap${cap}Side`]?.();
+      finalizePanelLayout();
+      return;
+    }
+    if (action === 'swap-neighbor') {
+      swapPanelWithNeighbor(pane);
       finalizePanelLayout();
       return;
     }
@@ -13770,7 +13891,7 @@ panel.style.width = '320px';
   function bindPanelHeaderActions(){
     if (window.__ccPanelHeaderActionsBound) return;
     window.__ccPanelHeaderActionsBound = true;
-    const PANEL_ACTIONS = new Set(['swap-side', 'toggle-pin', 'close-panel', 'toggle-fullscreen']);
+    const PANEL_ACTIONS = new Set(['swap-side', 'swap-neighbor', 'toggle-pin', 'close-panel', 'toggle-fullscreen']);
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-action][data-pane]');
       if (!btn) return;
@@ -19043,7 +19164,8 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       // normalize expand level
       const lv = Number.isInteger(term.expandLevel) ? term.expandLevel : (term.expandLevel ? 3 : 0);
       term.expandLevel = Math.max(0, Math.min(3, lv));
-      card.classList.add('lv'+term.expandLevel);
+      card.classList.add('expand-'+term.expandLevel);
+      if (term.expandLevel > 0) card.classList.add('expanded');
 
       const advanceExpandLevel = () => {
         const curLv = Number.isInteger(term.expandLevel) ? term.expandLevel : (term.expandLevel ? 3 : 0);
@@ -19127,18 +19249,21 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       card.ondblclick = () => { advanceExpandLevel(); };
 
       // ===== Body fields (match other panels) =====
+      const body = document.createElement('div');
+      body.className = 'terms-card-body';
+
       if (term.category) {
         const field = document.createElement('div');
         field.className = 'structure-field terms-card-meta';
         field.innerHTML = `<div class="structure-field-label">カテゴリ</div><div class="structure-field-value">${escapeHtml(term.category)}</div>`;
-        card.appendChild(field);
+        body.appendChild(field);
       }
 
       if (term.desc) {
         const field = document.createElement('div');
         field.className = 'structure-field terms-card-desc';
         field.innerHTML = `<div class="structure-field-label">説明</div><div class="structure-field-value" style="white-space:pre-wrap;">${escapeHtml(term.desc)}</div>`;
-        card.appendChild(field);
+        body.appendChild(field);
       }
       // linked input tab (unified) - show near bottom like other panels
       if (term.tabId && window.inputTabs) {
@@ -19147,7 +19272,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
           const tabField = document.createElement('div');
           tabField.className = 'structure-field terms-card-meta';
           tabField.innerHTML = `<div class="structure-field-label">紐づけタブ</div><span style="color:#2563eb; cursor:pointer;" onclick="event.stopPropagation(); if(window.switchTab) window.switchTab(${term.tabId})">📄 ${escapeHtml(tab.name)}</span>`;
-          card.appendChild(tabField);
+          body.appendChild(tabField);
         }
       }
 
@@ -19178,8 +19303,10 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
           ${linkedCharactersHtml ? `<div class="card-linked-label" style="margin-top:6px;">人物</div><div class="card-linked-items">${linkedCharactersHtml}</div>` : ''}
           ${linkedWorldsHtml ? `<div class="card-linked-label" style="margin-top:6px;">世界観</div><div class="card-linked-items">${linkedWorldsHtml}</div>` : ''}
         `;
-        card.appendChild(linkedSection);
+        body.appendChild(linkedSection);
       }
+
+      card.appendChild(body);
 
       // ===== Actions (match structure/world/character) =====
       const actions = document.createElement('div');
@@ -20862,6 +20989,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('DOMContentLoaded', ()=>{
     generateToolbars();
     document.addEventListener('click', handleToolbarClick);
+    if (typeof window.applyPanelOrderOverrides === 'function') window.applyPanelOrderOverrides();
   });
   
   // Open header context menu from toolbar button (left click)
