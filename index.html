@@ -8788,7 +8788,14 @@ function closeMemoPanel(force = false) {
 
   const panel = document.getElementById('memo-panel');
   if (!panel) return;
-  document.body.classList.remove('memo-fullscreen-mode');
+  if (document.body.classList.contains('memo-fullscreen-mode')) {
+    document.body.classList.remove('memo-fullscreen-mode');
+    panel.classList.add('open');
+    if (typeof applyPaneWidthSettings === 'function') applyPaneWidthSettings();
+    if (typeof updatePanelButtonStates === 'function') updatePanelButtonStates();
+    if (typeof updateDockSplitState === 'function') updateDockSplitState();
+    return;
+  }
   panel.classList.remove('open');
 
   if (typeof applyPaneWidthSettings === 'function') applyPaneWidthSettings();
