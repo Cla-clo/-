@@ -14543,6 +14543,7 @@ function showPresetPanelColorPicker(paneId){
     actions.className = 'structure-card-actions';
     actions.innerHTML = `
       <button onclick="openEditModal(${card.id})">✏️ 編集</button>
+      <button onclick="duplicateStructureCard(${card.id})">📋 複製</button>
       <button class="btn-delete" onclick="deleteStructureCard(${card.id})">🗑 削除</button>
     `;
     body.appendChild(actions);
@@ -17607,11 +17608,10 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     }
 
 
-    const linkedSectionHtml = (linkedCharactersHtml || linkedStructuresHtml || linkedWorldsHtml || linkedTermsHtml) ? `
+    const linkedSectionHtml = (linkedStructuresHtml || linkedCharactersHtml || linkedTermsHtml) ? `
       <div class="card-linked-section">
-        ${linkedCharactersHtml ? `<div class="card-linked-label">登場人物</div><div class="card-linked-items">${linkedCharactersHtml}</div>` : ''}
-        ${linkedStructuresHtml ? `<div class="card-linked-label" style="margin-top:6px;">構成</div><div class="card-linked-items">${linkedStructuresHtml}</div>` : ''}
-        ${linkedWorldsHtml ? `<div class="card-linked-label" style="margin-top:6px;">世界観</div><div class="card-linked-items">${linkedWorldsHtml}</div>` : ''}
+        ${linkedStructuresHtml ? `<div class="card-linked-label">構成</div><div class="card-linked-items">${linkedStructuresHtml}</div>` : ''}
+        ${linkedCharactersHtml ? `<div class="card-linked-label" style="margin-top:6px;">登場人物</div><div class="card-linked-items">${linkedCharactersHtml}</div>` : ''}
         ${linkedTermsHtml ? `<div class="card-linked-label" style="margin-top:6px;">用語</div><div class="card-linked-items">${linkedTermsHtml}</div>` : ''}
       </div>
     ` : '';
@@ -19090,6 +19090,11 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       }
       // ===== Linked chips (reuse shared colored styles) =====
       const linkedItems = [];
+      (term.linkedStructures || []).forEach(sid => {
+        const st = structData.find(x => x.id === sid);
+        if(!st) return;
+        linkedItems.push({ icon:'📋', label: st.title || st.name || `#${sid}`, panel:'structure', id: sid, cls:'structure-linked-structure' });
+      });
       (term.linkedCharacters || []).forEach(cid => {
         const c = charData.find(x => x.id === cid);
         if(!c) return;
@@ -19099,11 +19104,6 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
         const w = worldData.find(x => x.id === wid);
         if(!w) return;
         linkedItems.push({ icon:'🌍', label: w.name || `#${wid}`, panel:'world', id: wid, cls:'structure-linked-world' });
-      });
-      (term.linkedStructures || []).forEach(sid => {
-        const st = structData.find(x => x.id === sid);
-        if(!st) return;
-        linkedItems.push({ icon:'📋', label: st.title || st.name || `#${sid}`, panel:'structure', id: sid, cls:'structure-linked-structure' });
       });
 
       if (linkedItems.length){
@@ -19141,6 +19141,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       actions.className = 'structure-card-actions';
       actions.innerHTML = `
         <button onclick="openTermEditModal(${term.id})">✏️ 編集</button>
+        <button onclick="duplicateTermCard(${term.id})">📋 複製</button>
         <button class="btn-delete" onclick="deleteTermCard(${term.id})">🗑 削除</button>
       `;
       card.appendChild(actions);
