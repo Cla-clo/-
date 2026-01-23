@@ -1438,9 +1438,15 @@ body.theme-dark .panel-header { background: var(--pane-terms-head, #164e63); bor
     .terms-card-meta{ font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
     .terms-card-desc{ white-space: pre-wrap; font-size: 0.82rem; line-height: 1.35; }
     /* Terms expand levels (make changes obvious) */
-    .terms-card.lv0 .terms-card-meta, .terms-card.lv0 .terms-card-desc, .terms-card.lv0 .terms-linked-section{ display:none !important; }
-    .terms-card.lv1 .terms-card-desc, .terms-card.lv1 .terms-linked-section{ display:none !important; }
-    .terms-card.lv2 .terms-linked-section{ display:none !important; }
+    .terms-card.lv0 .terms-card-meta,
+    .terms-card.lv0 .terms-card-desc,
+    .terms-card.lv0 .terms-linked-section,
+    .terms-card.lv0 .card-linked-section{ display:none !important; }
+    .terms-card.lv1 .terms-card-desc,
+    .terms-card.lv1 .terms-linked-section,
+    .terms-card.lv1 .card-linked-section{ display:none !important; }
+    .terms-card.lv2 .terms-linked-section,
+    .terms-card.lv2 .card-linked-section{ display:none !important; }
     /* ===== Terms card: unified look ===== */
     .terms-card{
         background: var(--panel-bg);
@@ -1454,6 +1460,7 @@ body.theme-dark .panel-header { background: var(--pane-terms-head, #164e63); bor
         box-shadow: var(--shadow-soft, 0 1px 2px rgba(0,0,0,0.06));
     }
     .terms-card:hover{ box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .terms-card.drag-over { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245,158,11,0.3); }
     .terms-card-title{
         display:flex;
         justify-content: space-between;
@@ -1937,7 +1944,11 @@ body.theme-dark .structure-content {
         color: #065f46;
         border-color: #6ee7b7;
     }
-    .card-linked-term{ background: rgba(56,189,248,0.18); border-color: rgba(56,189,248,0.35); }
+    .card-linked-term{
+        background: #fef9c3;
+        color: #854d0e;
+        border-color: #fde047;
+    }
 
     .card-linked-structure {
         background: #dbeafe;
@@ -5005,26 +5016,26 @@ window.__ccInitPanelDnDAndResizers = function(){
             <div class="world-edit-hint"><span id="world-description-count">0</span>/500文字</div>
         </div>
         <div class="world-edit-field">
-            <label>関連する登場人物</label>
-            <div id="world-edit-characters" class="structure-link-select-container">
-                <div style="color:var(--text-muted); font-style:italic; font-size:0.8rem;">登場人物パネルにキャラクターを追加してください</div>
-            </div>
-        </div>
-        <div class="world-edit-field">
             <label>関連する構成</label>
             <div id="world-edit-structures" class="structure-link-select-container">
                 <div style="color:var(--text-muted); font-style:italic; font-size:0.8rem;">構成パネルにカードを追加してください</div>
             </div>
         </div>
         <div class="world-edit-field">
-    <label>関連する用語</label>
-    <div id="world-edit-terms" class="structure-link-select-container"></div>
-</div>
-<div class="world-edit-field">
+            <label>関連する登場人物</label>
+            <div id="world-edit-characters" class="structure-link-select-container">
+                <div style="color:var(--text-muted); font-style:italic; font-size:0.8rem;">登場人物パネルにキャラクターを追加してください</div>
+            </div>
+        </div>
+        <div class="world-edit-field">
             <label>関連する世界観</label>
             <div id="world-edit-worlds" class="structure-link-select-container">
                 <div style="color:var(--text-muted); font-style:italic; font-size:0.8rem;">他の世界観設定と関連付け</div>
             </div>
+        </div>
+        <div class="world-edit-field">
+            <label>関連する用語</label>
+            <div id="world-edit-terms" class="structure-link-select-container"></div>
         </div>
         <div class="world-edit-field">
             <label for="world-edit-tab">紐づけタブ</label>
@@ -15834,6 +15845,7 @@ window.__ccSyncTermsLinks = __ccSyncTermsLinks;
   window.closeStructureEditModal = closeStructureEditModal;
   window.saveStructureCard = saveStructureCard;
   window.deleteStructureCard = deleteStructureCard;
+  window.duplicateStructureCard = duplicateStructureCard;
   window.deleteSelectedStructureCards = deleteSelectedStructureCards;
   window.deleteAllStructureCards = deleteAllStructureCards;
   window.expandAllStructure = expandAllStructure;
@@ -15920,7 +15932,10 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     const container = document.getElementById('main-container');
     if (!panel) return;
 
-    document.body.classList.remove('structure-fullscreen-mode');
+    if (document.body.classList.contains('structure-fullscreen-mode')) {
+      document.body.classList.remove('structure-fullscreen-mode');
+      return;
+    }
     if (force || !checkbox || !checkbox.checked) {
       panel.classList.remove('open');
       if (checkbox) checkbox.checked = false;
@@ -17222,7 +17237,10 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     const container = document.getElementById('main-container');
     if (!panel) return;
 
-    document.body.classList.remove('character-fullscreen-mode');
+    if (document.body.classList.contains('character-fullscreen-mode')) {
+      document.body.classList.remove('character-fullscreen-mode');
+      return;
+    }
     if (force || !checkbox || !checkbox.checked) {
       panel.classList.remove('open');
       if (checkbox) checkbox.checked = false;
@@ -18568,7 +18586,10 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     const container = document.getElementById('main-container');
     if (!panel) return;
 
-    document.body.classList.remove('world-fullscreen-mode');
+    if (document.body.classList.contains('world-fullscreen-mode')) {
+      document.body.classList.remove('world-fullscreen-mode');
+      return;
+    }
     if (force || !checkbox || !checkbox.checked) {
       panel.classList.remove('open');
       if (checkbox) checkbox.checked = false;
@@ -18920,6 +18941,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
   let termsData = [];
   let termsNextId = 1;
   let editingTermId = null;
+  let draggingTermId = null;
 
   function loadTermsData(){
     try{
@@ -18992,6 +19014,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       const card = document.createElement('div');
       card.className = 'terms-card';
       card.dataset.id = term.id;
+      card.draggable = true;
 
       // per-card custom color (optional)
       if (term.bgColor) card.style.background = term.bgColor;
@@ -19095,43 +19118,6 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
         field.innerHTML = `<div class="structure-field-label">説明</div><div class="structure-field-value" style="white-space:pre-wrap;">${escapeHtml(term.desc)}</div>`;
         card.appendChild(field);
       }
-      // ===== Linked chips (reuse shared colored styles) =====
-      const linkedItems = [];
-      (term.linkedStructures || []).forEach(sid => {
-        const st = structData.find(x => x.id === sid);
-        if(!st) return;
-        linkedItems.push({ icon:'📋', label: st.title || st.name || `#${sid}`, panel:'structure', id: sid, cls:'structure-linked-structure' });
-      });
-      (term.linkedCharacters || []).forEach(cid => {
-        const c = charData.find(x => x.id === cid);
-        if(!c) return;
-        linkedItems.push({ icon:'👤', label: c.name || `#${cid}`, panel:'character', id: cid, cls:'structure-linked-character' });
-      });
-      (term.linkedWorlds || []).forEach(wid => {
-        const w = worldData.find(x => x.id === wid);
-        if(!w) return;
-        linkedItems.push({ icon:'🌍', label: w.name || `#${wid}`, panel:'world', id: wid, cls:'structure-linked-world' });
-      });
-
-      if (linkedItems.length){
-        const linkedSection = document.createElement('div');
-        linkedSection.className = 'structure-linked-section terms-linked-section';
-        linkedSection.innerHTML = `<div class="structure-linked-label">関連リンク</div>`;
-        const itemsWrap = document.createElement('div');
-        itemsWrap.className = 'structure-linked-items';
-        linkedItems.forEach(it=>{
-          const chip = document.createElement('span');
-          chip.className = `structure-linked-item ${it.cls}`;
-          chip.innerHTML = `<span class="structure-linked-icon">${it.icon}</span><span class="structure-linked-text">${escapeHtml(it.label)}</span>`;
-          chip.onclick = (ev)=>{ ev.stopPropagation(); ccGotoLinkedItem(it.panel, it.id); };
-          itemsWrap.appendChild(chip);
-        });
-        linkedSection.appendChild(itemsWrap);
-        card.appendChild(linkedSection);
-      }
-
-
-
       // linked input tab (unified) - show near bottom like other panels
       if (term.tabId && window.inputTabs) {
         const tab = window.inputTabs.find(t => t.id === term.tabId);
@@ -19143,6 +19129,36 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
         }
       }
 
+      // ===== Linked chips (match other panels) =====
+      const linkedStructuresHtml = (term.linkedStructures || []).map(sid => {
+        const st = structData.find(x => x.id === sid);
+        if (!st) return '';
+        return `<span class="card-linked-item card-linked-structure" onclick="event.stopPropagation(); ccGotoLinkedItem('structure', ${sid})"><span class="card-linked-icon">📋</span><span class="card-linked-text">${escapeHtml(st.title || st.name || `#${sid}`)}</span></span>`;
+      }).filter(Boolean).join('');
+
+      const linkedCharactersHtml = (term.linkedCharacters || []).map(cid => {
+        const c = charData.find(x => x.id === cid);
+        if (!c) return '';
+        return `<span class="card-linked-item card-linked-character" onclick="event.stopPropagation(); ccGotoLinkedItem('character', ${cid})"><span class="card-linked-icon">👤</span><span class="card-linked-text">${escapeHtml(c.name || `#${cid}`)}</span></span>`;
+      }).filter(Boolean).join('');
+
+      const linkedWorldsHtml = (term.linkedWorlds || []).map(wid => {
+        const w = worldData.find(x => x.id === wid);
+        if (!w) return '';
+        return `<span class="card-linked-item card-linked-world" onclick="event.stopPropagation(); ccGotoLinkedItem('world', ${wid})"><span class="card-linked-icon">🌍</span><span class="card-linked-text">${escapeHtml(w.name || `#${wid}`)}</span></span>`;
+      }).filter(Boolean).join('');
+
+      if (linkedStructuresHtml || linkedCharactersHtml || linkedWorldsHtml) {
+        const linkedSection = document.createElement('div');
+        linkedSection.className = 'card-linked-section terms-linked-section';
+        linkedSection.innerHTML = `
+          ${linkedStructuresHtml ? `<div class="card-linked-label">構成</div><div class="card-linked-items">${linkedStructuresHtml}</div>` : ''}
+          ${linkedCharactersHtml ? `<div class="card-linked-label" style="margin-top:6px;">人物</div><div class="card-linked-items">${linkedCharactersHtml}</div>` : ''}
+          ${linkedWorldsHtml ? `<div class="card-linked-label" style="margin-top:6px;">世界観</div><div class="card-linked-items">${linkedWorldsHtml}</div>` : ''}
+        `;
+        card.appendChild(linkedSection);
+      }
+
       // ===== Actions (match structure/world/character) =====
       const actions = document.createElement('div');
       actions.className = 'structure-card-actions';
@@ -19152,6 +19168,12 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
         <button class="btn-delete" onclick="deleteTermCard(${term.id})">🗑 削除</button>
       `;
       card.appendChild(actions);
+
+      card.addEventListener('dragstart', handleTermsDragStart);
+      card.addEventListener('dragend', handleTermsDragEnd);
+      card.addEventListener('dragover', handleTermsDragOver);
+      card.addEventListener('dragleave', handleTermsDragLeave);
+      card.addEventListener('drop', handleTermsDrop);
 
       list.appendChild(card);
     });
@@ -19554,6 +19576,7 @@ window.toggleTermsFullscreen = function(){
     saveTermsData();
     renderTermsList();
   }
+  window.duplicateTermCard = duplicateTermCard;
 
   function moveTermCard(cardId, delta){
       const idx = termsData.findIndex(t => t.id === cardId);
@@ -19567,6 +19590,44 @@ window.toggleTermsFullscreen = function(){
       renderTermsList();
   }
   window.moveTermCard = moveTermCard;
+
+  function handleTermsDragStart(e) {
+    draggingTermId = parseInt(e.currentTarget.dataset.id, 10);
+    e.currentTarget.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
+  function handleTermsDragEnd(e) {
+    e.currentTarget.classList.remove('dragging');
+    document.querySelectorAll('.terms-card.drag-over').forEach(el => el.classList.remove('drag-over'));
+    draggingTermId = null;
+  }
+
+  function handleTermsDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget.classList.add('drag-over');
+  }
+
+  function handleTermsDragLeave(e) {
+    e.currentTarget.classList.remove('drag-over');
+  }
+
+  function handleTermsDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+    const targetId = parseInt(e.currentTarget.dataset.id, 10);
+    if (draggingTermId === null || draggingTermId === targetId) return;
+
+    const dragIdx = termsData.findIndex(t => t.id === draggingTermId);
+    const targetIdx = termsData.findIndex(t => t.id === targetId);
+    if (dragIdx < 0 || targetIdx < 0) return;
+
+    const [moved] = termsData.splice(dragIdx, 1);
+    termsData.splice(targetIdx, 0, moved);
+    saveTermsData();
+    renderTermsList();
+  }
 
 
   function openTermsBgColorPicker(cardId){
