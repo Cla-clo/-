@@ -11112,8 +11112,13 @@ function paneIdToPaneKey(paneId){
 function showBulkCardColorPicker(paneId){
   const panel = document.getElementById(paneId);
   const list = panel ? panel.querySelector('.panel-content') : null;
-  const initial = PanelColorPicker.guessInitialFromEl(list);
-  PanelColorPicker.open({
+  const picker = window.PanelColorPicker;
+  if (!picker) {
+    console.warn('PanelColorPicker is not available yet.');
+    return;
+  }
+  const initial = picker.guessInitialFromEl(list);
+  picker.open({
     title: 'カード色を一括変更',
     initial,
     onApply: (color) => {
@@ -13919,10 +13924,11 @@ const PanelColorPicker = (() => {
 
   return { open, close, guessInitialFromEl };
 })();
+window.PanelColorPicker = PanelColorPicker;
 
 function hideColorPicker(){
   // Unified picker
-  PanelColorPicker.close();
+  window.PanelColorPicker?.close();
   // Legacy pickers (kept for compatibility)
   const ids = ['color-picker-popup','bg-color-picker-popup','preset-panel-color-picker','structure-card-color-picker','terms-card-color-picker','bulk-card-color-picker'];
   ids.forEach(id=>{
@@ -13937,8 +13943,13 @@ function hideColorPicker(){
 function showHeaderColorPicker(paneId){
   const panel = document.getElementById(paneId);
   const header = panel ? panel.querySelector('.panel-header') : null;
-  const initial = PanelColorPicker.guessInitialFromEl(header);
-  PanelColorPicker.open({
+  const picker = window.PanelColorPicker;
+  if (!picker) {
+    console.warn('PanelColorPicker is not available yet.');
+    return;
+  }
+  const initial = picker.guessInitialFromEl(header);
+  picker.open({
     title: 'ヘッダーカラー',
     initial,
     onApply: (color) => setPaneColorValue(paneId, 'head', color),
@@ -13950,8 +13961,13 @@ window.showHeaderColorPicker = showHeaderColorPicker;
   
 function showBgColorPicker(paneId){
   const panel = document.getElementById(paneId);
-  const initial = PanelColorPicker.guessInitialFromEl(panel);
-  PanelColorPicker.open({
+  const picker = window.PanelColorPicker;
+  if (!picker) {
+    console.warn('PanelColorPicker is not available yet.');
+    return;
+  }
+  const initial = picker.guessInitialFromEl(panel);
+  picker.open({
     title: '背景色',
     initial,
     onApply: (color) => setPaneColorValue(paneId, 'bg', color),
@@ -14941,8 +14957,13 @@ function showPresetPanelColorPicker(paneId){
 function openStructureCardColorPicker(cardId, anchorEl){
   const card = (window.structureData || []).find(c => c.id === cardId);
   if(!card) return;
-  const initial = (card.color && String(card.color).trim()) ? card.color : PanelColorPicker.guessInitialFromEl(anchorEl);
-  PanelColorPicker.open({
+  const picker = window.PanelColorPicker;
+  if (!picker) {
+    console.warn('PanelColorPicker is not available yet.');
+    return;
+  }
+  const initial = (card.color && String(card.color).trim()) ? card.color : picker.guessInitialFromEl(anchorEl);
+  picker.open({
     title: 'カード色',
     initial,
     onApply: (color) => {
@@ -19672,8 +19693,13 @@ window.toggleTermsFullscreen = function(){
 function openTermsCardColorPicker(termId, anchorEl){
   const term = (window.termsData || []).find(t => t.id === termId);
   if(!term) return;
-  const initial = (term.bgColor && String(term.bgColor).trim()) ? term.bgColor : PanelColorPicker.guessInitialFromEl(anchorEl);
-  PanelColorPicker.open({
+  const picker = window.PanelColorPicker;
+  if (!picker) {
+    console.warn('PanelColorPicker is not available yet.');
+    return;
+  }
+  const initial = (term.bgColor && String(term.bgColor).trim()) ? term.bgColor : picker.guessInitialFromEl(anchorEl);
+  picker.open({
     title: 'カード色',
     initial,
     onApply: (color) => {
