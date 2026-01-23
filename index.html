@@ -1415,18 +1415,23 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     /* [v23] Terms pane align with other panes */
     #terms-panel { background: var(--pane-terms-bg, #fffbe6) !important; }
 
-    /* ===== Terms card: unified look ===== */
-    .terms-card{
-        background: var(--panel-bg);
+    /* ===== Card shell (shared) ===== */
+    .card-shell{
+        background: var(--card-shell-bg, var(--panel-bg));
         border: 1px solid var(--border-color);
         border-radius: 8px;
         margin-bottom: 6px;
         cursor: grab;
         transition: box-shadow 0.2s, transform 0.15s;
         position: relative;
-        box-shadow: var(--shadow-soft, 0 1px 2px rgba(0,0,0,0.06));
+        box-shadow: var(--card-shadow, none);
     }
-    .terms-card:hover{ box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .card-shell:hover{ box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+    /* ===== Terms card: unified look ===== */
+    .terms-card{
+        --card-shadow: var(--shadow-soft, 0 1px 2px rgba(0,0,0,0.06));
+    }
     .terms-card.drag-over { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245,158,11,0.3); }
     .terms-card-title{
         display:flex;
@@ -1568,10 +1573,7 @@ body.theme-dark .structure-content {
 
     /* 構成カード */
     .structure-card {
-        background: var(--panel-bg); border: 1px solid var(--border-color);
-        border-radius: 8px; margin-bottom: 6px; cursor: grab;
-        transition: box-shadow 0.2s, transform 0.15s;
-        position: relative;
+        background: var(--panel-bg);
     }
     .structure-card.has-custom-color {
         background: var(--structure-card-bg, var(--panel-bg));
@@ -1615,22 +1617,22 @@ body.theme-dark .structure-content {
         width: 14px; height: 14px; accent-color: #6366f1;
         cursor: pointer; flex-shrink: 0;
     }
-.structure-move-group { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
-.structure-move-btn {
-        width: 16px;
-        height: 12px;
-        font-size: 8px;
-        padding: 0;
-        border: 1px solid var(--border-color);
-        border-radius: 2px;
-        background: var(--panel-bg);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--text-muted);
-    }
-    .structure-move-btn:hover { background: var(--pane-header-bg); color: var(--text-color); }
+	.card-move-group { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
+	.card-move-btn {
+	        width: 16px;
+	        height: 12px;
+	        font-size: 8px;
+	        padding: 0;
+	        border: 1px solid var(--border-color);
+	        border-radius: 2px;
+	        background: var(--panel-bg);
+	        cursor: pointer;
+	        display: flex;
+	        align-items: center;
+	        justify-content: center;
+	        color: var(--text-muted);
+	    }
+	    .card-move-btn:hover { background: var(--card-move-hover-bg, var(--pane-header-bg)); color: var(--card-move-hover-color, var(--text-color)); }
     .structure-card.expanded .structure-card-header {
         border-bottom-color: var(--border-color);
     }
@@ -2412,11 +2414,9 @@ body.theme-dark .structure-content {
 body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
     .character-list { overflow: visible; }
 
-.character-card {
-        background: var(--pane-character-bg, #fdf2f8); border: 1px solid var(--border-color);
+	.character-card {
+        --card-shell-bg: var(--pane-character-bg, #fdf2f8);
         border-left: 3px solid #f9a8d4;
-        border-radius: 8px; margin-bottom: 6px; cursor: grab;
-        transition: box-shadow 0.2s, transform 0.15s; position: relative;
     }
     .character-card.has-custom-color { background: var(--character-card-bg, var(--panel-bg)); }
     .character-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -2435,9 +2435,7 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
 
     .character-card-header { display: flex; align-items: center; gap: 6px; padding: 8px 10px; cursor: pointer; border-bottom: 1px solid transparent; }
     .character-select { width: 14px; height: 14px; accent-color: #ec4899; cursor: pointer; flex-shrink: 0; }
-    .character-move-group { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
-    .character-move-btn { width: 16px; height: 12px; font-size: 8px; padding: 0; border: 1px solid var(--border-color); border-radius: 2px; background: var(--panel-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
-    .character-move-btn:hover { background: #fce7f3; color: #ec4899; }
+	    #character-panel { --card-move-hover-bg: #fce7f3; --card-move-hover-color: #ec4899; }
     .character-toggle { font-size: 0.7rem; color: var(--text-muted); width: 14px; cursor: pointer; flex-shrink: 0; }
     .character-toggle:hover { color: #ec4899; }
     .character-name { flex: 1; font-weight: 600; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.85rem; }
@@ -2564,9 +2562,7 @@ body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
     .world-list { overflow: visible; }
 
     .world-card {
-        background: var(--panel-bg); border: 1px solid var(--border-color);
-        border-radius: 8px; margin-bottom: 6px; cursor: grab;
-        transition: box-shadow 0.2s, transform 0.15s; position: relative;
+        background: var(--panel-bg);
     }
     .world-card.has-custom-color { background: var(--world-card-bg, var(--panel-bg)); }
     .world-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -2581,9 +2577,7 @@ body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
 
     .world-card-header { display: flex; align-items: center; gap: 6px; padding: 8px 10px; cursor: pointer; border-bottom: 1px solid transparent; }
     .world-select { width: 14px; height: 14px; accent-color: #10b981; cursor: pointer; flex-shrink: 0; }
-    .world-move-group { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
-    .world-move-btn { width: 16px; height: 12px; font-size: 8px; padding: 0; border: 1px solid var(--border-color); border-radius: 2px; background: var(--panel-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
-    .world-move-btn:hover { background: #d1fae5; color: #10b981; }
+	    #world-panel { --card-move-hover-bg: #d1fae5; --card-move-hover-color: #10b981; }
     .world-toggle { font-size: 0.7rem; color: var(--text-muted); width: 14px; cursor: pointer; flex-shrink: 0; }
     .world-toggle:hover { color: #10b981; }
     .world-name { flex: 1; font-weight: 600; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.85rem; }
@@ -4491,8 +4485,9 @@ window.__ccInitPanelDnDAndResizers = function(){
   <div class="panel-header panel-drag-handle" data-panel-id="memo-panel" draggable="true">
     <span style="font-family: var(--font-ui);">📝 メモ</span>
     <div class="panel-controls">
-<button id="btn-memo-swap" class="btn panel-swap-btn" data-action="swap-side" data-pane="memo">左右入替</button>
-<button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor" data-pane="memo" title="隣のパネルと入替">◀▶</button>
+      <button id="btn-memo-swap" class="btn panel-swap-btn" data-action="swap-side" data-pane="memo">左右入替</button>
+      <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-left" data-pane="memo" title="左のパネルと入替" aria-label="左のパネルと入替">◀</button>
+      <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-right" data-pane="memo" title="右のパネルと入替" aria-label="右のパネルと入替">▶</button>
 <button class="btn panel-icon-btn panel-pin-btn" id="btn-memo-pin" data-action="toggle-pin" data-pane="memo" title="固定/浮動切り替え">📌</button>
 <input type="checkbox" id="check-memo-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="memo">
       <button class="btn structure-fullscreen-btn" data-action="toggle-fullscreen" data-pane="memo">⛶</button>
@@ -4528,7 +4523,8 @@ window.__ccInitPanelDnDAndResizers = function(){
         <div class="panel-title"><span class="panel-emoji" aria-hidden="true">📋</span><span class="panel-title-text">構成</span></div>
         <div class="panel-controls">
             <button id="btn-structure-swap" class="btn panel-swap-btn" data-action="swap-side" data-pane="structure">左右入替</button>
-            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor" data-pane="structure" title="隣のパネルと入替">◀▶</button>
+            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-left" data-pane="structure" title="左のパネルと入替" aria-label="左のパネルと入替">◀</button>
+            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-right" data-pane="structure" title="右のパネルと入替" aria-label="右のパネルと入替">▶</button>
             <button class="btn panel-icon-btn panel-pin-btn" id="btn-structure-pin" data-action="toggle-pin" data-pane="structure" title="固定/浮動切り替え">📌</button>
             <input type="checkbox" id="check-structure-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="structure">
             <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="structure" data-args="true">✕</button>
@@ -4555,7 +4551,8 @@ window.__ccInitPanelDnDAndResizers = function(){
         <div class="panel-title"><span class="panel-emoji" aria-hidden="true">👤</span><span class="panel-title-text">登場人物</span></div>
         <div class="panel-controls">
             <button id="btn-character-swap" class="btn panel-swap-btn" data-action="swap-side" data-pane="character">左右入替</button>
-            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor" data-pane="character" title="隣のパネルと入替">◀▶</button>
+            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-left" data-pane="character" title="左のパネルと入替" aria-label="左のパネルと入替">◀</button>
+            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-right" data-pane="character" title="右のパネルと入替" aria-label="右のパネルと入替">▶</button>
             <button class="btn panel-icon-btn panel-pin-btn" id="btn-character-pin" data-action="toggle-pin" data-pane="character" title="固定/浮動切り替え">📌</button>
             <input type="checkbox" id="check-character-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="character">
             <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="character" data-args="true">✕</button>
@@ -4582,7 +4579,8 @@ window.__ccInitPanelDnDAndResizers = function(){
         <div class="panel-title"><span class="panel-emoji" aria-hidden="true">🌍</span><span class="panel-title-text">世界観</span></div>
         <div class="panel-controls">
             <button id="btn-world-swap" class="btn panel-swap-btn" data-action="swap-side" data-pane="world">左右入替</button>
-            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor" data-pane="world" title="隣のパネルと入替">◀▶</button>
+            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-left" data-pane="world" title="左のパネルと入替" aria-label="左のパネルと入替">◀</button>
+            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-right" data-pane="world" title="右のパネルと入替" aria-label="右のパネルと入替">▶</button>
             <button class="btn panel-icon-btn panel-pin-btn" id="btn-world-pin" data-action="toggle-pin" data-pane="world" title="固定/浮動切り替え">📌</button>
             <input type="checkbox" id="check-world-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="world">
             <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="world" data-args="true">✕</button>
@@ -4609,7 +4607,8 @@ window.__ccInitPanelDnDAndResizers = function(){
         <div class="panel-title"><span class="panel-emoji" aria-hidden="true">📚</span><span class="panel-title-text">用語</span></div>
         <div class="panel-controls">
             <button id="btn-terms-swap" class="btn panel-swap-btn" data-action="swap-side" data-pane="terms">左右入替</button>
-            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor" data-pane="terms" title="隣のパネルと入替">◀▶</button>
+            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-left" data-pane="terms" title="左のパネルと入替" aria-label="左のパネルと入替">◀</button>
+            <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-right" data-pane="terms" title="右のパネルと入替" aria-label="右のパネルと入替">▶</button>
             <button class="btn panel-icon-btn panel-pin-btn" id="btn-terms-pin" data-action="toggle-pin" data-pane="terms" title="固定/浮動切り替え">📌</button>
             <input type="checkbox" id="check-terms-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="terms">
             <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="terms" data-args="true">✕</button>
@@ -4639,7 +4638,8 @@ window.__ccInitPanelDnDAndResizers = function(){
             <div class="panel-controls">
                 <button id="btn-outline-settings" class="btn panel-icon-btn" onclick="toggleOutlineSettings()" title="抽出ルール設定">⚙</button>
                 <button id="btn-outline-swap" class="btn panel-swap-btn" data-action="swap-side" data-pane="outline">左右入替</button>
-                <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor" data-pane="outline" title="隣のパネルと入替">◀▶</button>
+                <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-left" data-pane="outline" title="左のパネルと入替" aria-label="左のパネルと入替">◀</button>
+                <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-right" data-pane="outline" title="右のパネルと入替" aria-label="右のパネルと入替">▶</button>
                 <input type="checkbox" id="check-outline-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="outline">
                 <button class="btn panel-icon-btn panel-pin-btn" id="btn-outline-pin" data-action="toggle-pin" data-pane="outline" title="固定">📌</button>
                 <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="outline">✕</button>
@@ -13807,12 +13807,14 @@ panel.style.width = '320px';
       .sort((a, b) => (a.order - b.order) || (a.idx - b.idx));
   }
 
-  function swapPanelWithNeighbor(pane){
+  function swapPanelWithNeighbor(pane, direction){
     const panelId = String(pane || '').endsWith('-panel') ? String(pane) : `${pane}-panel`;
     const list = collectSwappablePanels();
     const currentIndex = list.findIndex(item => item.panel.id === panelId);
     if (currentIndex === -1 || list.length < 2) return;
-    const neighborIndex = currentIndex < list.length - 1 ? currentIndex + 1 : currentIndex - 1;
+    const dir = direction === 'left' || direction === 'right' ? direction : 'right';
+    const neighborIndex = dir === 'left' ? currentIndex - 1 : currentIndex + 1;
+    if (neighborIndex < 0 || neighborIndex >= list.length) return;
     const current = list[currentIndex]?.panel;
     const neighbor = list[neighborIndex]?.panel;
     if (!current || !neighbor) return;
@@ -13862,6 +13864,16 @@ panel.style.width = '320px';
       finalizePanelLayout();
       return;
     }
+    if (action === 'swap-neighbor-left') {
+      swapPanelWithNeighbor(pane, 'left');
+      finalizePanelLayout();
+      return;
+    }
+    if (action === 'swap-neighbor-right') {
+      swapPanelWithNeighbor(pane, 'right');
+      finalizePanelLayout();
+      return;
+    }
     if (action === 'toggle-pin') {
       window[`toggle${cap}DockPin`]?.();
       finalizePanelLayout();
@@ -13891,7 +13903,7 @@ panel.style.width = '320px';
   function bindPanelHeaderActions(){
     if (window.__ccPanelHeaderActionsBound) return;
     window.__ccPanelHeaderActionsBound = true;
-    const PANEL_ACTIONS = new Set(['swap-side', 'swap-neighbor', 'toggle-pin', 'close-panel', 'toggle-fullscreen']);
+    const PANEL_ACTIONS = new Set(['swap-side', 'swap-neighbor', 'swap-neighbor-left', 'swap-neighbor-right', 'toggle-pin', 'close-panel', 'toggle-fullscreen']);
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-action][data-pane]');
       if (!btn) return;
@@ -14450,7 +14462,7 @@ function showPresetPanelColorPicker(paneId){
     const expandLevel = card.expandLevel || 0;
 
     const div = document.createElement('div');
-    div.className = `structure-card level-${card.level}`;
+    div.className = `structure-card card-shell level-${card.level}`;
     if (expandLevel > 0) div.classList.add('expanded');
     if (expandLevel === 3) div.classList.add('fully-expanded');
     if (card.collapsed) div.classList.add('collapsed');
@@ -14531,10 +14543,10 @@ function showPresetPanelColorPicker(paneId){
     header.appendChild(status);
 
     const moveGroup = document.createElement('div');
-    moveGroup.className = 'structure-move-group';
+    moveGroup.className = 'card-move-group';
     const moveUp = document.createElement('button');
     moveUp.type = 'button';
-    moveUp.className = 'structure-move-btn';
+    moveUp.className = 'card-move-btn';
     moveUp.textContent = '↑';
     moveUp.title = '上のカードと入れ替える';
     moveUp.onclick = (e) => {
@@ -14543,7 +14555,7 @@ function showPresetPanelColorPicker(paneId){
     };
     const moveDown = document.createElement('button');
     moveDown.type = 'button';
-    moveDown.className = 'structure-move-btn';
+    moveDown.className = 'card-move-btn';
     moveDown.textContent = '↓';
     moveDown.title = '下のカードと入れ替える';
     moveDown.onclick = (e) => {
@@ -16392,7 +16404,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
 
   function createCharacterCardElement(card, index) {
     const div = document.createElement('div');
-    div.className = `character-card role-${card.role} hide-labels`;
+    div.className = `character-card card-shell role-${card.role} hide-labels`;
     const level = card.expandLevel || 0;
     if (level === 1) div.classList.add('expand-1');
     else if (level === 2) div.classList.add('expand-2');
@@ -16464,9 +16476,9 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     div.innerHTML = `
       <div class="character-card-header" onclick="toggleCharacterExpand(${card.id})">
         <input type="checkbox" class="character-select" ${card.selected ? 'checked' : ''} onclick="event.stopPropagation(); toggleCharacterSelect(${card.id})">
-        <div class="character-move-group" onclick="event.stopPropagation();">
-          <button class="character-move-btn" title="上へ移動" onclick="moveCharacterCard(${card.id}, -1)">↑</button>
-          <button class="character-move-btn" title="下へ移動" onclick="moveCharacterCard(${card.id}, 1)">↓</button>
+        <div class="card-move-group" onclick="event.stopPropagation();">
+          <button class="card-move-btn" title="上へ移動" onclick="moveCharacterCard(${card.id}, -1)">↑</button>
+          <button class="card-move-btn" title="下へ移動" onclick="moveCharacterCard(${card.id}, 1)">↓</button>
         </div>
         <span class="character-toggle">${toggleSymbol}</span>
         <span class="character-name">${escapeHtml(card.name)}</span>
@@ -17709,7 +17721,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
 
   function createWorldCardElement(card, index) {
     const div = document.createElement('div');
-    div.className = `world-card level-${card.level} hide-labels`;
+    div.className = `world-card card-shell level-${card.level} hide-labels`;
     const expandLevel = card.expandLevel || 0;
     if (expandLevel === 1) div.classList.add('expand-1');
     else if (expandLevel === 2) div.classList.add('expand-2');
@@ -17790,9 +17802,9 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     div.innerHTML = `
       <div class="world-card-header" onclick="toggleWorldExpand(${card.id})">
         <input type="checkbox" class="world-select" ${card.selected ? 'checked' : ''} onclick="event.stopPropagation(); toggleWorldSelect(${card.id})">
-        <div class="world-move-group" onclick="event.stopPropagation();">
-          <button class="world-move-btn" title="上へ移動" onclick="moveWorldCard(${card.id}, -1)">↑</button>
-          <button class="world-move-btn" title="下へ移動" onclick="moveWorldCard(${card.id}, 1)">↓</button>
+        <div class="card-move-group" onclick="event.stopPropagation();">
+          <button class="card-move-btn" title="上へ移動" onclick="moveWorldCard(${card.id}, -1)">↑</button>
+          <button class="card-move-btn" title="下へ移動" onclick="moveWorldCard(${card.id}, 1)">↓</button>
         </div>
         <span class="world-toggle">${toggleSymbol}</span>
         <span class="world-name">${escapeHtml(card.name)}</span>
@@ -19154,7 +19166,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
 
     termsData.forEach(term => {
       const card = document.createElement('div');
-      card.className = 'terms-card';
+      card.className = 'terms-card card-shell';
       card.dataset.id = term.id;
       card.draggable = true;
 
@@ -19189,14 +19201,14 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       left.appendChild(cb);
 
       const moveGroup = document.createElement('div');
-      moveGroup.className = 'structure-move-group';
+      moveGroup.className = 'card-move-group';
       const moveUp = document.createElement('button');
-      moveUp.className = 'structure-move-btn';
+      moveUp.className = 'card-move-btn';
       moveUp.textContent = '↑';
       moveUp.title = '1つ上へ';
       moveUp.onclick = (ev)=>{ ev.stopPropagation(); moveTermCard(term.id, -1); };
       const moveDown = document.createElement('button');
-      moveDown.className = 'structure-move-btn';
+      moveDown.className = 'card-move-btn';
       moveDown.textContent = '↓';
       moveDown.title = '1つ下へ';
       moveDown.onclick = (ev)=>{ ev.stopPropagation(); moveTermCard(term.id, +1); };
