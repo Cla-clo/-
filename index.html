@@ -895,7 +895,7 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
     .main-container.memo-docked #memo-panel.open ~ #resizer-memo { display: flex; }
     .main-container.memo-docked.memo-right #resizer-memo { order: 9; }
     .main-container.memo-docked:not(.memo-right) #resizer-memo { order: -9; }
-body.theme-dark .panel-header { background: #713f12; border-color: #854d0e; }
+body.theme-dark #memo-panel .panel-header { background: #713f12; border-color: #854d0e; }
 .panel-controls label { display: inline-flex; align-items: center; gap: 4px; }
 body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #d97706; color: #fef3c7; }
     body.theme-dark .memo-tab.active { background: #1f2937; border-bottom-color: #1f2937; }
@@ -2465,12 +2465,10 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
     .character-card.expand-1 .character-description { display: none; }
     .character-card.expand-1 .character-description-preview { display: none; }
     .character-card.expand-1 .card-linked-section { display: none; }
-    .character-card.expand-1 .character-card-actions { display: none; }
     /* expand-2: タグ + プレビュー */
     .character-card.expand-2 .character-description { display: none; }
     .character-card.expand-2 .character-description-preview { display: block; }
     .character-card.expand-2 .card-linked-section { display: none; }
-    .character-card.expand-2 .character-card-actions { display: none; }
     /* expand-3: すべて表示 */
     .character-card.expand-3 .character-description-preview { display: none; }
     .character-description-preview {
@@ -2559,7 +2557,7 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
     .main-container.world-docked.world-right #resizer-world { order: 7; }
     .main-container.world-docked:not(.world-right) #resizer-world { order: -7; }
     body.focus-mode #world-panel { display: none !important; }
-body.theme-dark .panel-header { background: var(--pane-world-head, #065f46); border-color: #059669; }
+body.theme-dark #world-panel .panel-header { background: var(--pane-world-head, #065f46); border-color: #059669; }
 body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
     .world-list { overflow: visible; }
 
@@ -2609,12 +2607,10 @@ body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
     .world-card.expand-1 .world-description { display: none; }
     .world-card.expand-1 .world-description-preview { display: none; }
     .world-card.expand-1 .card-linked-section { display: none; }
-    .world-card.expand-1 .world-card-actions { display: none; }
     /* expand-2: タグ + プレビュー */
     .world-card.expand-2 .world-description { display: none; }
     .world-card.expand-2 .world-description-preview { display: block; }
     .world-card.expand-2 .card-linked-section { display: none; }
-    .world-card.expand-2 .world-card-actions { display: none; }
     /* expand-3: すべて表示 */
     .world-card.expand-3 .world-description-preview { display: none; }
     .world-description-preview {
@@ -14559,6 +14555,8 @@ function showPresetPanelColorPicker(paneId){
       body.appendChild(linkedSection);
     }
 
+    div.appendChild(body);
+
     // アクションボタン
     const actions = document.createElement('div');
     actions.className = 'structure-card-actions';
@@ -14567,9 +14565,7 @@ function showPresetPanelColorPicker(paneId){
       <button onclick="duplicateStructureCard(${card.id})">📋 複製</button>
       <button class="btn-delete" onclick="deleteStructureCard(${card.id})">🗑 削除</button>
     `;
-    body.appendChild(actions);
-
-    div.appendChild(body);
+    div.appendChild(actions);
 
     // ドラッグイベント
     div.addEventListener('dragstart', handleDragStart);
