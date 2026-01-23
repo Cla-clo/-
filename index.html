@@ -1480,6 +1480,13 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
         min-width: 0;
         flex: 1;
     }
+    .terms-select{
+        width: 14px;
+        height: 14px;
+        accent-color: #f59e0b;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
     .terms-card-name{
         min-width: 0;
         overflow: hidden;
@@ -1514,6 +1521,7 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
         padding-top: 8px;
         border-top: 1px dashed var(--border-color);
     }
+    .terms-card .terms-card-actions{ display: flex !important; }
     .terms-linked-section{ margin-top: 8px; display:flex; flex-wrap: wrap; gap: 6px; }
     .terms-linked-item{
         display:inline-flex; align-items:center; gap:4px;
@@ -2420,7 +2428,7 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
     .character-list { overflow: visible; }
 
     .character-card {
-        background: var(--pane-character-bg, #fce7f3); border: 1px solid var(--border-color);
+        background: var(--pane-character-bg, #fdf2f8); border: 1px solid var(--border-color);
         border-radius: 8px; margin-bottom: 6px; cursor: grab;
         transition: box-shadow 0.2s, transform 0.15s; position: relative;
     }
@@ -11012,7 +11020,7 @@ function setupMemoInteractionGuard() {
       outline: { bg: panelBg, head: headerBg },
       search: { bg: panelBg, head: headerBg },
       structure: { bg: panelBg, head: headerBg },
-      character: { bg: '#fce7f3', head: '#fce7f3' },
+      character: { bg: '#fdf2f8', head: '#fdf2f8' },
       world: { bg: '#ecfdf5', head: '#d1fae5' },
       terms: { bg: '#fff9db', head: '#ffecb5' },
     };
@@ -11212,10 +11220,10 @@ function applyPaneColors(colors){
 #structure-panel .panel-toolbar,
 #structure-panel .structure-footer { background: var(--pane-structure-head, #eef2ff); }
 
-#character-panel { background: var(--pane-character-bg, #fce7f3); }
+#character-panel { background: var(--pane-character-bg, #fdf2f8); }
 #character-panel .panel-header,
 #character-panel .panel-toolbar,
-#character-panel .character-footer { background: var(--pane-character-head, #fce7f3); }
+#character-panel .character-footer { background: var(--pane-character-head, #fdf2f8); }
 
 #world-panel { background: var(--pane-world-bg, #ecfdf5); }
 #world-panel .panel-header,
@@ -19053,6 +19061,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
 
       const cb = document.createElement('input');
       cb.type = 'checkbox';
+      cb.className = 'terms-select';
       cb.checked = !!term.selected;
       cb.onchange = () => { term.selected = cb.checked; saveTermsData(); updateTermsCount(); };
       left.appendChild(cb);
