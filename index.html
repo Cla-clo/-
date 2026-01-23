@@ -5176,11 +5176,6 @@ window.__ccInitPanelDnDAndResizers = function(){
     const countEl  = document.getElementById('memo-char-count');
     if (memoArea && countEl) countEl.innerText = memoArea.value.length + '字';
   };
-    window.updateMemoCharCount = function () {
-    const memoArea = document.getElementById('memo-area');
-    const countEl  = document.getElementById('memo-char-count');
-    if (memoArea && countEl) countEl.innerText = memoArea.value.length + '字';
-  };
 
 // パネル操作中フラグ（浮動パネルが意図せず閉じないようにする）
 window.memoInteracting = false;
@@ -5189,90 +5184,44 @@ window.structureInteracting = false;
 window.characterInteracting = false;
 window.worldInteracting = false;
 
-function setupMemoInteractionGuard() {
-  const memo = document.getElementById('memo-panel');
-  if (!memo) return;
+function setupPanelInteractionGuard(panelId, flagName, options = {}) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
 
-  const on = () => { window.memoInteracting = true; };
-  const off = () => { window.memoInteracting = false; };
+  const on = () => { window[flagName] = true; };
+  const off = () => { window[flagName] = false; };
+  const delayedOff = options.delayedOff ? () => setTimeout(off, 0) : off;
 
   // マウスが乗っている間／フォーカス中は「操作中」
-  memo.addEventListener('pointerenter', on);
-  memo.addEventListener('pointerleave', off);
-  memo.addEventListener('focusin', on);
-  memo.addEventListener('focusout', off);
+  panel.addEventListener('pointerenter', on);
+  panel.addEventListener('pointerleave', off);
+  panel.addEventListener('focusin', on);
+  panel.addEventListener('focusout', off);
 
   // クリック・ドラッグの最中も「操作中」
-  memo.addEventListener('pointerdown', on, { capture: true });
-  memo.addEventListener('pointerup', off, { capture: true });
-  memo.addEventListener('pointercancel', off, { capture: true });
+  panel.addEventListener('pointerdown', on, { capture: true });
+  panel.addEventListener('pointerup', delayedOff, { capture: true });
+  panel.addEventListener('pointercancel', delayedOff, { capture: true });
+}
+
+function setupMemoInteractionGuard() {
+  setupPanelInteractionGuard('memo-panel', 'memoInteracting');
 }
 
 function setupOutlineInteractionGuard() {
-  const outline = document.getElementById('outline-panel');
-  if (!outline) return;
-
-  const on = () => { window.outlineInteracting = true; };
-  const off = () => { window.outlineInteracting = false; };
-
-  outline.addEventListener('pointerenter', on);
-  outline.addEventListener('pointerleave', off);
-  outline.addEventListener('focusin', on);
-  outline.addEventListener('focusout', off);
-  outline.addEventListener('pointerdown', on, { capture: true });
-  outline.addEventListener('pointerup', off, { capture: true });
-  outline.addEventListener('pointercancel', off, { capture: true });
+  setupPanelInteractionGuard('outline-panel', 'outlineInteracting');
 }
 
 function setupStructureInteractionGuard() {
-  const panel = document.getElementById('structure-panel');
-  if (!panel) return;
-
-  const on = () => { window.structureInteracting = true; };
-  const off = () => { window.structureInteracting = false; };
-
-  panel.addEventListener('pointerenter', on);
-  panel.addEventListener('pointerleave', off);
-  panel.addEventListener('focusin', on);
-  panel.addEventListener('focusout', off);
-  const delayedOff = () => setTimeout(off, 0);
-  panel.addEventListener('pointerdown', on, { capture: true });
-  panel.addEventListener('pointerup', delayedOff, { capture: true });
-  panel.addEventListener('pointercancel', delayedOff, { capture: true });
+  setupPanelInteractionGuard('structure-panel', 'structureInteracting', { delayedOff: true });
 }
 
 function setupCharacterInteractionGuard() {
-  const panel = document.getElementById('character-panel');
-  if (!panel) return;
-
-  const on = () => { window.characterInteracting = true; };
-  const off = () => { window.characterInteracting = false; };
-
-  panel.addEventListener('pointerenter', on);
-  panel.addEventListener('pointerleave', off);
-  panel.addEventListener('focusin', on);
-  panel.addEventListener('focusout', off);
-  const delayedOff = () => setTimeout(off, 0);
-  panel.addEventListener('pointerdown', on, { capture: true });
-  panel.addEventListener('pointerup', delayedOff, { capture: true });
-  panel.addEventListener('pointercancel', delayedOff, { capture: true });
+  setupPanelInteractionGuard('character-panel', 'characterInteracting', { delayedOff: true });
 }
 
 function setupWorldInteractionGuard() {
-  const panel = document.getElementById('world-panel');
-  if (!panel) return;
-
-  const on = () => { window.worldInteracting = true; };
-  const off = () => { window.worldInteracting = false; };
-
-  panel.addEventListener('pointerenter', on);
-  panel.addEventListener('pointerleave', off);
-  panel.addEventListener('focusin', on);
-  panel.addEventListener('focusout', off);
-  const delayedOff = () => setTimeout(off, 0);
-  panel.addEventListener('pointerdown', on, { capture: true });
-  panel.addEventListener('pointerup', delayedOff, { capture: true });
-  panel.addEventListener('pointercancel', delayedOff, { capture: true });
+  setupPanelInteractionGuard('world-panel', 'worldInteracting', { delayedOff: true });
 }
 
 // タブバー左右スクロール
@@ -15766,74 +15715,6 @@ window.__ccSyncTermsLinks = __ccSyncTermsLinks;
 
   // ========== パネル制御関数 ==========
 
-  // パネル開閉トグル（メモパネルと同様の3段階切り替え、常に左側表示）
-  function toggleStructurePanel() {
-    const panel = document.getElementById('structure-panel');
-    const checkbox = document.getElementById('check-structure-dock');
-    const container = document.getElementById('main-container');
-    if (!panel || !checkbox) return;
-
-    const isOpen = panel.classList.contains('open');
-    const isDocked = checkbox.checked;
-    const isFront = (!isDocked && typeof window.__ccIsPanelFront === 'function' && window.__ccIsPanelFront('structure-panel'));
-
-    if (isOpen && !isDocked) {
-      // open floating
-      if (!isFront) {
-        if (window.bringPanelToFront) window.bringPanelToFront(panel, false);
-        if (typeof updatePanelButtonStates === 'function') updatePanelButtonStates();
-        if (typeof updateStructureButtonState === 'function') updateStructureButtonState();
-        if (typeof updateTermsButtonState === 'function') updateTermsButtonState();
-        if (typeof updateCharacterButtonState === 'function') updateCharacterButtonState();
-        if (typeof updateWorldButtonState === 'function') updateWorldButtonState();
-        return;
-      }
-      // front -> pin + collapse all others
-      let __okDock = true;
-
-      if (typeof window.__ccRequestDockWithLimit === 'function') { __okDock = window.__ccRequestDockWithLimit('structure'); }
-
-      else { checkbox.checked = true; toggleStructureDock(); panel.classList.add('open'); __okDock = true; }
-
-      if (!__okDock) {
-
-        // 上限到達で入れ替えダイアログ表示中：ここでは何も畳まない
-
-        if (typeof updatePanelButtonStates === 'function') updatePanelButtonStates();
-
-        return;
-
-      }
-} else if (!isOpen) {
-      // closed -> open floating
-      if (container) container.classList.remove('structure-right');
-      panel.classList.add('open');
-      if (checkbox.checked) { checkbox.checked = false; toggleStructureDock(); }
-      if (window.bringPanelToFront) window.bringPanelToFront(panel, false);
-    } else {
-      // docked -> close
-      checkbox.checked = false;
-      toggleStructureDock();
-      panel.classList.remove('open');
-      panel.style.zIndex = '';
-      if (window.__ccFrontPanelId === 'structure-panel') window.__ccFrontPanelId = null;
-    }
-
-    const isDockedNow = checkbox.checked;
-    if (panel.classList.contains('open')) {
-      if (window.bringPanelToFront) window.bringPanelToFront(panel, isDockedNow);
-    } else {
-      panel.style.zIndex = '';
-    }
-
-    if (typeof applyPaneWidthSettings === 'function') applyPaneWidthSettings();
-    if (typeof updatePanelButtonStates === 'function') updatePanelButtonStates();
-    if (typeof updateStructureButtonState === 'function') updateStructureButtonState();
-        if (typeof updateTermsButtonState === 'function') updateTermsButtonState();
-    if (typeof updateCharacterButtonState === 'function') updateCharacterButtonState();
-    if (typeof updateWorldButtonState === 'function') updateWorldButtonState();
-}
-
   // ドック切り替え
   function toggleStructureDock() {
     const checkbox = document.getElementById('check-structure-dock');
@@ -16056,7 +15937,6 @@ if (swapBtn) swapBtn.classList.remove('is-active');
   }
 
   // パネル制御関数をグローバルに公開
-  window.toggleStructurePanel = toggleStructurePanel;
   window.toggleStructureDock = toggleStructureDock;
   window.toggleStructureDockPin = toggleStructureDockPin;
   window.initStructureFromReset = initStructureFromReset;
@@ -17108,74 +16988,6 @@ if (termContainer) {
     }
   }
 
-  // パネル制御
-  function toggleCharacterPanel() {
-    const panel = document.getElementById('character-panel');
-    const checkbox = document.getElementById('check-character-dock');
-    const container = document.getElementById('main-container');
-    if (!panel || !checkbox) return;
-
-    const isOpen = panel.classList.contains('open');
-    const isDocked = checkbox.checked;
-    const isFront = (!isDocked && typeof window.__ccIsPanelFront === 'function' && window.__ccIsPanelFront('character-panel'));
-
-    if (isOpen && !isDocked) {
-      // open floating
-      if (!isFront) {
-        if (window.bringPanelToFront) window.bringPanelToFront(panel, false);
-        if (typeof updatePanelButtonStates === 'function') updatePanelButtonStates();
-        if (typeof updateStructureButtonState === 'function') updateStructureButtonState();
-        if (typeof updateTermsButtonState === 'function') updateTermsButtonState();
-        if (typeof updateCharacterButtonState === 'function') updateCharacterButtonState();
-        if (typeof updateWorldButtonState === 'function') updateWorldButtonState();
-        return;
-      }
-      // front -> pin + collapse all others
-      let __okDock = true;
-
-      if (typeof window.__ccRequestDockWithLimit === 'function') { __okDock = window.__ccRequestDockWithLimit('character'); }
-
-      else { checkbox.checked = true; toggleCharacterDock(); panel.classList.add('open'); __okDock = true; }
-
-      if (!__okDock) {
-
-        // 上限到達で入れ替えダイアログ表示中：ここでは何も畳まない
-
-        if (typeof updatePanelButtonStates === 'function') updatePanelButtonStates();
-
-        return;
-
-      }
-} else if (!isOpen) {
-      // closed -> open floating
-      if (container) container.classList.remove('structure-right');
-      panel.classList.add('open');
-      if (checkbox.checked) { checkbox.checked = false; toggleCharacterDock(); }
-      if (window.bringPanelToFront) window.bringPanelToFront(panel, false);
-    } else {
-      // docked -> close
-      checkbox.checked = false;
-      toggleCharacterDock();
-      panel.classList.remove('open');
-      panel.style.zIndex = '';
-      if (window.__ccFrontPanelId === 'character-panel') window.__ccFrontPanelId = null;
-    }
-
-    const isDockedNow = checkbox.checked;
-    if (panel.classList.contains('open')) {
-      if (window.bringPanelToFront) window.bringPanelToFront(panel, isDockedNow);
-    } else {
-      panel.style.zIndex = '';
-    }
-
-    if (typeof applyPaneWidthSettings === 'function') applyPaneWidthSettings();
-    if (typeof updatePanelButtonStates === 'function') updatePanelButtonStates();
-    if (typeof updateStructureButtonState === 'function') updateStructureButtonState();
-        if (typeof updateTermsButtonState === 'function') updateTermsButtonState();
-    if (typeof updateCharacterButtonState === 'function') updateCharacterButtonState();
-    if (typeof updateWorldButtonState === 'function') updateWorldButtonState();
-}
-
   let characterFullscreenListenerAttached = false;
   function setupCharacterFullscreenListener() {
     if (characterFullscreenListenerAttached) return;
@@ -17424,7 +17236,6 @@ if (swapBtn) swapBtn.classList.remove('is-active');
   window.addCharacterFreeTag = addCharacterFreeTag;
   window.toggleCharacterStructureLink = toggleCharacterStructureLink;
   window.toggleCharacterWorldLink = toggleCharacterWorldLink;
-  window.toggleCharacterPanel = toggleCharacterPanel;
   window.toggleCharacterFullscreen = toggleCharacterFullscreen;
   window.toggleCharacterDock = toggleCharacterDock;
   window.toggleCharacterDockPin = toggleCharacterDockPin;
@@ -18515,74 +18326,6 @@ if (termContainer) {
     }
   }
 
-  // パネル制御
-  function toggleWorldPanel() {
-    const panel = document.getElementById('world-panel');
-    const checkbox = document.getElementById('check-world-dock');
-    const container = document.getElementById('main-container');
-    if (!panel || !checkbox) return;
-
-    const isOpen = panel.classList.contains('open');
-    const isDocked = checkbox.checked;
-    const isFront = (!isDocked && typeof window.__ccIsPanelFront === 'function' && window.__ccIsPanelFront('world-panel'));
-
-    if (isOpen && !isDocked) {
-      // open floating
-      if (!isFront) {
-        if (window.bringPanelToFront) window.bringPanelToFront(panel, false);
-        if (typeof updatePanelButtonStates === 'function') updatePanelButtonStates();
-        if (typeof updateStructureButtonState === 'function') updateStructureButtonState();
-        if (typeof updateTermsButtonState === 'function') updateTermsButtonState();
-        if (typeof updateCharacterButtonState === 'function') updateCharacterButtonState();
-        if (typeof updateWorldButtonState === 'function') updateWorldButtonState();
-        return;
-      }
-      // front -> pin + collapse all others
-      let __okDock = true;
-
-      if (typeof window.__ccRequestDockWithLimit === 'function') { __okDock = window.__ccRequestDockWithLimit('world'); }
-
-      else { checkbox.checked = true; toggleWorldDock(); panel.classList.add('open'); __okDock = true; }
-
-      if (!__okDock) {
-
-        // 上限到達で入れ替えダイアログ表示中：ここでは何も畳まない
-
-        if (typeof updatePanelButtonStates === 'function') updatePanelButtonStates();
-
-        return;
-
-      }
-} else if (!isOpen) {
-      // closed -> open floating
-      if (container) container.classList.remove('structure-right');
-      panel.classList.add('open');
-      if (checkbox.checked) { checkbox.checked = false; toggleWorldDock(); }
-      if (window.bringPanelToFront) window.bringPanelToFront(panel, false);
-    } else {
-      // docked -> close
-      checkbox.checked = false;
-      toggleWorldDock();
-      panel.classList.remove('open');
-      panel.style.zIndex = '';
-      if (window.__ccFrontPanelId === 'world-panel') window.__ccFrontPanelId = null;
-    }
-
-    const isDockedNow = checkbox.checked;
-    if (panel.classList.contains('open')) {
-      if (window.bringPanelToFront) window.bringPanelToFront(panel, isDockedNow);
-    } else {
-      panel.style.zIndex = '';
-    }
-
-    if (typeof applyPaneWidthSettings === 'function') applyPaneWidthSettings();
-    if (typeof updatePanelButtonStates === 'function') updatePanelButtonStates();
-    if (typeof updateStructureButtonState === 'function') updateStructureButtonState();
-        if (typeof updateTermsButtonState === 'function') updateTermsButtonState();
-    if (typeof updateCharacterButtonState === 'function') updateCharacterButtonState();
-    if (typeof updateWorldButtonState === 'function') updateWorldButtonState();
-}
-
   let worldFullscreenListenerAttached = false;
   function setupWorldFullscreenListener() {
     if (worldFullscreenListenerAttached) return;
@@ -18831,7 +18574,6 @@ if (swapBtn) swapBtn.classList.remove('is-active');
   window.toggleWorldCharacterLink = toggleWorldCharacterLink;
   window.toggleWorldStructureLink = toggleWorldStructureLink;
   window.toggleWorldWorldLink = toggleWorldWorldLink;
-  window.toggleWorldPanel = toggleWorldPanel;
   window.toggleWorldFullscreen = toggleWorldFullscreen;
   window.toggleWorldDock = toggleWorldDock;
   window.toggleWorldDockPin = toggleWorldDockPin;
@@ -19903,60 +19645,6 @@ function toggleTermsDock() {
 }
 
 
-function toggleTermsPanel() {
-  const panel = document.getElementById('terms-panel');
-  const checkbox = document.getElementById('check-terms-dock');
-  const container = document.getElementById('main-container');
-  if (!panel || !checkbox) return;
-
-  const isOpen = panel.classList.contains('open');
-  const isDocked = checkbox.checked;
-  const isFront = (!isDocked && typeof window.__ccIsPanelFront === 'function' && window.__ccIsPanelFront('terms-panel'));
-
-  if (isOpen && !isDocked) {
-    // open floating
-    if (!isFront) {
-      if (window.bringPanelToFront) window.bringPanelToFront(panel, false);
-      if (typeof updatePanelButtonStates === 'function') updatePanelButtonStates();
-      if (typeof updateTermsButtonState === 'function') updateTermsButtonState();
-      return;
-    }
-    // front -> pin (respect pinned-limit manager)
-    let __okDock = true;
-    if (typeof window.__ccRequestDockWithLimit === 'function') {
-      __okDock = window.__ccRequestDockWithLimit('terms');
-    } else {
-      checkbox.checked = true;
-      toggleTermsDock();
-      panel.classList.add('open');
-      __okDock = true;
-    }
-    if (!__okDock) {
-      if (typeof updatePanelButtonStates === 'function') updatePanelButtonStates();
-      return;
-    }
-    if (typeof updateTermsButtonState === 'function') updateTermsButtonState();
-    return;
-  }
-
-  if (isOpen && isDocked) {
-    // docked -> close (fold)
-    closeTermsPanel(true);
-    return;
-  }
-
-  // closed -> open floating
-  panel.classList.add('open');
-  if (checkbox.checked) {
-    toggleTermsDock();
-  } else {
-    if (window.bringPanelToFront) window.bringPanelToFront(panel, false);
-    if (typeof updatePanelButtonStates === 'function') updatePanelButtonStates();
-  }
-  if (typeof updateTermsButtonState === 'function') updateTermsButtonState();
-}
-
-
 function updateTermsButtonState() {
   const btn = document.getElementById('btn-toggle-terms');
   const panel = document.getElementById('terms-panel');
@@ -20550,6 +20238,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { key:'memo', panelId:'memo-panel', checkboxId:'check-memo-dock', dockFn:'toggleMemoDock' },
     { key:'outline', panelId:'outline-panel', checkboxId:'check-outline-dock', dockFn:'toggleOutlineDock' },
     { key:'search', panelId:'search-panel', checkboxId:'check-search-dock', dockFn:'toggleSearchDock' },
+    { key:'terms', panelId:'terms-panel', checkboxId:'check-terms-dock', dockFn:'toggleTermsDock' },
   ];
 
   function getMeta(key){ return PANEL_META.find(p=>p.key===key); }
@@ -20679,6 +20368,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.toggleMemoPanel = function(){ toggleUnified('memo'); };
   window.toggleOutlinePanel = function(){ toggleUnified('outline'); };
   window.toggleSearchPanel = function(){ toggleUnified('search'); };
+  window.toggleTermsPanel = function(){ toggleUnified('terms'); };
 
   // Also, if ribbon uses these names:
   window.toggleStructure = window.toggleStructurePanel;
@@ -20687,6 +20377,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.toggleMemo = window.toggleMemoPanel;
   window.toggleOutline = window.toggleOutlinePanel;
   window.toggleSearch = window.toggleSearchPanel;
+  window.toggleTerms = window.toggleTermsPanel;
 
   // Ensure buttons reflect current state after load
   const refresh = ()=>{ try{ if (typeof window.updatePanelButtonStates==='function') window.updatePanelButtonStates(); }catch(e){} };
