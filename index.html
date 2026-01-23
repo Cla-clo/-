@@ -1505,7 +1505,15 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
         color: var(--text-muted);
     }
 
-    .terms-card-actions{ margin-top: 8px; display:flex; justify-content:flex-end; gap: 6px; flex-wrap: wrap; }
+    .terms-card-actions{
+        margin-top: 8px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+        flex-wrap: wrap;
+        padding-top: 8px;
+        border-top: 1px dashed var(--border-color);
+    }
     .terms-linked-section{ margin-top: 8px; display:flex; flex-wrap: wrap; gap: 6px; }
     .terms-linked-item{
         display:inline-flex; align-items:center; gap:4px;
@@ -2412,7 +2420,7 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
     .character-list { overflow: visible; }
 
     .character-card {
-        background: var(--panel-bg); border: 1px solid var(--border-color);
+        background: var(--pane-character-bg, #fce7f3); border: 1px solid var(--border-color);
         border-radius: 8px; margin-bottom: 6px; cursor: grab;
         transition: box-shadow 0.2s, transform 0.15s; position: relative;
     }
@@ -2420,13 +2428,13 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
     .character-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     .character-card.dragging { opacity: 0.5; transform: scale(0.98); }
     .character-card.drag-over { border-color: #ec4899; box-shadow: 0 0 0 2px rgba(236,72,153,0.3); }
-    .character-card.role-protagonist { border-left: 4px solid #ec4899; background: linear-gradient(to right, rgba(236,72,153,0.08), transparent); }
+    .character-card.role-protagonist { border-left: 4px solid #ec4899; }
     .character-card.has-custom-color.role-protagonist { border-left-color: var(--character-card-accent, #ec4899); background: var(--character-card-bg, var(--panel-bg)); }
-    .character-card.role-heroine { border-left: 4px solid #f472b6; background: linear-gradient(to right, rgba(244,114,182,0.06), transparent); }
+    .character-card.role-heroine { border-left: 4px solid #f472b6; }
     .character-card.has-custom-color.role-heroine { border-left-color: var(--character-card-accent, #f472b6); background: var(--character-card-bg, var(--panel-bg)); }
-    .character-card.role-antagonist { border-left: 4px solid #be185d; background: linear-gradient(to right, rgba(190,24,93,0.06), transparent); }
+    .character-card.role-antagonist { border-left: 4px solid #be185d; }
     .character-card.has-custom-color.role-antagonist { border-left-color: var(--character-card-accent, #be185d); background: var(--character-card-bg, var(--panel-bg)); }
-    .character-card.role-supporting { margin-left: 16px; border-left: 3px solid #f9a8d4; background: linear-gradient(to right, rgba(249,168,212,0.04), transparent); }
+    .character-card.role-supporting { margin-left: 16px; border-left: 3px solid #f9a8d4; }
     .character-card.has-custom-color.role-supporting { border-left-color: var(--character-card-accent, #f9a8d4); background: var(--character-card-bg, var(--panel-bg)); }
     .character-card.role-mob { margin-left: 32px; border-left: 2px solid #fbcfe8; font-size: 0.9em; }
     .character-card.has-custom-color.role-mob { border-left-color: var(--character-card-accent, #fbcfe8); }
