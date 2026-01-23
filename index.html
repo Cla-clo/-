@@ -16351,6 +16351,9 @@ if (swapBtn) swapBtn.classList.remove('is-active');
       </div>
     `;
 
+    const characterActions = div.querySelector('.character-card-actions');
+    if (characterActions) div.appendChild(characterActions);
+
     div.addEventListener('dragstart', handleCharacterDragStart);
     div.addEventListener('dragend', handleCharacterDragEnd);
     div.addEventListener('dragover', handleCharacterDragOver);
@@ -17671,6 +17674,9 @@ if (swapBtn) swapBtn.classList.remove('is-active');
         </div>
       </div>
     `;
+
+    const worldActions = div.querySelector('.world-card-actions');
+    if (worldActions) div.appendChild(worldActions);
 
     div.addEventListener('dragstart', handleWorldDragStart);
     div.addEventListener('dragend', handleWorldDragEnd);
