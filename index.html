@@ -11015,23 +11015,29 @@ function paneIdToPaneKey(paneId){
     return ['structure-panel','character-panel','world-panel','terms-panel'].includes(paneId);
   }
 
+  function getCardColorKeyByPaneKey(key){
+    return ['structure', 'character', 'world'].includes(key) ? 'color' : 'bgColor';
+  }
+
   function bulkSetCardsBgColor(paneId, color){
     const key = paneIdToPaneKey(paneId);
     const c = (color || '').trim();
     const v = c ? ((c.toLowerCase() === '#ffffff') ? '' : c) : '';
+    const colorKey = getCardColorKeyByPaneKey(key);
+    const next = colorKey === 'color' ? (v ? v : null) : v;
     const bulk = window.__ccPaneBulk && window.__ccPaneBulk[key];
     if (!bulk || typeof bulk.setCardsBgColorAll !== 'function') {
       const reg = window.PanelRegistry && window.PanelRegistry[paneId];
-      if (reg && reg.supportsCards && reg.data && typeof reg.data.get === 'function' && typeof reg.data.save === 'function') {
+      if (reg && reg.supportsCards && reg.data && typeof reg.data.get === 'function') {
         const arr = reg.data.get() || [];
-        arr.forEach(c => { if (c) c.bgColor = v; });
-        try { reg.data.save(arr); } catch(e) {}
+        arr.forEach(card => { if (card) card[colorKey] = next; });
+        try { reg.data.save?.(); } catch(e) {}
         try { reg.data.render?.(); } catch(e) {}
       }
       return;
     }
     if (bulk && typeof bulk.setCardsBgColorAll === 'function') {
-      bulk.setCardsBgColorAll(v);
+      bulk.setCardsBgColorAll(next);
       return;
     }
     console.warn('bulkSetCardsBgColor: pane bulk API not available for', key);
@@ -11039,19 +11045,21 @@ function paneIdToPaneKey(paneId){
 
   function bulkResetCardsBgColor(paneId){
     const key = paneIdToPaneKey(paneId);
+    const colorKey = getCardColorKeyByPaneKey(key);
+    const next = colorKey === 'color' ? null : '';
     const bulk = window.__ccPaneBulk && window.__ccPaneBulk[key];
     if (!bulk || typeof bulk.resetCardsBgColorAll !== 'function') {
       const reg = window.PanelRegistry && window.PanelRegistry[paneId];
-      if (reg && reg.supportsCards && reg.data && typeof reg.data.get === 'function' && typeof reg.data.save === 'function') {
+      if (reg && reg.supportsCards && reg.data && typeof reg.data.get === 'function') {
         const arr = reg.data.get() || [];
-        arr.forEach(c => { if (c) c.bgColor = ''; });
-        try { reg.data.save(arr); } catch(e) {}
+        arr.forEach(card => { if (card) card[colorKey] = next; });
+        try { reg.data.save?.(); } catch(e) {}
         try { reg.data.render?.(); } catch(e) {}
       }
       return;
     }
     if (bulk && typeof bulk.setCardsBgColorAll === 'function') {
-      bulk.setCardsBgColorAll('');
+      bulk.setCardsBgColorAll(next);
       return;
     }
     console.warn('bulkResetCardsBgColor: pane bulk API not available for', key);
@@ -13628,6 +13636,81 @@ panel.style.width = '320px';
   }
   window.hideAllContextMenus = hideAllContextMenus;
 
+  function normalizePaneKey(pane){
+    if (!pane) return '';
+    return pane.charAt(0).toUpperCase() + pane.slice(1);
+  }
+
+  function parsePanelActionArg(raw){
+    if (raw === undefined || raw === null) return undefined;
+    const v = String(raw).trim();
+    if (v === 'true') return true;
+    if (v === 'false') return false;
+    return v;
+  }
+
+  function finalizePanelLayout(){
+    try { if (typeof window.applyPaneWidthSettings === 'function') window.applyPaneWidthSettings(); } catch(e) {}
+    try { if (typeof window.applyPaneHeightSettings === 'function') window.applyPaneHeightSettings(); } catch(e) {}
+    try { if (typeof window.updateDockTopOffset === 'function') window.updateDockTopOffset(); } catch(e) {}
+    try { if (typeof window.updateDockSplitState === 'function') window.updateDockSplitState(); } catch(e) {}
+    try { if (typeof window.updatePanelButtonStates === 'function') window.updatePanelButtonStates(); } catch(e) {}
+  }
+
+  function handlePanelAction(action, pane, arg){
+    const cap = normalizePaneKey(pane);
+    if (!cap) return;
+    if (action === 'swap-side') {
+      window[`swap${cap}Side`]?.();
+      finalizePanelLayout();
+      return;
+    }
+    if (action === 'toggle-pin') {
+      window[`toggle${cap}DockPin`]?.();
+      finalizePanelLayout();
+      return;
+    }
+    if (action === 'dock-checkbox') {
+      window[`toggle${cap}Dock`]?.();
+      finalizePanelLayout();
+      return;
+    }
+    if (action === 'toggle-fullscreen') {
+      window[`toggle${cap}Fullscreen`]?.();
+      finalizePanelLayout();
+      return;
+    }
+    if (action === 'close-panel') {
+      const fn = window[`close${cap}Panel`];
+      if (typeof fn === 'function') {
+        const parsed = parsePanelActionArg(arg);
+        if (parsed !== undefined) fn(parsed);
+        else fn();
+      }
+      finalizePanelLayout();
+    }
+  }
+
+  function bindPanelHeaderActions(){
+    if (window.__ccPanelHeaderActionsBound) return;
+    window.__ccPanelHeaderActionsBound = true;
+    const PANEL_ACTIONS = new Set(['swap-side', 'toggle-pin', 'close-panel', 'toggle-fullscreen']);
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-action][data-pane]');
+      if (!btn) return;
+      const action = btn.dataset.action;
+      if (!PANEL_ACTIONS.has(action)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      handlePanelAction(action, btn.dataset.pane, btn.dataset.args);
+    });
+    document.addEventListener('change', (e) => {
+      const el = e.target.closest('input[data-action="dock-checkbox"][data-pane]');
+      if (!el) return;
+      handlePanelAction('dock-checkbox', el.dataset.pane);
+    });
+  }
+
   // Color presets
   const colorPresets = {
     tab: ['#fff59d', '#fecaca', '#bfdbfe', '#bbf7d0', '#ddd6fe', '#fed7aa', '#fce7f3', '#f5f5dc', '#e0e7ff', '#ccfbf1'],
@@ -13946,9 +14029,11 @@ function showPresetPanelColorPicker(paneId){
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setupContextMenus);
     document.addEventListener('DOMContentLoaded', setupThemePresetContextMenu);
+    document.addEventListener('DOMContentLoaded', bindPanelHeaderActions);
   } else {
     setupContextMenus();
     setupThemePresetContextMenu();
+    bindPanelHeaderActions();
   }
 
   if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
@@ -15958,7 +16043,8 @@ if (swapBtn) swapBtn.classList.remove('is-active');
   window.__ccPaneBulk.structure = {
     setCardsBgColorAll: (v)=>{
       loadStructureData();
-      (structureData||[]).forEach(it=>{ if(it && typeof it==='object') it.bgColor = v; });
+      const next = v ? v : null;
+      (structureData||[]).forEach(it=>{ if(it && typeof it==='object') it.color = next; });
       saveStructureData();
       renderStructureList();
     }
@@ -17261,7 +17347,8 @@ if (swapBtn) swapBtn.classList.remove('is-active');
   window.__ccPaneBulk.character = {
     setCardsBgColorAll: (v)=>{
       loadCharacterData();
-      (characterData||[]).forEach(it=>{ if(it && typeof it==='object') it.bgColor = v; });
+      const next = v ? v : null;
+      (characterData||[]).forEach(it=>{ if(it && typeof it==='object') it.color = next; });
       saveCharacterData();
       renderCharacterList();
     }
@@ -18599,7 +18686,8 @@ if (swapBtn) swapBtn.classList.remove('is-active');
   window.__ccPaneBulk.world = {
     setCardsBgColorAll: (v)=>{
       loadWorldData();
-      (worldData||[]).forEach(it=>{ if(it && typeof it==='object') it.bgColor = v; });
+      const next = v ? v : null;
+      (worldData||[]).forEach(it=>{ if(it && typeof it==='object') it.color = next; });
       saveWorldData();
       renderWorldList();
     }
