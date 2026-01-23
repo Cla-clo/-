@@ -1409,58 +1409,21 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     .main-container.terms-docked.terms-right #resizer-terms { order: 7; }
     .main-container.terms-docked:not(.terms-right) #resizer-terms { order: -4; }
     body.theme-dark #terms-panel .panel-header { background: var(--pane-terms-head, #164e63); border-color: #155e75; }
-.terms-content{ display:flex; flex-direction:column; overflow:auto; flex:1; padding:0; }
-    .terms-list{ padding: 10px; flex: 1; overflow: auto; box-sizing:border-box; }
+.terms-content{ flex: 1; overflow: auto; padding: 18px 10px 10px 10px; box-sizing: border-box; }
+    .terms-list{ overflow: visible; box-sizing:border-box; }
 
     /* [v23] Terms pane align with other panes */
     #terms-panel { background: var(--pane-terms-bg, #fffbe6) !important; }
-.terms-card { border-radius: 8px; }
 
-    .terms-card{
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        background: rgba(255,255,255,0.7);
-        padding: 10px 10px 10px 14px;
-        margin-bottom: 6px;
-        cursor: grab;
-        transition: box-shadow 0.2s, transform 0.15s;
-        position: relative;
-        box-shadow: var(--shadow-soft, 0 1px 2px rgba(0,0,0,0.06));
-    }
-    .terms-card::before{
-        content:'';
-        position:absolute;
-        left:0; top:0; bottom:0;
-        width:4px;
-        border-radius:10px 0 0 10px;
-        background: var(--pane-terms-accent, #f59e0b);
-    
-    body.theme-dark .terms-card{ background: rgba(17,24,39,0.45); }
-}
-
-    .terms-card-title{ font-weight: 600; font-size:  0.85rem; margin-bottom: 4px; display:flex; justify-content: space-between; gap: 8px; }
-    .terms-card-meta{ font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
-    .terms-card-desc{ white-space: pre-wrap; font-size: 0.82rem; line-height: 1.35; }
-    /* Terms expand levels (make changes obvious) */
-.terms-card.lv0 .terms-card-meta,
-.terms-card.lv0 .terms-card-desc,
-.terms-card.lv0 .terms-linked-section,
-.terms-card.lv0 .card-linked-section{ display:none !important; }
-.terms-card.lv1 .terms-card-desc,
-.terms-card.lv1 .terms-linked-section,
-.terms-card.lv1 .card-linked-section{ display:none !important; }
-.terms-card.lv2 .terms-linked-section,
-.terms-card.lv2 .card-linked-section{ display:none !important; }
     /* ===== Terms card: unified look ===== */
     .terms-card{
         background: var(--panel-bg);
         border: 1px solid var(--border-color);
         border-radius: 8px;
         margin-bottom: 6px;
-        cursor: default;
+        cursor: grab;
         transition: box-shadow 0.2s, transform 0.15s;
         position: relative;
-        padding: 10px;
         box-shadow: var(--shadow-soft, 0 1px 2px rgba(0,0,0,0.06));
     }
     .terms-card:hover{ box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -1472,8 +1435,26 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
         gap: 8px;
         font-weight: 600;
         font-size:  0.85rem;
-        margin-bottom: 8px;
+        padding: 8px 10px;
+        border-bottom: 1px solid transparent;
     }
+    .terms-card.expanded .terms-card-title{ border-bottom-color: var(--border-color); }
+    .terms-card-body{
+        display: none;
+        padding: 8px 10px;
+        font-size: 0.8rem;
+        overflow-x: hidden;
+    }
+    .terms-card.expand-1 .terms-card-body,
+    .terms-card.expand-2 .terms-card-body,
+    .terms-card.expand-3 .terms-card-body{ display: block; }
+    .terms-card.expand-1 .terms-card-desc,
+    .terms-card.expand-1 .terms-linked-section,
+    .terms-card.expand-1 .card-linked-section{ display:none !important; }
+    .terms-card.expand-2 .terms-linked-section,
+    .terms-card.expand-2 .card-linked-section{ display:none !important; }
+    .terms-card-meta{ font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
+    .terms-card-desc{ white-space: pre-wrap; font-size: 0.82rem; line-height: 1.35; }
     .terms-card-head-left{
         display:flex;
         align-items:center;
@@ -1516,8 +1497,7 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     .terms-card-actions{
         margin-top: 8px;
         display: flex;
-        justify-content: flex-end;
-        gap: 6px;
+        gap: 4px;
         flex-wrap: wrap;
         padding-top: 8px;
         border-top: 1px dashed var(--border-color);
@@ -19184,7 +19164,8 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       // normalize expand level
       const lv = Number.isInteger(term.expandLevel) ? term.expandLevel : (term.expandLevel ? 3 : 0);
       term.expandLevel = Math.max(0, Math.min(3, lv));
-      card.classList.add('lv'+term.expandLevel);
+      card.classList.add('expand-'+term.expandLevel);
+      if (term.expandLevel > 0) card.classList.add('expanded');
 
       const advanceExpandLevel = () => {
         const curLv = Number.isInteger(term.expandLevel) ? term.expandLevel : (term.expandLevel ? 3 : 0);
@@ -19268,18 +19249,21 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       card.ondblclick = () => { advanceExpandLevel(); };
 
       // ===== Body fields (match other panels) =====
+      const body = document.createElement('div');
+      body.className = 'terms-card-body';
+
       if (term.category) {
         const field = document.createElement('div');
         field.className = 'structure-field terms-card-meta';
         field.innerHTML = `<div class="structure-field-label">カテゴリ</div><div class="structure-field-value">${escapeHtml(term.category)}</div>`;
-        card.appendChild(field);
+        body.appendChild(field);
       }
 
       if (term.desc) {
         const field = document.createElement('div');
         field.className = 'structure-field terms-card-desc';
         field.innerHTML = `<div class="structure-field-label">説明</div><div class="structure-field-value" style="white-space:pre-wrap;">${escapeHtml(term.desc)}</div>`;
-        card.appendChild(field);
+        body.appendChild(field);
       }
       // linked input tab (unified) - show near bottom like other panels
       if (term.tabId && window.inputTabs) {
@@ -19288,7 +19272,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
           const tabField = document.createElement('div');
           tabField.className = 'structure-field terms-card-meta';
           tabField.innerHTML = `<div class="structure-field-label">紐づけタブ</div><span style="color:#2563eb; cursor:pointer;" onclick="event.stopPropagation(); if(window.switchTab) window.switchTab(${term.tabId})">📄 ${escapeHtml(tab.name)}</span>`;
-          card.appendChild(tabField);
+          body.appendChild(tabField);
         }
       }
 
@@ -19319,8 +19303,10 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
           ${linkedCharactersHtml ? `<div class="card-linked-label" style="margin-top:6px;">人物</div><div class="card-linked-items">${linkedCharactersHtml}</div>` : ''}
           ${linkedWorldsHtml ? `<div class="card-linked-label" style="margin-top:6px;">世界観</div><div class="card-linked-items">${linkedWorldsHtml}</div>` : ''}
         `;
-        card.appendChild(linkedSection);
+        body.appendChild(linkedSection);
       }
+
+      card.appendChild(body);
 
       // ===== Actions (match structure/world/character) =====
       const actions = document.createElement('div');
