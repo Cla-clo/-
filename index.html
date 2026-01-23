@@ -7913,7 +7913,8 @@ function updateDockSplitState() {
     const pinnedPanels = new Set();
     function updateControlPanelScrollState() {
         const hasOpen = document.querySelectorAll('.control-panel.open').length > 0;
-        document.body.classList.toggle('allow-scroll', hasOpen);
+        const allowScroll = hasOpen && document.body.classList.contains('scroll-mode');
+        document.body.classList.toggle('allow-scroll', allowScroll);
         updateDockTopOffset();
     }
     function getPanelStateIcon(isOpen, isPinned) {
@@ -11048,7 +11049,7 @@ function paneIdToPaneKey(paneId){
     const colorKey = getCardColorKeyByPaneKey(key);
     const next = '';
     const bulk = window.__ccPaneBulk && window.__ccPaneBulk[key];
-    if (!bulk || typeof bulk.resetCardsBgColorAll !== 'function') {
+    if (!bulk) {
       const reg = window.PanelRegistry && window.PanelRegistry[paneId];
       if (reg && reg.supportsCards && reg.data && typeof reg.data.get === 'function') {
         const arr = reg.data.get() || [];
@@ -11058,7 +11059,11 @@ function paneIdToPaneKey(paneId){
       }
       return;
     }
-    if (bulk && typeof bulk.setCardsBgColorAll === 'function') {
+    if (typeof bulk.resetCardsBgColorAll === 'function') {
+      bulk.resetCardsBgColorAll();
+      return;
+    }
+    if (typeof bulk.setCardsBgColorAll === 'function') {
       bulk.setCardsBgColorAll(next);
       return;
     }
@@ -14514,6 +14519,7 @@ function showPresetPanelColorPicker(paneId){
     div.addEventListener('dragleave', handleDragLeave);
     div.addEventListener('contextmenu', (e) => {
       e.preventDefault();
+      e.stopPropagation();
       showStructureContextMenu(e, card.id);
     });
 
@@ -16048,6 +16054,12 @@ if (swapBtn) swapBtn.classList.remove('is-active');
       (structureData||[]).forEach(it=>{ if(it && typeof it==='object') it.bgColor = next; });
       saveStructureData();
       renderStructureList();
+    },
+    resetCardsBgColorAll: ()=>{
+      loadStructureData();
+      (structureData||[]).forEach(it=>{ if(it && typeof it==='object') it.bgColor = ''; });
+      saveStructureData();
+      renderStructureList();
     }
   };
 
@@ -17351,6 +17363,12 @@ if (swapBtn) swapBtn.classList.remove('is-active');
       loadCharacterData();
       const next = v || '';
       (characterData||[]).forEach(it=>{ if(it && typeof it==='object') it.bgColor = next; });
+      saveCharacterData();
+      renderCharacterList();
+    },
+    resetCardsBgColorAll: ()=>{
+      loadCharacterData();
+      (characterData||[]).forEach(it=>{ if(it && typeof it==='object') it.bgColor = ''; });
       saveCharacterData();
       renderCharacterList();
     }
@@ -18693,6 +18711,12 @@ if (swapBtn) swapBtn.classList.remove('is-active');
       (worldData||[]).forEach(it=>{ if(it && typeof it==='object') it.bgColor = next; });
       saveWorldData();
       renderWorldList();
+    },
+    resetCardsBgColorAll: ()=>{
+      loadWorldData();
+      (worldData||[]).forEach(it=>{ if(it && typeof it==='object') it.bgColor = ''; });
+      saveWorldData();
+      renderWorldList();
     }
   };
 
@@ -19653,6 +19677,12 @@ menu.querySelectorAll('.context-menu-item').forEach(item => {
     setCardsBgColorAll: (v)=>{
       loadTermsData();
       (termsData||[]).forEach(it=>{ if(it && typeof it==='object') it.bgColor = v; });
+      saveTermsData();
+      renderTermsList();
+    },
+    resetCardsBgColorAll: ()=>{
+      loadTermsData();
+      (termsData||[]).forEach(it=>{ if(it && typeof it==='object') it.bgColor = ''; });
       saveTermsData();
       renderTermsList();
     }
