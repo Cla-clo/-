@@ -1615,22 +1615,22 @@ body.theme-dark .structure-content {
         width: 14px; height: 14px; accent-color: #6366f1;
         cursor: pointer; flex-shrink: 0;
     }
-.structure-move-group { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
-.structure-move-btn {
-        width: 16px;
-        height: 12px;
-        font-size: 8px;
-        padding: 0;
-        border: 1px solid var(--border-color);
-        border-radius: 2px;
-        background: var(--panel-bg);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--text-muted);
-    }
-    .structure-move-btn:hover { background: var(--pane-header-bg); color: var(--text-color); }
+	.card-move-group { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
+	.card-move-btn {
+	        width: 16px;
+	        height: 12px;
+	        font-size: 8px;
+	        padding: 0;
+	        border: 1px solid var(--border-color);
+	        border-radius: 2px;
+	        background: var(--panel-bg);
+	        cursor: pointer;
+	        display: flex;
+	        align-items: center;
+	        justify-content: center;
+	        color: var(--text-muted);
+	    }
+	    .card-move-btn:hover { background: var(--card-move-hover-bg, var(--pane-header-bg)); color: var(--card-move-hover-color, var(--text-color)); }
     .structure-card.expanded .structure-card-header {
         border-bottom-color: var(--border-color);
     }
@@ -2435,9 +2435,7 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
 
     .character-card-header { display: flex; align-items: center; gap: 6px; padding: 8px 10px; cursor: pointer; border-bottom: 1px solid transparent; }
     .character-select { width: 14px; height: 14px; accent-color: #ec4899; cursor: pointer; flex-shrink: 0; }
-    .character-move-group { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
-    .character-move-btn { width: 16px; height: 12px; font-size: 8px; padding: 0; border: 1px solid var(--border-color); border-radius: 2px; background: var(--panel-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
-    .character-move-btn:hover { background: #fce7f3; color: #ec4899; }
+	    #character-panel { --card-move-hover-bg: #fce7f3; --card-move-hover-color: #ec4899; }
     .character-toggle { font-size: 0.7rem; color: var(--text-muted); width: 14px; cursor: pointer; flex-shrink: 0; }
     .character-toggle:hover { color: #ec4899; }
     .character-name { flex: 1; font-weight: 600; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.85rem; }
@@ -2581,9 +2579,7 @@ body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
 
     .world-card-header { display: flex; align-items: center; gap: 6px; padding: 8px 10px; cursor: pointer; border-bottom: 1px solid transparent; }
     .world-select { width: 14px; height: 14px; accent-color: #10b981; cursor: pointer; flex-shrink: 0; }
-    .world-move-group { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
-    .world-move-btn { width: 16px; height: 12px; font-size: 8px; padding: 0; border: 1px solid var(--border-color); border-radius: 2px; background: var(--panel-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
-    .world-move-btn:hover { background: #d1fae5; color: #10b981; }
+	    #world-panel { --card-move-hover-bg: #d1fae5; --card-move-hover-color: #10b981; }
     .world-toggle { font-size: 0.7rem; color: var(--text-muted); width: 14px; cursor: pointer; flex-shrink: 0; }
     .world-toggle:hover { color: #10b981; }
     .world-name { flex: 1; font-weight: 600; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.85rem; }
@@ -14531,10 +14527,10 @@ function showPresetPanelColorPicker(paneId){
     header.appendChild(status);
 
     const moveGroup = document.createElement('div');
-    moveGroup.className = 'structure-move-group';
+    moveGroup.className = 'card-move-group';
     const moveUp = document.createElement('button');
     moveUp.type = 'button';
-    moveUp.className = 'structure-move-btn';
+    moveUp.className = 'card-move-btn';
     moveUp.textContent = '↑';
     moveUp.title = '上のカードと入れ替える';
     moveUp.onclick = (e) => {
@@ -14543,7 +14539,7 @@ function showPresetPanelColorPicker(paneId){
     };
     const moveDown = document.createElement('button');
     moveDown.type = 'button';
-    moveDown.className = 'structure-move-btn';
+    moveDown.className = 'card-move-btn';
     moveDown.textContent = '↓';
     moveDown.title = '下のカードと入れ替える';
     moveDown.onclick = (e) => {
@@ -16464,9 +16460,9 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     div.innerHTML = `
       <div class="character-card-header" onclick="toggleCharacterExpand(${card.id})">
         <input type="checkbox" class="character-select" ${card.selected ? 'checked' : ''} onclick="event.stopPropagation(); toggleCharacterSelect(${card.id})">
-        <div class="character-move-group" onclick="event.stopPropagation();">
-          <button class="character-move-btn" title="上へ移動" onclick="moveCharacterCard(${card.id}, -1)">↑</button>
-          <button class="character-move-btn" title="下へ移動" onclick="moveCharacterCard(${card.id}, 1)">↓</button>
+        <div class="card-move-group" onclick="event.stopPropagation();">
+          <button class="card-move-btn" title="上へ移動" onclick="moveCharacterCard(${card.id}, -1)">↑</button>
+          <button class="card-move-btn" title="下へ移動" onclick="moveCharacterCard(${card.id}, 1)">↓</button>
         </div>
         <span class="character-toggle">${toggleSymbol}</span>
         <span class="character-name">${escapeHtml(card.name)}</span>
@@ -17790,9 +17786,9 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     div.innerHTML = `
       <div class="world-card-header" onclick="toggleWorldExpand(${card.id})">
         <input type="checkbox" class="world-select" ${card.selected ? 'checked' : ''} onclick="event.stopPropagation(); toggleWorldSelect(${card.id})">
-        <div class="world-move-group" onclick="event.stopPropagation();">
-          <button class="world-move-btn" title="上へ移動" onclick="moveWorldCard(${card.id}, -1)">↑</button>
-          <button class="world-move-btn" title="下へ移動" onclick="moveWorldCard(${card.id}, 1)">↓</button>
+        <div class="card-move-group" onclick="event.stopPropagation();">
+          <button class="card-move-btn" title="上へ移動" onclick="moveWorldCard(${card.id}, -1)">↑</button>
+          <button class="card-move-btn" title="下へ移動" onclick="moveWorldCard(${card.id}, 1)">↓</button>
         </div>
         <span class="world-toggle">${toggleSymbol}</span>
         <span class="world-name">${escapeHtml(card.name)}</span>
@@ -19189,14 +19185,14 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       left.appendChild(cb);
 
       const moveGroup = document.createElement('div');
-      moveGroup.className = 'structure-move-group';
+      moveGroup.className = 'card-move-group';
       const moveUp = document.createElement('button');
-      moveUp.className = 'structure-move-btn';
+      moveUp.className = 'card-move-btn';
       moveUp.textContent = '↑';
       moveUp.title = '1つ上へ';
       moveUp.onclick = (ev)=>{ ev.stopPropagation(); moveTermCard(term.id, -1); };
       const moveDown = document.createElement('button');
-      moveDown.className = 'structure-move-btn';
+      moveDown.className = 'card-move-btn';
       moveDown.textContent = '↓';
       moveDown.title = '1つ下へ';
       moveDown.onclick = (ev)=>{ ev.stopPropagation(); moveTermCard(term.id, +1); };
