@@ -20902,7 +20902,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!menu){
       menu = document.createElement('div');
       menu.id = 'panelui-pane-menu';
-      menu.className = 'header-context-menu';
+      menu.className = 'context-menu';
       menu.style.display = 'none';
       document.body.appendChild(menu);
     }
@@ -20911,7 +20911,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const addItem = (label, icon, onClick) => {
       const item = document.createElement('div');
-      item.className = 'header-context-item';
+      item.className = 'context-menu-item';
       item.innerHTML = `<span class="hci-icon">${icon||''}</span><span class="hci-label">${label}</span>`;
       item.addEventListener('click', (e)=>{ e.stopPropagation(); hide(); onClick && onClick(); });
       menu.appendChild(item);
