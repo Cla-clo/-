@@ -32,9 +32,9 @@ html.cc-boot #resizer-search {
 
 /* ===== Unified panel header controls ===== */
 .panel-header{
-  padding: 0 10px;
-  height: 44px;
-  min-height: 44px;
+  padding: var(--panel-header-padding-y) var(--panel-header-padding-x);
+  height: var(--panel-header-height);
+  min-height: var(--panel-header-height);
   box-sizing: border-box;
   line-height: 1;
   border-bottom: 1px solid var(--border-color);
@@ -106,6 +106,13 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
         --dock-top: 46px;
         --divider-size: 2px;
         --divider-hit-area: 10px;
+        --panel-header-height: 44px;
+        --panel-header-padding-y: 8px;
+        --panel-header-padding-x: 10px;
+        --panel-toolbar-height: 42px;
+        --panel-toolbar-padding-y: 6px;
+        --panel-toolbar-padding-x: 10px;
+        --panel-body-padding-top: 18px;
     }
     body.theme-dark {
         --bg-color: #1f2937; --panel-bg: #374151; --border-color: #4b5563;
@@ -2698,13 +2705,14 @@ body.theme-dark .dynamic-dock-resizer:hover{ background: rgba(255,255,255,0.08);
 /* WebKit */
 
 
-/* ===== Unified panel header / toolbar (refactor) ===== */
+/* ===== Unified panel header / toolbar (metrics via vars) ===== */
 .control-panel[data-pane] .panel-header{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding: 8px 10px;
-  min-height: 44px;
+  padding: var(--panel-header-padding-y) var(--panel-header-padding-x);
+  min-height: var(--panel-header-height);
+  height: var(--panel-header-height);
   border-bottom: 1px solid var(--border-color);
   box-sizing: border-box;
 }
@@ -2721,8 +2729,8 @@ body.theme-dark .dynamic-dock-resizer:hover{ background: rgba(255,255,255,0.08);
   row-gap: 4px;
   flex-wrap: wrap;          /* wrap so buttons never spill out */
   align-items: center;
-  padding: 6px 10px;
-  min-height: 42px;
+  padding: var(--panel-toolbar-padding-y) var(--panel-toolbar-padding-x);
+  min-height: var(--panel-toolbar-height);
   height: auto;             /* allow multiple rows */
   overflow: visible;        /* no horizontal scrolling */
   border-bottom: 1px solid var(--border-color);
@@ -2759,13 +2767,10 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
 }
 
 
-  :root{
-    --panel-body-top-gap: 12px; /* header/toolbar とカードの距離 */
-  }
-  .control-panel .panel-body{
-    padding-top: var(--panel-body-top-gap) !important;
-    box-sizing: border-box;
-  }
+.control-panel .panel-body{
+  padding-top: var(--panel-body-padding-top) !important;
+  box-sizing: border-box;
+}
 
   /* === Unified panel layout (prevents panels from growing the whole page) === */
   .control-panel[data-pane]{
@@ -2814,13 +2819,41 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
 }
 
 
-/* === FIX: per-pane header colors (override any global header rule) === */
-.pane[data-pane="structure"] .panel-header{ background: var(--pane-structure-head) !important; }
-.pane[data-pane="world"] .panel-header{ background: var(--pane-world-head) !important; }
-.pane[data-pane="character"] .panel-header{ background: var(--pane-character-head) !important; }
-.pane[data-pane="terms"] .panel-header{ background: var(--pane-terms-head) !important; }
-.pane[data-pane="memo"] .panel-header{ background: var(--pane-memo-head) !important; }
-.pane[data-pane="outline"] .panel-header{ background: var(--pane-outline-head) !important; }
+/* === Search panel layout helpers === */
+.search-toolbar{
+  display:flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.search-toolbar .search-row{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.search-panel-body{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  flex:1;
+  overflow:auto;
+  padding: 10px;
+}
+.control-panel[data-pane="search"] .panel-body{
+  padding-top: 0 !important;
+}
+.control-panel[data-pane="memo"] .panel-body{
+  padding-top: 0 !important;
+  display:flex;
+}
+.panel-toolbar.outline-toolbar{
+  gap: 4px;
+}
+.panel-toolbar.memo-toolbar{
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
 </style>
 
 <!-- ===== v0.96 hotfix (reader/search/bookmark, active tab color, tab context menu, per-tab stats, focus shortcuts) ===== -->
@@ -4367,36 +4400,38 @@ window.__ccInitPanelDnDAndResizers = function(){
     </div>
 
 <!-- Independent Search Panel -->
-<div id="search-panel" style="display:none;">
-  <div class="search-header panel-drag-handle" data-panel-id="search-panel" draggable="true" style="display:flex; justify-content:space-between; align-items:center; padding: 8px 10px; background: var(--pane-search-head, var(--pane-header-bg)); border-bottom: 1px solid var(--border-color); font-weight:bold; font-size:0.85rem; flex-wrap:wrap; gap:4px;">
-    <span>🔍 検索</span>
-    <div class="search-controls" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+<div id="search-panel" class="control-panel" data-pane="search" style="display:none;">
+  <div class="panel-header panel-drag-handle" data-panel-id="search-panel" draggable="true">
+    <div class="panel-title"><span class="panel-emoji" aria-hidden="true">🔍</span><span class="panel-title-text">検索</span></div>
+    <div class="panel-controls">
       <button id="btn-search-swap" class="btn panel-swap-btn" onclick="swapSearchSide()">左右入替</button>
       <button class="btn panel-icon-btn panel-pin-btn" id="btn-search-pin" onclick="toggleSearchDockPin()" title="固定/浮動切り替え">📌</button>
       <input type="checkbox" id="check-search-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="search">
-      <button class="btn panel-icon-btn panel-close-btn" onclick="closeSearchPanel()" style="background:none; border:none; cursor:pointer;">✖</button>
+      <button class="btn panel-icon-btn panel-close-btn" onclick="closeSearchPanel()">✖</button>
     </div>
   </div>
-  <div class="search-body" style="padding:10px; display:flex; flex-direction:column; gap:8px; flex:1; overflow:auto;">
-    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+  <div class="panel-toolbar search-toolbar">
+    <div class="search-row">
       <input type="text" id="search-input" placeholder="検索ワード..." style="flex:1; min-width:120px; padding:6px 10px; border:1px solid var(--border-color); border-radius:6px; background:var(--panel-bg); color:var(--text-color);" onkeydown="if(event.key==='Enter') doSearch()">
       <select id="search-scope" style="height:32px; border-radius:6px; border:1px solid var(--border-color); padding:0 6px; background:var(--panel-bg); color:var(--text-color);">
         <option value="current">このタブ</option>
         <option value="all">全タブ</option>
       </select>
     </div>
-    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+    <div class="search-row">
       <button class="btn btn-search-exec" onclick="doSearch()">検索</button>
       <button class="btn" onclick="findPrev()">▲ 前へ</button>
       <button class="btn" onclick="findNext()">▼ 次へ</button>
       <button class="btn btn-search-reset" onclick="resetSearchPanel()">リセット</button>
       <span id="search-match-info" style="font-size:0.85rem; color:var(--text-muted);">0 / 0</span>
     </div>
-    <div style="display:flex; gap:6px; align-items:center; padding-top:6px; border-top:1px solid var(--border-color);">
+    <div class="search-row" style="padding-top:6px; border-top:1px solid var(--border-color); width:100%;">
       <input type="text" id="replace-input" placeholder="置換後..." style="flex:1; min-width:100px; padding:6px 10px; border:1px solid var(--border-color); border-radius:6px; background:var(--panel-bg); color:var(--text-color);">
       <button class="btn" onclick="replaceOne()">置換</button>
       <button class="btn" onclick="replaceAll()">全置換</button>
     </div>
+  </div>
+  <div class="panel-body search-panel-body">
     <div id="search-hits" style="flex:1; overflow:auto; border:1px solid var(--border-color); border-radius:6px; padding:6px; min-height:100px; background:var(--bg-color);"></div>
   </div>
 </div>
@@ -4416,15 +4451,16 @@ window.__ccInitPanelDnDAndResizers = function(){
 
 
 
-    <div class="panel-toolbar" style="background: var(--bg-color); padding: 4px 4px 0 4px; border-bottom: 1px solid var(--border-color);">
+    <div class="panel-toolbar memo-toolbar">
         <div class="tabs-scroll-wrap memo-tabs-wrap" id="memo-tabs-wrap">
             <button class="tab-scroll-btn left" type="button" aria-label="メモタブを左へ" data-target="memo-tabs-container">◀</button>
             <div id="memo-tabs-container" class="memo-tabs"></div>
             <button class="tab-scroll-btn right" type="button" aria-label="メモタブを右へ" data-target="memo-tabs-container">▶</button>
         </div>
     </div>
-
-    <textarea id="memo-area" placeholder="ここに入力..." oninput="updateMemoCharCount(); saveMemoTabs()" style="flex: 1; width: 100%; resize: none; border: none; padding: 8px; font-family: inherit; box-sizing: border-box; outline: none;"></textarea>
+    <div class="panel-body memo-body">
+      <textarea id="memo-area" placeholder="ここに入力..." oninput="updateMemoCharCount(); saveMemoTabs()" style="flex: 1; width: 100%; resize: none; border: none; padding: 8px; font-family: inherit; box-sizing: border-box; outline: none;"></textarea>
+    </div>
     
     <div class="memo-footer" style="padding: 2px 8px; font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border-color); display:flex; justify-content:space-between;">
         <span id="memo-char-count">0字</span>
@@ -4553,7 +4589,7 @@ window.__ccInitPanelDnDAndResizers = function(){
                 <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="outline">✕</button>
             </div>
         </div>
-        <div class="panel-toolbar" style="display:flex; padding:4px 8px; background:var(--pane-outline-head, var(--pane-header-bg)); border-bottom:1px solid var(--border-color); gap:4px; align-items:center;">
+        <div class="panel-toolbar outline-toolbar">
             <div class="nav-jump-controls" title="ジャンプ履歴"><button id="btn-nav-back" class="nav-jump-btn" type="button" aria-label="戻る">◀</button><button id="btn-nav-forward" class="nav-jump-btn" type="button" aria-label="進む">▶</button></div><div class="outline-tabs-inner" style="display:flex; gap:2px; flex:1;">
                 <span class="memo-tab active" onclick="switchOutlineTab('outline')" style="cursor:pointer;">目次</span>
                 <span class="memo-tab" onclick="switchOutlineTab('bookmark')" style="cursor:pointer;">🔖しおり</span>
@@ -6321,90 +6357,6 @@ function addNewTab() {
             htmlContent = previewContent.innerHTML;
         }
         return `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>${escapeHtml(getNovelBaseName())}</title><link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&display=swap" rel="stylesheet"><style>body{margin:40px;background:#fdfcf0;font-family:${fontMap[fk]};font-size:${fs}px;line-height:${lh};${v?'writing-mode:vertical-rl;min-height:100vh;':''}}ruby{ruby-align:space-between;}rt{font-size:0.5em;color:#555;}.bouten-ruby rt{font-size:0.8em;font-weight:bold;}.underline-text{text-decoration:underline;text-decoration-color:#dc2626;}.highlight-text{background:linear-gradient(transparent 60%,#fef08a 60%);}</style>
-<style id="panelui-module-css">
-/* === PanelUI module: unified header/toolbar/body metrics === */
-:root{
-  --panel-header-min-h: 44px;
-  --panel-header-pad-y: 8px;
-  --panel-header-pad-x: 10px;
-  --panel-header-gap: 8px;
-  --panel-title-font: 18px;
-  --panel-toolbar-gap-bottom: 10px; /* gap between toolbar and body */
-  --panel-body-pad-top: 10px;      /* gap between toolbar and first content */
-}
-
-/* Ensure all headers share same metrics */
-.pane .panel-header{
-  min-height: var(--panel-header-min-h) !important;
-  padding: var(--panel-header-pad-y) var(--panel-header-pad-x) !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:space-between !important;
-  gap: var(--panel-header-gap) !important;
-  box-sizing:border-box !important;
-}
-.pane .panel-title{
-  display:flex !important;
-  align-items:center !important;
-  gap: 8px !important;
-  min-width:0 !important;
-}
-.pane .panel-title-text{
-  font-size: var(--panel-title-font) !important;
-  line-height: 1.2 !important;
-  font-weight: 700 !important;
-  white-space: nowrap !important;
-  overflow:hidden !important;
-  text-overflow: ellipsis !important;
-}
-.pane .panel-controls{
-  display:flex !important;
-  align-items:center !important;
-  gap: 8px !important;
-  flex:0 0 auto !important;
-}
-
-/* Toolbar spacing */
-.pane .panel-toolbar{
-  margin-top: 8px !important;
-  margin-bottom: var(--panel-toolbar-gap-bottom) !important;
-}
-/* Body top gap */
-.pane .panel-body{
-  padding-top: var(--panel-body-pad-top) !important;
-  box-sizing:border-box !important;
-}
-
-/* Memo / Outline: keep their internal controls, but unify outer spacing */
-.pane[data-pane="memo"] .panel-body,
-.pane[data-pane="outline"] .panel-body{
-  padding-top: var(--panel-body-pad-top) !important;
-}
-
-/* Color picker popup */
-#panelui-colorpicker{
-  position:fixed;
-  z-index:10050;
-  background: var(--panel-bg, #fff);
-  border:1px solid var(--border-color, #d0d7de);
-  border-radius:10px;
-  box-shadow:0 8px 24px rgba(0,0,0,.18);
-  padding:12px;
-  min-width: 260px;
-  display:none;
-}
-#panelui-colorpicker .panelui-row{ display:flex; align-items:center; gap:10px; }
-#panelui-colorpicker .panelui-title{ font-weight:700; }
-#panelui-colorpicker .panelui-close{
-  background:none; border:none; cursor:pointer; font-size:16px; color:var(--text-muted,#666);
-}
-#panelui-colorpicker .panelui-presets{ display:flex; gap:6px; flex-wrap:wrap; margin:10px 0 0; }
-#panelui-colorpicker .panelui-swatch{
-  width:18px; height:18px; border-radius:5px; border:1px solid rgba(0,0,0,.15); cursor:pointer;
-}
-#panelui-colorpicker .panelui-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
-</style>
-
 </head><body>${htmlContent}
 
 </body></html>`;
@@ -8714,94 +8666,6 @@ if (typeof adjustPaneHeightsOnVisibility === 'function') {
     }
     window.__ccCloseOtherFloatingPanels = __ccCloseOtherFloatingPanels;
     window.__ccSetActiveFloatingPanel = __ccSetActiveFloatingPanel;
-    const PANEL_BG_CONFIG = {
-      structure: { panelId: 'structure-panel', storageKey: 'cc_panel_bg_structure' },
-      character: { panelId: 'character-panel', storageKey: 'cc_panel_bg_character' },
-      world: { panelId: 'world-panel', storageKey: 'cc_panel_bg_world' },
-      terms: { panelId: 'terms-panel', storageKey: 'cc_panel_bg_terms' },
-      memo: { panelId: 'memo-panel', storageKey: 'cc_panel_bg_memo' },
-      outline: { panelId: 'outline-panel', storageKey: 'cc_panel_bg_outline' }
-    };
-    function normalizeColorToHex(color) {
-      if (!color) return '#ffffff';
-      if (color.startsWith('#')) return color;
-      const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-      if (!match) return '#ffffff';
-      const toHex = (value) => {
-        const hex = Number(value).toString(16);
-        return hex.length === 1 ? `0${hex}` : hex;
-      };
-      return `#${toHex(match[1])}${toHex(match[2])}${toHex(match[3])}`;
-    }
-    function applyPanelBackground(panelType, color) {
-      const config = PANEL_BG_CONFIG[panelType];
-      if (!config) return;
-      const panel = document.getElementById(config.panelId);
-      if (!panel) return;
-      panel.style.background = color;
-      localStorage.setItem(config.storageKey, color);
-    }
-    function loadPanelBackground(panelType) {
-      const config = PANEL_BG_CONFIG[panelType];
-      if (!config) return;
-      const panel = document.getElementById(config.panelId);
-      if (!panel) return;
-      const saved = localStorage.getItem(config.storageKey);
-      if (saved) panel.style.background = saved;
-    }
-    function openPanelBackgroundColorPicker(panelType) {
-      const config = PANEL_BG_CONFIG[panelType];
-      if (!config) return;
-      const panel = document.getElementById(config.panelId);
-      if (!panel) return;
-      let picker = document.getElementById('panel-bg-color-popup');
-      if (!picker) {
-        picker = document.createElement('div');
-        picker.id = 'panel-bg-color-popup';
-        picker.style.cssText = 'position:fixed; background:var(--panel-bg); border:1px solid var(--border-color); border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:10001; padding:12px; min-width:220px;';
-        document.body.appendChild(picker);
-      }
-      const current = normalizeColorToHex(panel.style.backgroundColor || getComputedStyle(panel).backgroundColor);
-      picker.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-weight:bold;">背景色</span>
-          <button class="panel-bg-picker-close" style="background:none; border:none; cursor:pointer; font-size:1rem; color:var(--text-muted);">✕</button>
-        </div>
-        <div style="display:flex; gap:8px; align-items:center; margin-bottom:12px;">
-          <input type="color" id="panel-bg-color-input" value="#ffffff" style="width:50px; height:30px; border:1px solid var(--border-color); border-radius:4px; cursor:pointer;">
-          <input type="text" id="panel-bg-color-text" value="#ffffff" style="width:90px; padding:4px; border:1px solid var(--border-color); border-radius:4px;">
-        </div>
-        <div style="display:flex; gap:8px; justify-content:flex-end;">
-          <button class="btn" id="panel-bg-cancel">キャンセル</button>
-          <button class="btn btn-save" id="panel-bg-apply">適用</button>
-        </div>
-      `;
-      picker.style.left = '50%';
-      picker.style.top = '50%';
-      picker.style.transform = 'translate(-50%, -50%)';
-      picker.style.display = 'block';
-
-      const input = picker.querySelector('#panel-bg-color-input');
-      const textInput = picker.querySelector('#panel-bg-color-text');
-      if (input && textInput) {
-        input.addEventListener('input', () => { textInput.value = input.value; });
-        textInput.addEventListener('input', () => { if (textInput.value.startsWith('#')) input.value = textInput.value; });
-      }
-      picker.querySelector('#panel-bg-apply')?.addEventListener('click', () => {
-        const value = textInput?.value || current;
-        applyPanelBackground(panelType, value);
-        picker.style.display = 'none';
-      });
-      picker.querySelector('#panel-bg-cancel')?.addEventListener('click', () => {
-        picker.style.display = 'none';
-      });
-      picker.querySelector('.panel-bg-picker-close')?.addEventListener('click', () => {
-        picker.style.display = 'none';
-      });
-    }
-    window.applyPanelBackground = applyPanelBackground;
-    window.loadPanelBackground = loadPanelBackground;
-    window.openPanelBackgroundColorPicker = openPanelBackgroundColorPicker;
     function doSearch() { const q = document.getElementById('search-input').value, t = inputArea.value; searchMatches = []; currentMatchIndex = -1; if (!q) { updateSearchInfo(); return; } const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), rx = new RegExp(esc, 'g'); let m; while ((m = rx.exec(t)) !== null) searchMatches.push({ start: m.index, end: m.index + m[0].length }); if (searchMatches.length > 0) { currentMatchIndex = 0; jumpToMatch(); } updateSearchInfo(); }
     function updateSearchInfo() { const i = document.getElementById('search-match-info'); if (searchMatches.length === 0) { i.innerText = '0 / 0'; i.style.color = '#999'; } else { i.innerText = `${currentMatchIndex + 1} / ${searchMatches.length}`; i.style.color = '#15803d'; } }
     function findNext() { if (searchMatches.length === 0) doSearch(); else { currentMatchIndex = (currentMatchIndex + 1) % searchMatches.length; jumpToMatch(); updateSearchInfo(); } }
@@ -11114,6 +10978,7 @@ function setupMemoInteractionGuard() {
     preview: { bg: null, head: null },
     memo: { bg: null, head: null },
     outline: { bg: null, head: null },
+    search: { bg: null, head: null },
     structure: { bg: null, head: null },
     character: { bg: null, head: null },
     world: { bg: null, head: null },
@@ -11132,6 +10997,7 @@ function setupMemoInteractionGuard() {
       preview: { bg: previewBg, head: headerBg },
       memo: { bg: panelBg, head: headerBg },
       outline: { bg: panelBg, head: headerBg },
+      search: { bg: panelBg, head: headerBg },
       structure: { bg: panelBg, head: headerBg },
       character: { bg: '#fce7f3', head: '#fce7f3' },
       world: { bg: '#ecfdf5', head: '#d1fae5' },
@@ -11143,7 +11009,7 @@ function setupMemoInteractionGuard() {
     const saved = lsGet(PANE_COLOR_KEY, null);
     if (!saved) return null;
     const out = JSON.parse(JSON.stringify(DEFAULT_PANE_COLORS));
-    for (const k of ['input','preview','memo','outline','structure','character','world','terms']){
+    for (const k of ['input','preview','memo','outline','search','structure','character','world','terms']){
       if (saved[k]){
         out[k].bg = saved[k].bg || null;
         out[k].head = saved[k].head || null;
@@ -11172,6 +11038,7 @@ function paneIdToPaneKey(paneId){
       'pane-preview': 'preview',
       'memo-panel': 'memo',
       'outline-panel': 'outline',
+      'search-panel': 'search',
       'structure-panel': 'structure',
       'character-panel': 'character',
       'world-panel': 'world',
@@ -11266,6 +11133,7 @@ function applyPaneColors(colors){
       preview: ['--pane-preview-bg','--pane-preview-head'],
       memo: ['--pane-memo-bg','--pane-memo-head'],
       outline: ['--pane-outline-bg','--pane-outline-head'],
+      search: ['--pane-search-bg','--pane-search-head'],
       structure: ['--pane-structure-bg','--pane-structure-head'],
       character: ['--pane-character-bg','--pane-character-head'],
       world: ['--pane-world-bg','--pane-world-head'],
@@ -11304,6 +11172,10 @@ function applyPaneColors(colors){
 #outline-panel { background: var(--pane-outline-bg, var(--panel-bg)); }
 #outline-panel .panel-header,
 #outline-panel .panel-toolbar { background: var(--pane-outline-head, var(--pane-header-bg)); }
+
+#search-panel { background: var(--pane-search-bg, var(--panel-bg)); }
+#search-panel .panel-header,
+#search-panel .panel-toolbar { background: var(--pane-search-head, var(--pane-header-bg)); }
 
 #structure-panel { background: var(--pane-structure-bg, #f0f4ff); }
 #structure-panel .panel-header,
@@ -14152,7 +14024,6 @@ function showPresetPanelColorPicker(paneId){
     renderStructureList();
     setupStructureEventListeners();
     setupStructurePanelContextMenu();
-    if (window.loadPanelBackground) window.loadPanelBackground('structure');
   }
 
   // ========== データ管理 ==========
@@ -14923,8 +14794,8 @@ function showPresetPanelColorPicker(paneId){
         ev.stopPropagation();
         const action = item.dataset.action;
         if (action === 'new-card') createStructureCardFromSelection();
-        if (action === 'bg-color' && window.openPanelBackgroundColorPicker) {
-          window.openPanelBackgroundColorPicker('structure');
+        if (action === 'bg-color') {
+          showBgColorPicker('structure-panel');
         }
         hideStructureContextMenu();
       };
@@ -16223,7 +16094,6 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     renderCharacterList();
     setupCharacterFullscreenListener();
     setupCharacterPanelContextMenu();
-    if (window.loadPanelBackground) window.loadPanelBackground('character');
   }
 
   function loadCharacterData() {
@@ -16822,8 +16692,8 @@ if (termContainer) {
         ev.stopPropagation();
         const action = item.dataset.action;
         if (action === 'new-card') createCharacterCardFromSelection();
-        if (action === 'bg-color' && window.openPanelBackgroundColorPicker) {
-          window.openPanelBackgroundColorPicker('character');
+        if (action === 'bg-color') {
+          showBgColorPicker('character-panel');
         }
         hideCharacterContextMenu();
       };
@@ -17594,7 +17464,6 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     renderWorldList();
     setupWorldFullscreenListener();
     setupWorldPanelContextMenu();
-    if (window.loadPanelBackground) window.loadPanelBackground('world');
   }
 
   function loadWorldData() {
@@ -18225,8 +18094,8 @@ if (termContainer) {
         ev.stopPropagation();
         const action = item.dataset.action;
         if (action === 'new-card') createWorldCardFromSelection();
-        if (action === 'bg-color' && window.openPanelBackgroundColorPicker) {
-          window.openPanelBackgroundColorPicker('world');
+        if (action === 'bg-color') {
+          showBgColorPicker('world-panel');
         }
         hideWorldContextMenu();
       };
@@ -19632,7 +19501,6 @@ loadTermsData();
   function initTermsPanel(){
     loadTermsData();
     renderTermsList();
-    if (window.loadPanelBackground) window.loadPanelBackground('terms');
   }
 
   // init on DOM ready
@@ -20838,81 +20706,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </script>
 
-<script>
-/* v9 hotfix: bulk card color apply must not depend on scoped load/save functions */
-(function(){
-  function storeKeyForPane(paneId){
-    switch(paneId){
-      case 'structure-panel': return 'cc_structure_data';
-      case 'character-panel': return 'cc_character_data';
-      case 'world-panel': return 'cc_world_data';
-      case 'terms-panel': return 'cc_terms_data';
-      default: return null;
-    }
-  }
-  function refreshPane(paneId){
-    try{
-      if(paneId==='structure-panel' && typeof window.refreshStructurePanel==='function') return window.refreshStructurePanel();
-      if(paneId==='character-panel' && typeof window.refreshCharacterPanel==='function') return window.refreshCharacterPanel();
-      if(paneId==='world-panel' && typeof window.refreshWorldPanel==='function') return window.refreshWorldPanel();
-      if(paneId==='terms-panel' && typeof window.refreshTermsPanel==='function') return window.refreshTermsPanel();
-    }catch(e){}
-  }
-  function inMemoryArrayForPane(paneId){
-    try{
-      if(paneId==='structure-panel' && typeof window.getStructureData==='function') return window.getStructureData();
-      if(paneId==='character-panel' && typeof window.getCharacterData==='function') return window.getCharacterData();
-      if(paneId==='world-panel' && typeof window.getWorldData==='function') return window.getWorldData();
-      if(paneId==='terms-panel' && typeof window.getTermsData==='function') return window.getTermsData();
-    }catch(e){}
-    return null;
-  }
-
-  function bulkSetCardsBgColor(paneId, color){
-    const c = (color || '').trim();
-    if(!c) return;
-    const v = (c.toLowerCase()==='#ffffff') ? '' : c;
-
-    // update in-memory (if available)
-    const arr = inMemoryArrayForPane(paneId);
-    if (Array.isArray(arr)) {
-      arr.forEach(it => { try { it.bgColor = v; } catch(e){} });
-    }
-
-    // update storage (best effort)
-    const key = storeKeyForPane(paneId);
-    if(key){
-      try{
-        const raw = localStorage.getItem(key);
-        if(raw){
-          const parsed = JSON.parse(raw);
-          if(Array.isArray(parsed.data)){
-            parsed.data = parsed.data.map(it => ({...it, bgColor: v}));
-            localStorage.setItem(key, JSON.stringify(parsed));
-          }
-        }
-      }catch(e){}
-    }
-
-    refreshPane(paneId);
-  }
-
-  function bulkResetCardsBgColor(paneId){
-    bulkSetCardsBgColor(paneId, '#ffffff');
-  }
-
-  window.__ccPaneColor = window.__ccPaneColor || {};
-  window.__ccPaneColor.bulkSetCardsBgColor = bulkSetCardsBgColor;
-  window.__ccPaneColor.bulkResetCardsBgColor = bulkResetCardsBgColor;
-})();
-</script>
-
-
 <script id="panelui-module-js">
 (function(){
   // === PanelUI module ===
   const PanelUI = {};
-  const ROOT = document.documentElement;
 
   // --- Panel Registry: single source of truth for pane capabilities & hooks ---
   // Keys are paneId (DOM id). Each entry wires load/render/save and common actions.
@@ -20989,11 +20786,40 @@ document.addEventListener('DOMContentLoaded', () => {
         render: () => window.renderTermsList?.(),
       }
     },
-    // memo / outline keep their own toolbar UI (tabs etc).
+    'memo-panel': {
+      key: 'memo',
+      supportsCards: false,
+      data: {
+        get: () => { try{ window.loadMemoTabs?.(); }catch(e){} return window.memoTabs || []; },
+        save: () => window.saveMemoTabs?.(),
+        render: () => window.renderMemoTabs?.(),
+      }
+    },
+    'outline-panel': {
+      key: 'outline',
+      supportsCards: false,
+      actions: {
+        refresh: () => window.generateOutline?.(),
+      },
+      data: {
+        get: () => [],
+        render: () => window.renderOutline?.(),
+      }
+    },
+    'search-panel': {
+      key: 'search',
+      supportsCards: false,
+    },
   };
+  window.PanelRegistry = PanelRegistry;
 
   function getPaneConf(paneId){
     return PanelRegistry[paneId] || null;
+  }
+
+  function paneSupportsCards(paneId){
+    const conf = getPaneConf(paneId);
+    return !!conf?.supportsCards;
   }
 
   // --- Toolbar generation (removes hand-written buttons from HTML) ---
@@ -21058,258 +20884,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if(!conf) return;
 
     const action = btn.dataset.action;
-const fn = toolbarActionToFn(conf, action);
+    const fn = toolbarActionToFn(conf, action);
     if(typeof fn === 'function'){
       try { fn(); } catch(e){ console.error(e); }
     }
   }
-
-
-  const PRESETS = (window.colorPresets || window.__ccColorPresets || [
-    '#ffffff','#fff7ed','#fef9c3','#e0f2fe','#dcfce7','#fce7f3','#ede9fe','#e2e8f0','#111827'
-  ]).slice(0, 12);
-
-  function paneIdToKey(paneId){
-    const conf = getPaneConf(paneId);
-    if(conf?.key) return conf.key;
-    if(paneId==='memo-panel') return 'memo';
-    if(paneId==='outline-panel') return 'outline';
-    return '';
-  }
-
-  function keyToVar(key, kind){
-    // kind: 'head' | 'bg'
-    const prefix = '--pane-';
-    return prefix + key + '-' + (kind==='head' ? 'head' : 'bg');
-  }
-
-  function getContextAnchor(){
-    const ctx = document.querySelector('.context-menu.show, .context-menu.visible');
-    if(!ctx) return {x: 20, y: 20};
-    const r = ctx.getBoundingClientRect();
-    return {x: r.right, y: r.top};
-  }
-
-  function ensurePicker(){
-    let el = document.getElementById('panelui-colorpicker');
-    if(el) return el;
-    el = document.createElement('div');
-    el.id = 'panelui-colorpicker';
-    document.body.appendChild(el);
-    el.addEventListener('click', (e)=>e.stopPropagation());
-    document.addEventListener('click', ()=>{ hidePicker(); }, {capture:true});
-    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') hidePicker(); });
-    return el;
-  }
-
-  function hidePicker(){
-    const el = document.getElementById('panelui-colorpicker');
-    if(el) el.style.display = 'none';
-  }
-
-  function openPicker(opts){
-    const {title, initial, onApply, onReset} = opts || {};
-    const picker = ensurePicker();
-    const safeInitial = (initial && String(initial).trim()) ? String(initial).trim() : '#ffffff';
-
-    const swatches = PRESETS.map(c=>(
-      '<div class="panelui-swatch" data-color="'+c+'" style="background:'+c+'"></div>'
-    )).join('');
-
-    picker.innerHTML =
-      '<div class="panelui-row" style="justify-content:space-between; margin-bottom:8px;">' +
-        '<span class="panelui-title">'+(title||'色の変更')+'</span>' +
-        '<button class="panelui-close" type="button">✕</button>' +
-      '</div>' +
-      '<div class="panelui-row">' +
-        '<input type="color" id="panelui-color-input" value="'+safeInitial+'" style="width:46px;height:32px;">' +
-        '<input type="text" id="panelui-color-text" value="'+safeInitial+'" style="flex:1; padding:8px 10px; border:1px solid rgba(0,0,0,.15); border-radius:8px;">' +
-      '</div>' +
-      '<div class="panelui-presets">'+swatches+'</div>' +
-      '<div class="panelui-actions">' +
-        (onReset ? '<button class="btn" id="panelui-reset-btn" type="button">リセット</button>' : '') +
-        '<button class="btn btn-update" id="panelui-apply-btn" type="button">適用</button>' +
-      '</div>';
-
-    const anchor = getContextAnchor();
-    picker.style.left = (anchor.x + 8) + 'px';
-    picker.style.top  = (anchor.y + 8) + 'px';
-    picker.style.display = 'block';
-
-    const colorInput = picker.querySelector('#panelui-color-input');
-    const textInput  = picker.querySelector('#panelui-color-text');
-    const applyBtn   = picker.querySelector('#panelui-apply-btn');
-    const closeBtn   = picker.querySelector('.panelui-close');
-    const resetBtn   = picker.querySelector('#panelui-reset-btn');
-
-    function setVal(v){
-      const val = (v||'').trim();
-      if(!val) return;
-      colorInput.value = val;
-      textInput.value = val;
-    }
-
-    picker.querySelectorAll('.panelui-swatch').forEach(sw=>{
-      sw.addEventListener('click', ()=> setVal(sw.dataset.color));
-    });
-
-    textInput.addEventListener('input', ()=> {
-      const v = textInput.value.trim();
-      if(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)) colorInput.value = v;
-    });
-    colorInput.addEventListener('input', ()=> { textInput.value = colorInput.value; });
-
-    applyBtn.onclick = ()=>{
-      try{
-        const v = textInput.value.trim();
-        if(onApply) onApply(v);
-      } finally {
-        hidePicker();
-      }
-    };
-    closeBtn.onclick = ()=> hidePicker();
-    if(resetBtn){
-      resetBtn.onclick = ()=>{
-        try{ if(onReset) onReset(); } finally { hidePicker(); }
-      };
-    }
-  }
-
-  // === Apply pane header/bg colors (CSS vars on :root) ===
-  function applyPaneColor(paneId, kind, color){
-    const key = paneIdToKey(paneId);
-    if(!key) return;
-    const varName = keyToVar(key, kind);
-    const v = (color||'').trim();
-    // allow empty => reset to default by clearing var
-    if(!v){
-      ROOT.style.removeProperty(varName);
-    }else{
-      ROOT.style.setProperty(varName, v);
-    }
-    // persist (use existing settings if available)
-    try{
-      const storeKey = 'PANE_COLORS';
-      const raw = localStorage.getItem(storeKey);
-      const obj = raw ? JSON.parse(raw) : {};
-      if(!obj[key]) obj[key] = {};
-      obj[key][kind] = v;
-      localStorage.setItem(storeKey, JSON.stringify(obj));
-    }catch(_e){}
-  }
-
-  function restorePaneColors(){
-    try{
-      const storeKey = 'PANE_COLORS';
-      const raw = localStorage.getItem(storeKey);
-      if(!raw) return;
-      const obj = JSON.parse(raw);
-      Object.keys(obj||{}).forEach(key=>{
-        const m = obj[key]||{};
-        if(typeof m.head === 'string') applyPaneColor(key+'-panel','head', m.head);
-        if(typeof m.bg === 'string') applyPaneColor(key+'-panel','bg', m.bg);
-      });
-    }catch(_e){}
-  }
-
-  // === Bulk card bg color ===
-  function getPaneDataById(paneId){
-    const conf = getPaneConf(paneId);
-    return conf?.data?.get ? conf.data.get() : [];
-  }
-  function savePaneDataById(paneId){
-    if(paneId==='structure-panel' && typeof window.saveStructureData==='function') window.saveStructureData();
-    else if(paneId==='character-panel' && typeof window.saveCharacterData==='function') window.saveCharacterData();
-    else if(paneId==='world-panel' && typeof window.saveWorldData==='function') window.saveWorldData();
-    else if(paneId==='terms-panel' && typeof window.saveTermsData==='function') window.saveTermsData();
-  }
-  function renderPaneListById(paneId){
-    const conf = getPaneConf(paneId);
-    if(conf?.data?.render) conf.data.render();
-  }
-
-  function bulkSetCardsBgColor(paneId, color){
-    const data = getPaneDataById(paneId);
-    if(!Array.isArray(data)) return;
-    const v = (color||'').trim();
-    data.forEach(it=>{
-      if(it && typeof it==='object') it.bgColor = v;
-    });
-    savePaneDataById(paneId);
-    renderPaneListById(paneId);
-  }
-
-  function bulkResetCardsBgColor(paneId){
-    bulkSetCardsBgColor(paneId, '');
-  }
-
-  // === Exposed wrappers for existing context menus ===
-  PanelUI.showHeaderColorPicker = function(paneId){
-    const key = paneIdToKey(paneId);
-    const varName = keyToVar(key,'head');
-    const initial = getComputedStyle(ROOT).getPropertyValue(varName).trim() || '#ffffff';
-    openPicker({
-      title: 'ヘッダーカラー',
-      initial,
-      onApply: (v)=>applyPaneColor(paneId,'head',v),
-      onReset: ()=>applyPaneColor(paneId,'head','')
-    });
-  };
-
-  PanelUI.showBgColorPicker = function(paneId){
-    const key = paneIdToKey(paneId);
-    const varName = keyToVar(key,'bg');
-    const initial = getComputedStyle(ROOT).getPropertyValue(varName).trim() || '#ffffff';
-    openPicker({
-      title: '背景色',
-      initial,
-      onApply: (v)=>applyPaneColor(paneId,'bg',v),
-      onReset: ()=>applyPaneColor(paneId,'bg','')
-    });
-  };
-
-  PanelUI.showBulkCardColorPicker = function(paneId){
-    // bulk card background color
-    openPicker({
-      title: 'カード色（背景）を一括変更',
-      initial: '#ffffff',
-      onApply: (v)=>bulkSetCardsBgColor(paneId, v),
-      onReset: ()=>bulkResetCardsBgColor(paneId)
-    });
-  };
-
-  // Make sure old callers resolve to new module
-  window.showHeaderColorPicker = PanelUI.showHeaderColorPicker;
-  window.showBgColorPicker = PanelUI.showBgColorPicker;
-  window.showBulkCardColorPicker = PanelUI.showBulkCardColorPicker;
-  window.bulkSetCardsBgColor = bulkSetCardsBgColor;
-
-    window.bulkResetCardsBgColor = bulkResetCardsBgColor;
-// Restore persisted pane colors on load
   document.addEventListener('DOMContentLoaded', ()=>{
-    restorePaneColors();
     generateToolbars();
     document.addEventListener('click', handleToolbarClick);
-  // Titlebar buttons (e.g., ×) are not inside .panel-toolbar, so we handle them here.
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.panel-titlebar button[data-action]');
-    if (!btn) return;
-    const paneEl = btn.closest('.control-panel');
-    if (!paneEl) return;
-    const action = btn.dataset.action;
-    const paneId = btn.dataset.paneId || paneEl.id;
-    if (!paneId) return;
-
-    if (action === 'close-panel') {
-      e.preventDefault();
-      e.stopPropagation();
-      try { closeControlPanel(paneId); } catch (err) { console.error(err); }
-    }
   });
-
-  });
-
-  // Expose for debugging
   
   // Open header context menu from toolbar button (left click)
   PanelUI.showPaneMenu = function(ev, paneId){
@@ -21324,7 +20907,7 @@ const fn = toolbarActionToFn(conf, action);
       document.body.appendChild(menu);
     }
 
-    const supportsCards = /^(structure|character|world|terms)-panel$/.test(pid);
+    const supportsCards = paneSupportsCards(pid);
 
     const addItem = (label, icon, onClick) => {
       const item = document.createElement('div');
@@ -21338,14 +20921,14 @@ const fn = toolbarActionToFn(conf, action);
     const onDocDown = (e)=>{ if (!menu.contains(e.target)) hide(); };
 
     menu.innerHTML = '';
-    addItem('ヘッダーカラーの変更', '🎨', ()=>PanelUI.showHeaderColorPicker(pid));
-    addItem('背景色の変更', '🖼', ()=>PanelUI.showBgColorPicker(pid));
-    addItem('ヘッダーカラーをリセット', '↩', ()=>PanelUI.applyPaneColor(pid,'head',''));
-    addItem('背景色をリセット', '↩', ()=>PanelUI.applyPaneColor(pid,'bg',''));
+    addItem('ヘッダーカラーの変更', '🎨', ()=>window.showHeaderColorPicker?.(pid));
+    addItem('背景色の変更', '🖼', ()=>window.showBgColorPicker?.(pid));
+    addItem('ヘッダーカラーをリセット', '↩', ()=>window.resetPaneColorValue?.(pid,'head'));
+    addItem('背景色をリセット', '↩', ()=>window.resetPaneColorValue?.(pid,'bg'));
 
     if (supportsCards){
-      addItem('カード色を一括変更', '🧤', ()=>PanelUI.showBulkCardColorPicker(pid));
-      addItem('カード色を一括リセット', '🧤', ()=>PanelUI.bulkResetCardsBgColor(pid));
+      addItem('カード色を一括変更', '🧤', ()=>window.showBulkCardColorPicker?.(pid));
+      addItem('カード色を一括リセット', '🧤', ()=>window.bulkResetCardsBgColor?.(pid));
     }
 
     // Position menu
@@ -21402,69 +20985,5 @@ const fn = toolbarActionToFn(conf, action);
 window.PanelUI = PanelUI;
 })();
 </script>
-
-
-
-
-
-<script>
-/* v26: registry-backed bulk card color + robust pane adapters */
-(function(){
-  return; // DISABLED: v28 uses PanelRegistry-based bulk API
-  function getPaneAdapters(paneId){
-    switch(paneId){
-      case 'characterPanel': return {get:()=>window.characterData, save:()=>window.saveCharacterData&&window.saveCharacterData(), render:()=>window.renderCharactersList&&window.renderCharactersList()};
-      case 'worldPanel': return {get:()=>window.worldData, save:()=>window.saveWorldData&&window.saveWorldData(), render:()=>window.renderWorldList&&window.renderWorldList()};
-      case 'structurePanel': return {get:()=>window.structureData, save:()=>window.saveStructureData&&window.saveStructureData(), render:()=>window.renderStructureList&&window.renderStructureList()};
-      case 'termsPanel': return {get:()=>window.termsData, save:()=>window.saveTermsData&&window.saveTermsData(), render:()=>window.renderTermsList&&window.renderTermsList()};
-      default: return null;
-    }
-  }
-
-  window.bulkSetCardsBgColor = function(paneId, color){
-    const ad = getPaneAdapters(paneId);
-    if(!ad) return;
-    const data = ad.get();
-    if(!Array.isArray(data)) return;
-    data.forEach(c=>{
-      if(c && typeof c === 'object'){
-        c.bgColor = color;
-      }
-    });
-    try{ ad.save(); }catch(e){ console.warn('bulkSetCardsBgColor save failed', e); }
-    try{ ad.render(); }catch(e){ console.warn('bulkSetCardsBgColor render failed', e); }
-  };
-
-  window.bulkResetCardsBgColor = function(paneId){
-    const ad = getPaneAdapters(paneId);
-    if(!ad) return;
-    const data = ad.get();
-    if(!Array.isArray(data)) return;
-    data.forEach(c=>{
-      if(c && typeof c === 'object'){
-        delete c.bgColor;
-      }
-    });
-    try{ ad.save(); }catch(e){ console.warn('bulkResetCardsBgColor save failed', e); }
-    try{ ad.render(); }catch(e){ console.warn('bulkResetCardsBgColor render failed', e); }
-  };
-
-  // Ensure close buttons work reliably.
-  document.addEventListener('click', function(ev){
-    const btn = ev.target.closest('[data-action]');
-    if(!btn) return;
-    if(btn.getAttribute('data-action') !== 'close-panel') return;
-    const panel = btn.closest('.control-panel');
-    if(!panel) return;
-    const paneId = panel.id;
-    if(typeof window.closeControlPanel === 'function'){
-      window.closeControlPanel(paneId);
-      ev.preventDefault();
-      ev.stopPropagation();
-    }
-  }, true);
-})();
-</script>
-
 </body>
 </html>
