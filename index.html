@@ -508,6 +508,43 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
     .header-file-dropdown-content .dropdown-item:hover {
         background: var(--pane-header-bg);
     }
+    /* Panel move dropdown */
+    .panel-move-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    .panel-move-dropdown-content {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        min-width: 180px;
+        background: var(--panel-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        padding: 4px 0;
+    }
+    .panel-move-dropdown.open .panel-move-dropdown-content {
+        display: block;
+    }
+    .panel-move-dropdown-content .dropdown-item {
+        padding: 6px 12px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+    .panel-move-dropdown-content .dropdown-item:hover {
+        background: var(--pane-header-bg);
+    }
+    .panel-move-dropdown-content .dropdown-item .move-direction {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+    }
     .btn-reset-input {
         background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;
         font-weight: bold; padding: 4px 8px;
@@ -1552,15 +1589,43 @@ color: white; padding: 20px 40px; border-radius: 16px;
       user-select: none;
     }
 
+    /* Hide expand toggle icons - user requested removal */
+    .card-toggle, .card-expand-toggle, .structure-expand-toggle {
+      display: none !important;
+    }
+
     .card-title{
-      flex: 1 1 auto;
+      flex: 0 1 auto;
       min-width: 0;
+      max-width: 6em;
       font-weight: 600;
       color: var(--text-color);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
+    }
+
+    /* Card badges: shrink to min 1 char when space is limited */
+    .card-badge, .character-role-badge, .world-level-badge {
+      flex: 0 1 auto;
+      min-width: 1.5em;
+      max-width: 6em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Card header layout: name priority */
+    .card-head-left {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .card-head-right {
+      flex: 0 1 auto;
+      min-width: 0;
+      overflow: hidden;
     }
 
 
@@ -1644,14 +1709,11 @@ color: white; padding: 20px 40px; border-radius: 16px;
         font-size: 0.8rem;
         overflow-x: hidden;
     }
+    .terms-card.expanded .terms-card-body,
     .terms-card.expand-1 .terms-card-body,
-    .terms-card.expand-2 .terms-card-body,
-    .terms-card.expand-3 .terms-card-body{ display: block; }
-    .terms-card.expand-1 .terms-card-desc,
+    .terms-card.expand-2 .terms-card-body{ display: block; }
     .terms-card.expand-1 .terms-linked-section,
     .terms-card.expand-1 .card-linked-section{ display:none !important; }
-    .terms-card.expand-2 .terms-linked-section,
-    .terms-card.expand-2 .card-linked-section{ display:none !important; }
     .terms-card-meta{ font-size: inherit; color: inherit; margin-bottom: 6px; }
     .terms-card-desc{ white-space: pre-wrap; }
     .terms-card-head-left{
@@ -2745,13 +2807,12 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
         overflow: hidden;
         text-overflow: ellipsis;
     }
+    /* expand-1: タグ + プレビュー */
+    .character-card.expand-1 .character-description { display: none; }
+    .character-card.expand-1 .character-description-preview { display: block; }
     .character-card.expand-1 .card-linked-section { display: none; }
-    /* expand-2: タグ + プレビュー */
-    .character-card.expand-2 .character-description { display: none; }
-    .character-card.expand-2 .character-description-preview { display: block; }
-    .character-card.expand-2 .card-linked-section { display: none; }
-    /* expand-3: すべて表示 */
-    .character-card.expand-3 .character-description-preview { display: none; }
+    /* expand-2: すべて表示 */
+    .character-card.expand-2 .character-description-preview { display: none; }
     .character-description-preview {
         display: none;
         font-size: 0.75rem;
@@ -2894,13 +2955,12 @@ body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
         overflow: hidden;
         text-overflow: ellipsis;
     }
+    /* expand-1: タグ + プレビュー */
+    .world-card.expand-1 .world-description { display: none; }
+    .world-card.expand-1 .world-description-preview { display: block; }
     .world-card.expand-1 .card-linked-section { display: none; }
-    /* expand-2: タグ + プレビュー */
-    .world-card.expand-2 .world-description { display: none; }
-    .world-card.expand-2 .world-description-preview { display: block; }
-    .world-card.expand-2 .card-linked-section { display: none; }
-    /* expand-3: すべて表示 */
-    .world-card.expand-3 .world-description-preview { display: none; }
+    /* expand-2: すべて表示 */
+    .world-card.expand-2 .world-description-preview { display: none; }
     .world-description-preview {
         display: none;
         font-size: 0.75rem;
@@ -4321,7 +4381,8 @@ window.__ccInitPanelDnDAndResizers = function(){
                     <button class="btn btn-project-new" onclick="confirmStartNewProject(); closeAllFileDropdowns();" title="新規プロジェクト">🆕 新規プロジェクト</button>
                     <div class="header-file-dropdown-content">
                         <div class="dropdown-item" onclick="openProjectFile(); closeAllFileDropdowns();">📂 開く</div>
-                        <div class="dropdown-item" onclick="openProjectSaveDialog(); closeAllFileDropdowns();"><span class="btn-icn" aria-hidden="true">💾</span><span class="btn-text">保存</span></div>
+                        <div class="dropdown-item" onclick="openProjectSaveDialog(); closeAllFileDropdowns();">📦 保存（プロジェクト形式）</div>
+                        <div class="dropdown-item" onclick="saveProjectAsText(); closeAllFileDropdowns();">📄 保存（テキスト形式）</div>
                     </div>
                 </div>
             </div>
@@ -4359,7 +4420,12 @@ window.__ccInitPanelDnDAndResizers = function(){
             </div>
             <div class="ribbon-subgroup">
                 <span class="ribbon-group-label">パネル</span>
-                <button class="btn" id="btn-move-pane" onclick="moveActivePanelToOppositeSide()" title="最後に操作したパネルを反対サイドへ移動">↔ 反対サイドへ移動</button>
+                <div class="panel-move-dropdown" id="panel-move-dropdown">
+                    <button class="btn" onclick="togglePanelMoveDropdown()" title="パネルを反対サイドへ移動">↔ 移動 ▾</button>
+                    <div class="panel-move-dropdown-content" id="panel-move-dropdown-content">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
             </div>
             <span class="ribbon-separator">|</span>
             <div class="ribbon-subgroup">
@@ -5163,21 +5229,21 @@ window.__ccInitPanelDnDAndResizers = function(){
             <div id="structure-tag-suggestions" class="structure-tag-suggestions"></div>
         </div>
         <div class="structure-edit-field card-section">
-            <div class="card-section-title">\1</div>
+            <div class="card-section-title">登場人物</div>
             <div id="structure-edit-characters" class="structure-link-select-container">
                 <div style="color:var(--text-muted); font-style:italic; font-size:0.8rem;">登場人物パネルにキャラクターを追加してください</div>
             </div>
             <div class="structure-edit-hint">この章/話/シーンに登場するキャラクターを選択</div>
         </div>
         <div class="structure-edit-field card-section">
-            <div class="card-section-title">\1</div>
+            <div class="card-section-title">世界観</div>
             <div id="structure-edit-worlds" class="structure-link-select-container">
                 <div style="color:var(--text-muted); font-style:italic; font-size:0.8rem;">世界観パネルに設定を追加してください</div>
             </div>
             <div class="structure-edit-hint">この章/話/シーンに関連する世界観設定を選択</div>
         </div>
         <div class="structure-edit-field card-section">
-            <div class="card-section-title">\1</div>
+            <div class="card-section-title">用語</div>
     <div id="structure-edit-terms" class="structure-link-select-container"></div>
 </div>
 <div class="structure-edit-field">
@@ -5218,6 +5284,42 @@ window.__ccInitPanelDnDAndResizers = function(){
             <label for="character-edit-reading">読み仮名</label>
             <input type="text" id="character-edit-reading" placeholder="ふりがな">
         </div>
+        <!-- 裏設定: 姓・ミドルネーム・名 -->
+        <details class="character-name-details" style="margin: 8px 0; padding: 8px; background: var(--pane-header-bg); border-radius: 6px; font-size: 0.85rem;">
+            <summary style="cursor: pointer; color: var(--text-muted); user-select: none;">📝 名前の詳細設定（裏設定）</summary>
+            <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 60px;">
+                    <label style="font-size: 0.75rem;">姓</label>
+                    <input type="text" id="character-edit-lastname" placeholder="姓" style="width: 100%; padding: 4px; font-size: 0.85rem;">
+                </div>
+                <div style="flex: 1; min-width: 80px;">
+                    <label style="font-size: 0.75rem;">ミドルネーム</label>
+                    <input type="text" id="character-edit-middlename" placeholder="ミドル" style="width: 100%; padding: 4px; font-size: 0.85rem;">
+                </div>
+                <div style="flex: 1; min-width: 60px;">
+                    <label style="font-size: 0.75rem;">名</label>
+                    <input type="text" id="character-edit-firstname" placeholder="名" style="width: 100%; padding: 4px; font-size: 0.85rem;">
+                </div>
+            </div>
+            <div style="margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 60px;">
+                    <label style="font-size: 0.75rem;">姓（読み）</label>
+                    <input type="text" id="character-edit-lastname-reading" placeholder="せい" style="width: 100%; padding: 4px; font-size: 0.85rem;">
+                </div>
+                <div style="flex: 1; min-width: 80px;">
+                    <label style="font-size: 0.75rem;">ミドル（読み）</label>
+                    <input type="text" id="character-edit-middlename-reading" placeholder="みどる" style="width: 100%; padding: 4px; font-size: 0.85rem;">
+                </div>
+                <div style="flex: 1; min-width: 60px;">
+                    <label style="font-size: 0.75rem;">名（読み）</label>
+                    <input type="text" id="character-edit-firstname-reading" placeholder="めい" style="width: 100%; padding: 4px; font-size: 0.85rem;">
+                </div>
+            </div>
+            <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <button type="button" onclick="applyNameParts()" style="padding: 4px 12px; font-size: 0.8rem; cursor: pointer; border: 1px solid var(--border-color); border-radius: 4px; background: var(--panel-bg);">↑ 名前に反映</button>
+                <span style="font-size: 0.7rem; color: var(--text-muted);">姓+ミドル+名を「名前」と「読み仮名」に反映します</span>
+            </div>
+        </details>
         <div class="character-edit-field" style="display:flex; gap:12px; flex-wrap:wrap;">
             <div style="flex:1; min-width:120px;">
                 <label for="character-edit-level">アウトラインレベル</label>
@@ -5252,19 +5354,19 @@ window.__ccInitPanelDnDAndResizers = function(){
             <div class="character-edit-hint"><span id="character-description-count">0</span>/300文字</div>
         </div>
         <div class="character-edit-field card-section">
-            <div class="card-section-title">\1</div>
+            <div class="card-section-title">構成</div>
             <div id="character-edit-structures" class="structure-link-select-container">
                 <div style="color:var(--text-muted); font-style:italic; font-size:0.8rem;">構成パネルにカードを追加してください</div>
             </div>
         </div>
         <div class="character-edit-field card-section">
-            <div class="card-section-title">\1</div>
+            <div class="card-section-title">世界観</div>
             <div id="character-edit-worlds" class="structure-link-select-container">
                 <div style="color:var(--text-muted); font-style:italic; font-size:0.8rem;">世界観パネルに設定を追加してください</div>
             </div>
         </div>
         <div class="character-edit-field card-section">
-            <div class="card-section-title">\1</div>
+            <div class="card-section-title">用語</div>
             <div id="character-edit-terms" class="structure-link-select-container"></div>
         </div>
         <div class="character-edit-field">
@@ -5320,25 +5422,25 @@ window.__ccInitPanelDnDAndResizers = function(){
             <div class="world-edit-hint"><span id="world-description-count">0</span>/500文字</div>
         </div>
         <div class="world-edit-field card-section">
-            <div class="card-section-title">\1</div>
+            <div class="card-section-title">構成</div>
             <div id="world-edit-structures" class="structure-link-select-container">
                 <div style="color:var(--text-muted); font-style:italic; font-size:0.8rem;">構成パネルにカードを追加してください</div>
             </div>
         </div>
         <div class="world-edit-field card-section">
-            <div class="card-section-title">\1</div>
+            <div class="card-section-title">登場人物</div>
             <div id="world-edit-characters" class="structure-link-select-container">
                 <div style="color:var(--text-muted); font-style:italic; font-size:0.8rem;">登場人物パネルにキャラクターを追加してください</div>
             </div>
         </div>
         <div class="world-edit-field card-section">
-            <div class="card-section-title">\1</div>
+            <div class="card-section-title">世界観</div>
             <div id="world-edit-worlds" class="structure-link-select-container">
                 <div style="color:var(--text-muted); font-style:italic; font-size:0.8rem;">他の世界観設定と関連付け</div>
             </div>
         </div>
         <div class="world-edit-field card-section">
-            <div class="card-section-title">\1</div>
+            <div class="card-section-title">用語</div>
             <div id="world-edit-terms" class="structure-link-select-container"></div>
         </div>
         <div class="world-edit-field">
@@ -5767,15 +5869,19 @@ memo: 'cc_memo_width_px',
     }
 
     function applyLayoutState() {
+        const btnSwapEl = document.getElementById('btn-layout-swap');
+        const paneStackEl = document.getElementById('pane-stack');
         if (layoutAxis === 'column') {
             document.body.classList.add('scroll-mode');
-            btnSwap.innerText = '上下入替';
+            if (btnSwapEl) btnSwapEl.innerText = '⇄ 上下入替';
         } else {
             document.body.classList.remove('scroll-mode');
-            btnSwap.innerText = '左右入替';
+            if (btnSwapEl) btnSwapEl.innerText = '⇄ 左右入替';
         }
-        paneStack.classList.remove('reverse-row', 'reverse-col');
-        if (layoutReversed) paneStack.classList.add(layoutAxis === 'row' ? 'reverse-row' : 'reverse-col');
+        if (paneStackEl) {
+            paneStackEl.classList.remove('reverse-row', 'reverse-col');
+            if (layoutReversed) paneStackEl.classList.add(layoutAxis === 'row' ? 'reverse-row' : 'reverse-col');
+        }
     }
 
     function loadLayoutSettings() {
@@ -9810,6 +9916,63 @@ if (typeof applyPaneHeightSettings === 'function') {
         if (typeof fn === 'function') fn();
     }
 
+    // Panel move dropdown functions
+    function togglePanelMoveDropdown() {
+        const dropdown = document.getElementById('panel-move-dropdown');
+        const isOpen = dropdown.classList.contains('open');
+        // Close all dropdowns first
+        document.querySelectorAll('.panel-move-dropdown.open, .header-file-dropdown.open').forEach(d => d.classList.remove('open'));
+        if (!isOpen) {
+            dropdown.classList.add('open');
+            populatePanelMoveDropdown();
+        }
+    }
+
+    function populatePanelMoveDropdown() {
+        const container = document.getElementById('panel-move-dropdown-content');
+        if (!container) return;
+
+        const panels = [
+            { key: 'structure', label: '📋 構成', swapFn: swapStructureSide },
+            { key: 'world', label: '🌍 世界観', swapFn: swapWorldSide },
+            { key: 'character', label: '👤 人物', swapFn: swapCharacterSide },
+            { key: 'terms', label: '📚 用語', swapFn: swapTermsSide },
+            { key: 'memo', label: '📝 メモ', swapFn: swapMemoSide },
+            { key: 'outline', label: '📑 目次', swapFn: swapOutlineSide },
+        ];
+
+        container.innerHTML = panels.map(p => {
+            const side = window.__ccGetPanelSide ? window.__ccGetPanelSide(p.key) : 'left';
+            const direction = side === 'left' ? '→ 右へ' : '← 左へ';
+            return `<div class="dropdown-item" onclick="movePanelToOppositeSide('${p.key}'); closePanelMoveDropdown();">
+                <span>${p.label}</span>
+                <span class="move-direction">${direction}</span>
+            </div>`;
+        }).join('');
+    }
+
+    function movePanelToOppositeSide(key) {
+        if (typeof window.__ccTogglePanelSide === 'function') {
+            window.__ccTogglePanelSide(key);
+        }
+    }
+
+    function closePanelMoveDropdown() {
+        const dropdown = document.getElementById('panel-move-dropdown');
+        if (dropdown) dropdown.classList.remove('open');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.panel-move-dropdown')) {
+            closePanelMoveDropdown();
+        }
+    });
+
+    // Expose functions globally
+    window.togglePanelMoveDropdown = togglePanelMoveDropdown;
+    window.movePanelToOppositeSide = movePanelToOppositeSide;
+    window.closePanelMoveDropdown = closePanelMoveDropdown;
 
     function showJumpDialog() { document.getElementById('jump-dialog').classList.add('show'); document.getElementById('jump-line-input').value = ''; document.getElementById('jump-line-input').focus(); }
     function closeJumpDialog() { document.getElementById('jump-dialog').classList.remove('show'); }
@@ -10075,6 +10238,114 @@ if (project.bookmarks) {
         a.click();
         closeProjectSaveDialog();
     }
+
+    // テキスト形式でプロジェクトを保存
+    function saveProjectAsText() {
+        const lines = [];
+        const timestamp = new Date().toLocaleString('ja-JP');
+        lines.push(`# プロジェクトエクスポート`);
+        lines.push(`# 出力日時: ${timestamp}`);
+        lines.push('');
+
+        // 入力タブの内容
+        const tabState = JSON.parse(localStorage.getItem(TABS_KEY) || '{}');
+        const tabs = Array.isArray(tabState.tabs) ? tabState.tabs : [];
+        if (tabs.length > 0) {
+            lines.push('========================================');
+            lines.push('【入力テキスト】');
+            lines.push('========================================');
+            tabs.forEach((tab, i) => {
+                lines.push(`\n--- タブ${i+1}: ${tab.name || '無題'} ---`);
+                lines.push(tab.content || '（空）');
+            });
+            lines.push('');
+        }
+
+        // メモの内容
+        const memoState = JSON.parse(localStorage.getItem(MEMO_KEY) || '{}');
+        const memoTabs = Array.isArray(memoState.tabs) ? memoState.tabs : [];
+        if (memoTabs.length > 0) {
+            lines.push('========================================');
+            lines.push('【メモ】');
+            lines.push('========================================');
+            memoTabs.forEach((tab, i) => {
+                lines.push(`\n--- メモ${i+1}: ${tab.name || '無題'} ---`);
+                lines.push(tab.content || '（空）');
+            });
+            lines.push('');
+        }
+
+        // 構成の内容
+        const structureState = JSON.parse(localStorage.getItem('cc_structure_data') || '{}');
+        const structureData = structureState.data || [];
+        if (structureData.length > 0) {
+            lines.push('========================================');
+            lines.push('【構成】');
+            lines.push('========================================');
+            structureData.forEach((card, i) => {
+                const level = {chapter:'章',episode:'話',scene:'シーン'}[card.level] || card.level || '';
+                lines.push(`\n[${i+1}] ${card.title || '無題'} (${level})`);
+                if (card.summary) lines.push(`要約: ${card.summary}`);
+                if (card.tags && card.tags.length) lines.push(`タグ: ${card.tags.join(', ')}`);
+            });
+            lines.push('');
+        }
+
+        // 登場人物の内容
+        const characterState = JSON.parse(localStorage.getItem('cc_character_data') || '{}');
+        const characterData = characterState.data || [];
+        if (characterData.length > 0) {
+            lines.push('========================================');
+            lines.push('【登場人物】');
+            lines.push('========================================');
+            const roles = {protagonist:'主人公',heroine:'ヒロイン',antagonist:'敵役',supporting:'脇役',mob:'モブ'};
+            characterData.forEach((card, i) => {
+                lines.push(`\n[${i+1}] ${card.name || '無題'} (${roles[card.role] || card.role || ''})`);
+                if (card.reading) lines.push(`読み: ${card.reading}`);
+                if (card.description) lines.push(`説明: ${card.description}`);
+            });
+            lines.push('');
+        }
+
+        // 世界観の内容
+        const worldState = JSON.parse(localStorage.getItem('cc_world_data') || '{}');
+        const worldData = worldState.data || [];
+        if (worldData.length > 0) {
+            lines.push('========================================');
+            lines.push('【世界観】');
+            lines.push('========================================');
+            const levels = {major:'大カテゴリ',middle:'中カテゴリ',detail:'詳細'};
+            worldData.forEach((card, i) => {
+                lines.push(`\n[${i+1}] ${card.name || '無題'} (${levels[card.level] || card.level || ''})`);
+                if (card.description) lines.push(`説明: ${card.description}`);
+            });
+            lines.push('');
+        }
+
+        // 用語の内容
+        const termsState = JSON.parse(localStorage.getItem('cc_terms_data') || '{}');
+        const termsData = termsState.data || [];
+        if (termsData.length > 0) {
+            lines.push('========================================');
+            lines.push('【用語】');
+            lines.push('========================================');
+            termsData.forEach((term, i) => {
+                lines.push(`\n[${i+1}] ${term.name || '無題'}`);
+                if (term.category) lines.push(`カテゴリ: ${term.category}`);
+                if (term.reading) lines.push(`読み: ${term.reading}`);
+                if (term.description) lines.push(`説明: ${term.description}`);
+            });
+            lines.push('');
+        }
+
+        const text = lines.join('\n');
+        const blob = new Blob([text], { type: 'text/plain; charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `project_${new Date().toISOString().slice(0,10)}.txt`;
+        a.click();
+    }
+    window.saveProjectAsText = saveProjectAsText;
 
     function loadProjectFile() {
         const input = document.createElement('input');
@@ -14845,7 +15116,7 @@ function showPresetPanelColorPicker(paneId){
     if (card.expandLevel === undefined) {
       card.expandLevel = card.expanded ? 2 : 0;
     }
-    const expandLevel = Math.max(0, Math.min(3, Number(card.expandLevel) || 0));
+    const expandLevel = Math.max(0, Math.min(2, Number(card.expandLevel) || 0));
     card.expandLevel = expandLevel;
 
     const div = document.createElement('div');
@@ -14924,12 +15195,12 @@ function showPresetPanelColorPicker(paneId){
     }
     headLeft.appendChild(toggle);
 
-    // 展開レベルトグル（4段階）
+    // 展開レベルトグル（3段階）
     const expandToggle = document.createElement('span');
     expandToggle.className = 'card-expand-toggle structure-expand-toggle';
-    const expandSymbols = ['▶', '▽', '▼', '◆'];
-    const expandTitles = ['名前のみ', 'タグのみ', 'タグ+プレビュー', 'すべて表示'];
-    const lvl = Math.min(Math.max(expandLevel || 0, 0), 3);
+    const expandSymbols = ['▶', '▼', '◆'];
+    const expandTitles = ['名前のみ', 'タグ+プレビュー', 'すべて表示'];
+    const lvl = Math.min(Math.max(expandLevel || 0, 0), 2);
     expandToggle.textContent = expandSymbols[lvl];
     expandToggle.title = expandTitles[lvl];
     expandToggle.onclick = (e) => {
@@ -15532,7 +15803,7 @@ function showPresetPanelColorPicker(paneId){
         if (action === 'toggle') {
           const target = structureData.find(c => c.id === cardId);
           if (target) {
-            target.expandLevel = ((target.expandLevel || 0) + 1) % 4;
+            target.expandLevel = ((target.expandLevel || 0) + 1) % 3;
             target.expanded = target.expandLevel > 0;
             saveStructureData();
             renderStructureList();
@@ -15648,9 +15919,9 @@ function openStructureCardColorPicker(cardId, anchorEl){
     return color;
   }
 
-  // ========== 一括展開レベル（4段階）: 構成 ==========
-  const BULK_EXPAND_SYMBOLS = ['▶', '▽', '▼', '◆'];
-  const BULK_EXPAND_TITLES  = ['名前のみ', 'タグのみ', 'タグ+プレビュー', 'すべて表示'];
+  // ========== 一括展開レベル（3段階）: 構成 ==========
+  const BULK_EXPAND_SYMBOLS = ['▶', '▼', '◆'];
+  const BULK_EXPAND_TITLES  = ['名前のみ', 'タグ+プレビュー', 'すべて表示'];
 
   function getUniformStructureExpandLevel() {
     if (!Array.isArray(structureData) || structureData.length === 0) return { level: 0, mixed: false };
@@ -15674,7 +15945,7 @@ function openStructureCardColorPicker(cardId, anchorEl){
       sym = '≋';
       title = '混在';
     } else {
-      const level = Math.min(Math.max(info.level || 0, 0), 3);
+      const level = Math.min(Math.max(info.level || 0, 0), 2);
       sym = BULK_EXPAND_SYMBOLS[level];
       title = BULK_EXPAND_TITLES[level];
     }
@@ -15697,7 +15968,7 @@ function openStructureCardColorPicker(cardId, anchorEl){
   function cycleStructureBulkExpand(delta) {
     const info = getUniformStructureExpandLevel();
     const base = info.mixed ? (typeof structureBulkExpandLevel === 'number' ? structureBulkExpandLevel : (info.level || 0)) : (info.level || 0);
-    const next = (base + delta + 4) % 4;
+    const next = (base + delta + 3) % 3;
     structureBulkExpandLevel = next;
 
     structureData.forEach(c => {
@@ -15969,7 +16240,7 @@ if (termContainer) {
   function toggleStructureExpand(cardId) {
     const card = structureData.find(c => c.id === cardId);
     if (card) {
-      card.expandLevel = (Math.max(0, Math.min(3, Number(card.expandLevel) || 0)) + 1) % 4;
+      card.expandLevel = (Math.max(0, Math.min(2, Number(card.expandLevel) || 0)) + 1) % 3;
       card.expanded = card.expandLevel > 0;
       saveStructureData();
       renderStructureList();
@@ -16815,7 +17086,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
   function createCharacterCardElement(card, index) {
     const div = document.createElement('div');
     div.className = `character-card card-shell role-${card.role}`;
-    const level = Math.max(0, Math.min(3, Number(card.expandLevel) || 0));
+    const level = Math.max(0, Math.min(2, Number(card.expandLevel) || 0));
     card.expandLevel = level;
     if (level === 1) div.classList.add('expand-1');
     else if (level === 2) div.classList.add('expand-2');
@@ -16872,9 +17143,9 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedWorldsHtml || linkedTer
       </div>
     ` : '';
 
-    // 展開レベルに応じたトグルアイコン
-    const toggleSymbols = ['▶', '▽', '▼', '◆'];
-    const toggleSymbol = toggleSymbols[Math.min(level, 3)];
+    // 展開レベルに応じたトグルアイコン（3段階）
+    const toggleSymbols = ['▶', '▼', '◆'];
+    const toggleSymbol = toggleSymbols[Math.min(level, 2)];
 
     // 説明の1行目プレビュー
     const descPreview = card.description ? card.description.split('\n')[0].substring(0, 50) + (card.description.length > 50 ? '...' : '') : '';
@@ -16952,9 +17223,9 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedWorldsHtml || linkedTer
     return color;
   }
 
-  // ========== 一括展開レベル（4段階）: 登場人物 ==========
-  const CHARACTER_BULK_EXPAND_SYMBOLS = ['▶', '▽', '▼', '◆'];
-  const CHARACTER_BULK_EXPAND_TITLES  = ['名前のみ', 'タグのみ', 'タグ+プレビュー', 'すべて表示'];
+  // ========== 一括展開レベル（3段階）: 登場人物 ==========
+  const CHARACTER_BULK_EXPAND_SYMBOLS = ['▶', '▼', '◆'];
+  const CHARACTER_BULK_EXPAND_TITLES  = ['名前のみ', 'タグ+プレビュー', 'すべて表示'];
 
   function getUniformCharacterExpandLevel() {
     if (!Array.isArray(characterData) || characterData.length === 0) return { level: 0, mixed: false };
@@ -16978,7 +17249,7 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedWorldsHtml || linkedTer
       sym = '≋';
       title = '混在';
     } else {
-      const level = Math.min(Math.max(info.level || 0, 0), 3);
+      const level = Math.min(Math.max(info.level || 0, 0), 2);
       sym = CHARACTER_BULK_EXPAND_SYMBOLS[level];
       title = CHARACTER_BULK_EXPAND_TITLES[level];
     }
@@ -17004,7 +17275,7 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedWorldsHtml || linkedTer
     const card = characterData.find(c => c.id === cardId);
     if (card) {
       // 4段階展開: 0 → 1 → 2 → 3 → 0
-      card.expandLevel = (Math.max(0, Math.min(3, Number(card.expandLevel) || 0)) + 1) % 4;
+      card.expandLevel = (Math.max(0, Math.min(2, Number(card.expandLevel) || 0)) + 1) % 3;
       saveCharacterData();
       renderCharacterList();
     }
@@ -17025,6 +17296,14 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedWorldsHtml || linkedTer
 
     document.getElementById('character-edit-name').value = card.name || '';
     document.getElementById('character-edit-reading').value = card.reading || '';
+
+    // 裏設定: 姓・ミドルネーム・名
+    document.getElementById('character-edit-lastname').value = card.lastName || '';
+    document.getElementById('character-edit-middlename').value = card.middleName || '';
+    document.getElementById('character-edit-firstname').value = card.firstName || '';
+    document.getElementById('character-edit-lastname-reading').value = card.lastNameReading || '';
+    document.getElementById('character-edit-middlename-reading').value = card.middleNameReading || '';
+    document.getElementById('character-edit-firstname-reading').value = card.firstNameReading || '';
 
     // アウトラインレベル（新規フィールド、デフォルト1）
     const levelSelect = document.getElementById('character-edit-level');
@@ -17143,6 +17422,28 @@ function toggleCharacterTermLink(termId){
     if (item) item.classList.toggle('selected');
   }
 
+  // 姓・ミドルネーム・名を名前と読み仮名に反映
+  function applyNameParts() {
+    const lastName = document.getElementById('character-edit-lastname').value.trim();
+    const middleName = document.getElementById('character-edit-middlename').value.trim();
+    const firstName = document.getElementById('character-edit-firstname').value.trim();
+    const lastNameR = document.getElementById('character-edit-lastname-reading').value.trim();
+    const middleNameR = document.getElementById('character-edit-middlename-reading').value.trim();
+    const firstNameR = document.getElementById('character-edit-firstname-reading').value.trim();
+
+    // 名前を結合（空白で区切る、空の部分はスキップ）
+    const nameParts = [lastName, middleName, firstName].filter(p => p);
+    const readingParts = [lastNameR, middleNameR, firstNameR].filter(p => p);
+
+    if (nameParts.length > 0) {
+      document.getElementById('character-edit-name').value = nameParts.join(' ');
+    }
+    if (readingParts.length > 0) {
+      document.getElementById('character-edit-reading').value = readingParts.join(' ');
+    }
+  }
+  window.applyNameParts = applyNameParts;
+
   function closeCharacterEditModal() {
     const modal = document.getElementById('character-edit-modal');
     if (modal) modal.classList.remove('show');
@@ -17169,6 +17470,15 @@ function toggleCharacterTermLink(termId){
     const roleValue = LABEL_TO_KEY[roleInputValue] || roleInputValue;
     card.name = document.getElementById('character-edit-name').value.trim() || roleInputValue || '名前未設定';
     card.reading = document.getElementById('character-edit-reading').value.trim();
+
+    // 裏設定: 姓・ミドルネーム・名
+    card.lastName = document.getElementById('character-edit-lastname').value.trim();
+    card.middleName = document.getElementById('character-edit-middlename').value.trim();
+    card.firstName = document.getElementById('character-edit-firstname').value.trim();
+    card.lastNameReading = document.getElementById('character-edit-lastname-reading').value.trim();
+    card.middleNameReading = document.getElementById('character-edit-middlename-reading').value.trim();
+    card.firstNameReading = document.getElementById('character-edit-firstname-reading').value.trim();
+
     card.outlineLevel = document.getElementById('character-edit-level')?.value || '1';
     card.role = roleValue || '未設定';
     card.affiliationTags = document.getElementById('character-edit-affiliation').value.split(',').map(t => t.trim()).filter(t => t);
@@ -17384,7 +17694,7 @@ if (termContainer) {
         if (action === 'duplicate') duplicateCharacterCard(cardId);
         if (action === 'toggle') {
           const target = characterData.find(c => c.id === cardId);
-          if (target) { target.expandLevel = ((target.expandLevel || 0) + 1) % 4; saveCharacterData(); renderCharacterList(); }
+          if (target) { target.expandLevel = ((target.expandLevel || 0) + 1) % 3; saveCharacterData(); renderCharacterList(); }
         }
         if (action === 'expand-0' || action === 'expand-1' || action === 'expand-2' || action === 'expand-3') {
           const target = characterData.find(c => c.id === cardId);
@@ -17554,7 +17864,7 @@ if (termContainer) {
   function cycleCharacterBulkExpand(delta) {
     const info = getUniformCharacterExpandLevel();
     const base = info.mixed ? (typeof characterBulkExpandLevel === 'number' ? characterBulkExpandLevel : (info.level || 0)) : (info.level || 0);
-    const next = (base + delta + 4) % 4;
+    const next = (base + delta + 3) % 3;
     characterBulkExpandLevel = next;
 
     characterData.forEach(c => { c.expandLevel = next; });
@@ -18211,9 +18521,9 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedCharactersHtml || linke
       </div>
     ` : '';
 
-    // 展開レベルに応じたトグルアイコン
-    const toggleSymbols = ['▶', '▽', '▼', '◆'];
-    const toggleSymbol = toggleSymbols[Math.min(expandLevel, 3)];
+    // 展開レベルに応じたトグルアイコン（3段階）
+    const toggleSymbols = ['▶', '▼', '◆'];
+    const toggleSymbol = toggleSymbols[Math.min(expandLevel, 2)];
 
     // 説明の1行目プレビュー
     const descPreview = card.description ? card.description.split('\n')[0].substring(0, 50) + (card.description.length > 50 ? '...' : '') : '';
@@ -18287,9 +18597,9 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedCharactersHtml || linke
     return color;
   }
 
-  // ========== 一括展開レベル（4段階）: 世界観 ==========
-  const WORLD_BULK_EXPAND_SYMBOLS = ['▶', '▽', '▼', '◆'];
-  const WORLD_BULK_EXPAND_TITLES  = ['名前のみ', 'タグのみ', 'タグ+プレビュー', 'すべて表示'];
+  // ========== 一括展開レベル（3段階）: 世界観 ==========
+  const WORLD_BULK_EXPAND_SYMBOLS = ['▶', '▼', '◆'];
+  const WORLD_BULK_EXPAND_TITLES  = ['名前のみ', 'タグ+プレビュー', 'すべて表示'];
 
   function getUniformWorldExpandLevel() {
     if (!Array.isArray(worldData) || worldData.length === 0) return { level: 0, mixed: false };
@@ -18313,7 +18623,7 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedCharactersHtml || linke
       sym = '≋';
       title = '混在';
     } else {
-      const level = Math.min(Math.max(info.level || 0, 0), 3);
+      const level = Math.min(Math.max(info.level || 0, 0), 2);
       sym = WORLD_BULK_EXPAND_SYMBOLS[level];
       title = WORLD_BULK_EXPAND_TITLES[level];
     }
@@ -18339,7 +18649,7 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedCharactersHtml || linke
     const card = worldData.find(c => c.id === cardId);
     if (card) {
       // 4段階展開: 0 → 1 → 2 → 3 → 0
-      card.expandLevel = (Math.max(0, Math.min(3, Number(card.expandLevel) || 0)) + 1) % 4;
+      card.expandLevel = (Math.max(0, Math.min(2, Number(card.expandLevel) || 0)) + 1) % 3;
       saveWorldData();
       renderWorldList();
     }
@@ -18742,7 +19052,7 @@ if (termContainer) {
         if (action === 'duplicate') duplicateWorldCard(cardId);
         if (action === 'toggle') {
           const target = worldData.find(c => c.id === cardId);
-          if (target) { target.expandLevel = ((target.expandLevel || 0) + 1) % 4; saveWorldData(); renderWorldList(); }
+          if (target) { target.expandLevel = ((target.expandLevel || 0) + 1) % 3; saveWorldData(); renderWorldList(); }
         }
         if (action === 'expand-0' || action === 'expand-1' || action === 'expand-2' || action === 'expand-3') {
           const target = worldData.find(c => c.id === cardId);
@@ -18951,7 +19261,7 @@ if (termContainer) {
   function cycleWorldBulkExpand(delta) {
     const info = getUniformWorldExpandLevel();
     const base = info.mixed ? (typeof worldBulkExpandLevel === 'number' ? worldBulkExpandLevel : (info.level || 0)) : (info.level || 0);
-    const next = (base + delta + 4) % 4;
+    const next = (base + delta + 3) % 3;
     worldBulkExpandLevel = next;
 
     worldData.forEach(c => { c.expandLevel = next; });
@@ -19596,15 +19906,13 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       // per-card custom color (optional)
       if (term.bgColor) card.style.background = term.bgColor;
 
-      // normalize expand level
-      const lv = Number.isInteger(term.expandLevel) ? term.expandLevel : (term.expandLevel ? 3 : 0);
-      term.expandLevel = Math.max(0, Math.min(3, lv));
+      // normalize expand level (unified with other panels)
+      term.expandLevel = Math.max(0, Math.min(2, Number(term.expandLevel) || 0));
       card.classList.add('expand-'+term.expandLevel);
       if (term.expandLevel > 0) card.classList.add('expanded');
 
       const advanceExpandLevel = () => {
-        const curLv = Number.isInteger(term.expandLevel) ? term.expandLevel : (term.expandLevel ? 3 : 0);
-        term.expandLevel = (curLv + 1) % 4;
+        term.expandLevel = (Math.max(0, Math.min(2, Number(term.expandLevel) || 0)) + 1) % 3;
         saveTermsData();
         renderTermsList();
       };
@@ -20285,10 +20593,8 @@ let menu = document.getElementById('terms-context-menu');
     const term = termsData.find(t => t.id === cardId);
     if (!term) return;
 
-    // normalize expand level to 0-3
-    let expandLevel = Number.isInteger(term.expandLevel) ? term.expandLevel : (term.expandLevel ? 3 : 0);
-    if (expandLevel < 0) expandLevel = 0;
-    if (expandLevel > 3) expandLevel = 3;
+    // normalize expand level to 0-3 (unified with other panels)
+    let expandLevel = Math.max(0, Math.min(2, Number(term.expandLevel) || 0));
 
     menu.innerHTML = `
       <div class="context-menu-item" data-action="new-card">＋新しいカード</div>
@@ -20325,7 +20631,7 @@ menu.querySelectorAll('.context-menu-item').forEach(item => {
         } else if (action === 'duplicate') {
           duplicateTermCard(cardId);
         } else if (action === 'toggle') {
-          term.expandLevel = (expandLevel + 1) % 4;
+          term.expandLevel = (expandLevel + 1) % 3;
           saveTermsData(); renderTermsList();
         } else if (action && action.startsWith('expand-')) {
           const lv = parseInt(action.split('-')[1], 10);
