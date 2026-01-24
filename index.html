@@ -655,7 +655,8 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
 
     .main-container { display: flex; flex: 1; gap: var(--layout-gap); overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; padding: var(--layout-padding); position: relative; max-width: 100vw; width: 100%; box-sizing: border-box; }
     .pane-stack { display: flex; flex: 1; min-width: 0; min-height: 0; gap: 0; }
-    .pane-stack.reverse-row { flex-direction: row-reverse; }
+    .pane-stack.reverse-row { /* flex-direction: row-reverse; */ }
+/* reverse-row は order で入れ替えるので flex-direction は変えない */
 /* .pane-stack.reverse-row uses order property for swapping */
     body.scroll-mode .main-container { overflow: visible; height: auto; max-height: none; width: 100%; max-width: 100vw; }
     body.scroll-mode .pane-stack { flex-direction: column; width: 100%; }
@@ -1595,9 +1596,8 @@ color: white; padding: 20px 40px; border-radius: 16px;
     }
 
     .card-title{
-      flex: 0 1 auto;
+      flex: 1 1 auto;
       min-width: 0;
-      max-width: 6em;
       font-weight: 600;
       color: var(--text-color);
       white-space: nowrap;
@@ -1610,7 +1610,7 @@ color: white; padding: 20px 40px; border-radius: 16px;
     .card-badge, .character-role-badge, .world-level-badge {
       flex: 0 1 auto;
       min-width: 1.5em;
-      max-width: 6em;
+      max-width: 100%;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1631,7 +1631,19 @@ color: white; padding: 20px 40px; border-radius: 16px;
 
     
 
-    /* ===== Character title: show reading above name (ruby-like) ===== */
+    .title-stack{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+      flex: 1 1 auto;
+      line-height: 1.05;
+    }
+    .title-stack > .card-title{
+      display:block;
+      flex: 0 0 auto;
+    }
+
+/* ===== Character title: show reading above name (ruby-like) ===== */
     .character-title-wrap{
       display:flex;
       flex-direction:column;
@@ -1661,7 +1673,9 @@ color: white; padding: 20px 40px; border-radius: 16px;
       display: flex;
       align-items: center;
       gap: 6px;
-      flex: 0 0 auto;
+      flex: 0 1 auto;
+      min-width: 0;
+      overflow: hidden;
     }
 
     .card-badge{
@@ -1815,8 +1829,10 @@ color: white; padding: 20px 40px; border-radius: 16px;
         display:flex;
         align-items:center;
         gap: 6px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         justify-content: flex-end;
+        min-width: 0;
+        overflow: hidden;
     }
     .terms-category-badge{
         font-size: 0.65rem;
@@ -5468,6 +5484,11 @@ window.__ccInitPanelDnDAndResizers = function(){
     <div class="structure-edit-field">
       <label for="terms-edit-name">用語名</label>
       <input type="text" id="terms-edit-name" placeholder="例：魔力結晶">
+    </div>
+    <div class="structure-edit-field">
+      <label for="terms-edit-reading">ふりがな</label>
+      <input type="text" id="terms-edit-reading" placeholder="例：まりょくけっしょう">
+      <div class="structure-edit-hint">任意：カード上で名前の上に小さく表示します</div>
     </div>
     <div class="structure-edit-field">
       <label for="terms-edit-category">カテゴリ <button type="button" class="tag-suggest-btn" onclick="toggleTermsCategorySuggestions()">既存タグ▼</button></label>
@@ -14422,6 +14443,10 @@ panel.style.width = '320px';
   }
 
   function applyPanelOrderOverrides(){
+    // Legacy "order override" system (superseded by panel side/order state).
+    // If the new panel side/order system is available, do not apply overrides.
+    if (typeof window.__ccApplyPanelSideClasses === 'function') return;
+
     const overrides = readPanelOrderOverrides();
     Object.entries(overrides).forEach(([id, order]) => {
       const el = document.getElementById(id);
@@ -14449,8 +14474,65 @@ panel.style.width = '320px';
       .sort((a, b) => (a.order - b.order) || (a.idx - b.idx));
   }
 
+  function isPanelVisibleByKey(key){
+    const el = document.getElementById(`${key}-panel`);
+    if (!el) return false;
+    try{
+      return getComputedStyle(el).display !== 'none';
+    }catch(e){
+      return true;
+    }
+  }
+
   function swapPanelWithNeighbor(pane, direction){
-    const panelId = String(pane || '').endsWith('-panel') ? String(pane) : `${pane}-panel`;
+    const raw = String(pane || '');
+    const key = raw.endsWith('-panel') ? raw.replace('-panel','') : raw;
+    if (!key) return;
+
+    // Prefer the panel side/order system (stable + non-conflicting with swap-side)
+    try{
+      if (window.settingsCache && typeof window.__ccGetPanelSide === 'function' && typeof window.__ccApplyPanelSideClasses === 'function') {
+        if (typeof window.__ccInitPanelSideState === 'function') window.__ccInitPanelSideState();
+
+        const dir = (direction === 'left' || direction === 'right') ? direction : 'right';
+        const side = (window.__ccGetPanelSide(key) === 'right') ? 'right' : 'left';
+        const arrName = (side === 'right') ? 'panelOrderRight' : 'panelOrderLeft';
+        const storageKey = (side === 'right') ? 'cc_panel_order_right' : 'cc_panel_order_left';
+
+        const arr = Array.isArray(window.settingsCache[arrName]) ? window.settingsCache[arrName].slice() : [];
+        if (!arr.length || !arr.includes(key)) return;
+
+        // Only consider visible panels within the same side (prevents "swapしても変わらない"が再発しにくい)
+        const visibleKeys = arr.filter(k => isPanelVisibleByKey(k));
+        const idxVisible = visibleKeys.indexOf(key);
+        if (idxVisible === -1) return;
+
+        const neighborVisibleIndex = (dir === 'left') ? (idxVisible - 1) : (idxVisible + 1);
+        if (neighborVisibleIndex < 0 || neighborVisibleIndex >= visibleKeys.length) return;
+
+        const neighborKey = visibleKeys[neighborVisibleIndex];
+        const i = arr.indexOf(key);
+        const j = arr.indexOf(neighborKey);
+        if (i < 0 || j < 0) return;
+
+        // swap within the side order array
+        arr[i] = neighborKey;
+        arr[j] = key;
+        window.settingsCache[arrName] = arr;
+
+        try{ localStorage.setItem(storageKey, JSON.stringify(arr)); }catch(e){}
+
+        // Legacy overrides are obsolete here; keep them from re-applying.
+        try{ localStorage.removeItem(PANEL_ORDER_STORAGE_KEY); }catch(e){}
+
+        window.__ccApplyPanelSideClasses();
+        if (typeof window.__ccUpdateDockResizers === 'function') window.__ccUpdateDockResizers();
+        return;
+      }
+    }catch(e){ /* fall through */ }
+
+    // Fallback: legacy order swap (kept for compatibility)
+    const panelId = raw.endsWith('-panel') ? raw : `${raw}-panel`;
     const list = collectSwappablePanels();
     const currentIndex = list.findIndex(item => item.panel.id === panelId);
     if (currentIndex === -1 || list.length < 2) return;
@@ -19957,11 +20039,23 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       lvBadge.onclick = (ev) => { ev.stopPropagation(); advanceExpandLevel(); };
       left.appendChild(lvBadge);
 
+      const titleWrap = document.createElement('div');
+      titleWrap.className = 'title-stack terms-title-wrap';
+
+      const readingText = (term.reading || '').trim();
+      if (readingText) {
+        const ruby = document.createElement('div');
+        ruby.className = 'card-title-ruby terms-title-ruby';
+        ruby.textContent = readingText;
+        titleWrap.appendChild(ruby);
+      }
+
       const nameSpan = document.createElement('span');
       nameSpan.className = 'card-title terms-card-name';
       nameSpan.textContent = term.name || '';
-      left.appendChild(nameSpan);
+      titleWrap.appendChild(nameSpan);
 
+      left.appendChild(titleWrap);
       const right = document.createElement('div');
       right.className = 'card-head-right terms-card-head-right card-badges';
       if (term.category) {
@@ -20140,6 +20234,7 @@ window.openTermEditModal = function(id){
     const term = id ? termsData.find(t => t.id === id) : null;
     document.getElementById('terms-edit-title').textContent = id ? '用語を編集' : '用語を追加';
     document.getElementById('terms-edit-name').value = term?.name || '';
+    document.getElementById('terms-edit-reading').value = term?.reading || '';
     document.getElementById('terms-edit-category').value = term?.category || '';
     document.getElementById('terms-edit-desc').value = term?.desc || '';
 
@@ -20191,6 +20286,7 @@ window.openTermEditModal = function(id){
   window.saveTermCard = function(){
     const modal = document.getElementById('terms-edit-modal');
     const name = (document.getElementById('terms-edit-name').value || '').trim();
+    const reading = ((document.getElementById('terms-edit-reading')?.value) || '').trim();
     const category = (document.getElementById('terms-edit-category').value || '').trim();
     const desc = (document.getElementById('terms-edit-desc').value || '').trim();
     const tabIdValue = (document.getElementById('terms-edit-tab')?.value || '').trim();
@@ -20211,6 +20307,7 @@ loadTermsData();
       const t = termsData.find(x => x.id === editingTermId);
       if(t){
         t.name = name;
+        t.reading = reading;
         t.category = category;
         t.desc = desc;
         t.tabId = tabId;
@@ -20221,7 +20318,9 @@ loadTermsData();
     } else {
       const newTerm = {
         id: termsNextId++,
-        name, category, desc,
+        name,
+        reading,
+        category, desc,
         tabId,
         linkedCharacters: selChars.slice(),
         linkedWorlds: selWorlds.slice(),
@@ -20294,14 +20393,18 @@ loadTermsData();
           termsData = imported.data.map(t => ({
             id: t.id,
             name: t.name || '',
+            reading: (t.reading || '').toString(),
             category: t.category || '',
             desc: t.desc || '',
             tabId: t.tabId ?? null,
             linkedStructures: Array.isArray(t.linkedStructures) ? t.linkedStructures : [],
             linkedCharacters: Array.isArray(t.linkedCharacters) ? t.linkedCharacters : [],
-            linkedWorlds: Array.isArray(t.linkedWorlds) ? t.linkedWorlds : []
+            linkedWorlds: Array.isArray(t.linkedWorlds) ? t.linkedWorlds : [],
+            selected: false,
+            expandLevel: (typeof t.expandLevel === 'number' ? t.expandLevel : 3),
+            bgColor: t.bgColor || ''
           }));
-          termsNextId = imported.nextId || (Math.max(0, ...termsData.map(x => x.id || 0)) + 1);
+termsNextId = imported.nextId || (Math.max(0, ...termsData.map(x => x.id || 0)) + 1);
         } else {
           const maxId = Math.max(termsNextId, ...termsData.map(t => t.id || 0), 0);
           let newId = maxId + 1;
@@ -20310,12 +20413,16 @@ loadTermsData();
               ...t,
               id: newId++,
               name: t.name || '',
+              reading: (t.reading || '').toString(),
               category: t.category || '',
               desc: t.desc || '',
               tabId: t.tabId ?? null,
               linkedStructures: Array.isArray(t.linkedStructures) ? t.linkedStructures : [],
               linkedCharacters: Array.isArray(t.linkedCharacters) ? t.linkedCharacters : [],
-              linkedWorlds: Array.isArray(t.linkedWorlds) ? t.linkedWorlds : []
+              linkedWorlds: Array.isArray(t.linkedWorlds) ? t.linkedWorlds : [],
+              selected: false,
+              expandLevel: (typeof t.expandLevel === 'number' ? t.expandLevel : 3),
+              bgColor: t.bgColor || ''
             };
             return nt;
           });
