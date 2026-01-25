@@ -2,9 +2,10 @@
 <html lang="ja">
 <head>
 <script>(function(){try{document.documentElement.classList.add('cc-boot');}catch(e){}})();</script>
+<script>window.DEBUG_LOG=false;</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ（動作確認版）</title>
+<title>ⓒエディタ（動作確認版v.2）</title>
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
@@ -631,7 +632,7 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
     .help-section:last-child { margin-bottom: 0; }
     .help-title { font-weight: bold; font-size: 0.9rem; margin-bottom: 4px; border-bottom: 1px dashed #fcd34d; padding-bottom: 2px; }
 
-    #settings-bar { margin-bottom: 0; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; padding: 8px 10px; padding-right: 14px; order: 3; }
+    #settings-bar { margin-bottom: 0; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; padding: 8px 10px; padding-right: 14px; order: 3; max-height: calc(100vh - 100px); overflow-y: auto; }
     #settings-bar .panel-action-buttons { right: 2px; }
     .setting-group { display: flex; flex-direction: column; gap: 4px; border-right: 1px solid var(--border-color); padding-right: 12px; }
     .setting-group:last-child { border-right: none; }
@@ -1213,7 +1214,8 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     }
     .celebration-message {
         position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-color: white; padding: 20px 40px; border-radius: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white; padding: 20px 40px; border-radius: 16px;
         font-size: 1.5rem; font-weight: bold; text-align: center;
         box-shadow: 0 10px 40px rgba(102, 126, 234, 0.5);
         z-index: 9999; animation: celebrationPop 0.5s ease-out;
@@ -1822,9 +1824,7 @@ color: white; padding: 20px 40px; border-radius: 16px;
     :where(.structure-field:last-child){ margin-bottom: 0; }
     :where(.structure-field-label){ font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px; }
     :where(.structure-field-value){ color: var(--text-color); line-height: 1.4; min-width: 0; overflow-wrap:anywhere; }
-    :where(.character-field, .world-field){ display:flex; align-items:flex-start; gap: 8px; margin: 6px 0; }
-    :where(.character-field-label, .world-field-label){ font-size: 0.85rem; min-width: 28px; text-align:center; padding-top:2px; opacity: 0.9; }
-
+    :where(.character-field, .world-field){ margin: 6px 0; }
 .terms-card-head-right{
         display:flex;
         align-items:center;
@@ -2640,18 +2640,18 @@ body.theme-dark .structure-content {
     body.structure-fullscreen-mode #outline-panel { display: none !important; }
     body.structure-fullscreen-mode #structure-panel {
         position: fixed !important; inset: 0 !important;
-        width: 100% !important; max-width: none !important;
+        width: 100% !important; max-width: none !important; height: 100% !important;
         transform: none !important; z-index: 9999 !important;
         border: none !important; border-radius: 0 !important;
-        display: flex !important;
+        display: flex !important; flex-direction: column !important;
     }
     body.structure-fullscreen-mode .structure-content {
-        display: flex; flex-direction: column;
+        display: flex; flex-direction: column; flex: 1; min-height: 0;
     }
     body.structure-fullscreen-mode .structure-list {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 12px; padding: 12px; flex: 1;
+        gap: 12px; padding: 12px; flex: 1; overflow-y: auto;
     }
     body.structure-fullscreen-mode .structure-card {
         margin: 0; margin-left: 0 !important;
@@ -2671,10 +2671,10 @@ body.theme-dark .structure-content {
     body.memo-fullscreen-mode #world-panel { display: none !important; }
     body.memo-fullscreen-mode #memo-panel {
         position: fixed !important; inset: 0 !important;
-        width: 100% !important; max-width: none !important;
+        width: 100% !important; max-width: none !important; height: 100% !important;
         transform: none !important; z-index: 9999 !important;
         border: none !important; border-radius: 0 !important;
-        display: flex !important;
+        display: flex !important; flex-direction: column !important;
     }
 
     body.character-fullscreen-mode header,
@@ -2687,16 +2687,16 @@ body.theme-dark .structure-content {
     body.character-fullscreen-mode #world-panel { display: none !important; }
     body.character-fullscreen-mode #character-panel {
         position: fixed !important; inset: 0 !important;
-        width: 100% !important; max-width: none !important;
+        width: 100% !important; max-width: none !important; height: 100% !important;
         transform: none !important; z-index: 9999 !important;
         border: none !important; border-radius: 0 !important;
-        display: flex !important;
+        display: flex !important; flex-direction: column !important;
     }
     body.character-fullscreen-mode .character-content {
-        display: flex; flex-direction: column;
+        display: flex; flex-direction: column; flex: 1; min-height: 0;
     }
     body.character-fullscreen-mode .character-list {
-        padding: 12px; flex: 1;
+        padding: 12px; flex: 1; overflow-y: auto;
     }
 
     body.world-fullscreen-mode header,
@@ -2709,16 +2709,16 @@ body.theme-dark .structure-content {
     body.world-fullscreen-mode #character-panel { display: none !important; }
     body.world-fullscreen-mode #world-panel {
         position: fixed !important; inset: 0 !important;
-        width: 100% !important; max-width: none !important;
+        width: 100% !important; max-width: none !important; height: 100% !important;
         transform: none !important; z-index: 9999 !important;
         border: none !important; border-radius: 0 !important;
-        display: flex !important;
+        display: flex !important; flex-direction: column !important;
     }
     body.world-fullscreen-mode .world-content {
-        display: flex; flex-direction: column;
+        display: flex; flex-direction: column; flex: 1; min-height: 0;
     }
     body.world-fullscreen-mode .world-list {
-        padding: 12px; flex: 1;
+        padding: 12px; flex: 1; overflow-y: auto;
     }
 
     /* ========== 登場人物パネル ========== */
@@ -2817,7 +2817,7 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
         border-top: 1px dashed var(--border-color);
     }
     .character-description-preview .card-field-body{
-        font-size: 0.75rem;
+        font-size: 0.8rem;
         color: var(--text-muted);
         white-space: nowrap;
         overflow: hidden;
@@ -2831,7 +2831,7 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
     .character-card.expand-2 .character-description-preview { display: none; }
     .character-description-preview {
         display: none;
-        font-size: 0.75rem;
+        font-size: inherit;
         color: var(--text-muted);
         white-space: nowrap;
         overflow: hidden;
@@ -2965,7 +2965,7 @@ body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
         border-top: 1px dashed var(--border-color);
     }
     .world-description-preview .card-field-body{
-        font-size: 0.75rem;
+        font-size: 0.8rem;
         color: var(--text-muted);
         white-space: nowrap;
         overflow: hidden;
@@ -2979,7 +2979,7 @@ body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
     .world-card.expand-2 .world-description-preview { display: none; }
     .world-description-preview {
         display: none;
-        font-size: 0.75rem;
+        font-size: inherit;
         color: var(--text-muted);
         white-space: nowrap;
         overflow: hidden;
@@ -3107,10 +3107,10 @@ body.theme-dark .dynamic-dock-resizer:hover{ background: rgba(255,255,255,0.08);
     body.terms-fullscreen-mode #world-panel { display:none !important; }
     body.terms-fullscreen-mode #terms-panel{
         position: fixed !important; inset:0 !important;
-        width: 100% !important; max-width:none !important;
+        width: 100% !important; max-width:none !important; height: 100% !important;
         transform:none !important; z-index:9999 !important;
         border:none !important; border-radius:0 !important;
-        display:flex !important;
+        display:flex !important; flex-direction: column !important;
         background: var(--pane-terms-bg, #fffbeb) !important;
     }
 
@@ -3262,6 +3262,60 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
   padding-top: 4px;
   padding-bottom: 4px;
 }
+
+    /* ===== Outline indentation (world / character) =====
+       - 階層・移動は outlineLevel(1..4) を使用
+       - カテゴリタグ（世界観: 大/中/詳細、登場人物: 役割）は見た目バッジのまま（階層には使わない）
+    */
+    .world-card, .character-card { --outline-indent: 0px; }
+    .world-card :where(.world-card-header, .world-card-body, .world-card-actions),
+    .character-card :where(.character-card-header, .character-card-body, .character-card-actions){
+      padding-left: calc(10px + var(--outline-indent));
+    }
+
+
+
+    /* ===== Outline level: indentation + accent bar (World / Character) ===== */
+    #world-list, #character-list, #structure-list { overflow-x: hidden; }
+
+    .world-card, .character-card{
+      --outline-margin: 0px;
+      margin-left: var(--outline-margin);
+      width: calc(100% - var(--outline-margin));
+      box-sizing: border-box;
+    }
+
+    /* Border strip should follow outlineLevel (not category/role). Keep category/role as badges. */
+    .world-card{
+      border-left: var(--outline-bar-width, 4px) solid var(--outline-bar-color, #10b981) !important;
+    }
+    .character-card{
+      border-left: var(--outline-bar-width, 3px) solid var(--outline-bar-color, #f9a8d4) !important;
+    }
+
+    .world-card.outline-l1{ --outline-bar-width:4px; --outline-bar-color:#10b981; }
+    .world-card.outline-l2{ --outline-bar-width:3px; --outline-bar-color:#34d399; }
+    .world-card.outline-l3{ --outline-bar-width:2px; --outline-bar-color:#6ee7b7; }
+    .world-card.outline-l4{ --outline-bar-width:1px; --outline-bar-color:#a7f3d0; }
+
+    .character-card.outline-l1{ --outline-bar-width:4px; --outline-bar-color:#ec4899; }
+    .character-card.outline-l2{ --outline-bar-width:3px; --outline-bar-color:#f472b6; }
+    .character-card.outline-l3{ --outline-bar-width:2px; --outline-bar-color:#f9a8d4; }
+    .character-card.outline-l4{ --outline-bar-width:1px; --outline-bar-color:#fbcfe8; }
+
+    /* If a custom color is set, prefer it for the strip color. */
+    .world-card.has-custom-color{ --outline-bar-color: var(--world-card-accent, var(--outline-bar-color)); }
+    .character-card.has-custom-color{ --outline-bar-color: var(--character-card-accent, var(--outline-bar-color)); }
+
+    /* ===== Structure hierarchy: clear dangling feel via indentation ===== */
+    .structure-card{
+      --structure-indent: 0px;
+      margin-left: var(--structure-indent);
+      width: calc(100% - var(--structure-indent));
+      box-sizing: border-box;
+    }
+    .structure-card.level-episode{ --structure-indent: 18px; }
+    .structure-card.level-scene{ --structure-indent: 36px; }
 </style>
 
 <!-- ===== v0.96 hotfix (reader/search/bookmark, active tab color, tab context menu, per-tab stats, focus shortcuts) ===== -->
@@ -4338,7 +4392,7 @@ window.__ccInitPanelDnDAndResizers = function(){
             <button class="app-icon" id="app-icon" title="アプリメニュー">
                 <img src="icons/favicon-32.png" alt="アプリアイコン">
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.0.99</span>
+            <span class="app-title" id="app-title">ⓒエディタver.0.995</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -4397,8 +4451,7 @@ window.__ccInitPanelDnDAndResizers = function(){
                     <button class="btn btn-project-new" onclick="confirmStartNewProject(); closeAllFileDropdowns();" title="新規プロジェクト">🆕 新規プロジェクト</button>
                     <div class="header-file-dropdown-content">
                         <div class="dropdown-item" onclick="openProjectFile(); closeAllFileDropdowns();">📂 開く</div>
-                        <div class="dropdown-item" onclick="openProjectSaveDialog(); closeAllFileDropdowns();">📦 保存（プロジェクト形式）</div>
-                        <div class="dropdown-item" onclick="saveProjectAsText(); closeAllFileDropdowns();">📄 保存（テキスト形式）</div>
+                        <div class="dropdown-item" onclick="openProjectSaveDialog(); closeAllFileDropdowns();">💾 保存</div>
                     </div>
                 </div>
             </div>
@@ -5154,6 +5207,23 @@ window.__ccInitPanelDnDAndResizers = function(){
     <div class="save-dialog" style="max-width:400px;">
         <h3>📦 プロジェクト保存</h3>
         <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">保存する項目を選択してください</p>
+        <div id="proj-save-format-section" style="margin-bottom: 15px; padding: 10px; background: var(--bg-color); border-radius: 8px;">
+            <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: 8px;">保存形式</div>
+            <label style="display: flex; align-items: flex-start; margin-bottom: 8px; cursor: pointer;">
+                <input type="radio" name="proj-save-format" value="ccproj" checked style="margin-top: 3px; margin-right: 8px;">
+                <div>
+                    <div style="font-weight: bold;">📦 .ccproj（プロジェクト形式）</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">再度読み込んで編集可能</div>
+                </div>
+            </label>
+            <label style="display: flex; align-items: flex-start; cursor: pointer;">
+                <input type="radio" name="proj-save-format" value="txt" style="margin-top: 3px; margin-right: 8px;">
+                <div>
+                    <div style="font-weight: bold;">📄 .txt（テキスト形式）</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">閲覧用バックアップ（読込不可）</div>
+                </div>
+            </label>
+        </div>
         <div style="margin-bottom: 15px; font-size: 0.85rem; max-height:200px; overflow-y:auto;">
             <label style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-text" checked> 入力テキスト（全タブ）</label>
             <label style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-memo" checked> メモ（全タブ）</label>
@@ -5161,8 +5231,8 @@ window.__ccInitPanelDnDAndResizers = function(){
             <label style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-character" checked> 登場人物</label>
             <label style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-world" checked> 世界観</label>
             <label style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-terms" checked> 用語</label>
-            <label style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-bookmarks" checked> しおり</label>
-            <label style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-settings" checked> 設定（ペイン幅・色など）</label>
+            <label id="proj-save-bookmarks-row" style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-bookmarks" checked> しおり</label>
+            <label id="proj-save-settings-row" style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-settings" checked> 設定（ペイン幅・色など）</label>
         </div>
         <div id="proj-save-newproject-hint" style="display:none; margin: 0 0 10px 0; font-size:0.78rem; color:var(--text-muted);">
             新規プロジェクトを開始する前にバックアップを推奨します。必要なら「保存して新規開始」を押してください。
@@ -5228,6 +5298,17 @@ window.__ccInitPanelDnDAndResizers = function(){
         <div class="structure-edit-field">
             <label for="structure-edit-name">タイトル</label>
             <input type="text" id="structure-edit-name" placeholder="章/話/シーンのタイトル">
+        </div>
+        <div class="structure-edit-field" style="display:flex; gap:12px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:160px;">
+                <label for="structure-edit-level">アウトラインレベル（章/話/シーン）</label>
+                <select id="structure-edit-level" style="width:100%;">
+                    <option value="chapter">章</option>
+                    <option value="episode">話</option>
+                    <option value="scene">シーン</option>
+                </select>
+                <div class="structure-edit-hint" style="margin-top:4px;">ここで章/話/シーンを変更すると、構成カードの階層（アウトライン）として扱われます</div>
+            </div>
         </div>
         <div class="structure-edit-field">
             <label for="structure-edit-summary">要約</label>
@@ -6341,7 +6422,7 @@ function addNewTab() {
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-    const defaultText = `　ⓒエディタ（使い方） v0.99
+    const defaultText = `　ⓒエディタ（使い方） v0.995
 
 ■ はじめに（最短で使い始める）
 
@@ -9960,6 +10041,7 @@ if (typeof applyPaneHeightSettings === 'function') {
             { key: 'terms', label: '📚 用語', swapFn: swapTermsSide },
             { key: 'memo', label: '📝 メモ', swapFn: swapMemoSide },
             { key: 'outline', label: '📑 目次', swapFn: swapOutlineSide },
+            { key: 'search', label: '🔍 検索', swapFn: swapSearchSide },
         ];
 
         container.innerHTML = panels.map(p => {
@@ -10194,6 +10276,8 @@ if (project.bookmarks) {
         // 通常起動の場合は通常モード
         try { if (!__ccNewProjectFlowActive) __ccSetProjectSaveDialogMode(false); } catch(e) {}
         document.getElementById('project-save-dialog').style.display = 'flex';
+        // フォーマット選択に応じてチェックボックスの表示を更新
+        setupProjectSaveFormatToggle();
     }
     function closeProjectSaveDialog() {
         document.getElementById('project-save-dialog').style.display = 'none';
@@ -10201,7 +10285,40 @@ if (project.bookmarks) {
         try { __ccNewProjectFlowActive = false; } catch(e) {}
     }
 
+    // フォーマット選択に応じてチェックボックスの表示切替
+    function setupProjectSaveFormatToggle() {
+        const radios = document.querySelectorAll('input[name="proj-save-format"]');
+        const bookmarksRow = document.getElementById('proj-save-bookmarks-row');
+        const settingsRow = document.getElementById('proj-save-settings-row');
+        
+        function updateVisibility() {
+            const selectedFormat = document.querySelector('input[name="proj-save-format"]:checked')?.value || 'ccproj';
+            if (selectedFormat === 'txt') {
+                if (bookmarksRow) bookmarksRow.style.display = 'none';
+                if (settingsRow) settingsRow.style.display = 'none';
+            } else {
+                if (bookmarksRow) bookmarksRow.style.display = 'block';
+                if (settingsRow) settingsRow.style.display = 'block';
+            }
+        }
+        
+        radios.forEach(radio => {
+            radio.addEventListener('change', updateVisibility);
+        });
+        updateVisibility();
+    }
+
     function executeProjectSave() {
+        const selectedFormat = document.querySelector('input[name="proj-save-format"]:checked')?.value || 'ccproj';
+        
+        if (selectedFormat === 'txt') {
+            executeProjectSaveAsText();
+        } else {
+            executeProjectSaveAsCcproj();
+        }
+    }
+
+    function executeProjectSaveAsCcproj() {
         const project = { version: 1, timestamp: Date.now() };
 
         if (document.getElementById('proj-save-text').checked) {
@@ -10260,8 +10377,8 @@ if (project.bookmarks) {
         closeProjectSaveDialog();
     }
 
-    // テキスト形式でプロジェクトを保存
-    function saveProjectAsText() {
+    // テキスト形式でプロジェクトを保存（ダイアログから呼び出し）
+    function executeProjectSaveAsText() {
         const lines = [];
         const timestamp = new Date().toLocaleString('ja-JP');
         lines.push(`# プロジェクトエクスポート`);
@@ -10269,94 +10386,106 @@ if (project.bookmarks) {
         lines.push('');
 
         // 入力タブの内容
-        const tabState = JSON.parse(localStorage.getItem(TABS_KEY) || '{}');
-        const tabs = Array.isArray(tabState.tabs) ? tabState.tabs : [];
-        if (tabs.length > 0) {
-            lines.push('========================================');
-            lines.push('【入力テキスト】');
-            lines.push('========================================');
-            tabs.forEach((tab, i) => {
-                lines.push(`\n--- タブ${i+1}: ${tab.name || '無題'} ---`);
-                lines.push(tab.content || '（空）');
-            });
-            lines.push('');
+        if (document.getElementById('proj-save-text').checked) {
+            const tabState = JSON.parse(localStorage.getItem(TABS_KEY) || '{}');
+            const tabs = Array.isArray(tabState.tabs) ? tabState.tabs : [];
+            if (tabs.length > 0) {
+                lines.push('========================================');
+                lines.push('【入力テキスト】');
+                lines.push('========================================');
+                tabs.forEach((tab, i) => {
+                    lines.push(`\n--- タブ${i+1}: ${tab.name || '無題'} ---`);
+                    lines.push(tab.content || '（空）');
+                });
+                lines.push('');
+            }
         }
 
         // メモの内容
-        const memoState = JSON.parse(localStorage.getItem(MEMO_KEY) || '{}');
-        const memoTabs = Array.isArray(memoState.tabs) ? memoState.tabs : [];
-        if (memoTabs.length > 0) {
-            lines.push('========================================');
-            lines.push('【メモ】');
-            lines.push('========================================');
-            memoTabs.forEach((tab, i) => {
-                lines.push(`\n--- メモ${i+1}: ${tab.name || '無題'} ---`);
-                lines.push(tab.content || '（空）');
-            });
-            lines.push('');
+        if (document.getElementById('proj-save-memo').checked) {
+            const memoState = JSON.parse(localStorage.getItem(MEMO_KEY) || '{}');
+            const memoTabs = Array.isArray(memoState.tabs) ? memoState.tabs : [];
+            if (memoTabs.length > 0) {
+                lines.push('========================================');
+                lines.push('【メモ】');
+                lines.push('========================================');
+                memoTabs.forEach((tab, i) => {
+                    lines.push(`\n--- メモ${i+1}: ${tab.name || '無題'} ---`);
+                    lines.push(tab.content || '（空）');
+                });
+                lines.push('');
+            }
         }
 
         // 構成の内容
-        const structureState = JSON.parse(localStorage.getItem('cc_structure_data') || '{}');
-        const structureData = structureState.data || [];
-        if (structureData.length > 0) {
-            lines.push('========================================');
-            lines.push('【構成】');
-            lines.push('========================================');
-            structureData.forEach((card, i) => {
-                const level = {chapter:'章',episode:'話',scene:'シーン'}[card.level] || card.level || '';
-                lines.push(`\n[${i+1}] ${card.title || '無題'} (${level})`);
-                if (card.summary) lines.push(`要約: ${card.summary}`);
-                if (card.tags && card.tags.length) lines.push(`タグ: ${card.tags.join(', ')}`);
-            });
-            lines.push('');
+        if (document.getElementById('proj-save-structure').checked) {
+            const structureState = JSON.parse(localStorage.getItem('cc_structure_data') || '{}');
+            const structureData = structureState.data || [];
+            if (structureData.length > 0) {
+                lines.push('========================================');
+                lines.push('【構成】');
+                lines.push('========================================');
+                structureData.forEach((card, i) => {
+                    const level = {chapter:'章',episode:'話',scene:'シーン'}[card.level] || card.level || '';
+                    lines.push(`\n[${i+1}] ${card.title || '無題'} (${level})`);
+                    if (card.summary) lines.push(`要約: ${card.summary}`);
+                    if (card.tags && card.tags.length) lines.push(`タグ: ${card.tags.join(', ')}`);
+                });
+                lines.push('');
+            }
         }
 
         // 登場人物の内容
-        const characterState = JSON.parse(localStorage.getItem('cc_character_data') || '{}');
-        const characterData = characterState.data || [];
-        if (characterData.length > 0) {
-            lines.push('========================================');
-            lines.push('【登場人物】');
-            lines.push('========================================');
-            const roles = {protagonist:'主人公',heroine:'ヒロイン',antagonist:'敵役',supporting:'脇役',mob:'モブ'};
-            characterData.forEach((card, i) => {
-                lines.push(`\n[${i+1}] ${card.name || '無題'} (${roles[card.role] || card.role || ''})`);
-                if (card.reading) lines.push(`読み: ${card.reading}`);
-                if (card.description) lines.push(`説明: ${card.description}`);
-            });
-            lines.push('');
+        if (document.getElementById('proj-save-character').checked) {
+            const characterState = JSON.parse(localStorage.getItem('cc_character_data') || '{}');
+            const characterData = characterState.data || [];
+            if (characterData.length > 0) {
+                lines.push('========================================');
+                lines.push('【登場人物】');
+                lines.push('========================================');
+                const roles = {protagonist:'主人公',heroine:'ヒロイン',antagonist:'敵役',supporting:'脇役',mob:'モブ'};
+                characterData.forEach((card, i) => {
+                    lines.push(`\n[${i+1}] ${card.name || '無題'} (${roles[card.role] || card.role || ''})`);
+                    if (card.reading) lines.push(`読み: ${card.reading}`);
+                    if (card.description) lines.push(`説明: ${card.description}`);
+                });
+                lines.push('');
+            }
         }
 
         // 世界観の内容
-        const worldState = JSON.parse(localStorage.getItem('cc_world_data') || '{}');
-        const worldData = worldState.data || [];
-        if (worldData.length > 0) {
-            lines.push('========================================');
-            lines.push('【世界観】');
-            lines.push('========================================');
-            const levels = {major:'大カテゴリ',middle:'中カテゴリ',detail:'詳細'};
-            worldData.forEach((card, i) => {
-                lines.push(`\n[${i+1}] ${card.name || '無題'} (${levels[card.level] || card.level || ''})`);
-                if (card.description) lines.push(`説明: ${card.description}`);
-            });
-            lines.push('');
+        if (document.getElementById('proj-save-world').checked) {
+            const worldState = JSON.parse(localStorage.getItem('cc_world_data') || '{}');
+            const worldData = worldState.data || [];
+            if (worldData.length > 0) {
+                lines.push('========================================');
+                lines.push('【世界観】');
+                lines.push('========================================');
+                const levels = {major:'大カテゴリ',middle:'中カテゴリ',detail:'詳細'};
+                worldData.forEach((card, i) => {
+                    lines.push(`\n[${i+1}] ${card.name || '無題'} (${levels[card.level] || card.level || ''})`);
+                    if (card.description) lines.push(`説明: ${card.description}`);
+                });
+                lines.push('');
+            }
         }
 
         // 用語の内容
-        const termsState = JSON.parse(localStorage.getItem('cc_terms_data') || '{}');
-        const termsData = termsState.data || [];
-        if (termsData.length > 0) {
-            lines.push('========================================');
-            lines.push('【用語】');
-            lines.push('========================================');
-            termsData.forEach((term, i) => {
-                lines.push(`\n[${i+1}] ${term.name || '無題'}`);
-                if (term.category) lines.push(`カテゴリ: ${term.category}`);
-                if (term.reading) lines.push(`読み: ${term.reading}`);
-                if (term.description) lines.push(`説明: ${term.description}`);
-            });
-            lines.push('');
+        if (document.getElementById('proj-save-terms') && document.getElementById('proj-save-terms').checked) {
+            const termsState = JSON.parse(localStorage.getItem('cc_terms_data') || '{}');
+            const termsData = termsState.data || [];
+            if (termsData.length > 0) {
+                lines.push('========================================');
+                lines.push('【用語】');
+                lines.push('========================================');
+                termsData.forEach((term, i) => {
+                    lines.push(`\n[${i+1}] ${term.name || '無題'}`);
+                    if (term.category) lines.push(`カテゴリ: ${term.category}`);
+                    if (term.reading) lines.push(`読み: ${term.reading}`);
+                    if (term.description) lines.push(`説明: ${term.description}`);
+                });
+                lines.push('');
+            }
         }
 
         const text = lines.join('\n');
@@ -10365,8 +10494,8 @@ if (project.bookmarks) {
         a.href = URL.createObjectURL(blob);
         a.download = `project_${new Date().toISOString().slice(0,10)}.txt`;
         a.click();
+        closeProjectSaveDialog();
     }
-    window.saveProjectAsText = saveProjectAsText;
 
     function loadProjectFile() {
         const input = document.createElement('input');
@@ -15004,20 +15133,6 @@ function showPresetPanelColorPicker(paneId){
   // ========== 初期化 ==========
   function initStructure() {
     loadStructureData();
-
-    // Default: start fully expanded (one-time migration per panel)
-    try{
-      const key = 'cc_default_expand_applied_structure_v1';
-      const defLv = 3;
-      if (localStorage.getItem(key) !== '1') {
-        (structureData||[]).forEach(c=>{
-          c.expandLevel = defLv;
-          c.expanded = true;
-        });
-        saveStructureData();
-        localStorage.setItem(key,'1');
-      }
-    }catch(e){}
     renderStructureList();
     setupStructureEventListeners();
     setupStructurePanelContextMenu();
@@ -15031,13 +15146,23 @@ function showPresetPanelColorPicker(paneId){
         const parsed = JSON.parse(saved);
         structureData = (parsed.data || []).map(card => ({
           ...card,
+          // 互換性: 古いデータで level が無い/日本語ラベルの場合を補完
+          level: (() => {
+            const vRaw = (card.level ?? card.type ?? card.kind ?? 'scene');
+            const v = String(vRaw);
+            const map = { '章': 'chapter', '話': 'episode', 'シーン': 'scene' };
+            if (map[v]) return map[v];
+            if (v === 'chapter' || v === 'episode' || v === 'scene') return v;
+            return 'scene';
+          })(),
+          outlineLevel: (() => { const v = (card.outlineLevel ?? card.level); const n = parseInt(v, 10); return Number.isFinite(n) ? String(Math.max(1, Math.min(4, n))) : '1'; })(),
           selected: false,
           collapsed: !!card.collapsed,
-          expanded: !!card.expanded,
+          // expanded (boolean) から expandLevel (0..4) への移行対応
+          expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0)),
           linkedCharacters: card.linkedCharacters || [],
           linkedTerms: card.linkedTerms || [],
           linkedWorlds: card.linkedWorlds || [],
-          linkedTerms: card.linkedTerms || [],
           bgColor: card.bgColor ?? card.color ?? '',
           isNew: false
         }));
@@ -15054,7 +15179,7 @@ function showPresetPanelColorPicker(paneId){
 
   function saveStructureData() {
     try {
-      const sanitized = structureData.map(({ selected, isNew, ...rest }) => rest);
+      const sanitized = structureData.map(({ selected, isNew, expanded, ...rest }) => rest);
       localStorage.setItem(STRUCTURE_STORAGE_KEY, JSON.stringify({
         data: sanitized,
         nextId: structureNextId
@@ -15078,7 +15203,6 @@ function showPresetPanelColorPicker(paneId){
       status: 'none',
       tabId: null,
       collapsed: false,
-      expanded: true,
       expandLevel: 3,
       selected: false,
       bgColor: '',
@@ -15196,15 +15320,15 @@ function showPresetPanelColorPicker(paneId){
   function createCardElement(card, index) {
     // 互換性: expanded (boolean) を expandLevel に変換
     if (card.expandLevel === undefined) {
-      card.expandLevel = card.expanded ? 2 : 0;
+      card.expandLevel = card.expanded ? 4 : 0;
     }
-    const expandLevel = Math.max(0, Math.min(2, Number(card.expandLevel) || 0));
+    const expandLevel = Math.max(0, Math.min(4, Number(card.expandLevel) || 0));
     card.expandLevel = expandLevel;
 
     const div = document.createElement('div');
     div.className = `structure-card card-shell level-${card.level}`;
     if (expandLevel > 0) div.classList.add('expanded');
-    if (expandLevel === 3) div.classList.add('fully-expanded');
+    if (expandLevel === 4) div.classList.add('fully-expanded');
     if (card.collapsed) div.classList.add('collapsed');
     if (card.bgColor) {
       div.classList.add('has-custom-color');
@@ -15277,12 +15401,12 @@ function showPresetPanelColorPicker(paneId){
     }
     headLeft.appendChild(toggle);
 
-    // 展開レベルトグル（3段階）
+    // 展開レベルトグル（5段階）
     const expandToggle = document.createElement('span');
     expandToggle.className = 'card-expand-toggle structure-expand-toggle';
-    const expandSymbols = ['▶', '▼', '◆'];
-    const expandTitles = ['名前のみ', 'タグ+プレビュー', 'すべて表示'];
-    const lvl = Math.min(Math.max(expandLevel || 0, 0), 2);
+    const expandSymbols = ['▶', '▽', '🔗', '📝', '◆'];
+    const expandTitles = ['名前のみ', 'タグのみ', 'リンク', '説明のみ', 'すべて表示'];
+    const lvl = Math.min(Math.max(expandLevel || 0, 0), 4);
     expandToggle.textContent = expandSymbols[lvl];
     expandToggle.title = expandTitles[lvl];
     expandToggle.onclick = (e) => {
@@ -15306,6 +15430,12 @@ function showPresetPanelColorPicker(paneId){
     };
     headLeft.appendChild(title);
 
+    // レベル（章/話/シーン）バッジ
+    const levelBadge = document.createElement('span');
+    levelBadge.className = 'card-badge structure-level-badge';
+    levelBadge.textContent = LEVEL_LABELS[card.level] || '';
+    headRight.appendChild(levelBadge);
+
     // ステータスバッジ
     const status = document.createElement('span');
     status.className = `card-badge structure-status status-${card.status}`;
@@ -15315,104 +15445,57 @@ function showPresetPanelColorPicker(paneId){
     header.appendChild(headLeft);
     header.appendChild(headRight);
 
+    
     div.appendChild(header);
 
-    // expandLevel === 1: タグのみ表示
-    if (expandLevel === 1) {
-      const tagsOnlyBody = document.createElement('div');
-      tagsOnlyBody.className = 'structure-card-body';
+    // ===== Body (5段階共通仕様) =====
+    const hasLinkedChars = Array.isArray(card.linkedCharacters) && card.linkedCharacters.length > 0;
+    const hasLinkedWorlds = Array.isArray(card.linkedWorlds) && card.linkedWorlds.length > 0;
+    const hasLinkedTerms = Array.isArray(card.linkedTerms) && card.linkedTerms.length > 0;
 
-      if (card.viewpoint) {
-        const viewpointField = document.createElement('div');
-        viewpointField.className = 'card-field structure-field';
-        viewpointField.innerHTML = `<div class="card-field-label structure-field-label">視点</div><div class="card-field-body"><span class="structure-viewpoint">${escapeHtml(card.viewpoint)}</span></div>`;
-        tagsOnlyBody.appendChild(viewpointField);
-      }
-
-      if (card.tags && card.tags.length > 0) {
-        const tagsField = document.createElement('div');
-        tagsField.className = 'card-field structure-field';
-        tagsField.innerHTML = `<div class="card-field-label structure-field-label">舞台</div><div class="card-field-body"><div class="card-tags structure-tags">${card.tags.map(t => `<span class="structure-tag">${escapeHtml(t)}</span>`).join('')}</div></div>`;
-        tagsOnlyBody.appendChild(tagsField);
-      }
-
-      div.appendChild(tagsOnlyBody);
-    }
-
-    // expandLevel === 2: タグ + 要約1行プレビュー
-    if (expandLevel === 2) {
-      const previewBody = document.createElement('div');
-      previewBody.className = 'structure-card-body';
-
-      if (card.viewpoint) {
-        const viewpointField = document.createElement('div');
-        viewpointField.className = 'card-field structure-field';
-        viewpointField.innerHTML = `<div class="card-field-label structure-field-label">視点</div><div class="card-field-body"><span class="structure-viewpoint">${escapeHtml(card.viewpoint)}</span></div>`;
-        previewBody.appendChild(viewpointField);
-      }
-
-      if (card.tags && card.tags.length > 0) {
-        const tagsField = document.createElement('div');
-        tagsField.className = 'card-field structure-field';
-        tagsField.innerHTML = `<div class="card-field-label structure-field-label">舞台</div><div class="card-field-body"><div class="card-tags structure-tags">${card.tags.map(t => `<span class="structure-tag">${escapeHtml(t)}</span>`).join('')}</div></div>`;
-        previewBody.appendChild(tagsField);
-      }
-
-      if (card.summary) {
-        const summaryPreview = document.createElement('div');
-        summaryPreview.className = 'structure-summary-preview';
-        const firstLine = card.summary.split('\n')[0].substring(0, 80);
-        summaryPreview.textContent = firstLine + (card.summary.length > 80 ? '...' : '');
-        previewBody.appendChild(summaryPreview);
-      }
-
-      // linked input tab (show from expand-2+)
-      {
-        const wrap = document.createElement('div');
-        wrap.innerHTML = ccBuildTabFieldHtml(card.tabId, '');
-        if (wrap.firstElementChild) previewBody.appendChild(wrap.firstElementChild);
-      }
-
-      div.appendChild(previewBody);
-    }
-
-    // expandLevel === 3: 全詳細表示
-    const body = document.createElement('div');
-    body.className = 'structure-card-body';
-    if (expandLevel !== 3) body.style.display = 'none';
-
-    if (card.summary) {
+    const buildSummarySection = () => {
+      if (!card.summary) return null;
+      const summarySection = document.createElement('div');
+      summarySection.className = 'structure-card-body structure-summary-section';
       const summaryField = document.createElement('div');
       summaryField.className = 'card-field structure-field';
       summaryField.innerHTML = `<div class="card-field-label structure-field-label">要約</div><div class="card-field-body structure-summary">${escapeHtml(card.summary)}</div>`;
-      body.appendChild(summaryField);
-    }
+      summarySection.appendChild(summaryField);
+      return summarySection;
+    };
 
-    if (card.viewpoint) {
-      const viewpointField = document.createElement('div');
-      viewpointField.className = 'card-field structure-field';
-      viewpointField.innerHTML = `<div class="card-field-label structure-field-label">視点</div><div class="card-field-body"><span class="structure-viewpoint">${escapeHtml(card.viewpoint)}</span></div>`;
-      body.appendChild(viewpointField);
-    }
-
-    if (card.tags && card.tags.length > 0) {
-      const tagsField = document.createElement('div');
-      tagsField.className = 'card-field structure-field';
-      tagsField.innerHTML = `<div class="card-field-label structure-field-label">舞台</div><div class="card-field-body"><div class="card-tags structure-tags">${card.tags.map(t => `<span class="structure-tag">${escapeHtml(t)}</span>`).join('')}</div></div>`;
-      body.appendChild(tagsField);
-    }
-    {
+    const buildAttrSection = () => {
+      const parts = [];
+      if (card.viewpoint) {
+        parts.push(`<div class="card-field structure-field"><div class="card-field-label structure-field-label">視点</div><div class="card-field-body"><span class="structure-viewpoint">${escapeHtml(card.viewpoint)}</span></div></div>`);
+      }
+      if (Array.isArray(card.tags) && card.tags.length > 0) {
+        parts.push(`<div class="card-field structure-field"><div class="card-field-label structure-field-label">舞台</div><div class="card-field-body"><div class="card-tags structure-tags">${card.tags.map(t => `<span class="structure-tag">${escapeHtml(t)}</span>`).join('')}</div></div></div>`);
+      }
+      if (!parts.length) return null;
       const wrap = document.createElement('div');
-      wrap.innerHTML = ccBuildTabFieldHtml(card.tabId, '');
-      if (wrap.firstElementChild) body.appendChild(wrap.firstElementChild);
-    }
-// リンクされた登場人物・世界観を表示
-    const hasLinkedChars = card.linkedCharacters && card.linkedCharacters.length > 0;
-    const hasLinkedWorlds = card.linkedWorlds && card.linkedWorlds.length > 0;
-    const hasLinkedTerms = card.linkedTerms && card.linkedTerms.length > 0;
-    if (hasLinkedChars || hasLinkedWorlds || hasLinkedTerms) {
+      wrap.className = 'structure-card-body structure-tags-section';
+      wrap.innerHTML = parts.join('');
+      return wrap;
+    };
+
+    const buildLinkedSection = () => {
+      if (!(hasLinkedWorlds || hasLinkedChars || hasLinkedTerms)) return null;
       const linkedSection = document.createElement('div');
       linkedSection.className = 'structure-linked-section terms-linked-section';
+
+      // desired order: 構成 → 世界観 → 登場人物 → 用語（構成カードでは世界観→登場人物→用語）
+      if (hasLinkedWorlds) {
+        const worldData = window.getWorldData ? window.getWorldData() : [];
+        const linkedWorldsHtml = card.linkedWorlds.map(wid => {
+          const world = worldData.find(w => w.id === wid);
+          if (!world) return '';
+          return `<span class="structure-linked-item structure-linked-world" onclick="event.stopPropagation(); goToLinkedPanel('world', ${wid})"><span class="structure-linked-icon">🌍</span><span class="structure-linked-text">${escapeHtml(world.name)}</span></span>`;
+        }).filter(h => h).join('');
+        if (linkedWorldsHtml) {
+          linkedSection.innerHTML += `<div class="card-section"><div class="card-section-title">世界観</div><div class="structure-linked-items">${linkedWorldsHtml}</div></div>`;
+        }
+      }
 
       if (hasLinkedChars) {
         const charData = window.getCharacterData ? window.getCharacterData() : [];
@@ -15423,18 +15506,6 @@ function showPresetPanelColorPicker(paneId){
         }).filter(h => h).join('');
         if (linkedCharsHtml) {
           linkedSection.innerHTML += `<div class="card-section"><div class="card-section-title">登場人物</div><div class="structure-linked-items">${linkedCharsHtml}</div></div>`;
-        }
-      }
-
-      if (hasLinkedWorlds) {
-        const worldData = window.getWorldData ? window.getWorldData() : [];
-        const linkedWorldsHtml = card.linkedWorlds.map(wid => {
-          const world = worldData.find(w => w.id === wid);
-          if (!world) return '';
-          return `<span class="structure-linked-item structure-linked-world" onclick="event.stopPropagation(); goToLinkedPanel('world', ${wid})"><span class="structure-linked-icon">🌍</span><span class="structure-linked-text">${escapeHtml(world.name)}</span></span>`;
-        }).filter(h => h).join('');
-        if (linkedWorldsHtml) {
-          linkedSection.innerHTML += `<div class="card-section"><div class="card-section-title">世界観</div><div class="structure-linked-items">${linkedWorldsHtml}</div></div>`;
         }
       }
 
@@ -15451,12 +15522,45 @@ function showPresetPanelColorPicker(paneId){
         }
       }
 
-      body.appendChild(linkedSection);
+      if (!linkedSection.innerHTML.trim()) return null;
+      return linkedSection;
+    };
+
+    const buildTabField = () => {
+      const wrap = document.createElement('div');
+      wrap.innerHTML = ccBuildTabFieldHtml(card.tabId, '');
+      return wrap.firstElementChild || null;
+    };
+
+    // Apply level rules:
+    // 0: header only
+    // 1: attributes only
+    // 2: attributes + links
+    // 3: summary only
+    // 4: summary + attributes + links + tab (tab always last)
+    if (expandLevel === 1) {
+      const attr = buildAttrSection();
+      if (attr) div.appendChild(attr);
+    } else if (expandLevel === 2) {
+      const attr = buildAttrSection();
+      if (attr) div.appendChild(attr);
+      const links = buildLinkedSection();
+      if (links) div.appendChild(links);
+    } else if (expandLevel === 3) {
+      const summary = buildSummarySection();
+      if (summary) div.appendChild(summary);
+    } else if (expandLevel === 4) {
+      const summary = buildSummarySection();
+      if (summary) div.appendChild(summary);
+      const attr = buildAttrSection();
+      if (attr) div.appendChild(attr);
+      const links = buildLinkedSection();
+      if (links) div.appendChild(links);
+      const tab = buildTabField();
+      if (tab) div.appendChild(tab);
     }
 
-    div.appendChild(body);
-
-    // アクションボタン
+// アクションボタン
     const actions = document.createElement('div');
     actions.className = 'card-actions structure-card-actions';
     actions.innerHTML = `
@@ -15862,8 +15966,9 @@ function showPresetPanelColorPicker(paneId){
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
       <div class="context-menu-item" data-action="expand-0" style="padding-left:24px;">▶ 名前のみ${expandLevel === 0 ? ' ✓' : ''}</div>
       <div class="context-menu-item" data-action="expand-1" style="padding-left:24px;">▽ タグのみ${expandLevel === 1 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-2" style="padding-left:24px;">▼ タグ+プレビュー${expandLevel === 2 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-3" style="padding-left:24px;">◆ すべて表示${expandLevel === 3 ? ' ✓' : ''}</div>
+      <div class="context-menu-item" data-action="expand-2" style="padding-left:24px;">🔗 リンク${expandLevel === 2 ? ' ✓' : ''}</div>
+      <div class="context-menu-item" data-action="expand-3" style="padding-left:24px;">📝 説明のみ${expandLevel === 3 ? ' ✓' : ''}</div>
+      <div class="context-menu-item" data-action="expand-4" style="padding-left:24px;">◆ すべて表示${expandLevel === 4 ? ' ✓' : ''}</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
       <div class="context-menu-item" data-action="color">🎨 カード色を変更</div>
       <div class="context-menu-item" data-action="reset-color">↩ 色をリセット</div>
@@ -15885,17 +15990,15 @@ function showPresetPanelColorPicker(paneId){
         if (action === 'toggle') {
           const target = structureData.find(c => c.id === cardId);
           if (target) {
-            target.expandLevel = ((target.expandLevel || 0) + 1) % 3;
-            target.expanded = target.expandLevel > 0;
+            target.expandLevel = (Math.max(0, Math.min(4, Number(target.expandLevel) || 0)) + 1) % 5;
             saveStructureData();
             renderStructureList();
           }
         }
-        if (action === 'expand-0' || action === 'expand-1' || action === 'expand-2' || action === 'expand-3') {
+        if (/^expand-[0-4]$/.test(action)) {
           const target = structureData.find(c => c.id === cardId);
           if (target) {
             target.expandLevel = parseInt(action.split('-')[1]);
-            target.expanded = target.expandLevel > 0;
             saveStructureData();
             renderStructureList();
           }
@@ -16002,12 +16105,12 @@ function openStructureCardColorPicker(cardId, anchorEl){
   }
 
   // ========== 一括展開レベル（3段階）: 構成 ==========
-  const BULK_EXPAND_SYMBOLS = ['▶', '▼', '◆'];
-  const BULK_EXPAND_TITLES  = ['名前のみ', 'タグ+プレビュー', 'すべて表示'];
+  const BULK_EXPAND_SYMBOLS = ['▶', '▽', '🔗', '📝', '◆'];
+  const BULK_EXPAND_TITLES  = ['名前のみ', 'タグのみ', 'リンク', '説明のみ', 'すべて表示'];
 
   function getUniformStructureExpandLevel() {
     if (!Array.isArray(structureData) || structureData.length === 0) return { level: 0, mixed: false };
-    const getLvl = (c) => (c && c.expandLevel !== undefined) ? (c.expandLevel || 0) : (c && c.expanded ? 2 : 0);
+    const getLvl = (c) => Math.max(0, Math.min(4, Number(c?.expandLevel) || 0));
     const base = getLvl(structureData[0]);
     for (const c of structureData) {
       if (getLvl(c) !== base) return { level: base, mixed: true };
@@ -16027,7 +16130,7 @@ function openStructureCardColorPicker(cardId, anchorEl){
       sym = '≋';
       title = '混在';
     } else {
-      const level = Math.min(Math.max(info.level || 0, 0), 2);
+      const level = Math.min(Math.max(info.level || 0, 0), 4);
       sym = BULK_EXPAND_SYMBOLS[level];
       title = BULK_EXPAND_TITLES[level];
     }
@@ -16050,12 +16153,11 @@ function openStructureCardColorPicker(cardId, anchorEl){
   function cycleStructureBulkExpand(delta) {
     const info = getUniformStructureExpandLevel();
     const base = info.mixed ? (typeof structureBulkExpandLevel === 'number' ? structureBulkExpandLevel : (info.level || 0)) : (info.level || 0);
-    const next = (base + delta + 3) % 3;
+    const next = (base + delta + 5) % 5;
     structureBulkExpandLevel = next;
 
     structureData.forEach(c => {
       c.expandLevel = next;
-      c.expanded = next > 0;
       // 注意: collapsed（章/話の折畳）は別概念なので触れない
     });
 
@@ -16147,6 +16249,16 @@ function openStructureCardColorPicker(cardId, anchorEl){
     document.getElementById('structure-edit-viewpoint').value = card.viewpoint;
     document.getElementById('structure-edit-tags').value = (card.tags || []).join(', ');
     document.getElementById('structure-edit-status').value = card.status;
+    // アウトラインレベル（章/話/シーン）
+    const levelSelect = document.getElementById('structure-edit-level');
+    if (levelSelect) {
+      levelSelect.value = card.level || 'scene';
+      levelSelect.onchange = () => {
+        const lv = levelSelect.value;
+        document.getElementById('structure-edit-title').textContent = (LEVEL_LABELS[lv] || '構成') + 'を編集';
+      };
+    }
+
 
     // 文字数カウント更新
     updateSummaryCount();
@@ -16176,7 +16288,7 @@ function openStructureCardColorPicker(cardId, anchorEl){
     if (tagSuggest) tagSuggest.style.display = 'none';
 
     // タイトル更新
-    document.getElementById('structure-edit-title').textContent = LEVEL_LABELS[card.level] + 'を編集';
+    document.getElementById('structure-edit-title').textContent = (LEVEL_LABELS[(document.getElementById('structure-edit-level')?.value || card.level)] || LEVEL_LABELS[card.level] || '構成') + 'を編集';
 
     // モーダル表示
     document.getElementById('structure-edit-modal').classList.add('show');
@@ -16279,6 +16391,12 @@ function toggleStructureTermLink(termId){
     card.summary = document.getElementById('structure-edit-summary').value.trim();
     card.viewpoint = document.getElementById('structure-edit-viewpoint').value.trim();
     card.status = document.getElementById('structure-edit-status').value;
+    const newLevel = document.getElementById('structure-edit-level')?.value;
+    if (newLevel) {
+      card.level = newLevel;
+      if (card.level === 'scene') card.collapsed = false; // sceneは折りたたみなし
+    }
+
 
     const tagsInput = document.getElementById('structure-edit-tags').value;
     card.tags = tagsInput.split(/[,、]/).map(t => t.trim()).filter(t => t);
@@ -16322,8 +16440,7 @@ if (termContainer) {
   function toggleStructureExpand(cardId) {
     const card = structureData.find(c => c.id === cardId);
     if (card) {
-      card.expandLevel = (Math.max(0, Math.min(2, Number(card.expandLevel) || 0)) + 1) % 3;
-      card.expanded = card.expandLevel > 0;
+      card.expandLevel = (Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) + 1) % 5;
       saveStructureData();
       renderStructureList();
     }
@@ -16387,10 +16504,9 @@ if (termContainer) {
   // ========== 全展開/全折畳 ==========
   function expandAllStructure() {
     // 一括で最大展開（段階を回さず、常に最大へ）
-    structureBulkExpandLevel = 3;
+    structureBulkExpandLevel = 4;
     structureData.forEach(c => {
-      c.expandLevel = 3;
-      c.expanded = true;
+      c.expandLevel = 4;
     });
     saveStructureData();
     renderStructureList();
@@ -16402,7 +16518,6 @@ if (termContainer) {
     structureBulkExpandLevel = 0;
     structureData.forEach(c => {
       c.expandLevel = 0;
-      c.expanded = false;
     });
     saveStructureData();
     renderStructureList();
@@ -16507,23 +16622,23 @@ if (termContainer) {
   }
 
   function toggleStructureViewpointSuggestions() {
-    console.log('[DEBUG] toggleStructureViewpointSuggestions called');
+    window.DEBUG_LOG && console.log('[DEBUG] toggleStructureViewpointSuggestions called');
     const container = document.getElementById('structure-viewpoint-suggestions');
-    console.log('[DEBUG] container:', container);
+    window.DEBUG_LOG && console.log('[DEBUG] container:', container);
     if (!container) return;
     if (container.style.display === 'none' || !container.style.display) {
       const viewpoints = getAllStructureViewpoints();
-      console.log('[DEBUG] viewpoints:', viewpoints);
+      window.DEBUG_LOG && console.log('[DEBUG] viewpoints:', viewpoints);
       if (viewpoints.length === 0) {
         container.innerHTML = '<span class="no-tags">まだ視点がありません</span>';
       } else {
         container.innerHTML = viewpoints.map(v => `<span class="tag-item" onclick="setStructureViewpoint('${v.replace(/'/g, "\\'")}')">${v}</span>`).join('');
       }
       container.style.display = 'flex';
-      console.log('[DEBUG] container.style.display set to flex');
+      window.DEBUG_LOG && console.log('[DEBUG] container.style.display set to flex');
     } else {
       container.style.display = 'none';
-      console.log('[DEBUG] container hidden');
+      window.DEBUG_LOG && console.log('[DEBUG] container hidden');
     }
   }
 
@@ -16954,7 +17069,8 @@ if (swapBtn) swapBtn.classList.remove('is-active');
             isNew: false,
             linkedCharacters: card.linkedCharacters || [],
           linkedTerms: card.linkedTerms || [],
-            linkedWorlds: card.linkedWorlds || []
+            linkedWorlds: card.linkedWorlds || [],
+            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
           }));
           structureNextId = imported.nextId || (Math.max(...structureData.map(c => c.id), 0) + 1);
         } else {
@@ -16968,7 +17084,8 @@ if (swapBtn) swapBtn.classList.remove('is-active');
             isNew: false,
             linkedCharacters: card.linkedCharacters || [],
           linkedTerms: card.linkedTerms || [],
-            linkedWorlds: card.linkedWorlds || []
+            linkedWorlds: card.linkedWorlds || [],
+            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
           }));
           structureData = [...structureData, ...newCards];
           structureNextId = newId;
@@ -17051,19 +17168,6 @@ if (swapBtn) swapBtn.classList.remove('is-active');
 
   function initCharacter() {
     loadCharacterData();
-
-    // Default: start fully expanded (one-time migration per panel)
-    try{
-      const key = 'cc_default_expand_applied_character_v1';
-      const defLv = 3;
-      if (localStorage.getItem(key) !== '1') {
-        (characterData||[]).forEach(c=>{
-          c.expandLevel = defLv;
-        });
-        saveCharacterData();
-        localStorage.setItem(key,'1');
-      }
-    }catch(e){}
     renderCharacterList();
     setupCharacterFullscreenListener();
     setupCharacterPanelContextMenu();
@@ -17076,14 +17180,18 @@ if (swapBtn) swapBtn.classList.remove('is-active');
         const parsed = JSON.parse(saved);
         characterData = (parsed.data || []).map(card => ({
           ...card,
+          outlineLevel: (() => { const v = (card.outlineLevel ?? card.level); const n = parseInt(v, 10); return Number.isFinite(n) ? String(Math.max(1, Math.min(4, n))) : '1'; })(),
+          role: (card.role ?? 'protagonist'),
+          affiliationTags: Array.isArray(card.affiliationTags) ? card.affiliationTags : [],
+          freeTags: Array.isArray(card.freeTags) ? card.freeTags : [],
           selected: false,
           linkedStructures: card.linkedStructures || [],
           linkedWorlds: card.linkedWorlds || [],
           linkedTerms: card.linkedTerms || [],
           tabId: card.tabId ?? null,
           bgColor: card.bgColor ?? card.color ?? '',
-          // expanded (boolean) から expandLevel (0,1,2) への移行対応
-          expandLevel: card.expandLevel !== undefined ? card.expandLevel : (card.expanded ? 2 : 0)
+          // expanded (boolean) から expandLevel (0..4) への移行対応
+          expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
         }));
         characterNextId = parsed.nextId || 1;
       }
@@ -17096,7 +17204,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
 
   function saveCharacterData() {
     try {
-      const sanitized = characterData.map(({ selected, ...rest }) => rest);
+      const sanitized = characterData.map(({ selected, expanded, ...rest }) => rest);
       localStorage.setItem(CHARACTER_STORAGE_KEY, JSON.stringify({
         data: sanitized,
         nextId: characterNextId
@@ -17112,6 +17220,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
       id: characterNextId++,
       name: CHARACTER_ROLES[role] + (count + 1),
       reading: '',
+      outlineLevel: '1',
       role: role,
       affiliationTags: [],
       freeTags: [],
@@ -17168,11 +17277,18 @@ if (swapBtn) swapBtn.classList.remove('is-active');
   function createCharacterCardElement(card, index) {
     const div = document.createElement('div');
     div.className = `character-card card-shell role-${card.role}`;
-    const level = Math.max(0, Math.min(2, Number(card.expandLevel) || 0));
+    // アウトラインレベル(1..4)でインデント（階層表現）。役割(role)とは独立。
+    const __ol = (() => { const n = parseInt(card.outlineLevel, 10); const v = Number.isFinite(n) ? Math.max(1, Math.min(4, n)) : 1; card.outlineLevel = String(v); return v; })();
+    div.classList.add('outline-l' + __ol);
+    div.style.setProperty('--outline-margin', `${(__ol - 1) * 18}px`);
+    div.style.setProperty('--outline-indent', `0px`);
+
+    const level = Math.max(0, Math.min(4, Number(card.expandLevel) || 0));
     card.expandLevel = level;
     if (level === 1) div.classList.add('expand-1');
     else if (level === 2) div.classList.add('expand-2');
-    else if (level >= 3) div.classList.add('expand-3');
+    else if (level === 3) div.classList.add('expand-3');
+    else if (level >= 4) div.classList.add('expand-4');
         if (level > 0) div.classList.add('expanded');
 if (card.bgColor) {
       div.classList.add('has-custom-color');
@@ -17181,6 +17297,10 @@ if (card.bgColor) {
     }
     div.dataset.id = card.id;
     div.draggable = true;
+
+    // 古いデータ互換: 配列が無い場合に補完
+    card.affiliationTags = Array.isArray(card.affiliationTags) ? card.affiliationTags : [];
+    card.freeTags = Array.isArray(card.freeTags) ? card.freeTags : [];
 
     const affiliationHtml = card.affiliationTags.length > 0
       ? card.affiliationTags.map(t => `<span class="character-affiliation-tag">${escapeHtml(t)}</span>`).join('')
@@ -17225,14 +17345,55 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedWorldsHtml || linkedTer
       </div>
     ` : '';
 
-    // 展開レベルに応じたトグルアイコン（3段階）
-    const toggleSymbols = ['▶', '▼', '◆'];
-    const toggleSymbol = toggleSymbols[Math.min(level, 2)];
+    // 展開レベルに応じたトグルアイコン（5段階）
+    const toggleSymbols = ['▶', '▽', '🔗', '📝', '◆'];
+    const toggleSymbol = toggleSymbols[Math.min(level, 4)];
 
-    // 説明の1行目プレビュー
-    const descPreview = card.description ? card.description.split('\n')[0].substring(0, 50) + (card.description.length > 50 ? '...' : '') : '';
+    // 5段階表示のHTML構築（共通仕様）
+    let bodyContent = '';
 
-    div.innerHTML = `
+    const addAttrs = () => {
+      let html = '';
+      if (affiliationHtml) {
+        html += `<div class="card-field character-field character-tags-section"><div class="card-field-label">所属</div><div class="card-field-body"><div class="card-tags character-tags">${affiliationHtml}</div></div></div>`;
+      }
+      if (freeTagsHtml) {
+        html += `<div class="card-field character-field character-tags-section"><div class="card-field-label">タグ</div><div class="card-field-body"><div class="card-tags character-tags">${freeTagsHtml}</div></div></div>`;
+      }
+      return html;
+    };
+
+    const addLinks = () => {
+      return linkedSectionHtml ? `<div class="character-linked-section">${linkedSectionHtml}</div>` : '';
+    };
+
+    const addDesc = () => {
+      return card.description
+        ? `<div class="card-field character-field character-description"><div class="card-field-label">説明</div><div class="card-field-body" style="white-space:pre-wrap;">${escapeHtml(card.description)}</div></div>`
+        : '';
+    };
+
+    // Level rules:
+    // 0: header only
+    // 1: attrs only
+    // 2: attrs + links
+    // 3: desc only
+    // 4: desc + attrs + links + tab (tab last)
+    if (level === 1) {
+      bodyContent += addAttrs();
+    } else if (level === 2) {
+      bodyContent += addAttrs();
+      bodyContent += addLinks();
+    } else if (level === 3) {
+      bodyContent += addDesc();
+    } else if (level >= 4) {
+      bodyContent += addDesc();
+      bodyContent += addAttrs();
+      bodyContent += addLinks();
+      bodyContent += tabLinkHtml;
+    }
+
+div.innerHTML = `
       <div class="card-header character-card-header" onclick="toggleCharacterExpand(${card.id})">
         <div class="card-head-left">
           <input type="checkbox" class="card-select character-select" ${card.selected ? 'checked' : ''} onclick="event.stopPropagation(); toggleCharacterSelect(${card.id})">
@@ -17250,18 +17411,11 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedWorldsHtml || linkedTer
           <span class="card-badge character-role-badge">${escapeHtml(CHARACTER_ROLES[card.role] || card.role || '未設定')}</span>
         </div>
       </div>
-      <div class="character-card-body">
-        ${affiliationHtml ? `<div class="card-field character-field"><div class="card-field-label">所属</div><div class="card-field-body"><div class="card-tags character-tags">${affiliationHtml}</div></div></div>` : ''}
-        ${freeTagsHtml ? `<div class="card-field character-field"><div class="card-field-label">タグ</div><div class="card-field-body"><div class="card-tags character-tags">${freeTagsHtml}</div></div></div>` : ''}
-        ${descPreview ? `<div class="card-field character-field character-description-preview"><div class="card-field-label">説明</div><div class="card-field-body">${escapeHtml(descPreview)}</div></div>` : ''}
-        ${card.description ? `<div class="card-field character-field character-description"><div class="card-field-label">説明</div><div class="card-field-body" style="white-space:pre-wrap;">${escapeHtml(card.description)}</div></div>` : ''}
-        ${tabLinkHtml}
-        ${linkedSectionHtml}
-        <div class="card-actions character-card-actions">
-          <button onclick="openCharacterEditModal(${card.id})">✏️ 編集</button>
-          <button onclick="duplicateCharacterCard(${card.id})">📋 複製</button>
-          <button class="btn-delete" onclick="deleteCharacterCard(${card.id})">🗑 削除</button>
-        </div>
+      ${level > 0 ? `<div class="character-card-body">${bodyContent}</div>` : ''}
+      <div class="card-actions character-card-actions">
+        <button onclick="openCharacterEditModal(${card.id})">✏️ 編集</button>
+        <button onclick="duplicateCharacterCard(${card.id})">📋 複製</button>
+        <button class="btn-delete" onclick="deleteCharacterCard(${card.id})">🗑 削除</button>
       </div>
     `;
 
@@ -17306,12 +17460,15 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedWorldsHtml || linkedTer
   }
 
   // ========== 一括展開レベル（3段階）: 登場人物 ==========
-  const CHARACTER_BULK_EXPAND_SYMBOLS = ['▶', '▼', '◆'];
-  const CHARACTER_BULK_EXPAND_TITLES  = ['名前のみ', 'タグ+プレビュー', 'すべて表示'];
+  const CHARACTER_BULK_EXPAND_SYMBOLS = ['▶', '▽', '🔗', '📝', '◆'];
+  const CHARACTER_BULK_EXPAND_TITLES  = ['名前のみ', 'タグのみ', 'リンク', '説明のみ', 'すべて表示'];
 
-  function getUniformCharacterExpandLevel() {
+  
+  // 現在の一括レベル（混在状態からの基準用）
+  let characterBulkExpandLevel = 0;
+function getUniformCharacterExpandLevel() {
     if (!Array.isArray(characterData) || characterData.length === 0) return { level: 0, mixed: false };
-    const getLvl = (c) => (c && c.expandLevel !== undefined) ? (c.expandLevel || 0) : 0;
+    const getLvl = (c) => (c && c.expandLevel !== undefined) ? Math.max(0, Math.min(4, Number(c.expandLevel) || 0)) : (c && c.expanded ? 4 : 0);
     const base = getLvl(characterData[0]);
     for (const c of characterData) {
       if (getLvl(c) !== base) return { level: base, mixed: true };
@@ -17331,7 +17488,7 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedWorldsHtml || linkedTer
       sym = '≋';
       title = '混在';
     } else {
-      const level = Math.min(Math.max(info.level || 0, 0), 2);
+      const level = Math.min(Math.max(info.level || 0, 0), 4);
       sym = CHARACTER_BULK_EXPAND_SYMBOLS[level];
       title = CHARACTER_BULK_EXPAND_TITLES[level];
     }
@@ -17356,8 +17513,8 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedWorldsHtml || linkedTer
   function toggleCharacterExpand(cardId) {
     const card = characterData.find(c => c.id === cardId);
     if (card) {
-      // 4段階展開: 0 → 1 → 2 → 3 → 0
-      card.expandLevel = (Math.max(0, Math.min(2, Number(card.expandLevel) || 0)) + 1) % 3;
+      // 5段階展開: 0 → 1 → 2 → 3 → 4 → 0
+      card.expandLevel = (Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) + 1) % 5;
       saveCharacterData();
       renderCharacterList();
     }
@@ -17445,14 +17602,14 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedWorldsHtml || linkedTer
   }
 
   function toggleCharacterStructureLink(id) {
-    console.log('[DEBUG] toggleCharacterStructureLink called with id:', id);
+    window.DEBUG_LOG && console.log('[DEBUG] toggleCharacterStructureLink called with id:', id);
     const container = document.getElementById('character-edit-structures');
-    console.log('[DEBUG] container:', container);
+    window.DEBUG_LOG && console.log('[DEBUG] container:', container);
     const item = container?.querySelector(`[data-id="${id}"]`);
-    console.log('[DEBUG] item:', item);
+    window.DEBUG_LOG && console.log('[DEBUG] item:', item);
     if (item) {
       item.classList.toggle('selected');
-      console.log('[DEBUG] item classes after toggle:', item.className);
+      window.DEBUG_LOG && console.log('[DEBUG] item classes after toggle:', item.className);
     }
   }
 
@@ -17543,8 +17700,9 @@ function toggleCharacterTermLink(termId){
 
   function saveCharacterCard() {
     if (editingCharacterId === null) return;
-    const card = characterData.find(c => c.id === editingCharacterId);
-    if (!card) return;
+    const idx = characterData.findIndex(c => c.id === editingCharacterId);
+    if (idx < 0) return;
+    const card = characterData[idx];
 
     const roleInputValue = document.getElementById('character-edit-role').value.trim();
     // 日本語ラベルをキーに変換（プリセット役割のみ）
@@ -17560,8 +17718,7 @@ function toggleCharacterTermLink(termId){
     card.lastNameReading = document.getElementById('character-edit-lastname-reading').value.trim();
     card.middleNameReading = document.getElementById('character-edit-middlename-reading').value.trim();
     card.firstNameReading = document.getElementById('character-edit-firstname-reading').value.trim();
-
-    card.outlineLevel = document.getElementById('character-edit-level')?.value || '1';
+    const desiredOutlineLevel = document.getElementById('character-edit-level')?.value || '1';
     card.role = roleValue || '未設定';
     card.affiliationTags = document.getElementById('character-edit-affiliation').value.split(',').map(t => t.trim()).filter(t => t);
     card.freeTags = document.getElementById('character-edit-freetags').value.split(',').map(t => t.trim()).filter(t => t);
@@ -17596,6 +17753,13 @@ if (termContainer) {
     }
 
     card.isNew = false;
+
+    // アウトラインレベル変更はサブツリーごと反映（ぶら下がりを維持）
+    if (typeof applyCharacterOutlineLevelAtIndex === 'function') {
+      applyCharacterOutlineLevelAtIndex(idx, desiredOutlineLevel);
+    } else {
+      card.outlineLevel = desiredOutlineLevel;
+    }
 
     saveCharacterData();
     renderCharacterList();
@@ -17674,60 +17838,31 @@ if (termContainer) {
 
   function handleCharacterDrop(e) {
     e.preventDefault();
-    e.currentTarget.classList.remove('drag-over');
+    e.stopPropagation();
+
+    if (draggingCharacterId == null) return;
     const targetId = parseInt(e.currentTarget.dataset.id);
-    if (draggingCharacterId === null || draggingCharacterId === targetId) return;
+    if (targetId === draggingCharacterId) return;
 
-    const dragIdx = characterData.findIndex(c => c.id === draggingCharacterId);
-    const targetIdx = characterData.findIndex(c => c.id === targetId);
-    if (dragIdx < 0 || targetIdx < 0) return;
+    const fromIdx = characterData.findIndex(c => c.id === draggingCharacterId);
+    const toIdx = characterData.findIndex(c => c.id === targetId);
+    if (fromIdx < 0 || toIdx < 0) return;
 
-    const [moved] = characterData.splice(dragIdx, 1);
-    characterData.splice(targetIdx, 0, moved);
+    const range = getCharacterCardRangeWithChildren(fromIdx);
+    if (toIdx >= range.start && toIdx <= range.end) return;
+
+    const blockLen = range.end - range.start + 1;
+    const block = characterData.splice(range.start, blockLen);
+
+    let insertPos = toIdx;
+    if (insertPos > range.start) insertPos -= blockLen;
+    characterData.splice(insertPos, 0, ...block);
+
+    draggingCharacterId = null;
     saveCharacterData();
     renderCharacterList();
   }
 
-  // コンテキストメニュー
-  function showCharacterPanelContextMenu(e) {
-    hideCharacterContextMenu();
-    let menu = document.getElementById('character-context-menu');
-    if (!menu) {
-      menu = document.createElement('div');
-      menu.id = 'character-context-menu';
-      menu.className = 'context-menu';
-      menu.style.cssText = 'position:fixed; background:var(--panel-bg); border:1px solid var(--border-color); border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:10000; padding:4px 0; min-width:160px;';
-      document.body.appendChild(menu);
-    }
-
-    menu.innerHTML = `
-      <div class="context-menu-item" data-action="new-card">＋新しいカード</div>
-      <div class="context-menu-item" data-action="bg-color">🎨 背景色の変更</div>
-    `;
-
-    menu.querySelectorAll('.context-menu-item').forEach(item => {
-      item.onclick = (ev) => {
-        ev.stopPropagation();
-        const action = item.dataset.action;
-        if (action === 'new-card') createCharacterCardFromSelection();
-        if (action === 'bg-color') {
-          showBgColorPicker('character-panel');
-        }
-        hideCharacterContextMenu();
-      };
-    });
-
-    if (typeof adjustContextMenuPosition === 'function') {
-      adjustContextMenuPosition(menu, e.clientX, e.clientY);
-    } else {
-      menu.style.left = e.clientX + 'px';
-      menu.style.top = e.clientY + 'px';
-      menu.style.display = 'block';
-    }
-
-    characterMenuClickHandler = () => hideCharacterContextMenu();
-    setTimeout(() => document.addEventListener('click', characterMenuClickHandler), 0);
-  }
 
   function showCharacterContextMenu(e, cardId) {
     hideCharacterContextMenu();
@@ -17752,8 +17887,9 @@ if (termContainer) {
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
       <div class="context-menu-item" data-action="expand-0" style="padding-left:24px;">▶ 名前のみ${expandLevel === 0 ? ' ✓' : ''}</div>
       <div class="context-menu-item" data-action="expand-1" style="padding-left:24px;">▽ タグのみ${expandLevel === 1 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-2" style="padding-left:24px;">▼ タグ+プレビュー${expandLevel === 2 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-3" style="padding-left:24px;">◆ すべて表示${expandLevel === 3 ? ' ✓' : ''}</div>
+      <div class="context-menu-item" data-action="expand-2" style="padding-left:24px;">🔗 リンク${expandLevel === 2 ? ' ✓' : ''}</div>
+      <div class="context-menu-item" data-action="expand-3" style="padding-left:24px;">📝 説明のみ${expandLevel === 3 ? ' ✓' : ''}</div>
+      <div class="context-menu-item" data-action="expand-4" style="padding-left:24px;">◆ すべて表示${expandLevel === 4 ? ' ✓' : ''}</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
       <div class="context-menu-item" data-action="color">🎨 色を変更</div>
       <div class="context-menu-item" data-action="reset-color">↩ 色をリセット</div>
@@ -17761,8 +17897,8 @@ if (termContainer) {
       <div class="context-menu-item" data-action="move-up">⬆ 上へ</div>
       <div class="context-menu-item" data-action="move-down">⬇ 下へ</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
-      <div class="context-menu-item" data-action="role-up">⬆ 役割を上げる</div>
-      <div class="context-menu-item" data-action="role-down">⬇ 役割を下げる</div>
+      <div class="context-menu-item" data-action="outline-up">⬆ アウトラインレベルを上げる</div>
+      <div class="context-menu-item" data-action="outline-down">⬇ アウトラインレベルを下げる</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
       <div class="context-menu-item" data-action="delete" style="color:#dc2626;">🗑 削除</div>
     `;
@@ -17776,9 +17912,9 @@ if (termContainer) {
         if (action === 'duplicate') duplicateCharacterCard(cardId);
         if (action === 'toggle') {
           const target = characterData.find(c => c.id === cardId);
-          if (target) { target.expandLevel = ((target.expandLevel || 0) + 1) % 3; saveCharacterData(); renderCharacterList(); }
+          if (target) { target.expandLevel = (Math.max(0, Math.min(4, Number(target.expandLevel) || 0)) + 1) % 5; saveCharacterData(); renderCharacterList(); }
         }
-        if (action === 'expand-0' || action === 'expand-1' || action === 'expand-2' || action === 'expand-3') {
+        if (/^expand-[0-4]$/.test(action)) {
           const target = characterData.find(c => c.id === cardId);
           if (target) {
             target.expandLevel = parseInt(action.split('-')[1]);
@@ -17788,8 +17924,8 @@ if (termContainer) {
         }
         if (action === 'move-up') moveCharacterCard(cardId, -1);
         if (action === 'move-down') moveCharacterCard(cardId, 1);
-        if (action === 'role-up') changeCharacterRole(cardId, -1);
-        if (action === 'role-down') changeCharacterRole(cardId, 1);
+        if (action === 'outline-up') changeCharacterOutlineLevel(cardId, -1);
+        if (action === 'outline-down') changeCharacterOutlineLevel(cardId, 1);
         if (action === 'delete') deleteCharacterCard(cardId);
         if (action === 'color') openCharacterColorPicker(cardId);
         if (action === 'reset-color') resetCharacterColor(cardId);
@@ -17902,10 +18038,12 @@ if (termContainer) {
     if (characterData.length === 0) { alert('エクスポートするキャラクターがありません'); return; }
     let text = '【登場人物一覧】\n\n';
     characterData.forEach(c => {
-      text += `■ ${c.name}${c.reading ? ` (${c.reading})` : ''} [${CHARACTER_ROLES[c.role]}]\n`;
-      if (c.affiliationTags.length > 0) text += `  所属: ${c.affiliationTags.join(', ')}\n`;
-      if (c.freeTags.length > 0) text += `  タグ: ${c.freeTags.join(', ')}\n`;
-      if (c.description) text += `  説明: ${c.description}\n`;
+      const ol = (() => { const n = parseInt(c.outlineLevel, 10); return Number.isFinite(n) ? Math.max(1, Math.min(4, n)) : 1; })();
+      const indent = '  '.repeat(Math.max(0, ol - 1));
+      text += `${indent}■ ${c.name}${c.reading ? ` (${c.reading})` : ''} [${CHARACTER_ROLES[c.role]}]\n`;
+      if (c.affiliationTags.length > 0) text += `${indent}  所属: ${c.affiliationTags.join(', ')}\n`;
+      if (c.freeTags.length > 0) text += `${indent}  タグ: ${c.freeTags.join(', ')}\n`;
+      if (c.description) text += `${indent}  説明: ${c.description}\n`;
       text += '\n';
     });
     const blob = new Blob([text], { type: 'text/plain' });
@@ -17916,37 +18054,163 @@ if (termContainer) {
   }
 
   // 上下移動
+  function getCharacterOutlineLevel(card) {
+    const n = parseInt(card?.outlineLevel, 10);
+    if (!Number.isFinite(n)) return 1;
+    return Math.max(1, Math.min(4, n));
+  }
+
+  // カード範囲取得（子要素を含む）
+  function getCharacterCardRangeWithChildren(cardIdx) {
+    const base = getCharacterOutlineLevel(characterData[cardIdx]);
+    let endIdx = cardIdx;
+    for (let i = cardIdx + 1; i < characterData.length; i++) {
+      if (getCharacterOutlineLevel(characterData[i]) <= base) break;
+      endIdx = i;
+    }
+    return { start: cardIdx, end: endIdx };
+  }
+
+  function findCharacterParentIndex(idx) {
+    const L = getCharacterOutlineLevel(characterData[idx]);
+    for (let i = idx - 1; i >= 0; i--) {
+      if (getCharacterOutlineLevel(characterData[i]) < L) return i;
+    }
+    return -1;
+  }
+
+  function findCharacterPrevSiblingIndex(idx) {
+    const L = getCharacterOutlineLevel(characterData[idx]);
+    const parent = findCharacterParentIndex(idx);
+    for (let i = idx - 1; i >= 0; i--) {
+      const li = getCharacterOutlineLevel(characterData[i]);
+      if (li < L) break;
+      if (li === L && findCharacterParentIndex(i) === parent) return i;
+    }
+    return -1;
+  }
+
+  function findCharacterNextSiblingIndex(rangeEnd, idx) {
+    const L = getCharacterOutlineLevel(characterData[idx]);
+    const parent = findCharacterParentIndex(idx);
+    for (let i = rangeEnd + 1; i < characterData.length; i++) {
+      const li = getCharacterOutlineLevel(characterData[i]);
+      if (li < L) break;
+      if (li === L && findCharacterParentIndex(i) === parent) return i;
+    }
+    return -1;
+  }
+
+  // 上下移動（子要素と一緒に移動）
   function moveCharacterCard(cardId, direction) {
     const idx = characterData.findIndex(c => c.id === cardId);
     if (idx < 0) return;
-    const newIdx = idx + direction;
-    if (newIdx < 0 || newIdx >= characterData.length) return;
-    const [card] = characterData.splice(idx, 1);
-    characterData.splice(newIdx, 0, card);
+
+    const range = getCharacterCardRangeWithChildren(idx);
+    const blockLen = range.end - range.start + 1;
+
+    if (direction === -1) {
+      const prevIdx = findCharacterPrevSiblingIndex(range.start);
+      if (prevIdx < 0) return;
+
+      const block = characterData.splice(range.start, blockLen);
+      characterData.splice(prevIdx, 0, ...block);
+
+      saveCharacterData();
+      renderCharacterList();
+      return;
+    }
+
+    if (direction === 1) {
+      const nextIdx = findCharacterNextSiblingIndex(range.end, range.start);
+      if (nextIdx < 0) return;
+
+      const nextRange = getCharacterCardRangeWithChildren(nextIdx);
+      const insertPosOriginal = nextRange.end + 1;
+
+      const block = characterData.splice(range.start, blockLen);
+      let insertPos = insertPosOriginal;
+      if (insertPos > range.start) insertPos -= blockLen;
+      characterData.splice(insertPos, 0, ...block);
+
+      saveCharacterData();
+      renderCharacterList();
+      return;
+    }
+  }
+
+
+
+  // アウトラインレベル(1..4)を上下で変更（見た目の階層・まとめ移動に反映）
+  function applyCharacterOutlineLevelAtIndex(idx, desiredLevel) {
+    if (!Array.isArray(characterData) || idx < 0 || idx >= characterData.length) return;
+    const range = getCharacterCardRangeWithChildren(idx);
+    const cur = getCharacterOutlineLevel(characterData[idx]);
+    let desired = Math.max(1, Math.min(4, Number(desiredLevel) || 1));
+    if (desired === cur) return;
+
+    // インデントを深くする場合は、直前カードにぶら下がれる範囲に制限
+    if (desired > cur) {
+      if (idx === 0) desired = 1;
+      else {
+        const prevLvl = getCharacterOutlineLevel(characterData[idx - 1]);
+        desired = Math.min(desired, prevLvl + 1);
+      }
+    }
+
+    // サブツリー全体を同じ量だけシフト（子も一緒に上下する）
+    let minL = 99, maxL = 0;
+    for (let i = range.start; i <= range.end; i++) {
+      const l = getCharacterOutlineLevel(characterData[i]);
+      minL = Math.min(minL, l);
+      maxL = Math.max(maxL, l);
+    }
+
+    let shift = desired - cur;
+    if (maxL + shift > 4) shift = 4 - maxL;
+    if (minL + shift < 1) shift = 1 - minL;
+    if (shift === 0) return;
+
+    for (let i = range.start; i <= range.end; i++) {
+      const old = getCharacterOutlineLevel(characterData[i]);
+      characterData[i].outlineLevel = String(Math.max(1, Math.min(4, old + shift)));
+    }
+  }
+
+  function changeCharacterOutlineLevel(cardId, delta) {
+    const idx = characterData.findIndex(c => c.id === cardId);
+    if (idx < 0) return;
+    const cur = getCharacterOutlineLevel(characterData[idx]);
+    const desired = cur + (Number(delta) || 0);
+    applyCharacterOutlineLevelAtIndex(idx, desired);
     saveCharacterData();
     renderCharacterList();
   }
 
-  // 役割の階層変更
-  const ROLE_ORDER = ['protagonist', 'heroine', 'antagonist', 'supporting', 'mob'];
-  function changeCharacterRole(cardId, direction) {
-    const card = characterData.find(c => c.id === cardId);
-    if (!card) return;
-    const currentIdx = ROLE_ORDER.indexOf(card.role);
-    const newIdx = currentIdx + direction;
-    if (newIdx < 0 || newIdx >= ROLE_ORDER.length) return;
-    card.role = ROLE_ORDER[newIdx];
+
+  // 役割を上下（循環）で変更：並び/階層とは独立（アウトラインレベルに影響しない）
+  function changeCharacterRole(cardId, delta) {
+    const idx = characterData.findIndex(c => c.id === cardId);
+    if (idx < 0) return;
+    const card = characterData[idx];
+
+    const keys = Object.keys(CHARACTER_ROLES);
+    if (!keys.length) return;
+
+    const cur = (card.role && keys.includes(card.role)) ? card.role : keys[0];
+    const pos = keys.indexOf(cur);
+    const nextPos = (pos + (delta || 0) + keys.length) % keys.length;
+
+    card.role = keys[nextPos];
+
     saveCharacterData();
     renderCharacterList();
   }
-
-  // 全展開・全折畳
-  let characterBulkExpandLevel = 0;
 
   function cycleCharacterBulkExpand(delta) {
     const info = getUniformCharacterExpandLevel();
     const base = info.mixed ? (typeof characterBulkExpandLevel === 'number' ? characterBulkExpandLevel : (info.level || 0)) : (info.level || 0);
-    const next = (base + delta + 3) % 3;
+    const next = (base + delta + 5) % 5;
     characterBulkExpandLevel = next;
 
     characterData.forEach(c => { c.expandLevel = next; });
@@ -17956,8 +18220,8 @@ if (termContainer) {
 
   function expandAllCharacter() {
     // 一括で最大展開（段階を回さず、常に最大へ）
-    characterBulkExpandLevel = 3;
-    characterData.forEach(c => { c.expandLevel = 3; c.expanded = true; });
+    characterBulkExpandLevel = 4;
+    characterData.forEach(c => { c.expandLevel = 4; });
     saveCharacterData();
     renderCharacterList();
 
@@ -18004,9 +18268,9 @@ if (termContainer) {
   }
 
   function toggleCharacterRoleSuggestions() {
-    console.log('[DEBUG] toggleCharacterRoleSuggestions called');
+    window.DEBUG_LOG && console.log('[DEBUG] toggleCharacterRoleSuggestions called');
     const container = document.getElementById('character-role-suggestions');
-    console.log('[DEBUG] container:', container);
+    window.DEBUG_LOG && console.log('[DEBUG] container:', container);
     if (!container) return;
     if (container.style.display === 'none' || !container.style.display) {
       // プリセット: キー→日本語ラベルのマッピング
@@ -18031,13 +18295,13 @@ if (termContainer) {
         ).join('');
       }
 
-      console.log('[DEBUG] html:', html);
+      window.DEBUG_LOG && console.log('[DEBUG] html:', html);
       container.innerHTML = html;
       container.style.display = 'flex';
-      console.log('[DEBUG] container.style.display set to flex');
+      window.DEBUG_LOG && console.log('[DEBUG] container.style.display set to flex');
     } else {
       container.style.display = 'none';
-      console.log('[DEBUG] container hidden');
+      window.DEBUG_LOG && console.log('[DEBUG] container hidden');
     }
   }
 
@@ -18294,7 +18558,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
             linkedStructures: card.linkedStructures || [],
             linkedWorlds: card.linkedWorlds || [],
           linkedTerms: card.linkedTerms || [],
-            expandLevel: card.expandLevel || 0
+            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
           }));
           characterNextId = imported.nextId || (Math.max(...characterData.map(c => c.id), 0) + 1);
         } else {
@@ -18310,7 +18574,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
             linkedStructures: card.linkedStructures || [],
             linkedWorlds: card.linkedWorlds || [],
           linkedTerms: card.linkedTerms || [],
-            expandLevel: card.expandLevel || 0
+            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
           }));
           characterData = [...characterData, ...newCards];
           characterNextId = newId;
@@ -18421,19 +18685,6 @@ if (swapBtn) swapBtn.classList.remove('is-active');
 
   function initWorld() {
     loadWorldData();
-
-    // Default: start fully expanded (one-time migration per panel)
-    try{
-      const key = 'cc_default_expand_applied_world_v1';
-      const defLv = 3;
-      if (localStorage.getItem(key) !== '1') {
-        (worldData||[]).forEach(c=>{
-          c.expandLevel = defLv;
-        });
-        saveWorldData();
-        localStorage.setItem(key,'1');
-      }
-    }catch(e){}
     renderWorldList();
     setupWorldFullscreenListener();
     setupWorldPanelContextMenu();
@@ -18446,16 +18697,17 @@ if (swapBtn) swapBtn.classList.remove('is-active');
         const parsed = JSON.parse(saved);
         worldData = (parsed.data || []).map(card => ({
           ...card,
+          outlineLevel: (() => { const v = card.outlineLevel; const n = parseInt(v, 10); return Number.isFinite(n) ? String(Math.max(1, Math.min(4, n))) : '1'; })(),
+          termTags: Array.isArray(card.termTags) ? card.termTags : [],
           selected: false,
           linkedCharacters: card.linkedCharacters || [],
           linkedTerms: card.linkedTerms || [],
           linkedWorlds: card.linkedWorlds || [],
-          linkedTerms: card.linkedTerms || [],
           linkedStructures: card.linkedStructures || [],
           tabId: card.tabId ?? null,
           bgColor: card.bgColor ?? card.color ?? '',
-          // expanded (boolean) から expandLevel (0,1,2) への移行対応
-          expandLevel: card.expandLevel !== undefined ? card.expandLevel : (card.expanded ? 2 : 0)
+          // expanded (boolean) から expandLevel (0..4) への移行対応
+          expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
         }));
         worldNextId = parsed.nextId || 1;
       }
@@ -18468,7 +18720,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
 
   function saveWorldData() {
     try {
-      const sanitized = worldData.map(({ selected, ...rest }) => rest);
+      const sanitized = worldData.map(({ selected, expanded, ...rest }) => rest);
       localStorage.setItem(WORLD_STORAGE_KEY, JSON.stringify({
         data: sanitized,
         nextId: worldNextId
@@ -18483,6 +18735,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     const newCard = {
       id: worldNextId++,
       name: WORLD_LEVELS[level] + (count + 1),
+      outlineLevel: '1',
       level: level,
       termTags: [],
       linkedCharacters: [],
@@ -18539,11 +18792,19 @@ if (swapBtn) swapBtn.classList.remove('is-active');
   function createWorldCardElement(card, index) {
     const div = document.createElement('div');
     div.className = `world-card card-shell level-${card.level}`;
-    const expandLevel = card.expandLevel || 0;
+    // アウトラインレベル(1..4)でインデント（階層表現）。カテゴリ(level=major/middle/detail)とは独立。
+    const __ol = (() => { const n = parseInt(card.outlineLevel, 10); const v = Number.isFinite(n) ? Math.max(1, Math.min(4, n)) : 1; card.outlineLevel = String(v); return v; })();
+    div.classList.add('outline-l' + __ol);
+    div.style.setProperty('--outline-margin', `${(__ol - 1) * 18}px`);
+    div.style.setProperty('--outline-indent', `0px`);
+
+    const expandLevel = Math.max(0, Math.min(4, Number(card.expandLevel) || 0));
+    card.expandLevel = expandLevel;
     if (expandLevel === 1) div.classList.add('expand-1');
     else if (expandLevel === 2) div.classList.add('expand-2');
-    else if (expandLevel >= 3) div.classList.add('expand-3');
-        if (expandLevel > 0) div.classList.add('expanded');
+    else if (expandLevel === 3) div.classList.add('expand-3');
+    else if (expandLevel >= 4) div.classList.add('expand-4');
+    if (expandLevel > 0) div.classList.add('expanded');
 if (card.bgColor) {
       div.classList.add('has-custom-color');
       div.style.setProperty('--world-card-accent', card.bgColor);
@@ -18551,6 +18812,9 @@ if (card.bgColor) {
     }
     div.dataset.id = card.id;
     div.draggable = true;
+
+    // 古いデータ互換: 配列が無い場合に補完
+    card.termTags = Array.isArray(card.termTags) ? card.termTags : [];
 
     const termTagsHtml = card.termTags.length > 0
       ? card.termTags.map(t => `<span class="world-term-tag">${escapeHtml(t)}</span>`).join('')
@@ -18603,14 +18867,52 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedCharactersHtml || linke
       </div>
     ` : '';
 
-    // 展開レベルに応じたトグルアイコン（3段階）
-    const toggleSymbols = ['▶', '▼', '◆'];
-    const toggleSymbol = toggleSymbols[Math.min(expandLevel, 2)];
+    // 展開レベルに応じたトグルアイコン（5段階）
+    const toggleSymbols = ['▶', '▽', '🔗', '📝', '◆'];
+    const toggleSymbol = toggleSymbols[Math.min(expandLevel, 4)];
 
-    // 説明の1行目プレビュー
-    const descPreview = card.description ? card.description.split('\n')[0].substring(0, 50) + (card.description.length > 50 ? '...' : '') : '';
+    // 5段階表示のHTML構築（共通仕様）
+    let bodyContent = '';
 
-    div.innerHTML = `
+    const addAttrs = () => {
+      let html = '';
+      if (termTagsHtml) {
+        html += `<div class="card-field world-field world-tags-section"><div class="card-field-label">タグ</div><div class="card-field-body"><div class="card-tags world-tags">${termTagsHtml}</div></div></div>`;
+      }
+      return html;
+    };
+
+    const addLinks = () => {
+      return linkedSectionHtml ? `<div class="world-linked-section">${linkedSectionHtml}</div>` : '';
+    };
+
+    const addDesc = () => {
+      return card.description
+        ? `<div class="card-field world-field world-description"><div class="card-field-label">説明</div><div class="card-field-body" style="white-space:pre-wrap;">${escapeHtml(card.description)}</div></div>`
+        : '';
+    };
+
+    // Level rules:
+    // 0: header only
+    // 1: attrs only
+    // 2: attrs + links
+    // 3: desc only
+    // 4: desc + attrs + links + tab (tab last)
+    if (expandLevel === 1) {
+      bodyContent += addAttrs();
+    } else if (expandLevel === 2) {
+      bodyContent += addAttrs();
+      bodyContent += addLinks();
+    } else if (expandLevel === 3) {
+      bodyContent += addDesc();
+    } else if (expandLevel >= 4) {
+      bodyContent += addDesc();
+      bodyContent += addAttrs();
+      bodyContent += addLinks();
+      bodyContent += tabLinkHtml;
+    }
+
+div.innerHTML = `
       <div class="card-header world-card-header" onclick="toggleWorldExpand(${card.id})">
         <div class="card-head-left">
           <input type="checkbox" class="card-select world-select" ${card.selected ? 'checked' : ''} onclick="event.stopPropagation(); toggleWorldSelect(${card.id})">
@@ -18625,17 +18927,11 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedCharactersHtml || linke
           <span class="card-badge world-level-badge">${escapeHtml(WORLD_LEVELS[card.level] || card.level || '未設定')}</span>
         </div>
       </div>
-      <div class="world-card-body">
-        ${termTagsHtml ? `<div class="card-field world-field"><div class="card-field-label">タグ</div><div class="card-field-body"><div class="card-tags world-tags">${termTagsHtml}</div></div></div>` : ''}
-        ${descPreview ? `<div class="card-field world-field world-description-preview"><div class="card-field-label">説明</div><div class="card-field-body">${escapeHtml(descPreview)}</div></div>` : ''}
-        ${card.description ? `<div class="card-field world-field world-description"><div class="card-field-label">説明</div><div class="card-field-body" style="white-space:pre-wrap;">${escapeHtml(card.description)}</div></div>` : ''}
-        ${tabLinkHtml}
-        ${linkedSectionHtml}
-        <div class="card-actions world-card-actions">
-          <button onclick="openWorldEditModal(${card.id})">✏️ 編集</button>
-          <button onclick="duplicateWorldCard(${card.id})">📋 複製</button>
-          <button class="btn-delete" onclick="deleteWorldCard(${card.id})">🗑 削除</button>
-        </div>
+      ${expandLevel > 0 ? `<div class="world-card-body">${bodyContent}</div>` : ''}
+      <div class="card-actions world-card-actions">
+        <button onclick="openWorldEditModal(${card.id})">✏️ 編集</button>
+        <button onclick="duplicateWorldCard(${card.id})">📋 複製</button>
+        <button class="btn-delete" onclick="deleteWorldCard(${card.id})">🗑 削除</button>
       </div>
     `;
 
@@ -18680,12 +18976,15 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedCharactersHtml || linke
   }
 
   // ========== 一括展開レベル（3段階）: 世界観 ==========
-  const WORLD_BULK_EXPAND_SYMBOLS = ['▶', '▼', '◆'];
-  const WORLD_BULK_EXPAND_TITLES  = ['名前のみ', 'タグ+プレビュー', 'すべて表示'];
+  const WORLD_BULK_EXPAND_SYMBOLS = ['▶', '▽', '🔗', '📝', '◆'];
+  const WORLD_BULK_EXPAND_TITLES  = ['名前のみ', 'タグのみ', 'リンク', '説明のみ', 'すべて表示'];
 
-  function getUniformWorldExpandLevel() {
+  
+  // 現在の一括レベル（混在状態からの基準用）
+  let worldBulkExpandLevel = 0;
+function getUniformWorldExpandLevel() {
     if (!Array.isArray(worldData) || worldData.length === 0) return { level: 0, mixed: false };
-    const getLvl = (c) => (c && c.expandLevel !== undefined) ? (c.expandLevel || 0) : 0;
+    const getLvl = (c) => (c && c.expandLevel !== undefined) ? Math.max(0, Math.min(4, Number(c.expandLevel) || 0)) : (c && c.expanded ? 4 : 0);
     const base = getLvl(worldData[0]);
     for (const c of worldData) {
       if (getLvl(c) !== base) return { level: base, mixed: true };
@@ -18705,7 +19004,7 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedCharactersHtml || linke
       sym = '≋';
       title = '混在';
     } else {
-      const level = Math.min(Math.max(info.level || 0, 0), 2);
+      const level = Math.min(Math.max(info.level || 0, 0), 4);
       sym = WORLD_BULK_EXPAND_SYMBOLS[level];
       title = WORLD_BULK_EXPAND_TITLES[level];
     }
@@ -18730,8 +19029,8 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedCharactersHtml || linke
   function toggleWorldExpand(cardId) {
     const card = worldData.find(c => c.id === cardId);
     if (card) {
-      // 4段階展開: 0 → 1 → 2 → 3 → 0
-      card.expandLevel = (Math.max(0, Math.min(2, Number(card.expandLevel) || 0)) + 1) % 3;
+      // 5段階展開: 0 → 1 → 2 → 3 → 4 → 0
+      card.expandLevel = (Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) + 1) % 5;
       saveWorldData();
       renderWorldList();
     }
@@ -18905,15 +19204,16 @@ function toggleWorldTermLink(termId){
 
   function saveWorldCard() {
     if (editingWorldId === null) return;
-    const card = worldData.find(c => c.id === editingWorldId);
-    if (!card) return;
+    const idx = worldData.findIndex(c => c.id === editingWorldId);
+    if (idx < 0) return;
+    const card = worldData[idx];
 
     const levelInputValue = document.getElementById('world-edit-level').value.trim();
     // 日本語ラベルをキーに変換（プリセットカテゴリのみ）
     const LABEL_TO_KEY = { '大カテゴリ': 'major', '中カテゴリ': 'middle', '詳細': 'detail' };
     const levelValue = LABEL_TO_KEY[levelInputValue] || levelInputValue;
     card.name = document.getElementById('world-edit-name').value.trim() || levelInputValue || '名前未設定';
-    card.outlineLevel = document.getElementById('world-edit-outline-level')?.value || '1';
+    const desiredOutlineLevel = document.getElementById('world-edit-outline-level')?.value || '1';
     card.level = levelValue || '未設定';
     card.termTags = document.getElementById('world-edit-termtags').value.split(',').map(t => t.trim()).filter(t => t);
     card.description = document.getElementById('world-edit-description').value.trim();
@@ -18954,6 +19254,13 @@ if (termContainer) {
     }
 
     card.isNew = false;
+
+    // アウトラインレベル変更はサブツリーごと反映（ぶら下がりを維持）
+    if (typeof applyWorldOutlineLevelAtIndex === 'function') {
+      applyWorldOutlineLevelAtIndex(idx, desiredOutlineLevel);
+    } else {
+      card.outlineLevel = desiredOutlineLevel;
+    }
 
     saveWorldData();
     renderWorldList();
@@ -19032,60 +19339,31 @@ if (termContainer) {
 
   function handleWorldDrop(e) {
     e.preventDefault();
-    e.currentTarget.classList.remove('drag-over');
+    e.stopPropagation();
+
+    if (draggingWorldId == null) return;
     const targetId = parseInt(e.currentTarget.dataset.id);
-    if (draggingWorldId === null || draggingWorldId === targetId) return;
+    if (targetId === draggingWorldId) return;
 
-    const dragIdx = worldData.findIndex(c => c.id === draggingWorldId);
-    const targetIdx = worldData.findIndex(c => c.id === targetId);
-    if (dragIdx < 0 || targetIdx < 0) return;
+    const fromIdx = worldData.findIndex(c => c.id === draggingWorldId);
+    const toIdx = worldData.findIndex(c => c.id === targetId);
+    if (fromIdx < 0 || toIdx < 0) return;
 
-    const [moved] = worldData.splice(dragIdx, 1);
-    worldData.splice(targetIdx, 0, moved);
+    const range = getWorldCardRangeWithChildren(fromIdx);
+    if (toIdx >= range.start && toIdx <= range.end) return; // 自分の子孫へドロップは無視
+
+    const blockLen = range.end - range.start + 1;
+    const block = worldData.splice(range.start, blockLen);
+
+    let insertPos = toIdx;
+    if (insertPos > range.start) insertPos -= blockLen; // 取り除いたぶん補正
+    worldData.splice(insertPos, 0, ...block);
+
+    draggingWorldId = null;
     saveWorldData();
     renderWorldList();
   }
 
-  // コンテキストメニュー
-  function showWorldPanelContextMenu(e) {
-    hideWorldContextMenu();
-    let menu = document.getElementById('world-context-menu');
-    if (!menu) {
-      menu = document.createElement('div');
-      menu.id = 'world-context-menu';
-      menu.className = 'context-menu';
-      menu.style.cssText = 'position:fixed; background:var(--panel-bg); border:1px solid var(--border-color); border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:10000; padding:4px 0; min-width:160px;';
-      document.body.appendChild(menu);
-    }
-
-    menu.innerHTML = `
-      <div class="context-menu-item" data-action="new-card">＋新しいカード</div>
-      <div class="context-menu-item" data-action="bg-color">🎨 背景色の変更</div>
-    `;
-
-    menu.querySelectorAll('.context-menu-item').forEach(item => {
-      item.onclick = (ev) => {
-        ev.stopPropagation();
-        const action = item.dataset.action;
-        if (action === 'new-card') createWorldCardFromSelection();
-        if (action === 'bg-color') {
-          showBgColorPicker('world-panel');
-        }
-        hideWorldContextMenu();
-      };
-    });
-
-    if (typeof adjustContextMenuPosition === 'function') {
-      adjustContextMenuPosition(menu, e.clientX, e.clientY);
-    } else {
-      menu.style.left = e.clientX + 'px';
-      menu.style.top = e.clientY + 'px';
-      menu.style.display = 'block';
-    }
-
-    worldMenuClickHandler = () => hideWorldContextMenu();
-    setTimeout(() => document.addEventListener('click', worldMenuClickHandler), 0);
-  }
 
   function showWorldContextMenu(e, cardId) {
     hideWorldContextMenu();
@@ -19110,8 +19388,9 @@ if (termContainer) {
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
       <div class="context-menu-item" data-action="expand-0" style="padding-left:24px;">▶ 名前のみ${expandLevel === 0 ? ' ✓' : ''}</div>
       <div class="context-menu-item" data-action="expand-1" style="padding-left:24px;">▽ タグのみ${expandLevel === 1 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-2" style="padding-left:24px;">▼ タグ+プレビュー${expandLevel === 2 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-3" style="padding-left:24px;">◆ すべて表示${expandLevel === 3 ? ' ✓' : ''}</div>
+      <div class="context-menu-item" data-action="expand-2" style="padding-left:24px;">🔗 リンク${expandLevel === 2 ? ' ✓' : ''}</div>
+      <div class="context-menu-item" data-action="expand-3" style="padding-left:24px;">📝 説明のみ${expandLevel === 3 ? ' ✓' : ''}</div>
+      <div class="context-menu-item" data-action="expand-4" style="padding-left:24px;">◆ すべて表示${expandLevel === 4 ? ' ✓' : ''}</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
       <div class="context-menu-item" data-action="color">🎨 色を変更</div>
       <div class="context-menu-item" data-action="reset-color">↩ 色をリセット</div>
@@ -19119,8 +19398,8 @@ if (termContainer) {
       <div class="context-menu-item" data-action="move-up">⬆ 上へ</div>
       <div class="context-menu-item" data-action="move-down">⬇ 下へ</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
-      <div class="context-menu-item" data-action="level-up">⬆ レベルを上げる</div>
-      <div class="context-menu-item" data-action="level-down">⬇ レベルを下げる</div>
+      <div class="context-menu-item" data-action="outline-up">⬆ アウトラインレベルを上げる</div>
+      <div class="context-menu-item" data-action="outline-down">⬇ アウトラインレベルを下げる</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
       <div class="context-menu-item" data-action="delete" style="color:#dc2626;">🗑 削除</div>
     `;
@@ -19134,9 +19413,9 @@ if (termContainer) {
         if (action === 'duplicate') duplicateWorldCard(cardId);
         if (action === 'toggle') {
           const target = worldData.find(c => c.id === cardId);
-          if (target) { target.expandLevel = ((target.expandLevel || 0) + 1) % 3; saveWorldData(); renderWorldList(); }
+          if (target) { target.expandLevel = (Math.max(0, Math.min(4, Number(target.expandLevel) || 0)) + 1) % 5; saveWorldData(); renderWorldList(); }
         }
-        if (action === 'expand-0' || action === 'expand-1' || action === 'expand-2' || action === 'expand-3') {
+        if (/^expand-[0-4]$/.test(action)) {
           const target = worldData.find(c => c.id === cardId);
           if (target) {
             target.expandLevel = parseInt(action.split('-')[1]);
@@ -19146,8 +19425,8 @@ if (termContainer) {
         }
         if (action === 'move-up') moveWorldCard(cardId, -1);
         if (action === 'move-down') moveWorldCard(cardId, 1);
-        if (action === 'level-up') changeWorldLevel(cardId, -1);
-        if (action === 'level-down') changeWorldLevel(cardId, 1);
+        if (action === 'outline-up') changeWorldOutlineLevel(cardId, -1);
+        if (action === 'outline-down') changeWorldOutlineLevel(cardId, 1);
         if (action === 'delete') deleteWorldCard(cardId);
         if (action === 'color') openWorldColorPicker(cardId);
         if (action === 'reset-color') resetWorldColor(cardId);
@@ -19260,8 +19539,9 @@ if (termContainer) {
     if (worldData.length === 0) { alert('エクスポートする項目がありません'); return; }
     let text = '【世界観設定】\n\n';
     worldData.forEach(c => {
-      const indent = c.level === 'major' ? '' : (c.level === 'middle' ? '  ' : '    ');
-      text += `${indent}■ ${c.name} [${WORLD_LEVELS[c.level]}]\n`;
+      const ol = (() => { const n = parseInt(c.outlineLevel, 10); return Number.isFinite(n) ? Math.max(1, Math.min(4, n)) : 1; })();
+      const indent = '  '.repeat(Math.max(0, ol - 1));
+      text += `${indent}■ ${c.name} [${WORLD_LEVELS[c.level] || c.level}]\n`;
       if (c.termTags.length > 0) text += `${indent}  用語: ${c.termTags.join(', ')}\n`;
       if (c.description) text += `${indent}  説明: ${c.description}\n`;
       text += '\n';
@@ -19274,76 +19554,166 @@ if (termContainer) {
   }
 
   // カード範囲取得（子要素を含む）
+  function getWorldOutlineLevel(card) {
+    const n = parseInt(card?.outlineLevel, 10);
+    if (!Number.isFinite(n)) return 1;
+    return Math.max(1, Math.min(4, n));
+  }
+
+  // カード範囲取得（子要素を含む）: outlineLevel が自分より深い間は子要素として含める
   function getWorldCardRangeWithChildren(cardIdx) {
-    const card = worldData[cardIdx];
-    if (!card) return { start: cardIdx, end: cardIdx };
+    const base = getWorldOutlineLevel(worldData[cardIdx]);
     let endIdx = cardIdx;
-    if (card.level === 'major') {
-      for (let i = cardIdx + 1; i < worldData.length; i++) {
-        if (worldData[i].level === 'major') break;
-        endIdx = i;
-      }
-    } else if (card.level === 'middle') {
-      for (let i = cardIdx + 1; i < worldData.length; i++) {
-        if (worldData[i].level === 'major' || worldData[i].level === 'middle') break;
-        endIdx = i;
-      }
+    for (let i = cardIdx + 1; i < worldData.length; i++) {
+      if (getWorldOutlineLevel(worldData[i]) <= base) break;
+      endIdx = i;
     }
     return { start: cardIdx, end: endIdx };
   }
+
+  function findWorldParentIndex(idx) {
+    const L = getWorldOutlineLevel(worldData[idx]);
+    for (let i = idx - 1; i >= 0; i--) {
+      if (getWorldOutlineLevel(worldData[i]) < L) return i;
+    }
+    return -1;
+  }
+
+  function findWorldPrevSiblingIndex(idx) {
+    const L = getWorldOutlineLevel(worldData[idx]);
+    const parent = findWorldParentIndex(idx);
+    for (let i = idx - 1; i >= 0; i--) {
+      const li = getWorldOutlineLevel(worldData[i]);
+      if (li < L) break; // 親の外に出た
+      if (li === L && findWorldParentIndex(i) === parent) return i;
+    }
+    return -1;
+  }
+
+  function findWorldNextSiblingIndex(rangeEnd, idx) {
+    const L = getWorldOutlineLevel(worldData[idx]);
+    const parent = findWorldParentIndex(idx);
+    for (let i = rangeEnd + 1; i < worldData.length; i++) {
+      const li = getWorldOutlineLevel(worldData[i]);
+      if (li < L) break; // 親の外に出た
+      if (li === L && findWorldParentIndex(i) === parent) return i;
+    }
+    return -1;
+  }
+
 
   // 上下移動（子要素と一緒に移動）
   function moveWorldCard(cardId, direction) {
     const idx = worldData.findIndex(c => c.id === cardId);
     if (idx < 0) return;
-    const card = worldData[idx];
+
     const range = getWorldCardRangeWithChildren(idx);
-    const count = range.end - range.start + 1;
+    const blockLen = range.end - range.start + 1;
+    const baseLevel = getWorldOutlineLevel(worldData[idx]);
 
     if (direction === -1) {
-      if (idx <= 0) return;
-      let targetIdx = idx - 1;
-      while (targetIdx > 0) {
-        const prevCard = worldData[targetIdx - 1];
-        if (prevCard.level === 'major') break;
-        if (prevCard.level === 'middle' && card.level === 'major') break;
-        if (prevCard.level === card.level) break;
-        targetIdx--;
-      }
-      const cardsToMove = worldData.splice(range.start, count);
-      worldData.splice(targetIdx, 0, ...cardsToMove);
-    } else if (direction === 1) {
-      const nextIdx = range.end + 1;
-      if (nextIdx >= worldData.length) return;
-      const nextRange = getWorldCardRangeWithChildren(nextIdx);
-      const cardsToMove = worldData.splice(range.start, count);
-      const insertPos = nextRange.end - count + 1;
-      worldData.splice(insertPos, 0, ...cardsToMove);
+      const prevIdx = findWorldPrevSiblingIndex(range.start);
+      if (prevIdx < 0) return;
+
+      const block = worldData.splice(range.start, blockLen);
+      worldData.splice(prevIdx, 0, ...block);
+
+      saveWorldData();
+      renderWorldList();
+      return;
     }
+
+    if (direction === 1) {
+      const nextIdx = findWorldNextSiblingIndex(range.end, range.start);
+      if (nextIdx < 0) return;
+
+      const nextRange = getWorldCardRangeWithChildren(nextIdx);
+      const insertPosOriginal = nextRange.end + 1;
+
+      const block = worldData.splice(range.start, blockLen);
+      let insertPos = insertPosOriginal;
+      if (insertPos > range.start) insertPos -= blockLen;
+      worldData.splice(insertPos, 0, ...block);
+
+      saveWorldData();
+      renderWorldList();
+      return;
+    }
+  }
+
+
+
+  // アウトラインレベル(1..4)を上下で変更（見た目の階層・まとめ移動に反映）
+  function applyWorldOutlineLevelAtIndex(idx, desiredLevel) {
+    if (!Array.isArray(worldData) || idx < 0 || idx >= worldData.length) return;
+    const range = getWorldCardRangeWithChildren(idx);
+    const cur = getWorldOutlineLevel(worldData[idx]);
+    let desired = Math.max(1, Math.min(4, Number(desiredLevel) || 1));
+    if (desired === cur) return;
+
+    // インデントを深くする（数値が大きくなる）場合は、直前カードにぶら下がれる範囲に制限
+    if (desired > cur) {
+      if (idx === 0) desired = 1;
+      else {
+        const prevLvl = getWorldOutlineLevel(worldData[idx - 1]);
+        desired = Math.min(desired, prevLvl + 1);
+      }
+    }
+
+    // サブツリー全体が 1..4 に収まるように調整（子も一緒にレベルシフト）
+    let minL = 99, maxL = 0;
+    for (let i = range.start; i <= range.end; i++) {
+      const l = getWorldOutlineLevel(worldData[i]);
+      minL = Math.min(minL, l);
+      maxL = Math.max(maxL, l);
+    }
+
+    let shift = desired - cur;
+    if (maxL + shift > 4) shift = 4 - maxL;
+    if (minL + shift < 1) shift = 1 - minL;
+    if (shift === 0) return;
+
+    for (let i = range.start; i <= range.end; i++) {
+      const old = getWorldOutlineLevel(worldData[i]);
+      worldData[i].outlineLevel = String(Math.max(1, Math.min(4, old + shift)));
+    }
+  }
+
+  function changeWorldOutlineLevel(cardId, delta) {
+    const idx = worldData.findIndex(c => c.id === cardId);
+    if (idx < 0) return;
+    const cur = getWorldOutlineLevel(worldData[idx]);
+    const desired = cur + (Number(delta) || 0);
+    applyWorldOutlineLevelAtIndex(idx, desired);
     saveWorldData();
     renderWorldList();
   }
 
-  // レベル変更
-  const LEVEL_ORDER = ['major', 'middle', 'detail'];
-  function changeWorldLevel(cardId, direction) {
-    const card = worldData.find(c => c.id === cardId);
-    if (!card) return;
-    const currentIdx = LEVEL_ORDER.indexOf(card.level);
-    const newIdx = currentIdx + direction;
-    if (newIdx < 0 || newIdx >= LEVEL_ORDER.length) return;
-    card.level = LEVEL_ORDER[newIdx];
+
+  // カテゴリレベル（大/中/詳細）を上下（循環）で変更：アウトライン階層とは独立
+  function changeWorldLevel(cardId, delta) {
+    const idx = worldData.findIndex(c => c.id === cardId);
+    if (idx < 0) return;
+    const card = worldData[idx];
+
+    const keys = ['major', 'middle', 'detail'];
+    const LABEL_TO_KEY = { '大カテゴリ': 'major', '中カテゴリ': 'middle', '詳細': 'detail' };
+
+    const curKey = LABEL_TO_KEY[card.level] || card.level;
+    const curIdx = keys.indexOf(curKey);
+    const base = curIdx >= 0 ? curIdx : 0;
+    const nextIdx = (base + (delta || 0) + keys.length) % keys.length;
+
+    card.level = keys[nextIdx];
+
     saveWorldData();
     renderWorldList();
   }
-
-  // 全展開・全折畳
-  let worldBulkExpandLevel = 0;
 
   function cycleWorldBulkExpand(delta) {
     const info = getUniformWorldExpandLevel();
     const base = info.mixed ? (typeof worldBulkExpandLevel === 'number' ? worldBulkExpandLevel : (info.level || 0)) : (info.level || 0);
-    const next = (base + delta + 3) % 3;
+    const next = (base + delta + 5) % 5;
     worldBulkExpandLevel = next;
 
     worldData.forEach(c => { c.expandLevel = next; });
@@ -19353,8 +19723,8 @@ if (termContainer) {
 
   function expandAllWorld() {
     // 一括で最大展開（段階を回さず、常に最大へ）
-    worldBulkExpandLevel = 3;
-    worldData.forEach(w => { w.expandLevel = 3; w.expanded = true; });
+    worldBulkExpandLevel = 4;
+    worldData.forEach(w => { w.expandLevel = 4; });
     saveWorldData();
     renderWorldList();
 
@@ -19379,7 +19749,7 @@ if (termContainer) {
   // 既存タグを取得（サジェスト用）
   function getAllWorldTermTags() {
     const tags = new Set();
-    worldData.forEach(c => c.termTags.forEach(t => tags.add(t)));
+    worldData.forEach(c => (Array.isArray(c.termTags) ? c.termTags : []).forEach(t => tags.add(t)));
     return Array.from(tags);
   }
 
@@ -19395,9 +19765,9 @@ if (termContainer) {
   }
 
   function toggleWorldLevelSuggestions() {
-    console.log('[DEBUG] toggleWorldLevelSuggestions called');
+    window.DEBUG_LOG && console.log('[DEBUG] toggleWorldLevelSuggestions called');
     const container = document.getElementById('world-level-suggestions');
-    console.log('[DEBUG] container:', container);
+    window.DEBUG_LOG && console.log('[DEBUG] container:', container);
     if (!container) return;
     if (container.style.display === 'none' || !container.style.display) {
       // プリセット: キー→日本語ラベルのマッピング
@@ -19420,13 +19790,13 @@ if (termContainer) {
         ).join('');
       }
 
-      console.log('[DEBUG] html:', html);
+      window.DEBUG_LOG && console.log('[DEBUG] html:', html);
       container.innerHTML = html;
       container.style.display = 'flex';
-      console.log('[DEBUG] container.style.display set to flex');
+      window.DEBUG_LOG && console.log('[DEBUG] container.style.display set to flex');
     } else {
       container.style.display = 'none';
-      console.log('[DEBUG] container hidden');
+      window.DEBUG_LOG && console.log('[DEBUG] container hidden');
     }
   }
 
@@ -19655,9 +20025,8 @@ if (swapBtn) swapBtn.classList.remove('is-active');
             linkedCharacters: card.linkedCharacters || [],
           linkedTerms: card.linkedTerms || [],
             linkedWorlds: card.linkedWorlds || [],
-          linkedTerms: card.linkedTerms || [],
             linkedStructures: card.linkedStructures || [],
-            expandLevel: card.expandLevel || 0
+            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
           }));
           worldNextId = imported.nextId || (Math.max(...worldData.map(c => c.id), 0) + 1);
         } else {
@@ -19672,9 +20041,8 @@ if (swapBtn) swapBtn.classList.remove('is-active');
             linkedCharacters: card.linkedCharacters || [],
           linkedTerms: card.linkedTerms || [],
             linkedWorlds: card.linkedWorlds || [],
-          linkedTerms: card.linkedTerms || [],
             linkedStructures: card.linkedStructures || [],
-            expandLevel: card.expandLevel || 0
+            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
           }));
           worldData = [...worldData, ...newCards];
           worldNextId = newId;
@@ -19924,7 +20292,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
           linkedStructures: t.linkedStructures || [],
           tabId: t.tabId ?? null,
           selected: false,
-          expandLevel: (typeof t.expandLevel === 'number' ? t.expandLevel : 3),
+          expandLevel: (t.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(t.expandLevel) || 0)) : (t.expanded ? 4 : 0)),
           bgColor: t.bgColor || ''
         }));
         termsNextId = parsed.nextId || 1;
@@ -19940,7 +20308,8 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
   }
   function saveTermsData(){
     try{
-      localStorage.setItem(TERMS_KEY, JSON.stringify({ data: termsData, nextId: termsNextId }));
+      const sanitized = (termsData||[]).map(({ selected, expanded, ...rest }) => rest);
+      localStorage.setItem(TERMS_KEY, JSON.stringify({ data: sanitized, nextId: termsNextId }));
     }catch(e){
       console.warn('用語データの保存に失敗:', e);
     }
@@ -19989,12 +20358,12 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       if (term.bgColor) card.style.background = term.bgColor;
 
       // normalize expand level (unified with other panels)
-      term.expandLevel = Math.max(0, Math.min(2, Number(term.expandLevel) || 0));
+      term.expandLevel = Math.max(0, Math.min(4, Number(term.expandLevel) || 0));
       card.classList.add('expand-'+term.expandLevel);
       if (term.expandLevel > 0) card.classList.add('expanded');
 
       const advanceExpandLevel = () => {
-        term.expandLevel = (Math.max(0, Math.min(2, Number(term.expandLevel) || 0)) + 1) % 3;
+        term.expandLevel = (Math.max(0, Math.min(4, Number(term.expandLevel) || 0)) + 1) % 5;
         saveTermsData();
         renderTermsList();
       };
@@ -20032,7 +20401,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
 
       const lvBadge = document.createElement('span');
       lvBadge.className = 'card-expand-toggle expand-level-badge';
-      const lvIcons = ['▶','▽','▼','◆'];
+      const lvIcons = ['▶','▽','🔗','📝','◆'];
       lvBadge.textContent = lvIcons[term.expandLevel] || '◆';
       lvBadge.title = '展開レベル（クリックで変更）';
       lvBadge.style.cursor = 'pointer';
@@ -20085,30 +20454,8 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       // Double click toggles expand
       card.ondblclick = () => { advanceExpandLevel(); };
 
-      // ===== Body fields (match other panels) =====
-      const body = document.createElement('div');
-      body.className = 'terms-card-body';
-
-      if (term.category) {
-        const field = document.createElement('div');
-        field.className = 'card-field';
-        field.innerHTML = `<div class="card-field-label">カテゴリ</div><div class="card-field-body">${escapeHtml(term.category)}</div>`;
-        body.appendChild(field);
-      }
-
-      if (term.desc) {
-        const field = document.createElement('div');
-        field.className = 'card-field terms-card-desc';
-        field.innerHTML = `<div class="card-field-label">説明</div><div class="card-field-body" style="white-space:pre-wrap;">${escapeHtml(term.desc)}</div>`;
-        body.appendChild(field);
-      }
-      // linked input tab (unified across panels)
-      {
-        const wrap = document.createElement('div');
-        wrap.innerHTML = ccBuildTabFieldHtml(term.tabId, '');
-        if (wrap.firstElementChild) body.appendChild(wrap.firstElementChild);
-      }
-// ===== Linked chips (match other panels) =====
+      // ===== Body fields (5段階表示対応) =====
+      // リンク情報を先に取得
       const linkedStructuresHtml = (term.linkedStructures || []).map(sid => {
         const st = structData.find(x => x.id === sid);
         if (!st) return '';
@@ -20127,20 +20474,70 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
         return `<span class="card-linked-item card-linked-world" onclick="event.stopPropagation(); ccGotoLinkedItem('world', ${wid})"><span class="card-linked-icon">🌍</span><span class="card-linked-text">${escapeHtml(w.name || `#${wid}`)}</span></span>`;
       }).filter(Boolean).join('');
 
-      if (linkedStructuresHtml || linkedCharactersHtml || linkedWorldsHtml) {
-        const linkedSection = document.createElement('div');
-        linkedSection.className = 'card-linked-section terms-linked-section';
-        linkedSection.innerHTML = `
-          ${linkedStructuresHtml ? `<div class="card-section"><div class="card-section-title">構成</div><div class="card-linked-items">${linkedStructuresHtml}</div></div>` : ''}
-          ${linkedCharactersHtml ? `<div class="card-section"><div class="card-section-title">人物</div><div class="card-linked-items">${linkedCharactersHtml}</div></div>` : ''}
-          ${linkedWorldsHtml ? `<div class="card-section"><div class="card-section-title">世界観</div><div class="card-linked-items">${linkedWorldsHtml}</div></div>` : ''}
-        `;
-        body.appendChild(linkedSection);
+      // Level 0以上の場合のみbodyを表示
+      if (term.expandLevel > 0) {
+        const body = document.createElement('div');
+        body.className = 'terms-card-body';
+
+        const addDesc = () => {
+          if (!term.desc) return;
+          const field = document.createElement('div');
+          field.className = 'card-field terms-card-desc';
+          field.innerHTML = `<div class="card-field-label">説明</div><div class="card-field-body" style="white-space:pre-wrap;">${escapeHtml(term.desc)}</div>`;
+          body.appendChild(field);
+        };
+
+        const addAttrs = () => {
+          if (!term.category) return;
+          const field = document.createElement('div');
+          field.className = 'card-field terms-tags-section';
+          field.innerHTML = `<div class="card-field-label">カテゴリ</div><div class="card-field-body">${escapeHtml(term.category)}</div>`;
+          body.appendChild(field);
+        };
+
+        const addLinks = () => {
+          if (!(linkedStructuresHtml || linkedCharactersHtml || linkedWorldsHtml)) return;
+          const linkedSection = document.createElement('div');
+          linkedSection.className = 'card-linked-section terms-linked-section';
+          // desired order: 構成 → 世界観 → 登場人物
+          linkedSection.innerHTML = `
+            ${linkedStructuresHtml ? `<div class="card-section"><div class="card-section-title">構成</div><div class="card-linked-items">${linkedStructuresHtml}</div></div>` : ''}
+            ${linkedWorldsHtml ? `<div class="card-section"><div class="card-section-title">世界観</div><div class="card-linked-items">${linkedWorldsHtml}</div></div>` : ''}
+            ${linkedCharactersHtml ? `<div class="card-section"><div class="card-section-title">登場人物</div><div class="card-linked-items">${linkedCharactersHtml}</div></div>` : ''}
+          `;
+          body.appendChild(linkedSection);
+        };
+
+        const addTab = () => {
+          const wrap = document.createElement('div');
+          wrap.innerHTML = ccBuildTabFieldHtml(term.tabId, '');
+          if (wrap.firstElementChild) body.appendChild(wrap.firstElementChild);
+        };
+
+        // Level rules:
+        // 0: header only
+        // 1: attrs only
+        // 2: attrs + links
+        // 3: desc only
+        // 4: desc + attrs + links + tab (tab last)
+        if (term.expandLevel === 1) {
+          addAttrs();
+        } else if (term.expandLevel === 2) {
+          addAttrs();
+          addLinks();
+        } else if (term.expandLevel === 3) {
+          addDesc();
+        } else if (term.expandLevel >= 4) {
+          addDesc();
+          addAttrs();
+          addLinks();
+          addTab();
+        }
+
+        card.appendChild(body);
       }
 
-      card.appendChild(body);
-
-      // ===== Actions (match structure/world/character) =====
+// ===== Actions (match structure/world/character) =====
       const actions = document.createElement('div');
       actions.className = 'card-actions terms-card-actions';
       actions.innerHTML = `
@@ -20401,7 +20798,7 @@ loadTermsData();
             linkedCharacters: Array.isArray(t.linkedCharacters) ? t.linkedCharacters : [],
             linkedWorlds: Array.isArray(t.linkedWorlds) ? t.linkedWorlds : [],
             selected: false,
-            expandLevel: (typeof t.expandLevel === 'number' ? t.expandLevel : 3),
+            expandLevel: (t.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(t.expandLevel) || 0)) : (t.expanded ? 4 : 0)),
             bgColor: t.bgColor || ''
           }));
 termsNextId = imported.nextId || (Math.max(0, ...termsData.map(x => x.id || 0)) + 1);
@@ -20421,7 +20818,7 @@ termsNextId = imported.nextId || (Math.max(0, ...termsData.map(x => x.id || 0)) 
               linkedCharacters: Array.isArray(t.linkedCharacters) ? t.linkedCharacters : [],
               linkedWorlds: Array.isArray(t.linkedWorlds) ? t.linkedWorlds : [],
               selected: false,
-              expandLevel: (typeof t.expandLevel === 'number' ? t.expandLevel : 3),
+              expandLevel: (t.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(t.expandLevel) || 0)) : (t.expanded ? 4 : 0)),
               bgColor: t.bgColor || ''
             };
             return nt;
@@ -20443,19 +20840,6 @@ termsNextId = imported.nextId || (Math.max(0, ...termsData.map(x => x.id || 0)) 
 
   function initTermsPanel(){
     loadTermsData();
-
-    // Default: start fully expanded (one-time migration per panel)
-    try{
-      const key = 'cc_default_expand_applied_terms_v1';
-      const defLv = 3;
-      if (localStorage.getItem(key) !== '1') {
-        (termsData||[]).forEach(t=>{
-          t.expandLevel = defLv;
-        });
-        saveTermsData();
-        localStorage.setItem(key,'1');
-      }
-    }catch(e){}
     renderTermsList();
   }
 
@@ -20506,8 +20890,8 @@ window.refreshTermsPanel = function(){
   window.expandAllTerms = function(){
     // 他パネルと同様に「最大展開」へ
     loadTermsData();
-    termsBulkExpandLevel = 3;
-    termsData.forEach(t => { t.expandLevel = 3; t.expanded = true; });
+    termsBulkExpandLevel = 4;
+    termsData.forEach(t => { t.expandLevel = 4; });
     saveTermsData();
     renderTermsList();
   };
@@ -20700,8 +21084,8 @@ let menu = document.getElementById('terms-context-menu');
     const term = termsData.find(t => t.id === cardId);
     if (!term) return;
 
-    // normalize expand level to 0-3 (unified with other panels)
-    let expandLevel = Math.max(0, Math.min(2, Number(term.expandLevel) || 0));
+    // normalize expand level to 0-4 (5 levels unified with other panels)
+    let expandLevel = Math.max(0, Math.min(4, Number(term.expandLevel) || 0));
 
     menu.innerHTML = `
       <div class="context-menu-item" data-action="new-card">＋新しいカード</div>
@@ -20712,8 +21096,9 @@ let menu = document.getElementById('terms-context-menu');
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
       <div class="context-menu-item" data-action="expand-0" style="padding-left:24px;">▶ 名前のみ${expandLevel === 0 ? ' ✓' : ''}</div>
       <div class="context-menu-item" data-action="expand-1" style="padding-left:24px;">▽ タグのみ${expandLevel === 1 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-2" style="padding-left:24px;">▼ タグ+プレビュー${expandLevel === 2 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-3" style="padding-left:24px;">◆ すべて表示${expandLevel === 3 ? ' ✓' : ''}</div>
+      <div class="context-menu-item" data-action="expand-2" style="padding-left:24px;">🔗 リンク${expandLevel === 2 ? ' ✓' : ''}</div>
+      <div class="context-menu-item" data-action="expand-3" style="padding-left:24px;">📝 説明のみ${expandLevel === 3 ? ' ✓' : ''}</div>
+      <div class="context-menu-item" data-action="expand-4" style="padding-left:24px;">◆ すべて表示${expandLevel === 4 ? ' ✓' : ''}</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
       <div class="context-menu-item" data-action="card-color">🎨 カード色を変更</div>
       <div class="context-menu-item" data-action="reset-color">↩ 色をリセット</div>
@@ -20738,7 +21123,7 @@ menu.querySelectorAll('.context-menu-item').forEach(item => {
         } else if (action === 'duplicate') {
           duplicateTermCard(cardId);
         } else if (action === 'toggle') {
-          term.expandLevel = (expandLevel + 1) % 3;
+          term.expandLevel = (expandLevel + 1) % 5;
           saveTermsData(); renderTermsList();
         } else if (action && action.startsWith('expand-')) {
           const lv = parseInt(action.split('-')[1], 10);
@@ -21960,88 +22345,35 @@ window.PanelUI = PanelUI;
   /* v11: hide structure-specific collapse caret in card headers (keep internal behavior) */
   #structure-panel .card-header .structure-toggle,
   #structure-panel .structure-toggle{ display:none !important; }
+
+  /* ---- Patch: Structure panel chip & tab alignment (scoped to .structure-card only) ---- */
+  .structure-card .structure-linked-section{
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .structure-card .card-tab-field{
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  /* ---- Patch: Terms panel card padding (avoid double-padding on terms cards) ---- */
+  /* HOTFIXで #terms-panel .terms-card に padding: 10px 10px 10px 14px が入っており、
+     ヘッダ/ボディ側の padding と二重になって左が空きすぎるため、ここで相殺します。 */
+  #terms-panel .terms-card{
+  /* slight left offset to avoid feeling too tight; body still has its own padding */
+  padding: 0 0 0 4px !important;
+}/* ---- End terms patch ---- */
+
+  /* ---- End patch ---- */
+
 </style>
 
 <script id="cc-v11-runtime-patches">
 (function(){
   var VIEW_MODE_KEY = 'cc_view_mode_v11';
-  var DEFAULT_EXPAND_KEY = 'cc_default_expand_applied_v11';
-
-  function onReady(fn){
+function onReady(fn){
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn);
     else fn();
-  }
-
-  // --- 1) Initial expand-all (one-time) for Structure/Character/World/Terms ---
-  function applyDefaultExpandAllOnce(){
-    try{
-      if (localStorage.getItem(DEFAULT_EXPAND_KEY) === 'true') return;
-
-      // Structure
-      try{
-        if (Array.isArray(window.structureData)) {
-          window.structureBulkExpandLevel = 3;
-          for (var i=0;i<window.structureData.length;i++){
-            var c = window.structureData[i];
-            if (!c) continue;
-            c.expandLevel = 3;
-            c.expanded = true;
-            c.collapsed = false;
-          }
-          if (typeof window.saveStructureData === 'function') window.saveStructureData();
-        }
-      }catch(e){}
-
-      // Character
-      try{
-        if (Array.isArray(window.characterData)) {
-          window.characterBulkExpandLevel = 3;
-          for (var j=0;j<window.characterData.length;j++){
-            var cc = window.characterData[j];
-            if (!cc) continue;
-            cc.expandLevel = 3;
-            cc.expanded = true;
-          }
-          if (typeof window.saveCharacterData === 'function') window.saveCharacterData();
-        }
-      }catch(e){}
-
-      // World
-      try{
-        if (Array.isArray(window.worldData)) {
-          window.worldBulkExpandLevel = 3;
-          for (var k=0;k<window.worldData.length;k++){
-            var wc = window.worldData[k];
-            if (!wc) continue;
-            wc.expandLevel = 3;
-            wc.expanded = true;
-          }
-          if (typeof window.saveWorldData === 'function') window.saveWorldData();
-        }
-      }catch(e){}
-
-      // Terms
-      try{
-        if (Array.isArray(window.termsData)) {
-          window.termsBulkExpandLevel = 3;
-          for (var t=0;t<window.termsData.length;t++){
-            var tc = window.termsData[t];
-            if (!tc) continue;
-            tc.expandLevel = 3;
-            tc.expanded = true;
-          }
-          if (typeof window.saveTermsData === 'function') window.saveTermsData();
-        }
-      }catch(e){}
-
-      // Render once at end
-      try{ if (typeof window.renderStructureList === 'function') window.renderStructureList(); }catch(e){}
-      try{ if (typeof window.renderCharacterList === 'function') window.renderCharacterList(); }catch(e){}
-      try{ if (typeof window.renderWorldList === 'function') window.renderWorldList(); }catch(e){}
-      try{ if (typeof window.renderTermsList === 'function') window.renderTermsList(); }catch(e){}
-
-      try{ localStorage.setItem(DEFAULT_EXPAND_KEY, 'true'); }catch(e){}
-    }catch(e){}
   }
 
   // --- 2) Robust adjacent panel swap (visual adjacency) ---
@@ -22232,8 +22564,7 @@ window.PanelUI = PanelUI;
   }
 
   onReady(function(){
-    applyDefaultExpandAllOnce();
-    patchViewRibbon();
+patchViewRibbon();
   });
 })();
 </script>
