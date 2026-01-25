@@ -5,7 +5,7 @@
 <script>window.DEBUG_LOG=false;</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ（動作確認版v.2）</title>
+<title>ⓒエディタ（動作確認版）</title>
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
@@ -680,10 +680,12 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
     /* Pane Resizer */
     .pane-resizer {
         width: var(--divider-hit-area); cursor: col-resize;
-        position: relative; flex-shrink: 0; z-index: 10;
+        position: relative; flex-shrink: 0; z-index: 5000;
         margin: 0 calc(-1 * (var(--divider-hit-area) / 2));
         display: flex; align-items: center; justify-content: center;
-        background: transparent;
+        
+        pointer-events: auto;
+background: transparent;
     }
     .pane-resizer::before {
         content: "";
@@ -707,11 +709,13 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
 
     .dock-resizer {
         width: var(--divider-hit-area); cursor: col-resize;
-        position: relative; flex-shrink: 0; z-index: 10;
+        position: relative; flex-shrink: 0; z-index: 5000;
         margin: 0 calc(-1 * (var(--divider-hit-area) / 2));
         display: none; align-items: center; justify-content: center;
         background: transparent;
-    }
+    
+        pointer-events: auto;
+}
     .dock-resizer::before {
         content: "";
         width: var(--divider-size);
@@ -1162,9 +1166,9 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     .modal-overlay {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(0,0,0,0.5); z-index: 1000;
-        display: none; justify-content: center; align-items: center;
+        display: none; pointer-events: none; justify-content: center; align-items: center;
     }
-    .modal-overlay.show { display: flex; }
+    .modal-overlay.show { display: flex; pointer-events: auto; }
     .modal-content {
         background: var(--panel-bg); border-radius: 8px; padding: 20px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.3); max-width: 600px; width: 90%;
@@ -1190,7 +1194,7 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     .heatmap-legend { font-size: 0.7rem; color: #666; }
     .heatmap-grid { display: flex; flex-wrap: wrap; gap: 2px; }
     .heatmap-cell { width: 20px; height: 20px; border-radius: 3px; cursor: pointer; position: relative; transition: transform 0.1s; }
-    .heatmap-cell:hover { transform: scale(1.3); z-index: 10; }
+    .heatmap-cell:hover { transform: scale(1.3); z-index: 5000; }
     .heatmap-cell[data-tooltip]:hover::after { content: attr(data-tooltip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 3px 6px; border-radius: 3px; font-size: 0.7rem; white-space: nowrap; z-index: 100; }
     .heatmap-tabs { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
     .heatmap-tab { padding: 5px 10px; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; font-size: 0.8rem; background: var(--bg-color); }
@@ -1542,7 +1546,7 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
 
     /* ===== Phase4: keep only minimal visual diffs (band/badge/tag/hover/drag) ===== */
     /* per-pane drag accent (you can tweak these 4 values only) */
-    #structure-panel { --card-drag-border: #6366f1; --card-drag-ring: rgba(99,102,241,0.28); }
+    #structure-panel { --card-drag-border: #2563eb; --card-drag-ring: rgba(37,99,235,0.28); }
     #character-panel { --card-drag-border: #ec4899; --card-drag-ring: rgba(236,72,153,0.26); }
     #world-panel     { --card-drag-border: #10b981; --card-drag-ring: rgba(16,185,129,0.26); }
     #terms-panel     { --card-drag-border: #f59e0b; --card-drag-ring: rgba(245,158,11,0.22); }
@@ -1911,10 +1915,10 @@ body.theme-dark .structure-content {
 
     /* 構成カード */
     .structure-card {
-        background: var(--panel-bg);
+        background: transparent;
     }
     .structure-card.has-custom-color {
-        background: var(--structure-card-bg, var(--panel-bg));
+        background: transparent;
     }
     .structure-card:hover{}
     .structure-card.dragging{}
@@ -1922,30 +1926,30 @@ body.theme-dark .structure-content {
 
     /* 階層レベル別スタイル */
     .structure-card.level-chapter {
-        border-left: 4px solid #6366f1;
+        border-left: 4px solid #2563eb;
 }
     .structure-card.has-custom-color.level-chapter {
-        border-left-color: var(--structure-card-accent, #6366f1);
+        border-left-color: var(--structure-card-accent, #2563eb);
         background: var(--structure-card-bg, var(--panel-bg));
     }
 .structure-card.level-episode {
-        border-left: 3px solid #8b5cf6;
+        border-left: 3px solid #3b82f6;
 }
     .structure-card.has-custom-color.level-episode {
-        border-left-color: var(--structure-card-accent, #8b5cf6);
+        border-left-color: var(--structure-card-accent, #3b82f6);
         background: var(--structure-card-bg, var(--panel-bg));
     }
 .structure-card.level-scene {
-        border-left: 2px solid #a78bfa;
+        border-left: 2px solid #60a5fa;
         font-size: 0.9em;
     }
     .structure-card.has-custom-color.level-scene {
-        border-left-color: var(--structure-card-accent, #a78bfa);
+        border-left-color: var(--structure-card-accent, #60a5fa);
     }
     .structure-card-header{}
     .structure-card-header button { cursor: pointer; }
     .structure-select {
-        width: 14px; height: 14px; accent-color: #6366f1;
+        width: 14px; height: 14px; accent-color: #2563eb;
         cursor: pointer; flex-shrink: 0;
     }
 	.card-move-group { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
@@ -2471,7 +2475,7 @@ body.theme-dark .structure-content {
     .structure-link-checkbox-item input {
         width: 16px;
         height: 16px;
-        accent-color: #6366f1;
+        accent-color: #2563eb;
         flex-shrink: 0;
         margin: 0;
     }
@@ -2920,17 +2924,17 @@ body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
     .world-list { overflow: visible; }
 
     .world-card {
-        background: var(--panel-bg);
+        background: transparent;
     }
-    .world-card.has-custom-color { background: var(--world-card-bg, var(--panel-bg)); }
+    .world-card.has-custom-color { background: transparent; }
     .world-card:hover{}
     .world-card.dragging{}
     .world-card.drag-over{}
-    .world-card.level-major { border-left: 4px solid #10b981; }
+    .world-card.level-major { border-left: 3px solid #10b981; }
     .world-card.has-custom-color.level-major { border-left-color: var(--world-card-accent, #10b981); background: var(--world-card-bg, var(--panel-bg)); }
-.world-card.level-middle { border-left: 3px solid #34d399; }
+.world-card.level-middle { border-left: 2px solid #34d399; }
     .world-card.has-custom-color.level-middle { border-left-color: var(--world-card-accent, #34d399); background: var(--world-card-bg, var(--panel-bg)); }
-.world-card.level-detail { border-left: 2px solid #6ee7b7; font-size: 0.9em; }
+.world-card.level-detail { border-left: 1px solid #6ee7b7; font-size: 0.9em; }
     .world-card.has-custom-color.level-detail { border-left-color: var(--world-card-accent, #6ee7b7); }
     .world-card-header{}
     .world-select { width: 14px; height: 14px; accent-color: #10b981; cursor: pointer; flex-shrink: 0; }
@@ -3281,28 +3285,27 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
     .world-card, .character-card{
       --outline-margin: 0px;
       margin-left: var(--outline-margin);
-      width: calc(100% - var(--outline-margin));
+      /* Fix: keep the card inside the panel even when indented (outlineLevel) */
+      width: calc(100% - var(--outline-margin)) !important;
+      max-width: calc(100% - var(--outline-margin)) !important;
       box-sizing: border-box;
+      min-width: 0;
     }
 
     /* Border strip should follow outlineLevel (not category/role). Keep category/role as badges. */
     .world-card{
-      border-left: var(--outline-bar-width, 4px) solid var(--outline-bar-color, #10b981) !important;
+      border-left: var(--outline-bar-width, 3px) solid var(--outline-bar-color, #10b981) !important;
     }
     .character-card{
-      border-left: var(--outline-bar-width, 3px) solid var(--outline-bar-color, #f9a8d4) !important;
+      border-left: var(--outline-bar-width, 2px) solid var(--outline-bar-color, #f9a8d4) !important;
     }
 
     .world-card.outline-l1{ --outline-bar-width:4px; --outline-bar-color:#10b981; }
     .world-card.outline-l2{ --outline-bar-width:3px; --outline-bar-color:#34d399; }
     .world-card.outline-l3{ --outline-bar-width:2px; --outline-bar-color:#6ee7b7; }
-    .world-card.outline-l4{ --outline-bar-width:1px; --outline-bar-color:#a7f3d0; }
-
     .character-card.outline-l1{ --outline-bar-width:4px; --outline-bar-color:#ec4899; }
     .character-card.outline-l2{ --outline-bar-width:3px; --outline-bar-color:#f472b6; }
     .character-card.outline-l3{ --outline-bar-width:2px; --outline-bar-color:#f9a8d4; }
-    .character-card.outline-l4{ --outline-bar-width:1px; --outline-bar-color:#fbcfe8; }
-
     /* If a custom color is set, prefer it for the strip color. */
     .world-card.has-custom-color{ --outline-bar-color: var(--world-card-accent, var(--outline-bar-color)); }
     .character-card.has-custom-color{ --outline-bar-color: var(--character-card-accent, var(--outline-bar-color)); }
@@ -3311,11 +3314,91 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
     .structure-card{
       --structure-indent: 0px;
       margin-left: var(--structure-indent);
-      width: calc(100% - var(--structure-indent));
+      /* Fix: keep the card inside the panel even when indented */
+      width: calc(100% - var(--structure-indent)) !important;
+      max-width: calc(100% - var(--structure-indent)) !important;
       box-sizing: border-box;
+      min-width: 0;
     }
     .structure-card.level-episode{ --structure-indent: 18px; }
     .structure-card.level-scene{ --structure-indent: 36px; }
+    /* ===== Structure guide lines: stronger chapter > episode > scene tree feel =====
+   - We render connector "trunks" in the indent gutter (outside the card body),
+     and an elbow line into each Episode/Scene card.
+   - Episode connects from Chapter gutter line (x=12px) to its card start.
+   - Scene connects from Episode gutter line (x=30px) to its card start, while also showing the Chapter trunk.
+*/
+#structure-panel .structure-card{ position: relative; }
+#structure-panel .structure-card:not(.level-chapter)::before{
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  top:-10px;
+  bottom:-10px;
+  left: calc(-1 * var(--structure-indent));
+  width: calc(var(--structure-indent) + 2px);
+  background-repeat:no-repeat;
+}
+/* Episode: show chapter trunk at x=12px */
+#structure-panel .structure-card.level-episode::before{
+  background-image:
+    linear-gradient(to bottom, rgba(37,99,235,.55), rgba(37,99,235,.55));
+  background-size: 2px 100%;
+  background-position: 12px 0;
+}
+/* Scene: show chapter trunk (x=12px) + episode trunk (x=30px) */
+#structure-panel .structure-card.level-scene::before{
+  background-image:
+    linear-gradient(to bottom, rgba(37,99,235,.40), rgba(37,99,235,.40)),
+    linear-gradient(to bottom, rgba(37,99,235,.62), rgba(37,99,235,.62));
+  background-size: 2px 100%, 2px 100%;
+  background-position: 12px 0, 30px 0;
+}
+/* Elbow into the card */
+#structure-panel .structure-card.level-episode::after,
+#structure-panel .structure-card.level-scene::after{
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  top: 22px; /* roughly header center */
+  transform: translateY(-50%);
+  height: 14px;
+  border-left: 2px solid rgba(37,99,235,.62);
+  border-bottom: 2px solid rgba(37,99,235,.62);
+  border-bottom-left-radius: 10px;
+  background:
+    radial-gradient(circle at 100% 100%, rgba(37,99,235,.72) 0 3px, transparent 4px);
+}
+#structure-panel .structure-card.level-episode::after{
+  left: calc(-1 * var(--structure-indent) + 12px);
+  width: calc(var(--structure-indent) - 12px);
+}
+#structure-panel .structure-card.level-scene::after{
+  left: calc(-1 * var(--structure-indent) + 30px);
+  width: calc(var(--structure-indent) - 30px);
+}
+
+    /* === v17: Fix indented cards clipping (override panel-body width:100% !important) === */
+    .control-panel .panel-body .world-card,
+    .control-panel .panel-body .character-card{
+      width: calc(100% - var(--outline-margin)) !important;
+      max-width: calc(100% - var(--outline-margin)) !important;
+    }
+
+    .control-panel .panel-body .structure-card{
+      width: calc(100% - var(--structure-indent)) !important;
+      max-width: calc(100% - var(--structure-indent)) !important;
+    }
+
+    /* === v17: Structure accent strip -> blue (even when card has custom bg) === */
+    #structure-panel .structure-card.level-chapter{ border-left: 4px solid #2563eb !important; }
+    #structure-panel .structure-card.level-episode{ border-left: 3px solid #3b82f6 !important; }
+    #structure-panel .structure-card.level-scene{ border-left: 2px solid #60a5fa !important; }
+
+    #structure-panel .structure-card.has-custom-color.level-chapter{ border-left-color: #2563eb !important; }
+    #structure-panel .structure-card.has-custom-color.level-episode{ border-left-color: #3b82f6 !important; }
+    #structure-panel .structure-card.has-custom-color.level-scene{ border-left-color: #60a5fa !important; }
+
 </style>
 
 <!-- ===== v0.96 hotfix (reader/search/bookmark, active tab color, tab context menu, per-tab stats, focus shortcuts) ===== -->
@@ -3466,7 +3549,160 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
     return '#' + ((1<<24) + (r<<16) + (g<<8) + b).toString(16).slice(1);
   }
 
-  // -----------------------------
+  // --- Color helpers for outline accent (keep strip visible even when card is dyed) ---
+function hexToRgbObj(hex){
+  if (!hex || typeof hex !== 'string') return null;
+  const s = hex.trim();
+  let m = s.match(/^#?([0-9a-fA-F]{3})$/);
+  if (m){
+    const h = m[1];
+    const r = parseInt(h[0]+h[0],16), g = parseInt(h[1]+h[1],16), b = parseInt(h[2]+h[2],16);
+    return {r,g,b};
+  }
+  m = s.match(/^#?([0-9a-fA-F]{6})$/);
+  if (!m) return null;
+  const n = parseInt(m[1],16);
+  return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
+}
+function relativeLuminance(hex){
+  const rgb = hexToRgbObj(hex);
+  if (!rgb) return 0.5;
+  const srgb = [rgb.r/255, rgb.g/255, rgb.b/255].map(v => (v <= 0.04045) ? (v/12.92) : Math.pow((v+0.055)/1.055, 2.4));
+  return 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2]; // 0..1
+}
+function deriveOutlineAccentFromBg(bgColor, outlineLevel){
+  // Derive a visible accent strip color from the card background color.
+  // - Keeps the same "color family" (hue), but increases contrast and (slightly) saturation.
+  // - outlineLevel: 1..3 (1 strongest)
+  const lvl = clamp(parseInt(outlineLevel,10)||1, 1, 3);
+  const strength = [0, 0.42, 0.30, 0.22][lvl]; // L1 strongest
+  const rgb = window.cssColorToRgb(bgColor);
+  if(!rgb) return bgColor;
+
+  // Convert to HSL, boost saturation a bit, then shift lightness for contrast.
+  const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+  const sat = clamp(hsl.s * 1.20, 0.45, 0.95);
+
+  // Pick darker or lighter candidate based on best contrast.
+  const candDark = hslToRgb(hsl.h, sat, clamp(hsl.l - strength, 0, 1));
+  const candLight = hslToRgb(hsl.h, sat, clamp(hsl.l + strength, 0, 1));
+  const bgLum = relativeLuminanceRgb(rgb.r, rgb.g, rgb.b);
+
+  let best = candDark;
+  let bestC = contrastRatioRgb(rgb, candDark);
+  const c2 = contrastRatioRgb(rgb, candLight);
+  if (c2 > bestC){
+    best = candLight;
+    bestC = c2;
+  }
+
+  // Ensure a minimum contrast; if still weak, push further.
+  if (bestC < 2.2){
+    const push = (bgLum > 0.5) ? -0.18 : 0.18;
+    const pushed = hslToRgb(hsl.h, sat, clamp(hsl.l + push, 0, 1));
+    if (contrastRatioRgb(rgb, pushed) > bestC) best = pushed;
+  }
+
+  return rgbToHex(best.r, best.g, best.b);
+}
+
+// Expose for other script scopes
+window.deriveOutlineAccentFromBg = deriveOutlineAccentFromBg;
+
+const __cssColorCache = new Map();
+function cssColorToRgb(colorStr){
+  const key = (colorStr || '').trim();
+  if(!key) return null;
+  if(__cssColorCache.has(key)) return __cssColorCache.get(key);
+  // Fast paths
+  let m;
+  if ((m = key.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i))){
+    const rgb = hexToRgb(key);
+    __cssColorCache.set(key, rgb);
+    return rgb;
+  }
+  if ((m = key.match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i))){
+    const rgb = {r: clampInt(parseFloat(m[1])), g: clampInt(parseFloat(m[2])), b: clampInt(parseFloat(m[3]))};
+    __cssColorCache.set(key, rgb);
+    return rgb;
+  }
+  // Fallback: let the browser parse named colors, hsl(), etc.
+  if (!document.body) return null;
+  const el = document.createElement('div');
+  el.style.color = key;
+  el.style.display = 'none';
+  document.body.appendChild(el);
+  const cs = getComputedStyle(el).color; // "rgb(r,g,b)"
+  el.remove();
+  const mm = cs.match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i);
+  const rgb = mm ? {r: clampInt(parseFloat(mm[1])), g: clampInt(parseFloat(mm[2])), b: clampInt(parseFloat(mm[3]))} : null;
+  __cssColorCache.set(key, rgb);
+  return rgb;
+}
+// Expose for other script scopes
+window.cssColorToRgb = cssColorToRgb;
+
+function clampInt(n){ return Math.max(0, Math.min(255, Math.round(n || 0))); }
+function hexToRgb(hex){
+  const h = hex.replace('#','').trim();
+  if (h.length === 3){
+    const r = parseInt(h[0]+h[0],16), g = parseInt(h[1]+h[1],16), b = parseInt(h[2]+h[2],16);
+    return {r,g,b};
+  }
+  if (h.length === 6){
+    const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
+    return {r,g,b};
+  }
+  return null;
+}
+function rgbToHex(r,g,b){
+  const to = (v)=>v.toString(16).padStart(2,'0');
+  return '#'+to(clampInt(r))+to(clampInt(g))+to(clampInt(b));
+}
+function rgbToHsl(r,g,b){
+  r/=255; g/=255; b/=255;
+  const max = Math.max(r,g,b), min = Math.min(r,g,b);
+  let h=0,s=0,l=(max+min)/2;
+  const d = max-min;
+  if (d !== 0){
+    s = d / (1 - Math.abs(2*l - 1));
+    switch(max){
+      case r: h = ((g-b)/d) % 6; break;
+      case g: h = ((b-r)/d) + 2; break;
+      case b: h = ((r-g)/d) + 4; break;
+    }
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+  return {h, s, l};
+}
+function hslToRgb(h,s,l){
+  const c = (1 - Math.abs(2*l - 1)) * s;
+  const hh = (h % 360) / 60;
+  const x = c * (1 - Math.abs((hh % 2) - 1));
+  let r1=0,g1=0,b1=0;
+  if (0 <= hh && hh < 1) { r1=c; g1=x; b1=0; }
+  else if (1 <= hh && hh < 2) { r1=x; g1=c; b1=0; }
+  else if (2 <= hh && hh < 3) { r1=0; g1=c; b1=x; }
+  else if (3 <= hh && hh < 4) { r1=0; g1=x; b1=c; }
+  else if (4 <= hh && hh < 5) { r1=x; g1=0; b1=c; }
+  else if (5 <= hh && hh < 6) { r1=c; g1=0; b1=x; }
+  const m = l - c/2;
+  return {r: clampInt((r1+m)*255), g: clampInt((g1+m)*255), b: clampInt((b1+m)*255)};
+}
+function relativeLuminanceRgb(r,g,b){
+  // WCAG relative luminance
+  const f = (v)=>{ v/=255; return (v<=0.03928)? (v/12.92) : Math.pow((v+0.055)/1.055, 2.4); };
+  const R=f(r), G=f(g), B=f(b);
+  return 0.2126*R + 0.7152*G + 0.0722*B;
+}
+function contrastRatioRgb(bg, fg){
+  const L1 = relativeLuminanceRgb(bg.r,bg.g,bg.b);
+  const L2 = relativeLuminanceRgb(fg.r,fg.g,fg.b);
+  const hi = Math.max(L1,L2), lo = Math.min(L1,L2);
+  return (hi + 0.05) / (lo + 0.05);
+}
+// -----------------------------
   // 1) 「今日」開始時刻を反映：getTodayDateStrを論理日付に置換
   // -----------------------------
   const DAY_START_LS_KEY = 'cc_day_start_hhmm';
@@ -4383,6 +4619,79 @@ window.__ccInitPanelDnDAndResizers = function(){
   }
 </style>
 
+
+<style id="cc-card-gradient-style">
+/* === Card background: transparent left→right gradient (bulk dye removed) === */
+/* === v11 tweaks: remove structure "dangling" guide lines === */
+#structure-panel .structure-card::before,
+#structure-panel .structure-card::after{
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  border: none !important;
+}
+
+
+/* ===== v12: Prettier "paper + tint" gradient (Option A) ===== */
+/* Keep per-panel card classes from enforcing opaque backgrounds */
+.structure-card,
+.character-card,
+.world-card,
+.terms-card{
+  background-color: transparent !important;
+}
+
+:root{
+  /* "paper" overlay to smooth banding and keep readability while staying semi-transparent */
+  --cc-card-paper-top: rgba(255,255,255,0.65);
+  --cc-card-paper-bottom: rgba(255,255,255,0.50);
+
+  /* neutral shade (used when no per-card custom color) */
+  --cc-card-shade-rgb: 0 0 0;
+  --cc-card-shade-a1: 0.04;
+  --cc-card-shade-a2: 0.02;
+  --cc-card-shade-a3: 0.01;
+}
+body.theme-dark{
+  --cc-card-paper-top: rgba(0,0,0,0.26);
+  --cc-card-paper-bottom: rgba(0,0,0,0.18);
+
+  --cc-card-shade-rgb: 255 255 255;
+  --cc-card-shade-a1: 0.06;
+  --cc-card-shade-a2: 0.035;
+  --cc-card-shade-a3: 0.018;
+}
+
+/* Applies to all card shells + terms cards */
+.card-shell,
+.terms-card{
+  background:
+    linear-gradient(180deg, var(--cc-card-paper-top) 0%, var(--cc-card-paper-bottom) 100%),
+    linear-gradient(90deg,
+      rgb(var(--cc-card-shade-rgb) / var(--cc-card-shade-a1)) 0%,
+      rgb(var(--cc-card-shade-rgb) / var(--cc-card-shade-a2)) 22%,
+      rgb(var(--cc-card-shade-rgb) / var(--cc-card-shade-a3)) 45%,
+      rgb(var(--cc-card-shade-rgb) / 0) 78%) !important;
+  background-color: transparent !important;
+  background-clip: padding-box;
+}
+
+/* When the card has a custom color: use tint-rgb + multi-stop fade */
+.card-shell.has-custom-color,
+.terms-card.has-custom-color{
+  background:
+    linear-gradient(180deg, var(--cc-card-paper-top) 0%, var(--cc-card-paper-bottom) 100%),
+    linear-gradient(90deg,
+      rgb(var(--cc-card-tint-rgb) / 0.12) 0%,
+      rgb(var(--cc-card-tint-rgb) / 0.06) 22%,
+      rgb(var(--cc-card-tint-rgb) / 0.03) 45%,
+      rgb(var(--cc-card-tint-rgb) / 0) 78%) !important;
+  background-color: transparent !important;
+  background-clip: padding-box;
+}
+</style>
+
+
 </head>
 <body>
 
@@ -4392,7 +4701,7 @@ window.__ccInitPanelDnDAndResizers = function(){
             <button class="app-icon" id="app-icon" title="アプリメニュー">
                 <img src="icons/favicon-32.png" alt="アプリアイコン">
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.0.995</span>
+            <span class="app-title" id="app-title">ⓒエディタver.0.99</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -5424,8 +5733,7 @@ window.__ccInitPanelDnDAndResizers = function(){
                     <option value="1">レベル1（大）</option>
                     <option value="2">レベル2（中）</option>
                     <option value="3">レベル3（小）</option>
-                    <option value="4">レベル4（微）</option>
-                </select>
+</select>
             </div>
             <div style="flex:2; min-width:180px;">
                 <label for="character-edit-role">役割タグ<button type="button" class="tag-suggest-btn" onclick="toggleCharacterRoleSuggestions()">既存タグ▼</button></label>
@@ -5498,8 +5806,7 @@ window.__ccInitPanelDnDAndResizers = function(){
                     <option value="1">レベル1（大）</option>
                     <option value="2">レベル2（中）</option>
                     <option value="3">レベル3（小）</option>
-                    <option value="4">レベル4（微）</option>
-                </select>
+</select>
             </div>
             <div style="flex:2; min-width:180px;">
                 <label for="world-edit-level">カテゴリタグ<button type="button" class="tag-suggest-btn" onclick="toggleWorldLevelSuggestions()">既存タグ▼</button></label>
@@ -6422,7 +6729,7 @@ function addNewTab() {
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-    const defaultText = `　ⓒエディタ（使い方） v0.995
+    const defaultText = `　ⓒエディタ（使い方） v0.99
 
 ■ はじめに（最短で使い始める）
 
@@ -11409,7 +11716,7 @@ window.addEventListener('resize', () => {
   margin: 0 0 6px 0;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: rgba(255,255,255,0.7);
+  background: transparent;
   padding: 10px 10px 10px 14px;
   position: relative;
 }
@@ -11876,6 +12183,9 @@ function paneIdToPaneKey(paneId){
   }
 
   function bulkSetCardsBgColor(paneId, color){
+    // Removed: bulk card coloring (requested)
+    return;
+
     const key = paneIdToPaneKey(paneId);
     const c = (color || '').trim();
     const v = c ? ((c.toLowerCase() === '#ffffff') ? '' : c) : '';
@@ -11900,6 +12210,9 @@ function paneIdToPaneKey(paneId){
   }
 
   function bulkResetCardsBgColor(paneId){
+    // Removed: bulk card coloring (requested)
+    return;
+
     const key = paneIdToPaneKey(paneId);
     const colorKey = getCardColorKeyByPaneKey(key);
     const next = '';
@@ -11927,6 +12240,9 @@ function paneIdToPaneKey(paneId){
 
   
 function showBulkCardColorPicker(paneId){
+    // Removed: bulk card coloring (requested)
+    return;
+
   const panel = document.getElementById(paneId);
   const list = panel ? panel.querySelector('.panel-content') : null;
   const picker = window.PanelColorPicker;
@@ -11945,7 +12261,7 @@ function showBulkCardColorPicker(paneId){
   });
 }
 
-window.showBulkCardColorPicker = showBulkCardColorPicker;
+// remove window.showBulkCardColorPicker export (removed)
 
 function darkenColor(color, amount = 0.12){
     if (!color) return color;
@@ -13141,9 +13457,9 @@ function applyPaneColors(colors){
     window.__ccPaneColor.setPaneColorValue = setPaneColorValue;
     window.__ccPaneColor.resetPaneColorValue = resetPaneColorValue;
     window.__ccPaneColor.paneSupportsCards = paneSupportsCards;
-    window.__ccPaneColor.bulkSetCardsBgColor = bulkSetCardsBgColor;
-    window.__ccPaneColor.bulkResetCardsBgColor = bulkResetCardsBgColor;
-    window.__ccPaneColor.showBulkCardColorPicker = window.showBulkCardColorPicker || showBulkCardColorPicker;
+    // remove __ccPaneColor.bulkSetCardsBgColor export (removed)
+    // remove __ccPaneColor.bulkResetCardsBgColor export (removed)
+    // remove __ccPaneColor.showBulkCardColorPicker export (removed)
   } catch(e) {}
 })();
 
@@ -13245,7 +13561,7 @@ function bulkResetCardsBgColor(paneId){
     st.textContent = `
       .reader-bm-pin{ position:absolute; left:8px; width:18px; height:18px; display:flex; align-items:center; justify-content:center;
         border-radius:999px; background: rgba(253,224,71,0.85); border:1px solid rgba(245,158,11,0.85); cursor:pointer;
-        user-select:none; font-size:12px; line-height:1; z-index:10; box-shadow:0 1px 2px rgba(0,0,0,0.15);
+        user-select:none; font-size:12px; line-height:1; z-index:5000; box-shadow:0 1px 2px rgba(0,0,0,0.15);
       }
       body.theme-dark .reader-bm-pin{ background: rgba(14,116,144,0.55); border-color: rgba(56,189,248,0.7); }
     `;
@@ -14411,13 +14727,6 @@ panel.style.width = '320px';
       <div class="context-menu-item" data-action="header-reset" data-pane="${paneId}">↩️ ヘッダーカラーをリセット</div>
       <div class="context-menu-item" data-action="bg-reset" data-pane="${paneId}">↩️ 背景色をリセット</div>
     `;
-    if (paneSupportsCards(paneId)) {
-      html += `
-        <div class="context-menu-sep"></div>
-        <div class="context-menu-item" data-action="bulk-card-color" data-pane="${paneId}">🧽 カード色を一括変更</div>
-        <div class="context-menu-item" data-action="bulk-card-reset" data-pane="${paneId}">🧽 カード色を一括リセット</div>
-      `;
-    }
     menu.innerHTML = html;
 // Add event listeners to menu items
     menu.querySelectorAll('.context-menu-item').forEach(item => {
@@ -14471,13 +14780,6 @@ panel.style.width = '320px';
       <div class="context-menu-item" data-action="header-reset" data-pane="${paneId}">↩️ ヘッダーカラーをリセット</div>
       <div class="context-menu-item" data-action="bg-reset" data-pane="${paneId}">↩️ 背景色をリセット</div>
     `;
-    if (paneSupportsCards(paneId)) {
-      html += `
-        <div class="context-menu-sep"></div>
-        <div class="context-menu-item" data-action="bulk-card-color" data-pane="${paneId}">🧽 カード色を一括変更</div>
-        <div class="context-menu-item" data-action="bulk-card-reset" data-pane="${paneId}">🧽 カード色を一括リセット</div>
-      `;
-    }
     menu.innerHTML = html;
 // Add event listeners
     menu.querySelectorAll('.context-menu-item').forEach(item => {
@@ -14488,10 +14790,7 @@ panel.style.width = '320px';
         if (action === 'header-color') { showHeaderColorPicker(pId); }
         else if (action === 'bg-color') { showBgColorPicker(pId); }
         else if (action === 'header-reset') { resetPaneColorValue(pId,'head'); hideAllContextMenus(); }
-        else if (action === 'bg-reset') { resetPaneColorValue(pId,'bg'); hideAllContextMenus(); }
-        else if (action === 'bulk-card-color') { showBulkCardColorPicker(pId); }
-        else if (action === 'bulk-card-reset') { bulkResetCardsBgColor(pId); hideAllContextMenus(); }
-      };
+        else if (action === 'bg-reset') { resetPaneColorValue(pId,'bg'); hideAllContextMenus(); }      };
     });
 
     menu.style.left = e.clientX + 'px';
@@ -15155,7 +15454,7 @@ function showPresetPanelColorPicker(paneId){
             if (v === 'chapter' || v === 'episode' || v === 'scene') return v;
             return 'scene';
           })(),
-          outlineLevel: (() => { const v = (card.outlineLevel ?? card.level); const n = parseInt(v, 10); return Number.isFinite(n) ? String(Math.max(1, Math.min(4, n))) : '1'; })(),
+          outlineLevel: (() => { const v = (card.outlineLevel ?? card.level); const n = parseInt(v, 10); return Number.isFinite(n) ? String(Math.max(1, Math.min(3, n))) : '1'; })(),
           selected: false,
           collapsed: !!card.collapsed,
           // expanded (boolean) から expandLevel (0..4) への移行対応
@@ -15332,8 +15631,15 @@ function showPresetPanelColorPicker(paneId){
     if (card.collapsed) div.classList.add('collapsed');
     if (card.bgColor) {
       div.classList.add('has-custom-color');
-      div.style.setProperty('--structure-card-accent', card.bgColor);
+      const __sl = (card.level === 'chapter') ? 1 : ((card.level === 'episode') ? 2 : 3);
+      const __acc = deriveOutlineAccentFromBg(card.bgColor, __sl);
+      div.style.setProperty('--structure-card-accent', __acc);
       div.style.setProperty('--structure-card-bg', card.bgColor);
+      div.style.setProperty('--cc-card-tint-left', toRgba(card.bgColor, 0.18));
+      div.style.setProperty('--cc-card-tint-right', toRgba(card.bgColor, 0));
+      const __rgb = window.cssColorToRgb(card.bgColor);
+      if(__rgb) div.style.setProperty('--cc-card-tint-rgb', `${__rgb.r} ${__rgb.g} ${__rgb.b}`);
+      else div.style.removeProperty('--cc-card-tint-rgb');
     }
     div.dataset.id = card.id;
     div.draggable = true;
@@ -17180,7 +17486,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
         const parsed = JSON.parse(saved);
         characterData = (parsed.data || []).map(card => ({
           ...card,
-          outlineLevel: (() => { const v = (card.outlineLevel ?? card.level); const n = parseInt(v, 10); return Number.isFinite(n) ? String(Math.max(1, Math.min(4, n))) : '1'; })(),
+          outlineLevel: (() => { const v = (card.outlineLevel ?? card.level); const n = parseInt(v, 10); return Number.isFinite(n) ? String(Math.max(1, Math.min(3, n))) : '1'; })(),
           role: (card.role ?? 'protagonist'),
           affiliationTags: Array.isArray(card.affiliationTags) ? card.affiliationTags : [],
           freeTags: Array.isArray(card.freeTags) ? card.freeTags : [],
@@ -17278,7 +17584,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     const div = document.createElement('div');
     div.className = `character-card card-shell role-${card.role}`;
     // アウトラインレベル(1..4)でインデント（階層表現）。役割(role)とは独立。
-    const __ol = (() => { const n = parseInt(card.outlineLevel, 10); const v = Number.isFinite(n) ? Math.max(1, Math.min(4, n)) : 1; card.outlineLevel = String(v); return v; })();
+    const __ol = (() => { const n = parseInt(card.outlineLevel, 10); const v = Number.isFinite(n) ? Math.max(1, Math.min(3, n)) : 1; card.outlineLevel = String(v); return v; })();
     div.classList.add('outline-l' + __ol);
     div.style.setProperty('--outline-margin', `${(__ol - 1) * 18}px`);
     div.style.setProperty('--outline-indent', `0px`);
@@ -17292,8 +17598,14 @@ if (swapBtn) swapBtn.classList.remove('is-active');
         if (level > 0) div.classList.add('expanded');
 if (card.bgColor) {
       div.classList.add('has-custom-color');
-      div.style.setProperty('--character-card-accent', card.bgColor);
+      const __acc = deriveOutlineAccentFromBg(card.bgColor, __ol);
+      div.style.setProperty('--character-card-accent', __acc);
       div.style.setProperty('--character-card-bg', card.bgColor);
+      div.style.setProperty('--cc-card-tint-left', toRgba(card.bgColor, 0.18));
+      div.style.setProperty('--cc-card-tint-right', toRgba(card.bgColor, 0));
+      const __rgb = window.cssColorToRgb(card.bgColor);
+      if(__rgb) div.style.setProperty('--cc-card-tint-rgb', `${__rgb.r} ${__rgb.g} ${__rgb.b}`);
+      else div.style.removeProperty('--cc-card-tint-rgb');
     }
     div.dataset.id = card.id;
     div.draggable = true;
@@ -18038,7 +18350,7 @@ if (termContainer) {
     if (characterData.length === 0) { alert('エクスポートするキャラクターがありません'); return; }
     let text = '【登場人物一覧】\n\n';
     characterData.forEach(c => {
-      const ol = (() => { const n = parseInt(c.outlineLevel, 10); return Number.isFinite(n) ? Math.max(1, Math.min(4, n)) : 1; })();
+      const ol = (() => { const n = parseInt(c.outlineLevel, 10); return Number.isFinite(n) ? Math.max(1, Math.min(3, n)) : 1; })();
       const indent = '  '.repeat(Math.max(0, ol - 1));
       text += `${indent}■ ${c.name}${c.reading ? ` (${c.reading})` : ''} [${CHARACTER_ROLES[c.role]}]\n`;
       if (c.affiliationTags.length > 0) text += `${indent}  所属: ${c.affiliationTags.join(', ')}\n`;
@@ -18057,7 +18369,7 @@ if (termContainer) {
   function getCharacterOutlineLevel(card) {
     const n = parseInt(card?.outlineLevel, 10);
     if (!Number.isFinite(n)) return 1;
-    return Math.max(1, Math.min(4, n));
+    return Math.max(1, Math.min(3, n));
   }
 
   // カード範囲取得（子要素を含む）
@@ -18146,7 +18458,7 @@ if (termContainer) {
     if (!Array.isArray(characterData) || idx < 0 || idx >= characterData.length) return;
     const range = getCharacterCardRangeWithChildren(idx);
     const cur = getCharacterOutlineLevel(characterData[idx]);
-    let desired = Math.max(1, Math.min(4, Number(desiredLevel) || 1));
+    let desired = Math.max(1, Math.min(3, Number(desiredLevel) || 1));
     if (desired === cur) return;
 
     // インデントを深くする場合は、直前カードにぶら下がれる範囲に制限
@@ -18167,13 +18479,13 @@ if (termContainer) {
     }
 
     let shift = desired - cur;
-    if (maxL + shift > 4) shift = 4 - maxL;
+    if (maxL + shift > 3) shift = 3 - maxL;
     if (minL + shift < 1) shift = 1 - minL;
     if (shift === 0) return;
 
     for (let i = range.start; i <= range.end; i++) {
       const old = getCharacterOutlineLevel(characterData[i]);
-      characterData[i].outlineLevel = String(Math.max(1, Math.min(4, old + shift)));
+      characterData[i].outlineLevel = String(Math.max(1, Math.min(3, old + shift)));
     }
   }
 
@@ -18697,7 +19009,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
         const parsed = JSON.parse(saved);
         worldData = (parsed.data || []).map(card => ({
           ...card,
-          outlineLevel: (() => { const v = card.outlineLevel; const n = parseInt(v, 10); return Number.isFinite(n) ? String(Math.max(1, Math.min(4, n))) : '1'; })(),
+          outlineLevel: (() => { const v = card.outlineLevel; const n = parseInt(v, 10); return Number.isFinite(n) ? String(Math.max(1, Math.min(3, n))) : '1'; })(),
           termTags: Array.isArray(card.termTags) ? card.termTags : [],
           selected: false,
           linkedCharacters: card.linkedCharacters || [],
@@ -18793,7 +19105,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     const div = document.createElement('div');
     div.className = `world-card card-shell level-${card.level}`;
     // アウトラインレベル(1..4)でインデント（階層表現）。カテゴリ(level=major/middle/detail)とは独立。
-    const __ol = (() => { const n = parseInt(card.outlineLevel, 10); const v = Number.isFinite(n) ? Math.max(1, Math.min(4, n)) : 1; card.outlineLevel = String(v); return v; })();
+    const __ol = (() => { const n = parseInt(card.outlineLevel, 10); const v = Number.isFinite(n) ? Math.max(1, Math.min(3, n)) : 1; card.outlineLevel = String(v); return v; })();
     div.classList.add('outline-l' + __ol);
     div.style.setProperty('--outline-margin', `${(__ol - 1) * 18}px`);
     div.style.setProperty('--outline-indent', `0px`);
@@ -18807,8 +19119,15 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     if (expandLevel > 0) div.classList.add('expanded');
 if (card.bgColor) {
       div.classList.add('has-custom-color');
-      div.style.setProperty('--world-card-accent', card.bgColor);
+      // 背景色はユーザー指定のまま、帯は背景から自動生成してコントラストを出す（outlineLevelに応じて強弱）
+      const __acc = deriveOutlineAccentFromBg(card.bgColor, __ol);
+      div.style.setProperty('--world-card-accent', __acc);
       div.style.setProperty('--world-card-bg', card.bgColor);
+      div.style.setProperty('--cc-card-tint-left', toRgba(card.bgColor, 0.18));
+      div.style.setProperty('--cc-card-tint-right', toRgba(card.bgColor, 0));
+      const __rgb = window.cssColorToRgb(card.bgColor);
+      if(__rgb) div.style.setProperty('--cc-card-tint-rgb', `${__rgb.r} ${__rgb.g} ${__rgb.b}`);
+      else div.style.removeProperty('--cc-card-tint-rgb');
     }
     div.dataset.id = card.id;
     div.draggable = true;
@@ -19539,7 +19858,7 @@ if (termContainer) {
     if (worldData.length === 0) { alert('エクスポートする項目がありません'); return; }
     let text = '【世界観設定】\n\n';
     worldData.forEach(c => {
-      const ol = (() => { const n = parseInt(c.outlineLevel, 10); return Number.isFinite(n) ? Math.max(1, Math.min(4, n)) : 1; })();
+      const ol = (() => { const n = parseInt(c.outlineLevel, 10); return Number.isFinite(n) ? Math.max(1, Math.min(3, n)) : 1; })();
       const indent = '  '.repeat(Math.max(0, ol - 1));
       text += `${indent}■ ${c.name} [${WORLD_LEVELS[c.level] || c.level}]\n`;
       if (c.termTags.length > 0) text += `${indent}  用語: ${c.termTags.join(', ')}\n`;
@@ -19557,7 +19876,7 @@ if (termContainer) {
   function getWorldOutlineLevel(card) {
     const n = parseInt(card?.outlineLevel, 10);
     if (!Number.isFinite(n)) return 1;
-    return Math.max(1, Math.min(4, n));
+    return Math.max(1, Math.min(3, n));
   }
 
   // カード範囲取得（子要素を含む）: outlineLevel が自分より深い間は子要素として含める
@@ -19648,7 +19967,7 @@ if (termContainer) {
     if (!Array.isArray(worldData) || idx < 0 || idx >= worldData.length) return;
     const range = getWorldCardRangeWithChildren(idx);
     const cur = getWorldOutlineLevel(worldData[idx]);
-    let desired = Math.max(1, Math.min(4, Number(desiredLevel) || 1));
+    let desired = Math.max(1, Math.min(3, Number(desiredLevel) || 1));
     if (desired === cur) return;
 
     // インデントを深くする（数値が大きくなる）場合は、直前カードにぶら下がれる範囲に制限
@@ -19669,13 +19988,13 @@ if (termContainer) {
     }
 
     let shift = desired - cur;
-    if (maxL + shift > 4) shift = 4 - maxL;
+    if (maxL + shift > 3) shift = 3 - maxL;
     if (minL + shift < 1) shift = 1 - minL;
     if (shift === 0) return;
 
     for (let i = range.start; i <= range.end; i++) {
       const old = getWorldOutlineLevel(worldData[i]);
-      worldData[i].outlineLevel = String(Math.max(1, Math.min(4, old + shift)));
+      worldData[i].outlineLevel = String(Math.max(1, Math.min(3, old + shift)));
     }
   }
 
@@ -20355,7 +20674,14 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       card.draggable = true;
 
       // per-card custom color (optional)
-      if (term.bgColor) card.style.background = term.bgColor;
+      if (term.bgColor) {
+        card.classList.add('has-custom-color');
+        card.style.setProperty('--cc-card-tint-left', toRgba(term.bgColor, 0.18));
+        card.style.setProperty('--cc-card-tint-right', toRgba(term.bgColor, 0));
+        const __rgb = window.cssColorToRgb(term.bgColor);
+        if(__rgb) card.style.setProperty('--cc-card-tint-rgb', `${__rgb.r} ${__rgb.g} ${__rgb.b}`);
+        else card.style.removeProperty('--cc-card-tint-rgb');
+      }
 
       // normalize expand level (unified with other panels)
       term.expandLevel = Math.max(0, Math.min(4, Number(term.expandLevel) || 0));
@@ -22264,12 +22590,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addItem('背景色の変更', '🖼', ()=>window.showBgColorPicker?.(pid));
     addItem('ヘッダーカラーをリセット', '↩', ()=>window.resetPaneColorValue?.(pid,'head'));
     addItem('背景色をリセット', '↩', ()=>window.resetPaneColorValue?.(pid,'bg'));
-
-    if (supportsCards){
-      addItem('カード色を一括変更', '🧤', ()=>window.showBulkCardColorPicker?.(pid));
-      addItem('カード色を一括リセット', '🧤', ()=>window.bulkResetCardsBgColor?.(pid));
-    }
-
+    // カード色の一括変更/リセット機能は削除しました
     // Position menu
     const x = (ev && (ev.clientX||ev.pageX)) || 0;
     const y = (ev && (ev.clientY||ev.pageY)) || 0;
