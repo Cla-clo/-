@@ -1175,6 +1175,23 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     .modal-header h3 { margin: 0; font-size: 1.2rem; }
     .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
     .modal-close:hover { color: #dc2626; }
+
+    /* Card View Modal Styles */
+    .card-view-modal-content { max-width: 700px; }
+    .card-view-body { padding: 10px 0; }
+    .card-view-section { margin-bottom: 16px; padding: 12px; background: var(--pane-header-bg); border-radius: 6px; border-left: 3px solid #3b82f6; }
+    .card-view-section-title { font-weight: bold; font-size: 0.85rem; color: #3b82f6; margin-bottom: 8px; }
+    .card-view-section-content { font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
+    .card-view-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    .card-view-tag { background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; }
+    .card-view-tag.role { background: #fef3c7; color: #92400e; }
+    .card-view-tag.level { background: #d1fae5; color: #065f46; }
+    .card-view-tag.status { background: #ede9fe; color: #5b21b6; }
+    .card-view-links { display: flex; flex-wrap: wrap; gap: 4px; }
+    .card-view-link { background: #e5e7eb; color: #374151; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; }
+    .card-view-footer { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 8px; }
+    .card-view-header-badges { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+
     .analysis-section { margin-bottom: 20px; padding: 15px; background: var(--pane-header-bg); border-radius: 6px; }
     .analysis-section h4 { margin: 0 0 10px 0; font-size: 0.95rem; color: #2563eb; }
     .analysis-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dotted var(--border-color); }
@@ -5567,6 +5584,20 @@ body.theme-dark{
     <div class="modal-content">
         <div class="modal-header"><h3>📊 テキスト分析</h3><button class="modal-close" onclick="closeAnalysis()">✕</button></div>
         <div id="analysis-results"></div>
+    </div>
+</div>
+
+<!-- カード閲覧モーダル -->
+<div id="card-view-modal" class="modal-overlay">
+    <div class="modal-content card-view-modal-content">
+        <div class="modal-header">
+            <h3 id="card-view-title">カード詳細</h3>
+            <button class="modal-close" onclick="closeCardViewModal()">&times;</button>
+        </div>
+        <div id="card-view-body" class="card-view-body"></div>
+        <div class="card-view-footer">
+            <button class="btn-primary" onclick="closeCardViewModal()">閉じる</button>
+        </div>
     </div>
 </div>
 
@@ -15778,6 +15809,7 @@ function showPresetPanelColorPicker(paneId){
     const actions = document.createElement('div');
     actions.className = 'card-actions structure-card-actions';
     actions.innerHTML = `
+      <button onclick="showStructureCardView(${card.id})">👁 閲覧</button>
       <button onclick="openEditModal(${card.id})">✏️ 編集</button>
       <button onclick="duplicateStructureCard(${card.id})">📋 複製</button>
       <button class="btn-delete" onclick="deleteStructureCard(${card.id})">🗑 削除</button>
@@ -16174,6 +16206,7 @@ function showPresetPanelColorPicker(paneId){
     menu.innerHTML = `
       <div class="context-menu-item" data-action="new-card">＋新しいカード</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
+      <div class="context-menu-item" data-action="view">👁 閲覧</div>
       <div class="context-menu-item" data-action="edit">✏️ 編集</div>
       <div class="context-menu-item" data-action="duplicate">📋 複製</div>
       <div class="context-menu-item" data-action="toggle">↕ 次の展開レベル</div>
@@ -16199,6 +16232,7 @@ function showPresetPanelColorPicker(paneId){
         ev.stopPropagation();
         const action = item.dataset.action;
         if (action === 'new-card') createStructureCardFromSelection();
+        if (action === 'view') showStructureCardView(cardId);
         if (action === 'edit') openEditModal(cardId);
         if (action === 'duplicate') duplicateStructureCard(cardId);
         if (action === 'toggle') {
@@ -16448,6 +16482,118 @@ function openStructureCardColorPicker(cardId, anchorEl){
 
     saveStructureData();
     renderStructureList();
+  }
+
+  // ========== 閲覧モーダル（共通） ==========
+  function closeCardViewModal() {
+    const modal = document.getElementById('card-view-modal');
+    if (modal) modal.classList.remove('show');
+  }
+
+  function escapeHtmlView(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function showStructureCardView(cardId) {
+    const card = structureData.find(c => c.id === cardId);
+    if (!card) return;
+
+    const modal = document.getElementById('card-view-modal');
+    const title = document.getElementById('card-view-title');
+    const body = document.getElementById('card-view-body');
+
+    title.textContent = card.title || '（無題）';
+
+    let html = '<div class="card-view-header-badges">';
+    if (card.level) {
+      const levelLabel = LEVEL_LABELS[card.level] || card.level;
+      html += `<span class="card-view-tag level">${escapeHtmlView(levelLabel)}</span>`;
+    }
+    if (card.status && card.status !== 'none') {
+      const statusLabels = { draft: '草稿', revise: '推敲', done: '完了' };
+      html += `<span class="card-view-tag status">${escapeHtmlView(statusLabels[card.status] || card.status)}</span>`;
+    }
+    html += '</div>';
+
+    if (card.summary) {
+      html += `<div class="card-view-section">
+        <div class="card-view-section-title">要約</div>
+        <div class="card-view-section-content">${escapeHtmlView(card.summary)}</div>
+      </div>`;
+    }
+
+    if (card.viewpoint) {
+      html += `<div class="card-view-section">
+        <div class="card-view-section-title">視点</div>
+        <div class="card-view-section-content">${escapeHtmlView(card.viewpoint)}</div>
+      </div>`;
+    }
+
+    if (card.tags && card.tags.length > 0) {
+      html += `<div class="card-view-section">
+        <div class="card-view-section-title">舞台タグ</div>
+        <div class="card-view-tags">${card.tags.map(t => `<span class="card-view-tag">${escapeHtmlView(t)}</span>`).join('')}</div>
+      </div>`;
+    }
+
+    // リンク：登場人物
+    if (card.linkedCharacters && card.linkedCharacters.length > 0 && window.characterData) {
+      const names = card.linkedCharacters.map(id => {
+        const ch = characterData.find(c => c.id === id);
+        return ch ? ch.name : null;
+      }).filter(n => n);
+      if (names.length > 0) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">登場人物</div>
+          <div class="card-view-links">${names.map(n => `<span class="card-view-link">${escapeHtmlView(n)}</span>`).join('')}</div>
+        </div>`;
+      }
+    }
+
+    // リンク：世界観
+    if (card.linkedWorlds && card.linkedWorlds.length > 0 && window.worldData) {
+      const names = card.linkedWorlds.map(id => {
+        const w = worldData.find(c => c.id === id);
+        return w ? w.name : null;
+      }).filter(n => n);
+      if (names.length > 0) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">世界観</div>
+          <div class="card-view-links">${names.map(n => `<span class="card-view-link">${escapeHtmlView(n)}</span>`).join('')}</div>
+        </div>`;
+      }
+    }
+
+    // リンク：用語
+    if (card.linkedTerms && card.linkedTerms.length > 0 && window.termsData) {
+      const names = card.linkedTerms.map(id => {
+        const t = termsData.find(c => c.id === id);
+        return t ? t.name : null;
+      }).filter(n => n);
+      if (names.length > 0) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">用語</div>
+          <div class="card-view-links">${names.map(n => `<span class="card-view-link">${escapeHtmlView(n)}</span>`).join('')}</div>
+        </div>`;
+      }
+    }
+
+    // タブ
+    if (card.tabId && window.inputTabs) {
+      const tab = inputTabs.find(t => t.id === card.tabId);
+      if (tab) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">紐づけタブ</div>
+          <div class="card-view-section-content">${escapeHtmlView(tab.name)}</div>
+        </div>`;
+      }
+    }
+
+    body.innerHTML = html;
+    modal.classList.add('show');
   }
 
   // ========== 編集モーダル ==========
@@ -17628,6 +17774,7 @@ div.innerHTML = `
       </div>
       ${level > 0 ? `<div class="character-card-body">${bodyContent}</div>` : ''}
       <div class="card-actions character-card-actions">
+        <button onclick="showCharacterCardView(${card.id})">👁 閲覧</button>
         <button onclick="openCharacterEditModal(${card.id})">✏️ 編集</button>
         <button onclick="duplicateCharacterCard(${card.id})">📋 複製</button>
         <button class="btn-delete" onclick="deleteCharacterCard(${card.id})">🗑 削除</button>
@@ -17741,6 +17888,121 @@ function getUniformCharacterExpandLevel() {
       card.selected = !card.selected;
       renderCharacterList();
     }
+  }
+
+  // ========== 登場人物閲覧モーダル ==========
+  function showCharacterCardView(cardId) {
+    const card = characterData.find(c => c.id === cardId);
+    if (!card) return;
+
+    const modal = document.getElementById('card-view-modal');
+    const title = document.getElementById('card-view-title');
+    const body = document.getElementById('card-view-body');
+
+    let titleText = card.name || '（無題）';
+    if (card.reading) titleText += `（${card.reading}）`;
+    title.textContent = titleText;
+
+    let html = '<div class="card-view-header-badges">';
+    if (card.role) {
+      const roleLabel = CHARACTER_ROLES[card.role] || card.role;
+      html += `<span class="card-view-tag role">${escapeHtmlView(roleLabel)}</span>`;
+    }
+    html += '</div>';
+
+    // 裏設定：姓・ミドルネーム・名
+    const hasHiddenName = card.lastName || card.middleName || card.firstName;
+    if (hasHiddenName) {
+      let nameDetail = '';
+      if (card.lastName) nameDetail += `姓: ${card.lastName}${card.lastNameReading ? `（${card.lastNameReading}）` : ''} `;
+      if (card.middleName) nameDetail += `ミドルネーム: ${card.middleName}${card.middleNameReading ? `（${card.middleNameReading}）` : ''} `;
+      if (card.firstName) nameDetail += `名: ${card.firstName}${card.firstNameReading ? `（${card.firstNameReading}）` : ''}`;
+      html += `<div class="card-view-section">
+        <div class="card-view-section-title">名前詳細（裏設定）</div>
+        <div class="card-view-section-content">${escapeHtmlView(nameDetail.trim())}</div>
+      </div>`;
+    }
+
+    if (card.description) {
+      html += `<div class="card-view-section">
+        <div class="card-view-section-title">説明</div>
+        <div class="card-view-section-content">${escapeHtmlView(card.description)}</div>
+      </div>`;
+    }
+
+    if (card.details) {
+      html += `<div class="card-view-section">
+        <div class="card-view-section-title">詳細</div>
+        <div class="card-view-section-content">${escapeHtmlView(card.details)}</div>
+      </div>`;
+    }
+
+    // タグ
+    const allTags = [];
+    if (card.affiliation && card.affiliation.length > 0) allTags.push(...card.affiliation);
+    if (card.freeTags && card.freeTags.length > 0) allTags.push(...card.freeTags);
+    if (allTags.length > 0) {
+      html += `<div class="card-view-section">
+        <div class="card-view-section-title">タグ</div>
+        <div class="card-view-tags">${allTags.map(t => `<span class="card-view-tag">${escapeHtmlView(t)}</span>`).join('')}</div>
+      </div>`;
+    }
+
+    // リンク：構成
+    if (card.linkedStructures && card.linkedStructures.length > 0 && window.structureData) {
+      const names = card.linkedStructures.map(id => {
+        const s = structureData.find(c => c.id === id);
+        return s ? s.title : null;
+      }).filter(n => n);
+      if (names.length > 0) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">構成</div>
+          <div class="card-view-links">${names.map(n => `<span class="card-view-link">${escapeHtmlView(n)}</span>`).join('')}</div>
+        </div>`;
+      }
+    }
+
+    // リンク：世界観
+    if (card.linkedWorlds && card.linkedWorlds.length > 0 && window.worldData) {
+      const names = card.linkedWorlds.map(id => {
+        const w = worldData.find(c => c.id === id);
+        return w ? w.name : null;
+      }).filter(n => n);
+      if (names.length > 0) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">世界観</div>
+          <div class="card-view-links">${names.map(n => `<span class="card-view-link">${escapeHtmlView(n)}</span>`).join('')}</div>
+        </div>`;
+      }
+    }
+
+    // リンク：用語
+    if (card.linkedTerms && card.linkedTerms.length > 0 && window.termsData) {
+      const names = card.linkedTerms.map(id => {
+        const t = termsData.find(c => c.id === id);
+        return t ? t.name : null;
+      }).filter(n => n);
+      if (names.length > 0) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">用語</div>
+          <div class="card-view-links">${names.map(n => `<span class="card-view-link">${escapeHtmlView(n)}</span>`).join('')}</div>
+        </div>`;
+      }
+    }
+
+    // タブ
+    if (card.tabId && window.inputTabs) {
+      const tab = inputTabs.find(t => t.id === card.tabId);
+      if (tab) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">紐づけタブ</div>
+          <div class="card-view-section-content">${escapeHtmlView(tab.name)}</div>
+        </div>`;
+      }
+    }
+
+    body.innerHTML = html;
+    modal.classList.add('show');
   }
 
   function openCharacterEditModal(cardId) {
@@ -18101,6 +18363,7 @@ if (termContainer) {
     menu.innerHTML = `
       <div class="context-menu-item" data-action="new-card">＋新しいカード</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
+      <div class="context-menu-item" data-action="view">👁 閲覧</div>
       <div class="context-menu-item" data-action="edit">✏️ 編集</div>
       <div class="context-menu-item" data-action="duplicate">📋 複製</div>
       <div class="context-menu-item" data-action="toggle">↕ 次の展開レベル</div>
@@ -18128,6 +18391,7 @@ if (termContainer) {
         ev.stopPropagation();
         const action = item.dataset.action;
         if (action === 'new-card') createCharacterCardFromSelection();
+        if (action === 'view') showCharacterCardView(cardId);
         if (action === 'edit') openCharacterEditModal(cardId);
         if (action === 'duplicate') duplicateCharacterCard(cardId);
         if (action === 'toggle') {
@@ -19153,6 +19417,7 @@ div.innerHTML = `
       </div>
       ${expandLevel > 0 ? `<div class="world-card-body">${bodyContent}</div>` : ''}
       <div class="card-actions world-card-actions">
+        <button onclick="showWorldCardView(${card.id})">👁 閲覧</button>
         <button onclick="openWorldEditModal(${card.id})">✏️ 編集</button>
         <button onclick="duplicateWorldCard(${card.id})">📋 複製</button>
         <button class="btn-delete" onclick="deleteWorldCard(${card.id})">🗑 削除</button>
@@ -19266,6 +19531,103 @@ function getUniformWorldExpandLevel() {
       card.selected = !card.selected;
       renderWorldList();
     }
+  }
+
+  // ========== 世界観閲覧モーダル ==========
+  function showWorldCardView(cardId) {
+    const card = worldData.find(c => c.id === cardId);
+    if (!card) return;
+
+    const modal = document.getElementById('card-view-modal');
+    const title = document.getElementById('card-view-title');
+    const body = document.getElementById('card-view-body');
+
+    title.textContent = card.name || '（無題）';
+
+    let html = '<div class="card-view-header-badges">';
+    if (card.level) {
+      const levelLabel = WORLD_LEVELS[card.level] || card.level;
+      html += `<span class="card-view-tag level">${escapeHtmlView(levelLabel)}</span>`;
+    }
+    html += '</div>';
+
+    if (card.description) {
+      html += `<div class="card-view-section">
+        <div class="card-view-section-title">説明</div>
+        <div class="card-view-section-content">${escapeHtmlView(card.description)}</div>
+      </div>`;
+    }
+
+    if (card.details) {
+      html += `<div class="card-view-section">
+        <div class="card-view-section-title">詳細</div>
+        <div class="card-view-section-content">${escapeHtmlView(card.details)}</div>
+      </div>`;
+    }
+
+    // タグ
+    if (card.termTags && card.termTags.length > 0) {
+      html += `<div class="card-view-section">
+        <div class="card-view-section-title">タグ</div>
+        <div class="card-view-tags">${card.termTags.map(t => `<span class="card-view-tag">${escapeHtmlView(t)}</span>`).join('')}</div>
+      </div>`;
+    }
+
+    // リンク：構成
+    if (card.linkedStructures && card.linkedStructures.length > 0 && window.structureData) {
+      const names = card.linkedStructures.map(id => {
+        const s = structureData.find(c => c.id === id);
+        return s ? s.title : null;
+      }).filter(n => n);
+      if (names.length > 0) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">構成</div>
+          <div class="card-view-links">${names.map(n => `<span class="card-view-link">${escapeHtmlView(n)}</span>`).join('')}</div>
+        </div>`;
+      }
+    }
+
+    // リンク：登場人物
+    if (card.linkedCharacters && card.linkedCharacters.length > 0 && window.characterData) {
+      const names = card.linkedCharacters.map(id => {
+        const ch = characterData.find(c => c.id === id);
+        return ch ? ch.name : null;
+      }).filter(n => n);
+      if (names.length > 0) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">登場人物</div>
+          <div class="card-view-links">${names.map(n => `<span class="card-view-link">${escapeHtmlView(n)}</span>`).join('')}</div>
+        </div>`;
+      }
+    }
+
+    // リンク：用語
+    if (card.linkedTerms && card.linkedTerms.length > 0 && window.termsData) {
+      const names = card.linkedTerms.map(id => {
+        const t = termsData.find(c => c.id === id);
+        return t ? t.name : null;
+      }).filter(n => n);
+      if (names.length > 0) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">用語</div>
+          <div class="card-view-links">${names.map(n => `<span class="card-view-link">${escapeHtmlView(n)}</span>`).join('')}</div>
+        </div>`;
+      }
+    }
+
+    // タブ
+    if (card.tabId && window.inputTabs) {
+      const tab = inputTabs.find(t => t.id === card.tabId);
+      if (tab) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">紐づけタブ</div>
+          <div class="card-view-section-content">${escapeHtmlView(tab.name)}</div>
+        </div>`;
+      }
+    }
+
+    body.innerHTML = html;
+    modal.classList.add('show');
   }
 
   function openWorldEditModal(cardId) {
@@ -19615,6 +19977,7 @@ if (termContainer) {
     menu.innerHTML = `
       <div class="context-menu-item" data-action="new-card">＋新しいカード</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
+      <div class="context-menu-item" data-action="view">👁 閲覧</div>
       <div class="context-menu-item" data-action="edit">✏️ 編集</div>
       <div class="context-menu-item" data-action="duplicate">📋 複製</div>
       <div class="context-menu-item" data-action="toggle">↕ 次の展開レベル</div>
@@ -19642,6 +20005,7 @@ if (termContainer) {
         ev.stopPropagation();
         const action = item.dataset.action;
         if (action === 'new-card') createWorldCardFromSelection();
+        if (action === 'view') showWorldCardView(cardId);
         if (action === 'edit') openWorldEditModal(cardId);
         if (action === 'duplicate') duplicateWorldCard(cardId);
         if (action === 'toggle') {
@@ -20778,6 +21142,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       const actions = document.createElement('div');
       actions.className = 'card-actions terms-card-actions';
       actions.innerHTML = `
+        <button onclick="showTermCardView(${term.id})">👁 閲覧</button>
         <button onclick="openTermEditModal(${term.id})">✏️ 編集</button>
         <button onclick="duplicateTermCard(${term.id})">📋 複製</button>
         <button class="btn-delete" onclick="deleteTermCard(${term.id})">🗑 削除</button>
@@ -20860,6 +21225,97 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
     const container = document.getElementById('terms-category-suggestions');
     if (container) container.style.display = 'none';
   };
+
+  // ========== 用語閲覧モーダル ==========
+  window.showTermCardView = function(cardId) {
+    const term = termsData.find(t => t.id === cardId);
+    if (!term) return;
+
+    const modal = document.getElementById('card-view-modal');
+    const title = document.getElementById('card-view-title');
+    const body = document.getElementById('card-view-body');
+
+    let titleText = term.name || '（無題）';
+    if (term.reading) titleText += `（${term.reading}）`;
+    title.textContent = titleText;
+
+    let html = '<div class="card-view-header-badges">';
+    if (term.category) {
+      html += `<span class="card-view-tag level">${escapeHtmlView(term.category)}</span>`;
+    }
+    html += '</div>';
+
+    if (term.desc) {
+      html += `<div class="card-view-section">
+        <div class="card-view-section-title">説明</div>
+        <div class="card-view-section-content">${escapeHtmlView(term.desc)}</div>
+      </div>`;
+    }
+
+    if (term.details) {
+      html += `<div class="card-view-section">
+        <div class="card-view-section-title">詳細</div>
+        <div class="card-view-section-content">${escapeHtmlView(term.details)}</div>
+      </div>`;
+    }
+
+    // リンク：構成
+    if (term.linkedStructures && term.linkedStructures.length > 0 && window.structureData) {
+      const names = term.linkedStructures.map(id => {
+        const s = structureData.find(c => c.id === id);
+        return s ? s.title : null;
+      }).filter(n => n);
+      if (names.length > 0) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">構成</div>
+          <div class="card-view-links">${names.map(n => `<span class="card-view-link">${escapeHtmlView(n)}</span>`).join('')}</div>
+        </div>`;
+      }
+    }
+
+    // リンク：登場人物
+    if (term.linkedCharacters && term.linkedCharacters.length > 0 && window.characterData) {
+      const names = term.linkedCharacters.map(id => {
+        const ch = characterData.find(c => c.id === id);
+        return ch ? ch.name : null;
+      }).filter(n => n);
+      if (names.length > 0) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">登場人物</div>
+          <div class="card-view-links">${names.map(n => `<span class="card-view-link">${escapeHtmlView(n)}</span>`).join('')}</div>
+        </div>`;
+      }
+    }
+
+    // リンク：世界観
+    if (term.linkedWorlds && term.linkedWorlds.length > 0 && window.worldData) {
+      const names = term.linkedWorlds.map(id => {
+        const w = worldData.find(c => c.id === id);
+        return w ? w.name : null;
+      }).filter(n => n);
+      if (names.length > 0) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">世界観</div>
+          <div class="card-view-links">${names.map(n => `<span class="card-view-link">${escapeHtmlView(n)}</span>`).join('')}</div>
+        </div>`;
+      }
+    }
+
+    // タブ
+    if (term.tabId && window.inputTabs) {
+      const tab = inputTabs.find(t => t.id === term.tabId);
+      if (tab) {
+        html += `<div class="card-view-section">
+          <div class="card-view-section-title">紐づけタブ</div>
+          <div class="card-view-section-content">${escapeHtmlView(tab.name)}</div>
+        </div>`;
+      }
+    }
+
+    body.innerHTML = html;
+    modal.classList.add('show');
+  };
+
 window.openTermEditModal = function(id){
     const modal = document.getElementById('terms-edit-modal');
     if(!modal) return;
@@ -21351,6 +21807,7 @@ let menu = document.getElementById('terms-context-menu');
     menu.innerHTML = `
       <div class="context-menu-item" data-action="new-card">＋新しいカード</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
+      <div class="context-menu-item" data-action="view">👁 閲覧</div>
       <div class="context-menu-item" data-action="edit">✏️ 編集</div>
       <div class="context-menu-item" data-action="duplicate">📋 複製</div>
       <div class="context-menu-item" data-action="toggle">↕ 次の展開レベル</div>
@@ -21370,7 +21827,7 @@ let menu = document.getElementById('terms-context-menu');
       <div class="context-menu-item" data-action="delete" style="color:#ef4444;">削除</div>
     `;
 
-    
+
     menu.style.display = 'block';
 menu.querySelectorAll('.context-menu-item').forEach(item => {
       item.onclick = (ev) => {
@@ -21379,6 +21836,8 @@ menu.querySelectorAll('.context-menu-item').forEach(item => {
 
         if (action === 'new-card') {
           createTermsCard();
+        } else if (action === 'view') {
+          showTermCardView(cardId);
         } else if (action === 'edit') {
           openTermEditModal(cardId);
         } else if (action === 'duplicate') {
