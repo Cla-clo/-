@@ -2,7 +2,6 @@
 <html lang="ja">
 <head>
 <script>(function(){try{document.documentElement.classList.add('cc-boot');}catch(e){}})();</script>
-<script>window.DEBUG_LOG=false;</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ⓒエディタ（動作確認版）</title>
@@ -962,8 +961,6 @@ background: transparent;
     .bracket-blue { color: #2563eb; font-weight: bold; }
     .bracket-green { color: #059669; font-weight: bold; }
     .underline-text { text-decoration: underline; text-decoration-color: #dc2626; text-underline-offset: 2px; }
-    .highlight-text { }
-    body.theme-dark .highlight-text { }
 
     /* Memo Panel */
     #memo-panel {
@@ -1720,8 +1717,6 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     .terms-card{
         --card-shadow: var(--shadow-soft, 0 1px 2px rgba(0,0,0,0.06));
     }
-    .terms-card.drag-over{}
-    .terms-card-title{}
     .terms-card.expanded .terms-card-title{ border-bottom-color: var(--border-color); }
     .terms-card-body{
         display: none;
@@ -1762,7 +1757,6 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
 
     
     /* ===== Card actions (common) ===== */
-    .card-actions{ }
     .card-actions button{
         padding: 3px 8px;
         font-size: 0.7rem;
@@ -1920,9 +1914,6 @@ body.theme-dark .structure-content {
     .structure-card.has-custom-color {
         background: transparent;
     }
-    .structure-card:hover{}
-    .structure-card.dragging{}
-    .structure-card.drag-over{}
 
     /* 階層レベル別スタイル */
     .structure-card.level-chapter {
@@ -1946,7 +1937,6 @@ body.theme-dark .structure-content {
     .structure-card.has-custom-color.level-scene {
         border-left-color: var(--structure-card-accent, #60a5fa);
     }
-    .structure-card-header{}
     .structure-card-header button { cursor: pointer; }
     .structure-select {
         width: 14px; height: 14px; accent-color: #2563eb;
@@ -2771,9 +2761,6 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
         border-left: 3px solid #f9a8d4;
     }
     .character-card.has-custom-color { background: var(--character-card-bg, var(--panel-bg)); }
-    .character-card:hover{}
-    .character-card.dragging{}
-    .character-card.drag-over{}
     .character-card.role-protagonist { border-left: 4px solid #ec4899; }
     .character-card.has-custom-color.role-protagonist { border-left-color: var(--character-card-accent, #ec4899); background: var(--character-card-bg, var(--panel-bg)); }
     .character-card.role-heroine { border-left: 4px solid #f472b6; }
@@ -2784,11 +2771,8 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
     .character-card.has-custom-color.role-supporting { border-left-color: var(--character-card-accent, #f9a8d4); background: var(--character-card-bg, var(--panel-bg)); }
 .character-card.role-mob { border-left: 2px solid #fbcfe8; font-size: 0.9em; }
     .character-card.has-custom-color.role-mob { border-left-color: var(--character-card-accent, #fbcfe8); }
-    .character-card-header{}
     .character-select { width: 14px; height: 14px; accent-color: #ec4899; cursor: pointer; flex-shrink: 0; }
 	    #character-panel { --card-move-hover-bg: #fce7f3; --card-move-hover-color: #ec4899; --card-drag-border:#ec4899; --card-drag-ring: rgba(236,72,153,0.3); --card-toggle-hover-color:#ec4899; }
-    .character-toggle{}
-    .character-toggle:hover{}
     .character-name { flex: 1; font-weight: 600; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.85rem; }
     .character-reading { font-size: 0.7rem; color: var(--text-muted); margin-left: 4px; }
     .character-card.expanded .character-card-header { border-bottom-color: var(--border-color); }
@@ -2812,10 +2796,10 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
     .character-card.expand-1 .character-card-body { display: block; }
     .character-card.expand-2 .character-card-body { display: block; }
     .character-card.expand-3 .character-card-body { display: block; }
-    /* expand-1: タグのみ */
+    /* expand-1: タグ + プレビュー */
     .character-card.expand-1 .character-description { display: none; }
     .character-card.expand-1 .character-description-preview {
-        display: none;
+        display: block;
         margin-top: 4px;
         padding-top: 4px;
         border-top: 1px dashed var(--border-color);
@@ -2827,9 +2811,6 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    /* expand-1: タグ + プレビュー */
-    .character-card.expand-1 .character-description { display: none; }
-    .character-card.expand-1 .character-description-preview { display: block; }
     .character-card.expand-1 .card-linked-section { display: none; }
     /* expand-2: すべて表示 */
     .character-card.expand-2 .character-description-preview { display: none; }
@@ -2927,20 +2908,14 @@ body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
         background: transparent;
     }
     .world-card.has-custom-color { background: transparent; }
-    .world-card:hover{}
-    .world-card.dragging{}
-    .world-card.drag-over{}
     .world-card.level-major { border-left: 3px solid #10b981; }
     .world-card.has-custom-color.level-major { border-left-color: var(--world-card-accent, #10b981); background: var(--world-card-bg, var(--panel-bg)); }
 .world-card.level-middle { border-left: 2px solid #34d399; }
     .world-card.has-custom-color.level-middle { border-left-color: var(--world-card-accent, #34d399); background: var(--world-card-bg, var(--panel-bg)); }
 .world-card.level-detail { border-left: 1px solid #6ee7b7; font-size: 0.9em; }
     .world-card.has-custom-color.level-detail { border-left-color: var(--world-card-accent, #6ee7b7); }
-    .world-card-header{}
     .world-select { width: 14px; height: 14px; accent-color: #10b981; cursor: pointer; flex-shrink: 0; }
 	    #world-panel { --card-move-hover-bg: #d1fae5; --card-move-hover-color: #10b981; --card-drag-border:#10b981; --card-drag-ring: rgba(16,185,129,0.3); --card-toggle-hover-color:#10b981; }
-    .world-toggle{}
-    .world-toggle:hover{}
     .world-name { flex: 1; font-weight: 600; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.85rem; }
     .world-card.level-major .world-name { font-size: 0.95rem; }
     .world-card.expanded .world-card-header { border-bottom-color: var(--border-color); }
@@ -2960,10 +2935,10 @@ body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
     .world-card.expand-1 .world-card-body { display: block; }
     .world-card.expand-2 .world-card-body { display: block; }
     .world-card.expand-3 .world-card-body { display: block; }
-    /* expand-1: タグのみ */
+    /* expand-1: タグ + プレビュー */
     .world-card.expand-1 .world-description { display: none; }
     .world-card.expand-1 .world-description-preview {
-        display: none;
+        display: block;
         margin-top: 4px;
         padding-top: 4px;
         border-top: 1px dashed var(--border-color);
@@ -2975,9 +2950,6 @@ body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    /* expand-1: タグ + プレビュー */
-    .world-card.expand-1 .world-description { display: none; }
-    .world-card.expand-1 .world-description-preview { display: block; }
     .world-card.expand-1 .card-linked-section { display: none; }
     /* expand-2: すべて表示 */
     .world-card.expand-2 .world-description-preview { display: none; }
@@ -6459,10 +6431,6 @@ function addNewTab() {
 
   renderInputTabs();
   updateInputStats();
-
-  // ★ここではプレビューを更新しない（完全独立）
-  // updatePreview();
-
   saveTabsToStorage();
 }
 
@@ -11880,9 +11848,6 @@ function setupMemoInteractionGuard() {
 	
     // 起動時に実行
     setTimeout(renderMemoTabs, 500);
-	function updateActiveTabTitle() {
-  // TODO: 後で実装。とりあえずエラー回避用
-}
 </script>
 	-->
 
@@ -12184,84 +12149,16 @@ function paneIdToPaneKey(paneId){
 
   function bulkSetCardsBgColor(paneId, color){
     // Removed: bulk card coloring (requested)
-    return;
-
-    const key = paneIdToPaneKey(paneId);
-    const c = (color || '').trim();
-    const v = c ? ((c.toLowerCase() === '#ffffff') ? '' : c) : '';
-    const colorKey = getCardColorKeyByPaneKey(key);
-    const next = v;
-    const bulk = window.__ccPaneBulk && window.__ccPaneBulk[key];
-    if (!bulk || typeof bulk.setCardsBgColorAll !== 'function') {
-      const reg = window.PanelRegistry && window.PanelRegistry[paneId];
-      if (reg && reg.supportsCards && reg.data && typeof reg.data.get === 'function') {
-        const arr = reg.data.get() || [];
-        arr.forEach(card => { if (card) card[colorKey] = next; });
-        try { reg.data.save?.(); } catch(e) {}
-        try { reg.data.render?.(); } catch(e) {}
-      }
-      return;
-    }
-    if (bulk && typeof bulk.setCardsBgColorAll === 'function') {
-      bulk.setCardsBgColorAll(next);
-      return;
-    }
-    console.warn('bulkSetCardsBgColor: pane bulk API not available for', key);
   }
 
   function bulkResetCardsBgColor(paneId){
     // Removed: bulk card coloring (requested)
-    return;
-
-    const key = paneIdToPaneKey(paneId);
-    const colorKey = getCardColorKeyByPaneKey(key);
-    const next = '';
-    const bulk = window.__ccPaneBulk && window.__ccPaneBulk[key];
-    if (!bulk) {
-      const reg = window.PanelRegistry && window.PanelRegistry[paneId];
-      if (reg && reg.supportsCards && reg.data && typeof reg.data.get === 'function') {
-        const arr = reg.data.get() || [];
-        arr.forEach(card => { if (card) card[colorKey] = next; });
-        try { reg.data.save?.(); } catch(e) {}
-        try { reg.data.render?.(); } catch(e) {}
-      }
-      return;
-    }
-    if (typeof bulk.resetCardsBgColorAll === 'function') {
-      bulk.resetCardsBgColorAll();
-      return;
-    }
-    if (typeof bulk.setCardsBgColorAll === 'function') {
-      bulk.setCardsBgColorAll(next);
-      return;
-    }
-    console.warn('bulkResetCardsBgColor: pane bulk API not available for', key);
   }
 
   
 function showBulkCardColorPicker(paneId){
     // Removed: bulk card coloring (requested)
-    return;
-
-  const panel = document.getElementById(paneId);
-  const list = panel ? panel.querySelector('.panel-content') : null;
-  const picker = window.PanelColorPicker;
-  if (!picker) {
-    console.warn('PanelColorPicker is not available yet.');
-    return;
   }
-  const initial = picker.guessInitialFromEl(list);
-  picker.open({
-    title: 'カード色を一括変更',
-    initial,
-    onApply: (color) => {
-      // Keep behavior unified: bulk apply for this pane
-      if (typeof bulkSetCardsBgColor === 'function') bulkSetCardsBgColor(paneId, color);
-    },
-  });
-}
-
-// remove window.showBulkCardColorPicker export (removed)
 
 function darkenColor(color, amount = 0.12){
     if (!color) return color;
@@ -13568,10 +13465,6 @@ function bulkResetCardsBgColor(paneId){
     document.head.appendChild(st);
   })();
 
-  // Reader bookmark functions disabled (feature removed)
-  window.readerAddBookmark = function(){ /* disabled */ };
-  window.readerJumpBookmark = function(){ /* disabled */ };
-
   // Reader search: make Enter work and ensure active hit scrolls
   if (typeof window.readerDoSearch === 'function'){
     // keep existing, but ensure it runs after render
@@ -14316,7 +14209,6 @@ function bulkResetCardsBgColor(paneId){
   }
 
   function init(){
-    // relocatePanelsIntoNav(); // Disabled: keep panels independent per user request
     setupIndependentPanels();
     hookAltShortcuts();
     patchSearchTargetAndEngine();
@@ -16928,23 +16820,18 @@ if (termContainer) {
   }
 
   function toggleStructureViewpointSuggestions() {
-    window.DEBUG_LOG && console.log('[DEBUG] toggleStructureViewpointSuggestions called');
     const container = document.getElementById('structure-viewpoint-suggestions');
-    window.DEBUG_LOG && console.log('[DEBUG] container:', container);
     if (!container) return;
     if (container.style.display === 'none' || !container.style.display) {
       const viewpoints = getAllStructureViewpoints();
-      window.DEBUG_LOG && console.log('[DEBUG] viewpoints:', viewpoints);
       if (viewpoints.length === 0) {
         container.innerHTML = '<span class="no-tags">まだ視点がありません</span>';
       } else {
         container.innerHTML = viewpoints.map(v => `<span class="tag-item" onclick="setStructureViewpoint('${v.replace(/'/g, "\\'")}')">${v}</span>`).join('');
       }
       container.style.display = 'flex';
-      window.DEBUG_LOG && console.log('[DEBUG] container.style.display set to flex');
     } else {
       container.style.display = 'none';
-      window.DEBUG_LOG && console.log('[DEBUG] container hidden');
     }
   }
 
@@ -17914,14 +17801,10 @@ function getUniformCharacterExpandLevel() {
   }
 
   function toggleCharacterStructureLink(id) {
-    window.DEBUG_LOG && console.log('[DEBUG] toggleCharacterStructureLink called with id:', id);
     const container = document.getElementById('character-edit-structures');
-    window.DEBUG_LOG && console.log('[DEBUG] container:', container);
     const item = container?.querySelector(`[data-id="${id}"]`);
-    window.DEBUG_LOG && console.log('[DEBUG] item:', item);
     if (item) {
       item.classList.toggle('selected');
-      window.DEBUG_LOG && console.log('[DEBUG] item classes after toggle:', item.className);
     }
   }
 
@@ -18580,9 +18463,7 @@ if (termContainer) {
   }
 
   function toggleCharacterRoleSuggestions() {
-    window.DEBUG_LOG && console.log('[DEBUG] toggleCharacterRoleSuggestions called');
     const container = document.getElementById('character-role-suggestions');
-    window.DEBUG_LOG && console.log('[DEBUG] container:', container);
     if (!container) return;
     if (container.style.display === 'none' || !container.style.display) {
       // プリセット: キー→日本語ラベルのマッピング
@@ -18607,13 +18488,10 @@ if (termContainer) {
         ).join('');
       }
 
-      window.DEBUG_LOG && console.log('[DEBUG] html:', html);
       container.innerHTML = html;
       container.style.display = 'flex';
-      window.DEBUG_LOG && console.log('[DEBUG] container.style.display set to flex');
     } else {
       container.style.display = 'none';
-      window.DEBUG_LOG && console.log('[DEBUG] container hidden');
     }
   }
 
@@ -20084,9 +19962,7 @@ if (termContainer) {
   }
 
   function toggleWorldLevelSuggestions() {
-    window.DEBUG_LOG && console.log('[DEBUG] toggleWorldLevelSuggestions called');
     const container = document.getElementById('world-level-suggestions');
-    window.DEBUG_LOG && console.log('[DEBUG] container:', container);
     if (!container) return;
     if (container.style.display === 'none' || !container.style.display) {
       // プリセット: キー→日本語ラベルのマッピング
@@ -20109,13 +19985,10 @@ if (termContainer) {
         ).join('');
       }
 
-      window.DEBUG_LOG && console.log('[DEBUG] html:', html);
       container.innerHTML = html;
       container.style.display = 'flex';
-      window.DEBUG_LOG && console.log('[DEBUG] container.style.display set to flex');
     } else {
       container.style.display = 'none';
-      window.DEBUG_LOG && console.log('[DEBUG] container hidden');
     }
   }
 
