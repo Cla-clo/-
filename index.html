@@ -5727,8 +5727,13 @@ body.theme-dark{
         </div>
         <div class="character-edit-field">
             <label for="character-edit-description">説明</label>
-            <textarea id="character-edit-description" placeholder="キャラクターの説明（300文字以内）" maxlength="300"></textarea>
-            <div class="character-edit-hint"><span id="character-description-count">0</span>/300文字</div>
+            <textarea id="character-edit-description" placeholder="キャラクターの説明（500文字以内）" maxlength="500"></textarea>
+            <div class="character-edit-hint"><span id="character-description-count">0</span>/500文字</div>
+        </div>
+        <div class="character-edit-field">
+            <label for="character-edit-details">詳細</label>
+            <textarea id="character-edit-details" placeholder="詳細情報（2000文字以内）カード表示には含まれません" maxlength="2000" rows="6"></textarea>
+            <div class="character-edit-hint"><span id="character-details-count">0</span>/2000文字（カードに非表示）</div>
         </div>
         <div class="character-edit-field card-section">
             <div class="card-section-title">構成</div>
@@ -5797,6 +5802,11 @@ body.theme-dark{
             <textarea id="world-edit-description" placeholder="この項目の説明（500文字以内）" maxlength="500"></textarea>
             <div class="world-edit-hint"><span id="world-description-count">0</span>/500文字</div>
         </div>
+        <div class="world-edit-field">
+            <label for="world-edit-details">詳細</label>
+            <textarea id="world-edit-details" placeholder="詳細情報（2000文字以内）カード表示には含まれません" maxlength="2000" rows="6"></textarea>
+            <div class="world-edit-hint"><span id="world-details-count">0</span>/2000文字（カードに非表示）</div>
+        </div>
         <div class="world-edit-field card-section">
             <div class="card-section-title">構成</div>
             <div id="world-edit-structures" class="structure-link-select-container">
@@ -5858,7 +5868,13 @@ body.theme-dark{
     </div>
     <div class="structure-edit-field">
       <label for="terms-edit-desc">説明</label>
-      <textarea id="terms-edit-desc" rows="5" placeholder="説明を書いてください"></textarea>
+      <textarea id="terms-edit-desc" rows="5" placeholder="説明を書いてください（500文字以内）" maxlength="500"></textarea>
+      <div class="structure-edit-hint"><span id="terms-description-count">0</span>/500文字</div>
+    </div>
+    <div class="structure-edit-field">
+      <label for="terms-edit-details">詳細</label>
+      <textarea id="terms-edit-details" rows="6" placeholder="詳細情報（2000文字以内）カード表示には含まれません" maxlength="2000"></textarea>
+      <div class="structure-edit-hint"><span id="terms-details-count">0</span>/2000文字（カードに非表示）</div>
     </div>
     <div class="structure-edit-field">
       <div class="structure-edit-hint">関連リンク（クリックで選択/解除）</div>
@@ -17758,7 +17774,9 @@ function getUniformCharacterExpandLevel() {
     document.getElementById('character-edit-affiliation').value = (card.affiliationTags || []).join(', ');
     document.getElementById('character-edit-freetags').value = (card.freeTags || []).join(', ');
     document.getElementById('character-edit-description').value = card.description || '';
+    document.getElementById('character-edit-details').value = card.details || '';
     updateCharacterDescriptionCount();
+    updateCharacterDetailsCount();
 
     const tabSelect = document.getElementById('character-edit-tab');
     if (tabSelect) {
@@ -17918,6 +17936,7 @@ function toggleCharacterTermLink(termId){
     card.affiliationTags = document.getElementById('character-edit-affiliation').value.split(',').map(t => t.trim()).filter(t => t);
     card.freeTags = document.getElementById('character-edit-freetags').value.split(',').map(t => t.trim()).filter(t => t);
     card.description = document.getElementById('character-edit-description').value.trim();
+    card.details = document.getElementById('character-edit-details').value.trim();
     const tabId = document.getElementById('character-edit-tab')?.value || '';
     card.tabId = tabId ? parseInt(tabId, 10) : null;
 
@@ -17970,6 +17989,12 @@ if (termContainer) {
   function updateCharacterDescriptionCount() {
     const textarea = document.getElementById('character-edit-description');
     const count = document.getElementById('character-description-count');
+    if (textarea && count) count.textContent = textarea.value.length;
+  }
+
+  function updateCharacterDetailsCount() {
+    const textarea = document.getElementById('character-edit-details');
+    const count = document.getElementById('character-details-count');
     if (textarea && count) count.textContent = textarea.value.length;
   }
 
@@ -18823,6 +18848,8 @@ if (swapBtn) swapBtn.classList.remove('is-active');
   // 説明欄の文字数カウント
   const descEl = document.getElementById('character-edit-description');
   if (descEl) descEl.addEventListener('input', updateCharacterDescriptionCount);
+  const detailsEl = document.getElementById('character-edit-details');
+  if (detailsEl) detailsEl.addEventListener('input', updateCharacterDetailsCount);
 
   // 初期化
   if (document.readyState === 'loading') {
@@ -19262,7 +19289,9 @@ function getUniformWorldExpandLevel() {
 
     document.getElementById('world-edit-termtags').value = (card.termTags || []).join(', ');
     document.getElementById('world-edit-description').value = card.description || '';
+    document.getElementById('world-edit-details').value = card.details || '';
     updateWorldDescriptionCount();
+    updateWorldDetailsCount();
 
     const tabSelect = document.getElementById('world-edit-tab');
     if (tabSelect) {
@@ -19414,6 +19443,7 @@ function toggleWorldTermLink(termId){
     card.level = levelValue || '未設定';
     card.termTags = document.getElementById('world-edit-termtags').value.split(',').map(t => t.trim()).filter(t => t);
     card.description = document.getElementById('world-edit-description').value.trim();
+    card.details = document.getElementById('world-edit-details').value.trim();
     const tabId = document.getElementById('world-edit-tab')?.value || '';
     card.tabId = tabId ? parseInt(tabId, 10) : null;
 
@@ -19473,6 +19503,12 @@ if (termContainer) {
   function updateWorldDescriptionCount() {
     const textarea = document.getElementById('world-edit-description');
     const count = document.getElementById('world-description-count');
+    if (textarea && count) count.textContent = textarea.value.length;
+  }
+
+  function updateWorldDetailsCount() {
+    const textarea = document.getElementById('world-edit-details');
+    const count = document.getElementById('world-details-count');
     if (textarea && count) count.textContent = textarea.value.length;
   }
 
@@ -20291,6 +20327,8 @@ if (swapBtn) swapBtn.classList.remove('is-active');
   // 説明欄の文字数カウント
   const descEl = document.getElementById('world-edit-description');
   if (descEl) descEl.addEventListener('input', updateWorldDescriptionCount);
+  const detailsEl = document.getElementById('world-edit-details');
+  if (detailsEl) detailsEl.addEventListener('input', updateWorldDetailsCount);
 
   // 初期化
   if (document.readyState === 'loading') {
@@ -20833,6 +20871,9 @@ window.openTermEditModal = function(id){
     document.getElementById('terms-edit-reading').value = term?.reading || '';
     document.getElementById('terms-edit-category').value = term?.category || '';
     document.getElementById('terms-edit-desc').value = term?.desc || '';
+    document.getElementById('terms-edit-details').value = term?.details || '';
+    updateTermsDescriptionCount();
+    updateTermsDetailsCount();
 
     const tabSelect = document.getElementById('terms-edit-tab');
     if (tabSelect) {
@@ -20885,6 +20926,7 @@ window.openTermEditModal = function(id){
     const reading = ((document.getElementById('terms-edit-reading')?.value) || '').trim();
     const category = (document.getElementById('terms-edit-category').value || '').trim();
     const desc = (document.getElementById('terms-edit-desc').value || '').trim();
+    const details = (document.getElementById('terms-edit-details').value || '').trim();
     const tabIdValue = (document.getElementById('terms-edit-tab')?.value || '').trim();
     const tabId = tabIdValue ? parseInt(tabIdValue, 10) : null;
     if(!name){
@@ -20906,6 +20948,7 @@ loadTermsData();
         t.reading = reading;
         t.category = category;
         t.desc = desc;
+        t.details = details;
         t.tabId = tabId;
         t.linkedCharacters = selChars.slice();
         t.linkedWorlds = selWorlds.slice();
@@ -20917,6 +20960,7 @@ loadTermsData();
         name,
         reading,
         category, desc,
+        details,
         tabId,
         linkedCharacters: selChars.slice(),
         linkedWorlds: selWorlds.slice(),
@@ -20933,6 +20977,24 @@ loadTermsData();
     closeTermEditModal(true);
     if (typeof updateTermsButtonState === 'function') updateTermsButtonState();
   };
+
+  function updateTermsDescriptionCount() {
+    const textarea = document.getElementById('terms-edit-desc');
+    const count = document.getElementById('terms-description-count');
+    if (textarea && count) count.textContent = textarea.value.length;
+  }
+
+  function updateTermsDetailsCount() {
+    const textarea = document.getElementById('terms-edit-details');
+    const count = document.getElementById('terms-details-count');
+    if (textarea && count) count.textContent = textarea.value.length;
+  }
+
+  // 説明欄の文字数カウント
+  const termsDescEl = document.getElementById('terms-edit-desc');
+  if (termsDescEl) termsDescEl.addEventListener('input', updateTermsDescriptionCount);
+  const termsDetailsEl = document.getElementById('terms-edit-details');
+  if (termsDetailsEl) termsDetailsEl.addEventListener('input', updateTermsDetailsCount);
 
   window.deleteTermCard = function(id){
     if(!confirm('この用語を削除しますか？')) return;
