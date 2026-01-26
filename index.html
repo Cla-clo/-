@@ -1177,7 +1177,6 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     .modal-close:hover { color: #dc2626; }
 
     /* Card View Modal Styles */
-    #card-view-modal.modal-overlay { background: rgba(0,0,0,0.85); }
     .card-view-modal-content { max-width: 700px; }
     .card-view-body { padding: 10px 0; max-height: 60vh; overflow-y: auto; }
     .card-view-section { margin-bottom: 16px; padding: 12px; background: var(--pane-header-bg); border-radius: 6px; border-left: 3px solid #3b82f6; }
@@ -16611,8 +16610,9 @@ function openStructureCardColorPicker(cardId, anchorEl){
     }
 
     // リンク：登場人物
-    if (card.linkedCharacters && card.linkedCharacters.length > 0 && window.characterData) {
-      const items = card.linkedCharacters.map(id => characterData.find(c => c.id === id)).filter(c => c);
+    const charData = window.getCharacterData ? window.getCharacterData() : [];
+    if (card.linkedCharacters && card.linkedCharacters.length > 0 && charData.length > 0) {
+      const items = card.linkedCharacters.map(id => charData.find(c => c.id === id)).filter(c => c);
       if (items.length > 0) {
         html += `<div class="card-view-section">
           <div class="card-view-section-title">登場人物</div>
@@ -16622,8 +16622,9 @@ function openStructureCardColorPicker(cardId, anchorEl){
     }
 
     // リンク：世界観
-    if (card.linkedWorlds && card.linkedWorlds.length > 0 && window.worldData) {
-      const items = card.linkedWorlds.map(id => worldData.find(c => c.id === id)).filter(c => c);
+    const wData = window.getWorldData ? window.getWorldData() : [];
+    if (card.linkedWorlds && card.linkedWorlds.length > 0 && wData.length > 0) {
+      const items = card.linkedWorlds.map(id => wData.find(c => c.id === id)).filter(c => c);
       if (items.length > 0) {
         html += `<div class="card-view-section">
           <div class="card-view-section-title">世界観</div>
@@ -16633,8 +16634,9 @@ function openStructureCardColorPicker(cardId, anchorEl){
     }
 
     // リンク：用語
-    if (card.linkedTerms && card.linkedTerms.length > 0 && window.termsData) {
-      const items = card.linkedTerms.map(id => termsData.find(c => c.id === id)).filter(c => c);
+    const tData = window.getTermsData ? window.getTermsData() : [];
+    if (card.linkedTerms && card.linkedTerms.length > 0 && tData.length > 0) {
+      const items = card.linkedTerms.map(id => tData.find(c => c.id === id)).filter(c => c);
       if (items.length > 0) {
         html += `<div class="card-view-section">
           <div class="card-view-section-title">用語</div>
@@ -18014,8 +18016,9 @@ function getUniformCharacterExpandLevel() {
     }
 
     // リンク：構成
-    if (card.linkedStructures && card.linkedStructures.length > 0 && window.structureData) {
-      const items = card.linkedStructures.map(id => structureData.find(c => c.id === id)).filter(c => c);
+    const sData = window.getStructureData ? window.getStructureData() : [];
+    if (card.linkedStructures && card.linkedStructures.length > 0 && sData.length > 0) {
+      const items = card.linkedStructures.map(id => sData.find(c => c.id === id)).filter(c => c);
       if (items.length > 0) {
         html += `<div class="card-view-section">
           <div class="card-view-section-title">構成</div>
@@ -18025,8 +18028,9 @@ function getUniformCharacterExpandLevel() {
     }
 
     // リンク：世界観
-    if (card.linkedWorlds && card.linkedWorlds.length > 0 && window.worldData) {
-      const items = card.linkedWorlds.map(id => worldData.find(c => c.id === id)).filter(c => c);
+    const wData = window.getWorldData ? window.getWorldData() : [];
+    if (card.linkedWorlds && card.linkedWorlds.length > 0 && wData.length > 0) {
+      const items = card.linkedWorlds.map(id => wData.find(c => c.id === id)).filter(c => c);
       if (items.length > 0) {
         html += `<div class="card-view-section">
           <div class="card-view-section-title">世界観</div>
@@ -18036,8 +18040,9 @@ function getUniformCharacterExpandLevel() {
     }
 
     // リンク：用語
-    if (card.linkedTerms && card.linkedTerms.length > 0 && window.termsData) {
-      const items = card.linkedTerms.map(id => termsData.find(c => c.id === id)).filter(c => c);
+    const tData = window.getTermsData ? window.getTermsData() : [];
+    if (card.linkedTerms && card.linkedTerms.length > 0 && tData.length > 0) {
+      const items = card.linkedTerms.map(id => tData.find(c => c.id === id)).filter(c => c);
       if (items.length > 0) {
         html += `<div class="card-view-section">
           <div class="card-view-section-title">用語</div>
@@ -19632,8 +19637,9 @@ function getUniformWorldExpandLevel() {
     }
 
     // リンク：構成
-    if (card.linkedStructures && card.linkedStructures.length > 0 && window.structureData) {
-      const items = card.linkedStructures.map(id => structureData.find(c => c.id === id)).filter(c => c);
+    const sData = window.getStructureData ? window.getStructureData() : [];
+    if (card.linkedStructures && card.linkedStructures.length > 0 && sData.length > 0) {
+      const items = card.linkedStructures.map(id => sData.find(c => c.id === id)).filter(c => c);
       if (items.length > 0) {
         html += `<div class="card-view-section">
           <div class="card-view-section-title">構成</div>
@@ -19643,8 +19649,9 @@ function getUniformWorldExpandLevel() {
     }
 
     // リンク：登場人物
-    if (card.linkedCharacters && card.linkedCharacters.length > 0 && window.characterData) {
-      const items = card.linkedCharacters.map(id => characterData.find(c => c.id === id)).filter(c => c);
+    const charData = window.getCharacterData ? window.getCharacterData() : [];
+    if (card.linkedCharacters && card.linkedCharacters.length > 0 && charData.length > 0) {
+      const items = card.linkedCharacters.map(id => charData.find(c => c.id === id)).filter(c => c);
       if (items.length > 0) {
         html += `<div class="card-view-section">
           <div class="card-view-section-title">登場人物</div>
@@ -19654,8 +19661,9 @@ function getUniformWorldExpandLevel() {
     }
 
     // リンク：用語
-    if (card.linkedTerms && card.linkedTerms.length > 0 && window.termsData) {
-      const items = card.linkedTerms.map(id => termsData.find(c => c.id === id)).filter(c => c);
+    const tData = window.getTermsData ? window.getTermsData() : [];
+    if (card.linkedTerms && card.linkedTerms.length > 0 && tData.length > 0) {
+      const items = card.linkedTerms.map(id => tData.find(c => c.id === id)).filter(c => c);
       if (items.length > 0) {
         html += `<div class="card-view-section">
           <div class="card-view-section-title">用語</div>
@@ -21312,8 +21320,9 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
     }
 
     // リンク：構成
-    if (term.linkedStructures && term.linkedStructures.length > 0 && window.structureData) {
-      const items = term.linkedStructures.map(id => structureData.find(c => c.id === id)).filter(c => c);
+    const sData = window.getStructureData ? window.getStructureData() : [];
+    if (term.linkedStructures && term.linkedStructures.length > 0 && sData.length > 0) {
+      const items = term.linkedStructures.map(id => sData.find(c => c.id === id)).filter(c => c);
       if (items.length > 0) {
         html += `<div class="card-view-section">
           <div class="card-view-section-title">構成</div>
@@ -21323,8 +21332,9 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
     }
 
     // リンク：登場人物
-    if (term.linkedCharacters && term.linkedCharacters.length > 0 && window.characterData) {
-      const items = term.linkedCharacters.map(id => characterData.find(c => c.id === id)).filter(c => c);
+    const charData = window.getCharacterData ? window.getCharacterData() : [];
+    if (term.linkedCharacters && term.linkedCharacters.length > 0 && charData.length > 0) {
+      const items = term.linkedCharacters.map(id => charData.find(c => c.id === id)).filter(c => c);
       if (items.length > 0) {
         html += `<div class="card-view-section">
           <div class="card-view-section-title">登場人物</div>
@@ -21334,8 +21344,9 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
     }
 
     // リンク：世界観
-    if (term.linkedWorlds && term.linkedWorlds.length > 0 && window.worldData) {
-      const items = term.linkedWorlds.map(id => worldData.find(c => c.id === id)).filter(c => c);
+    const wData = window.getWorldData ? window.getWorldData() : [];
+    if (term.linkedWorlds && term.linkedWorlds.length > 0 && wData.length > 0) {
+      const items = term.linkedWorlds.map(id => wData.find(c => c.id === id)).filter(c => c);
       if (items.length > 0) {
         html += `<div class="card-view-section">
           <div class="card-view-section-title">世界観</div>
