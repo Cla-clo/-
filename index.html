@@ -2921,6 +2921,8 @@ body.theme-dark .structure-content {
     body.structure-fullscreen-mode .structure-card.level-scene {
         margin-left: 0;
     }
+    body.structure-fullscreen-mode .dock-resizer,
+    body.structure-fullscreen-mode .pane-resizer { display: none !important; }
 
     body.memo-fullscreen-mode header,
     body.memo-fullscreen-mode .controls-wrapper,
@@ -2937,6 +2939,8 @@ body.theme-dark .structure-content {
         border: none !important; border-radius: 0 !important;
         display: flex !important; flex-direction: column !important;
     }
+    body.memo-fullscreen-mode .dock-resizer,
+    body.memo-fullscreen-mode .pane-resizer { display: none !important; }
 
     body.character-fullscreen-mode header,
     body.character-fullscreen-mode .controls-wrapper,
@@ -2959,6 +2963,8 @@ body.theme-dark .structure-content {
     body.character-fullscreen-mode .character-list {
         padding: 12px; flex: 1; overflow-y: auto;
     }
+    body.character-fullscreen-mode .dock-resizer,
+    body.character-fullscreen-mode .pane-resizer { display: none !important; }
 
     body.world-fullscreen-mode header,
     body.world-fullscreen-mode .controls-wrapper,
@@ -2981,6 +2987,8 @@ body.theme-dark .structure-content {
     body.world-fullscreen-mode .world-list {
         padding: 12px; flex: 1; overflow-y: auto;
     }
+    body.world-fullscreen-mode .dock-resizer,
+    body.world-fullscreen-mode .pane-resizer { display: none !important; }
 
     /* ========== 登場人物パネル ========== */
     #character-panel {
@@ -3356,6 +3364,8 @@ body.theme-dark .dynamic-dock-resizer:hover{ background: rgba(255,255,255,0.08);
         display:flex !important; flex-direction: column !important;
         background: var(--pane-terms-bg, #fffbeb) !important;
     }
+    body.terms-fullscreen-mode .dock-resizer,
+    body.terms-fullscreen-mode .pane-resizer { display: none !important; }
 
 /* WebKit */
 
@@ -7123,18 +7133,18 @@ function addNewTab() {
 
 ■ 9. 構成（章・話・シーンのカード管理）
 ・📋 構成：章／話／シーンのカードを作って整理
-・「＋新しいカード」：選択範囲からカード作成
-・更新／全展開／全折畳／選択削除／全削除
+・「＋」ボタン：選択範囲からカード作成
+・更新／展開レベル（全折畳はメニュー内）／削除（選択削除・全削除）
 ・📂 開く／💾 保存：構成JSONの入出力、📄 TXT でテキスト出力 
 
 ■ 10. 登場人物（キャラ管理）
 ・👤 登場人物：役割（主人公/ヒロイン/敵役/サブ/モブ）でカード管理
-・選択からカード作成／更新／全展開／全折畳／削除
+・＋／展開レベル／削除（選択削除・全削除）
 ・📂 開く／💾 保存：登場人物JSONの入出力、📄 TXT で一覧出力 
 
 ■ 11. 世界観（設定管理）
 ・🌍 世界観：大カテゴリ／中カテゴリ／詳細項目のカード管理
-・選択からカード作成／更新／全展開／全折畳／削除
+・＋／展開レベル／削除（選択削除・全削除）
 ・📂 開く／💾 保存：世界観JSONの入出力、📄 TXT で一覧出力 
 
 ■ 12. 📊 分析（文章チェック）
@@ -16027,7 +16037,7 @@ function showPresetPanelColorPicker(paneId){
           selected: false,
           collapsed: !!card.collapsed,
           // expanded (boolean) から expandLevel (0..4) への移行対応
-          expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0)),
+          expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(5, Number(card.expandLevel) || 0)) : (card.expanded ? 5 : 0)),
           linkedCharacters: card.linkedCharacters || [],
           linkedTerms: card.linkedTerms || [],
           linkedWorlds: card.linkedWorlds || [],
@@ -16190,15 +16200,15 @@ function showPresetPanelColorPicker(paneId){
   function createCardElement(card, index) {
     // 互換性: expanded (boolean) を expandLevel に変換
     if (card.expandLevel === undefined) {
-      card.expandLevel = card.expanded ? 4 : 0;
+      card.expandLevel = card.expanded ? 5 : 0;
     }
-    const expandLevel = Math.max(0, Math.min(4, Number(card.expandLevel) || 0));
+    const expandLevel = Math.max(0, Math.min(5, Number(card.expandLevel) || 0));
     card.expandLevel = expandLevel;
 
     const div = document.createElement('div');
     div.className = `structure-card card-shell level-${card.level}`;
     if (expandLevel > 0) div.classList.add('expanded');
-    if (expandLevel === 4) div.classList.add('fully-expanded');
+    if (expandLevel === 5) div.classList.add('fully-expanded');
     if (card.collapsed) div.classList.add('collapsed');
     if (card.bgColor) {
       div.classList.add('has-custom-color');
@@ -16278,12 +16288,12 @@ function showPresetPanelColorPicker(paneId){
     }
     headLeft.appendChild(toggle);
 
-    // 展開レベルトグル（5段階）
+    // 展開レベルトグル（6段階）
     const expandToggle = document.createElement('span');
     expandToggle.className = 'card-expand-toggle structure-expand-toggle';
-    const expandSymbols = ['▶', '▽', '🔗', '📝', '◆'];
-    const expandTitles = ['名前のみ', 'タグのみ', 'リンク', '説明のみ', 'すべて表示'];
-    const lvl = Math.min(Math.max(expandLevel || 0, 0), 4);
+    const expandSymbols = ['▶', '▽', '🔗', '📝', '🗒', '◆'];
+    const expandTitles = ['名前のみ', 'タグのみ', 'リンク', '説明のみ', '説明＋詳細', 'すべて表示'];
+    const lvl = Math.min(Math.max(expandLevel || 0, 0), 5);
     expandToggle.textContent = expandSymbols[lvl];
     expandToggle.title = expandTitles[lvl];
     expandToggle.onclick = (e) => {
@@ -16325,7 +16335,7 @@ function showPresetPanelColorPicker(paneId){
     
     div.appendChild(header);
 
-    // ===== Body (5段階共通仕様) =====
+    // ===== Body (6段階共通仕様) =====
     const hasLinkedChars = Array.isArray(card.linkedCharacters) && card.linkedCharacters.length > 0;
     const hasLinkedWorlds = Array.isArray(card.linkedWorlds) && card.linkedWorlds.length > 0;
     const hasLinkedTerms = Array.isArray(card.linkedTerms) && card.linkedTerms.length > 0;
@@ -16414,7 +16424,8 @@ function showPresetPanelColorPicker(paneId){
     // 1: attributes only
     // 2: attributes + links
     // 3: summary only
-    // 4: summary + attributes + links + tab (tab always last)
+    // 4: summary + tab (tab always last)
+    // 5: summary + attributes + links + tab (tab always last)
     if (expandLevel === 1) {
       const attr = buildAttrSection();
       if (attr) div.appendChild(attr);
@@ -16427,6 +16438,11 @@ function showPresetPanelColorPicker(paneId){
       const summary = buildSummarySection();
       if (summary) div.appendChild(summary);
     } else if (expandLevel === 4) {
+      const summary = buildSummarySection();
+      if (summary) div.appendChild(summary);
+      const tab = buildTabField();
+      if (tab) div.appendChild(tab);
+    } else if (expandLevel >= 5) {
       const summary = buildSummarySection();
       if (summary) div.appendChild(summary);
       const attr = buildAttrSection();
@@ -16757,8 +16773,8 @@ function showExpandLevelSubmenu(anchorEl, currentLevel, onPick) {
     document.body.appendChild(sm);
   }
 
-  const labels = ['名前のみ','タグのみ','リンク','説明のみ','すべて表示'];
-  const icons  = ['▶','▽','🔗','📝','◆'];
+  const labels = ['名前のみ','タグのみ','リンク','説明のみ','説明＋詳細','すべて表示'];
+  const icons  = ['▶','▽','🔗','📝','🗒','◆'];
   sm.innerHTML = labels.map((lab, i)=>{
     const check = (i === currentLevel) ? ' ✓' : '';
     return `<div class="context-menu-item" data-lv="${i}">${icons[i]} ${lab}${check}</div>`;
@@ -16895,7 +16911,7 @@ document.addEventListener('mousedown', (e)=>{
     if (!card) return;
 
     const expandLevel = card.expandLevel || 0;
-    const expandLabel = ['名前のみ','タグのみ','リンク','説明のみ','すべて表示'][Math.max(0, Math.min(4, Number(expandLevel) || 0))] || '名前のみ';
+    const expandLabel = ['名前のみ','タグのみ','リンク','説明のみ','説明＋詳細','すべて表示'][Math.max(0, Math.min(5, Number(expandLevel) || 0))] || '名前のみ';
 
     const moveTargets = getMoveTargetsForCard(card);
     const moveSection = moveTargets.length
@@ -16931,7 +16947,7 @@ document.addEventListener('mousedown', (e)=>{
         const action = item.dataset.action;
         if (action === 'expand-submenu') {
           if (typeof window.showExpandLevelSubmenu === 'function') {
-            window.showExpandLevelSubmenu(item, Math.max(0, Math.min(4, Number(expandLevel) || 0)), (lv)=>{
+            window.showExpandLevelSubmenu(item, Math.max(0, Math.min(5, Number(expandLevel) || 0)), (lv)=>{
               const target = structureData.find(c => c.id === cardId);
               if (target) {
                 target.expandLevel = lv;
@@ -16951,12 +16967,12 @@ document.addEventListener('mousedown', (e)=>{
         if (action === 'toggle') {
           const target = structureData.find(c => c.id === cardId);
           if (target) {
-            target.expandLevel = (Math.max(0, Math.min(4, Number(target.expandLevel) || 0)) + 1) % 5;
+            target.expandLevel = (Math.max(0, Math.min(5, Number(target.expandLevel) || 0)) + 1) % 6;
             saveStructureData();
             renderStructureList();
           }
         }
-        if (/^expand-[0-4]$/.test(action)) {
+        if (/^expand-[0-5]$/.test(action)) {
           const target = structureData.find(c => c.id === cardId);
           if (target) {
             target.expandLevel = parseInt(action.split('-')[1]);
@@ -17065,13 +17081,13 @@ function openStructureCardColorPicker(cardId, anchorEl){
     return color;
   }
 
-  // ========== 一括展開レベル（3段階）: 構成 ==========
-  const BULK_EXPAND_SYMBOLS = ['▶', '▽', '🔗', '📝', '◆'];
-  const BULK_EXPAND_TITLES  = ['名前のみ', 'タグのみ', 'リンク', '説明のみ', 'すべて表示'];
+  // ========== 一括展開レベル（6段階）: 構成 ==========
+  const BULK_EXPAND_SYMBOLS = ['▶', '▽', '🔗', '📝', '🗒', '◆'];
+  const BULK_EXPAND_TITLES  = ['名前のみ', 'タグのみ', 'リンク', '説明のみ', '説明＋詳細', 'すべて表示'];
 
   function getUniformStructureExpandLevel() {
     if (!Array.isArray(structureData) || structureData.length === 0) return { level: 0, mixed: false };
-    const getLvl = (c) => Math.max(0, Math.min(4, Number(c?.expandLevel) || 0));
+    const getLvl = (c) => Math.max(0, Math.min(5, Number(c?.expandLevel) || 0));
     const base = getLvl(structureData[0]);
     for (const c of structureData) {
       if (getLvl(c) !== base) return { level: base, mixed: true };
@@ -17091,7 +17107,7 @@ function openStructureCardColorPicker(cardId, anchorEl){
       sym = '≋';
       title = '混在';
     } else {
-      const level = Math.min(Math.max(info.level || 0, 0), 4);
+      const level = Math.min(Math.max(info.level || 0, 0), 5);
       sym = BULK_EXPAND_SYMBOLS[level];
       title = BULK_EXPAND_TITLES[level];
     }
@@ -17114,7 +17130,7 @@ function openStructureCardColorPicker(cardId, anchorEl){
   function cycleStructureBulkExpand(delta) {
     const info = getUniformStructureExpandLevel();
     const base = info.mixed ? (typeof structureBulkExpandLevel === 'number' ? structureBulkExpandLevel : (info.level || 0)) : (info.level || 0);
-    const next = (base + delta + 5) % 5;
+    const next = (base + delta + 6) % 6;
     structureBulkExpandLevel = next;
 
     structureData.forEach(c => {
@@ -17592,7 +17608,7 @@ if (termContainer) {
   function toggleStructureExpand(cardId) {
     const card = structureData.find(c => c.id === cardId);
     if (card) {
-      card.expandLevel = (Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) + 1) % 5;
+      card.expandLevel = (Math.max(0, Math.min(5, Number(card.expandLevel) || 0)) + 1) % 6;
       saveStructureData();
       renderStructureList();
     }
@@ -17656,9 +17672,9 @@ if (termContainer) {
   // ========== 全展開/全折畳 ==========
   function expandAllStructure() {
     // 一括で最大展開（段階を回さず、常に最大へ）
-    structureBulkExpandLevel = 4;
+    structureBulkExpandLevel = 5;
     structureData.forEach(c => {
-      c.expandLevel = 4;
+      c.expandLevel = 5;
     });
     saveStructureData();
     renderStructureList();
@@ -17676,9 +17692,9 @@ if (termContainer) {
   }
 
 
-  // ========== 任意の一括展開レベル設定（0〜4） ==========
+  // ========== 任意の一括展開レベル設定（0〜5） ==========
   function setStructureBulkExpandLevel(level) {
-    const lvl = Math.max(0, Math.min(4, Number(level) || 0));
+    const lvl = Math.max(0, Math.min(5, Number(level) || 0));
     structureBulkExpandLevel = lvl;
     structureData.forEach(c => { c.expandLevel = lvl; });
     saveStructureData();
@@ -18228,7 +18244,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
             linkedCharacters: card.linkedCharacters || [],
           linkedTerms: card.linkedTerms || [],
             linkedWorlds: card.linkedWorlds || [],
-            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
+            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(5, Number(card.expandLevel) || 0)) : (card.expanded ? 5 : 0))
           }));
           structureNextId = imported.nextId || (Math.max(...structureData.map(c => c.id), 0) + 1);
         } else {
@@ -18243,7 +18259,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
             linkedCharacters: card.linkedCharacters || [],
           linkedTerms: card.linkedTerms || [],
             linkedWorlds: card.linkedWorlds || [],
-            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
+            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(5, Number(card.expandLevel) || 0)) : (card.expanded ? 5 : 0))
           }));
           structureData = [...structureData, ...newCards];
           structureNextId = newId;
@@ -18348,8 +18364,8 @@ if (swapBtn) swapBtn.classList.remove('is-active');
           linkedTerms: card.linkedTerms || [],
           tabId: card.tabId ?? null,
           bgColor: card.bgColor ?? card.color ?? '',
-          // expanded (boolean) から expandLevel (0..4) への移行対応
-          expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
+          // expanded (boolean) から expandLevel (0..5) への移行対応
+          expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(5, Number(card.expandLevel) || 0)) : (card.expanded ? 5 : 0))
         }));
 
         // 旧データ互換: description 内に「詳細：」が混ざっている場合は details に分離する
@@ -18462,7 +18478,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     div.style.setProperty('--outline-margin', `${(__ol - 1) * 18}px`);
     div.style.setProperty('--outline-indent', `0px`);
 
-    const level = Math.max(0, Math.min(4, Number(card.expandLevel) || 0));
+    const level = Math.max(0, Math.min(5, Number(card.expandLevel) || 0));
     card.expandLevel = level;
     if (level === 1) div.classList.add('expand-1');
     else if (level === 2) div.classList.add('expand-2');
@@ -18530,11 +18546,11 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedWorldsHtml || linkedTer
       </div>
     ` : '';
 
-    // 展開レベルに応じたトグルアイコン（5段階）
-    const toggleSymbols = ['▶', '▽', '🔗', '📝', '◆'];
-    const toggleSymbol = toggleSymbols[Math.min(level, 4)];
+    // 展開レベルに応じたトグルアイコン（6段階）
+    const toggleSymbols = ['▶', '▽', '🔗', '📝', '🗒', '◆'];
+    const toggleSymbol = toggleSymbols[Math.min(level, 5)];
 
-    // 5段階表示のHTML構築（共通仕様）
+    // 6段階表示のHTML構築（共通仕様）
     let bodyContent = '';
 
     const addAttrs = () => {
@@ -18557,13 +18573,19 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedWorldsHtml || linkedTer
         ? `<div class="card-field character-field character-description"><div class="card-field-label">説明</div><div class="card-field-body" style="white-space:pre-wrap;">${escapeHtml(card.description)}</div></div>`
         : '';
     };
+    const addDetails = () => {
+      return card.details
+        ? `<div class="card-field character-field character-details"><div class="card-field-label">詳細</div><div class="card-field-body" style="white-space:pre-wrap;">${escapeHtml(card.details)}</div></div>`
+        : '';
+    };
 
     // Level rules:
     // 0: header only
     // 1: attrs only
     // 2: attrs + links
     // 3: desc only
-    // 4: desc + attrs + links + tab (tab last)
+    // 4: desc + details
+    // 5: desc + details + attrs + links + tab (tab last)
     if (level === 1) {
       bodyContent += addAttrs();
     } else if (level === 2) {
@@ -18571,8 +18593,12 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedWorldsHtml || linkedTer
       bodyContent += addLinks();
     } else if (level === 3) {
       bodyContent += addDesc();
-    } else if (level >= 4) {
+    } else if (level === 4) {
       bodyContent += addDesc();
+      bodyContent += addDetails();
+    } else if (level >= 5) {
+      bodyContent += addDesc();
+      bodyContent += addDetails();
       bodyContent += addAttrs();
       bodyContent += addLinks();
       bodyContent += tabLinkHtml;
@@ -18646,16 +18672,16 @@ div.innerHTML = `
     return color;
   }
 
-  // ========== 一括展開レベル（3段階）: 登場人物 ==========
-  const CHARACTER_BULK_EXPAND_SYMBOLS = ['▶', '▽', '🔗', '📝', '◆'];
-  const CHARACTER_BULK_EXPAND_TITLES  = ['名前のみ', 'タグのみ', 'リンク', '説明のみ', 'すべて表示'];
+  // ========== 一括展開レベル（6段階）: 登場人物 ==========
+  const CHARACTER_BULK_EXPAND_SYMBOLS = ['▶', '▽', '🔗', '📝', '🗒', '◆'];
+  const CHARACTER_BULK_EXPAND_TITLES  = ['名前のみ', 'タグのみ', 'リンク', '説明のみ', '説明＋詳細', 'すべて表示'];
 
   
   // 現在の一括レベル（混在状態からの基準用）
   let characterBulkExpandLevel = 0;
 function getUniformCharacterExpandLevel() {
     if (!Array.isArray(characterData) || characterData.length === 0) return { level: 0, mixed: false };
-    const getLvl = (c) => (c && c.expandLevel !== undefined) ? Math.max(0, Math.min(4, Number(c.expandLevel) || 0)) : (c && c.expanded ? 4 : 0);
+    const getLvl = (c) => (c && c.expandLevel !== undefined) ? Math.max(0, Math.min(5, Number(c.expandLevel) || 0)) : (c && c.expanded ? 5 : 0);
     const base = getLvl(characterData[0]);
     for (const c of characterData) {
       if (getLvl(c) !== base) return { level: base, mixed: true };
@@ -18675,7 +18701,7 @@ function getUniformCharacterExpandLevel() {
       sym = '≋';
       title = '混在';
     } else {
-      const level = Math.min(Math.max(info.level || 0, 0), 4);
+      const level = Math.min(Math.max(info.level || 0, 0), 5);
       sym = CHARACTER_BULK_EXPAND_SYMBOLS[level];
       title = CHARACTER_BULK_EXPAND_TITLES[level];
     }
@@ -18700,8 +18726,8 @@ function getUniformCharacterExpandLevel() {
   function toggleCharacterExpand(cardId) {
     const card = characterData.find(c => c.id === cardId);
     if (card) {
-      // 5段階展開: 0 → 1 → 2 → 3 → 4 → 0
-      card.expandLevel = (Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) + 1) % 5;
+      // 6段階展開: 0 → 1 → 2 → 3 → 4 → 5 → 0
+      card.expandLevel = (Math.max(0, Math.min(5, Number(card.expandLevel) || 0)) + 1) % 6;
       saveCharacterData();
       renderCharacterList();
     }
@@ -19185,7 +19211,7 @@ if (termContainer) {
     const currentCard = characterData.find(c => c.id === cardId);
     const expandLevel = currentCard ? (currentCard.expandLevel || 0) : 0;
 
-    const expandLabel = ['名前のみ','タグのみ','リンク','説明のみ','すべて表示'][Math.max(0, Math.min(4, Number(expandLevel) || 0))] || '名前のみ';
+    const expandLabel = ['名前のみ','タグのみ','リンク','説明のみ','説明＋詳細','すべて表示'][Math.max(0, Math.min(5, Number(expandLevel) || 0))] || '名前のみ';
 
     menu.innerHTML = `
       <div class="context-menu-item" data-action="new-card">＋新しいカード</div>
@@ -19214,7 +19240,7 @@ if (termContainer) {
         const action = item.dataset.action;
         if (action === 'expand-submenu') {
           if (typeof window.showExpandLevelSubmenu === 'function') {
-            window.showExpandLevelSubmenu(item, Math.max(0, Math.min(4, Number(expandLevel) || 0)), (lv)=>{
+            window.showExpandLevelSubmenu(item, Math.max(0, Math.min(5, Number(expandLevel) || 0)), (lv)=>{
               const target = characterData.find(c => c.id === cardId);
               if (target) {
                 target.expandLevel = lv;
@@ -19233,9 +19259,9 @@ if (termContainer) {
         if (action === 'duplicate') duplicateCharacterCard(cardId);
         if (action === 'toggle') {
           const target = characterData.find(c => c.id === cardId);
-          if (target) { target.expandLevel = (Math.max(0, Math.min(4, Number(target.expandLevel) || 0)) + 1) % 5; saveCharacterData(); renderCharacterList(); }
+          if (target) { target.expandLevel = (Math.max(0, Math.min(5, Number(target.expandLevel) || 0)) + 1) % 6; saveCharacterData(); renderCharacterList(); }
         }
-        if (/^expand-[0-4]$/.test(action)) {
+        if (/^expand-[0-5]$/.test(action)) {
           const target = characterData.find(c => c.id === cardId);
           if (target) {
             target.expandLevel = parseInt(action.split('-')[1]);
@@ -19531,7 +19557,7 @@ if (termContainer) {
   function cycleCharacterBulkExpand(delta) {
     const info = getUniformCharacterExpandLevel();
     const base = info.mixed ? (typeof characterBulkExpandLevel === 'number' ? characterBulkExpandLevel : (info.level || 0)) : (info.level || 0);
-    const next = (base + delta + 5) % 5;
+    const next = (base + delta + 6) % 6;
     characterBulkExpandLevel = next;
 
     characterData.forEach(c => { c.expandLevel = next; });
@@ -19541,8 +19567,8 @@ if (termContainer) {
 
   function expandAllCharacter() {
     // 一括で最大展開（段階を回さず、常に最大へ）
-    characterBulkExpandLevel = 4;
-    characterData.forEach(c => { c.expandLevel = 4; });
+    characterBulkExpandLevel = 5;
+    characterData.forEach(c => { c.expandLevel = 5; });
     saveCharacterData();
     renderCharacterList();
 
@@ -19557,9 +19583,9 @@ if (termContainer) {
   }
 
 
-  // ========== 任意の一括展開レベル設定（0〜4） ==========
+  // ========== 任意の一括展開レベル設定（0〜5） ==========
   function setCharacterBulkExpandLevel(level) {
-    const lvl = Math.max(0, Math.min(4, Number(level) || 0));
+    const lvl = Math.max(0, Math.min(5, Number(level) || 0));
     characterBulkExpandLevel = lvl;
     characterData.forEach(c => { c.expandLevel = lvl; });
     saveCharacterData();
@@ -19884,7 +19910,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
             linkedStructures: card.linkedStructures || [],
             linkedWorlds: card.linkedWorlds || [],
           linkedTerms: card.linkedTerms || [],
-            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
+            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(5, Number(card.expandLevel) || 0)) : (card.expanded ? 5 : 0))
           }));
           characterNextId = imported.nextId || (Math.max(...characterData.map(c => c.id), 0) + 1);
         } else {
@@ -19900,7 +19926,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
             linkedStructures: card.linkedStructures || [],
             linkedWorlds: card.linkedWorlds || [],
           linkedTerms: card.linkedTerms || [],
-            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
+            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(5, Number(card.expandLevel) || 0)) : (card.expanded ? 5 : 0))
           }));
           characterData = [...characterData, ...newCards];
           characterNextId = newId;
@@ -20035,8 +20061,8 @@ if (swapBtn) swapBtn.classList.remove('is-active');
           linkedStructures: card.linkedStructures || [],
           tabId: card.tabId ?? null,
           bgColor: card.bgColor ?? card.color ?? '',
-          // expanded (boolean) から expandLevel (0..4) への移行対応
-          expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
+          // expanded (boolean) から expandLevel (0..5) への移行対応
+          expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(5, Number(card.expandLevel) || 0)) : (card.expanded ? 5 : 0))
         }));
 
         // 旧データ互換: description 内に「詳細：」が混ざっている場合は details に分離する
@@ -20148,7 +20174,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
     div.style.setProperty('--outline-margin', `${(__ol - 1) * 18}px`);
     div.style.setProperty('--outline-indent', `0px`);
 
-    const expandLevel = Math.max(0, Math.min(4, Number(card.expandLevel) || 0));
+    const expandLevel = Math.max(0, Math.min(5, Number(card.expandLevel) || 0));
     card.expandLevel = expandLevel;
     if (expandLevel === 1) div.classList.add('expand-1');
     else if (expandLevel === 2) div.classList.add('expand-2');
@@ -20224,11 +20250,11 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedCharactersHtml || linke
       </div>
     ` : '';
 
-    // 展開レベルに応じたトグルアイコン（5段階）
-    const toggleSymbols = ['▶', '▽', '🔗', '📝', '◆'];
-    const toggleSymbol = toggleSymbols[Math.min(expandLevel, 4)];
+    // 展開レベルに応じたトグルアイコン（6段階）
+    const toggleSymbols = ['▶', '▽', '🔗', '📝', '🗒', '◆'];
+    const toggleSymbol = toggleSymbols[Math.min(expandLevel, 5)];
 
-    // 5段階表示のHTML構築（共通仕様）
+    // 6段階表示のHTML構築（共通仕様）
     let bodyContent = '';
 
     const addAttrs = () => {
@@ -20248,13 +20274,19 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedCharactersHtml || linke
         ? `<div class="card-field world-field world-description"><div class="card-field-label">説明</div><div class="card-field-body" style="white-space:pre-wrap;">${escapeHtml(card.description)}</div></div>`
         : '';
     };
+    const addDetails = () => {
+      return (card.details ?? card.detail)
+        ? `<div class="card-field world-field world-details"><div class="card-field-label">詳細</div><div class="card-field-body" style="white-space:pre-wrap;">${escapeHtml(card.details ?? card.detail)}</div></div>`
+        : '';
+    };
 
     // Level rules:
     // 0: header only
     // 1: attrs only
     // 2: attrs + links
     // 3: desc only
-    // 4: desc + attrs + links + tab (tab last)
+    // 4: desc + details
+    // 5: desc + details + attrs + links + tab (tab last)
     if (expandLevel === 1) {
       bodyContent += addAttrs();
     } else if (expandLevel === 2) {
@@ -20262,8 +20294,12 @@ const linkedSectionHtml = (linkedStructuresHtml || linkedCharactersHtml || linke
       bodyContent += addLinks();
     } else if (expandLevel === 3) {
       bodyContent += addDesc();
-    } else if (expandLevel >= 4) {
+    } else if (expandLevel === 4) {
       bodyContent += addDesc();
+      bodyContent += addDetails();
+    } else if (expandLevel >= 5) {
+      bodyContent += addDesc();
+      bodyContent += addDetails();
       bodyContent += addAttrs();
       bodyContent += addLinks();
       bodyContent += tabLinkHtml;
@@ -20334,16 +20370,16 @@ div.innerHTML = `
     return color;
   }
 
-  // ========== 一括展開レベル（3段階）: 世界観 ==========
-  const WORLD_BULK_EXPAND_SYMBOLS = ['▶', '▽', '🔗', '📝', '◆'];
-  const WORLD_BULK_EXPAND_TITLES  = ['名前のみ', 'タグのみ', 'リンク', '説明のみ', 'すべて表示'];
+  // ========== 一括展開レベル（6段階）: 世界観 ==========
+  const WORLD_BULK_EXPAND_SYMBOLS = ['▶', '▽', '🔗', '📝', '🗒', '◆'];
+  const WORLD_BULK_EXPAND_TITLES  = ['名前のみ', 'タグのみ', 'リンク', '説明のみ', '説明＋詳細', 'すべて表示'];
 
   
   // 現在の一括レベル（混在状態からの基準用）
   let worldBulkExpandLevel = 0;
 function getUniformWorldExpandLevel() {
     if (!Array.isArray(worldData) || worldData.length === 0) return { level: 0, mixed: false };
-    const getLvl = (c) => (c && c.expandLevel !== undefined) ? Math.max(0, Math.min(4, Number(c.expandLevel) || 0)) : (c && c.expanded ? 4 : 0);
+    const getLvl = (c) => (c && c.expandLevel !== undefined) ? Math.max(0, Math.min(5, Number(c.expandLevel) || 0)) : (c && c.expanded ? 5 : 0);
     const base = getLvl(worldData[0]);
     for (const c of worldData) {
       if (getLvl(c) !== base) return { level: base, mixed: true };
@@ -20363,7 +20399,7 @@ function getUniformWorldExpandLevel() {
       sym = '≋';
       title = '混在';
     } else {
-      const level = Math.min(Math.max(info.level || 0, 0), 4);
+      const level = Math.min(Math.max(info.level || 0, 0), 5);
       sym = WORLD_BULK_EXPAND_SYMBOLS[level];
       title = WORLD_BULK_EXPAND_TITLES[level];
     }
@@ -20388,8 +20424,8 @@ function getUniformWorldExpandLevel() {
   function toggleWorldExpand(cardId) {
     const card = worldData.find(c => c.id === cardId);
     if (card) {
-      // 5段階展開: 0 → 1 → 2 → 3 → 4 → 0
-      card.expandLevel = (Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) + 1) % 5;
+      // 6段階展開: 0 → 1 → 2 → 3 → 4 → 5 → 0
+      card.expandLevel = (Math.max(0, Math.min(5, Number(card.expandLevel) || 0)) + 1) % 6;
       saveWorldData();
       renderWorldList();
     }
@@ -20843,7 +20879,7 @@ if (termContainer) {
     const currentCard = worldData.find(c => c.id === cardId);
     const expandLevel = currentCard ? (currentCard.expandLevel || 0) : 0;
 
-    const expandLabel = ['名前のみ','タグのみ','リンク','説明のみ','すべて表示'][Math.max(0, Math.min(4, Number(expandLevel) || 0))] || '名前のみ';
+    const expandLabel = ['名前のみ','タグのみ','リンク','説明のみ','説明＋詳細','すべて表示'][Math.max(0, Math.min(5, Number(expandLevel) || 0))] || '名前のみ';
 
     menu.innerHTML = `
       <div class="context-menu-item" data-action="new-card">＋新しいカード</div>
@@ -20872,7 +20908,7 @@ if (termContainer) {
         const action = item.dataset.action;
         if (action === 'expand-submenu') {
           if (typeof window.showExpandLevelSubmenu === 'function') {
-            window.showExpandLevelSubmenu(item, Math.max(0, Math.min(4, Number(expandLevel) || 0)), (lv)=>{
+            window.showExpandLevelSubmenu(item, Math.max(0, Math.min(5, Number(expandLevel) || 0)), (lv)=>{
               const target = worldData.find(c => c.id === cardId);
               if (target) {
                 target.expandLevel = lv;
@@ -20891,9 +20927,9 @@ if (termContainer) {
         if (action === 'duplicate') duplicateWorldCard(cardId);
         if (action === 'toggle') {
           const target = worldData.find(c => c.id === cardId);
-          if (target) { target.expandLevel = (Math.max(0, Math.min(4, Number(target.expandLevel) || 0)) + 1) % 5; saveWorldData(); renderWorldList(); }
+          if (target) { target.expandLevel = (Math.max(0, Math.min(5, Number(target.expandLevel) || 0)) + 1) % 6; saveWorldData(); renderWorldList(); }
         }
-        if (/^expand-[0-4]$/.test(action)) {
+        if (/^expand-[0-5]$/.test(action)) {
           const target = worldData.find(c => c.id === cardId);
           if (target) {
             target.expandLevel = parseInt(action.split('-')[1]);
@@ -21191,7 +21227,7 @@ if (termContainer) {
   function cycleWorldBulkExpand(delta) {
     const info = getUniformWorldExpandLevel();
     const base = info.mixed ? (typeof worldBulkExpandLevel === 'number' ? worldBulkExpandLevel : (info.level || 0)) : (info.level || 0);
-    const next = (base + delta + 5) % 5;
+    const next = (base + delta + 6) % 6;
     worldBulkExpandLevel = next;
 
     worldData.forEach(c => { c.expandLevel = next; });
@@ -21201,8 +21237,8 @@ if (termContainer) {
 
   function expandAllWorld() {
     // 一括で最大展開（段階を回さず、常に最大へ）
-    worldBulkExpandLevel = 4;
-    worldData.forEach(w => { w.expandLevel = 4; });
+    worldBulkExpandLevel = 5;
+    worldData.forEach(w => { w.expandLevel = 5; });
     saveWorldData();
     renderWorldList();
 
@@ -21217,9 +21253,9 @@ if (termContainer) {
   }
 
 
-  // ========== 任意の一括展開レベル設定（0〜4） ==========
+  // ========== 任意の一括展開レベル設定（0〜5） ==========
   function setWorldBulkExpandLevel(level) {
-    const lvl = Math.max(0, Math.min(4, Number(level) || 0));
+    const lvl = Math.max(0, Math.min(5, Number(level) || 0));
     worldBulkExpandLevel = lvl;
     worldData.forEach(c => { c.expandLevel = lvl; });
     saveWorldData();
@@ -21509,7 +21545,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
           linkedTerms: card.linkedTerms || [],
             linkedWorlds: card.linkedWorlds || [],
             linkedStructures: card.linkedStructures || [],
-            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
+            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(5, Number(card.expandLevel) || 0)) : (card.expanded ? 5 : 0))
           }));
           worldNextId = imported.nextId || (Math.max(...worldData.map(c => c.id), 0) + 1);
         } else {
@@ -21525,7 +21561,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
           linkedTerms: card.linkedTerms || [],
             linkedWorlds: card.linkedWorlds || [],
             linkedStructures: card.linkedStructures || [],
-            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
+            expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(5, Number(card.expandLevel) || 0)) : (card.expanded ? 5 : 0))
           }));
           worldData = [...worldData, ...newCards];
           worldNextId = newId;
@@ -21778,7 +21814,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
           linkedStructures: t.linkedStructures || [],
           tabId: t.tabId ?? null,
           selected: false,
-          expandLevel: (t.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(t.expandLevel) || 0)) : (t.expanded ? 4 : 0)),
+          expandLevel: (t.expandLevel !== undefined ? Math.max(0, Math.min(5, Number(t.expandLevel) || 0)) : (t.expanded ? 5 : 0)),
           bgColor: t.bgColor || ''
         }));
         termsNextId = parsed.nextId || 1;
@@ -21823,7 +21859,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       empty.style.padding = '20px';
       empty.style.textAlign = 'center';
       empty.style.fontStyle = 'italic';
-      empty.textContent = 'まだ用語がありません。上の「＋新しいカード」から追加できます。';
+      empty.textContent = 'まだ用語がありません。上の「＋」ボタンから追加できます。';
       list.appendChild(empty);
       const countEl = document.getElementById('terms-count');
       if (countEl) countEl.textContent = `0語`;
@@ -21851,12 +21887,12 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       }
 
       // normalize expand level (unified with other panels)
-      term.expandLevel = Math.max(0, Math.min(4, Number(term.expandLevel) || 0));
+      term.expandLevel = Math.max(0, Math.min(5, Number(term.expandLevel) || 0));
       card.classList.add('expand-'+term.expandLevel);
       if (term.expandLevel > 0) card.classList.add('expanded');
 
       const advanceExpandLevel = () => {
-        term.expandLevel = (Math.max(0, Math.min(4, Number(term.expandLevel) || 0)) + 1) % 5;
+        term.expandLevel = (Math.max(0, Math.min(5, Number(term.expandLevel) || 0)) + 1) % 6;
         saveTermsData();
         renderTermsList();
       };
@@ -21894,7 +21930,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
 
       const lvBadge = document.createElement('span');
       lvBadge.className = 'card-expand-toggle expand-level-badge';
-      const lvIcons = ['▶','▽','🔗','📝','◆'];
+      const lvIcons = ['▶','▽','🔗','📝','🗒','◆'];
       lvBadge.textContent = lvIcons[term.expandLevel] || '◆';
       lvBadge.title = '展開レベル（クリックで変更）';
       lvBadge.style.cursor = 'pointer';
@@ -21956,7 +21992,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       // Double click toggles expand
       card.ondblclick = () => { advanceExpandLevel(); };
 
-      // ===== Body fields (5段階表示対応) =====
+      // ===== Body fields (6段階表示対応) =====
       // リンク情報を先に取得
       const linkedStructuresHtml = (term.linkedStructures || []).map(sid => {
         const st = structData.find(x => x.id === sid);
@@ -21996,6 +22032,13 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
           field.innerHTML = `<div class="card-field-label">カテゴリ</div><div class="card-field-body">${escapeHtml(term.category)}</div>`;
           body.appendChild(field);
         };
+        const addDetails = () => {
+          if (!term.details) return;
+          const field = document.createElement('div');
+          field.className = 'card-field terms-card-details';
+          field.innerHTML = `<div class="card-field-label">詳細</div><div class="card-field-body" style="white-space:pre-wrap;">${escapeHtml(term.details)}</div>`;
+          body.appendChild(field);
+        };
 
         const addLinks = () => {
           if (!(linkedStructuresHtml || linkedCharactersHtml || linkedWorldsHtml)) return;
@@ -22021,7 +22064,8 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
         // 1: attrs only
         // 2: attrs + links
         // 3: desc only
-        // 4: desc + attrs + links + tab (tab last)
+        // 4: desc + details
+        // 5: desc + details + attrs + links + tab (tab last)
         if (term.expandLevel === 1) {
           addAttrs();
         } else if (term.expandLevel === 2) {
@@ -22029,8 +22073,12 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
           addLinks();
         } else if (term.expandLevel === 3) {
           addDesc();
-        } else if (term.expandLevel >= 4) {
+        } else if (term.expandLevel === 4) {
           addDesc();
+          addDetails();
+        } else if (term.expandLevel >= 5) {
+          addDesc();
+          addDetails();
           addAttrs();
           addLinks();
           addTab();
@@ -22416,7 +22464,7 @@ loadTermsData();
             linkedCharacters: Array.isArray(t.linkedCharacters) ? t.linkedCharacters : [],
             linkedWorlds: Array.isArray(t.linkedWorlds) ? t.linkedWorlds : [],
             selected: false,
-            expandLevel: (t.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(t.expandLevel) || 0)) : (t.expanded ? 4 : 0)),
+            expandLevel: (t.expandLevel !== undefined ? Math.max(0, Math.min(5, Number(t.expandLevel) || 0)) : (t.expanded ? 5 : 0)),
             bgColor: t.bgColor || ''
           }));
 termsNextId = imported.nextId || (Math.max(0, ...termsData.map(x => x.id || 0)) + 1);
@@ -22437,7 +22485,7 @@ termsNextId = imported.nextId || (Math.max(0, ...termsData.map(x => x.id || 0)) 
               linkedCharacters: Array.isArray(t.linkedCharacters) ? t.linkedCharacters : [],
               linkedWorlds: Array.isArray(t.linkedWorlds) ? t.linkedWorlds : [],
               selected: false,
-              expandLevel: (t.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(t.expandLevel) || 0)) : (t.expanded ? 4 : 0)),
+              expandLevel: (t.expandLevel !== undefined ? Math.max(0, Math.min(5, Number(t.expandLevel) || 0)) : (t.expanded ? 5 : 0)),
               bgColor: t.bgColor || ''
             };
             return nt;
@@ -22509,8 +22557,8 @@ window.refreshTermsPanel = function(){
   window.expandAllTerms = function(){
     // 他パネルと同様に「最大展開」へ
     loadTermsData();
-    termsBulkExpandLevel = 4;
-    termsData.forEach(t => { t.expandLevel = 4; });
+    termsBulkExpandLevel = 5;
+    termsData.forEach(t => { t.expandLevel = 5; });
     saveTermsData();
     renderTermsList();
   };
@@ -22526,7 +22574,7 @@ window.refreshTermsPanel = function(){
 
   window.setTermsBulkExpandLevel = function(level){
     loadTermsData();
-    const lvl = Math.max(0, Math.min(4, Number(level) || 0));
+    const lvl = Math.max(0, Math.min(5, Number(level) || 0));
     termsBulkExpandLevel = lvl;
     termsData.forEach(t => { t.expandLevel = lvl; });
     saveTermsData();
@@ -22713,10 +22761,10 @@ let menu = document.getElementById('terms-context-menu');
     const term = termsData.find(t => t.id === cardId);
     if (!term) return;
 
-    // normalize expand level to 0-4 (5 levels unified with other panels)
-    let expandLevel = Math.max(0, Math.min(4, Number(term.expandLevel) || 0));
+    // normalize expand level to 0-5 (6 levels unified with other panels)
+    let expandLevel = Math.max(0, Math.min(5, Number(term.expandLevel) || 0));
 
-    const expandLabel = ['名前のみ','タグのみ','リンク','説明のみ','すべて表示'][expandLevel] || '名前のみ';
+    const expandLabel = ['名前のみ','タグのみ','リンク','説明のみ','説明＋詳細','すべて表示'][expandLevel] || '名前のみ';
 
     menu.innerHTML = `
       <div class="context-menu-item" data-action="new-card">＋新しいカード</div>
@@ -22764,7 +22812,7 @@ menu.querySelectorAll('.context-menu-item').forEach(item => {
         } else if (action === 'duplicate') {
           duplicateTermCard(cardId);
         } else if (action === 'toggle') {
-          term.expandLevel = (expandLevel + 1) % 5;
+          term.expandLevel = (expandLevel + 1) % 6;
           saveTermsData(); renderTermsList();
         } else if (action && action.startsWith('expand-')) {
           const lv = parseInt(action.split('-')[1], 10);
@@ -22855,7 +22903,7 @@ menu.querySelectorAll('.context-menu-item').forEach(item => {
         linkedStructures: t?.linkedStructures || [],
         tabId: t?.tabId ?? null,
         selected: false,
-        expandLevel: (t?.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(t.expandLevel) || 0)) : (t?.expanded ? 4 : 0)),
+        expandLevel: (t?.expandLevel !== undefined ? Math.max(0, Math.min(5, Number(t.expandLevel) || 0)) : (t?.expanded ? 5 : 0)),
         bgColor: t?.bgColor || ''
       }));
       termsNextId = nextId;
@@ -23842,12 +23890,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Toolbar generation (removes hand-written buttons from HTML) ---
   const STANDARD_TOOLBAR = [
-    { action: 'new-card', label: '＋新しいカード', cls: 'btn btn-lite' },
+    { action: 'new-card', label: '＋',            cls: 'btn btn-lite', title: '新しいカードをつくる' },
     { action: 'refresh',  label: '更新',          cls: 'btn btn-primary' },
-    { action: 'expand-all', label: '全展開',       cls: 'btn btn-lite' },
-    { action: 'collapse-all', label: '全折畳',     cls: 'btn btn-lite' },
-    { action: 'delete-selected', label: '選択削除', cls: 'btn btn-lite' },
-    { action: 'delete-all', label: '全削除',       cls: 'btn btn-lite' },
+    { action: 'expand-all', label: '全展開',       cls: 'btn btn-lite', title: '展開レベルを選択' },
+    { action: 'delete-menu', label: '🚮',         cls: 'btn btn-lite', title: '削除' },
     { action: 'fullscreen', label: '⛶',           cls: 'btn btn-lite', title: '全画面' },
 ];
 
@@ -23880,7 +23926,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         {
           const fn = toolbarActionToFn(conf, spec.action);
-          if(typeof fn !== 'function') continue;
+          if (spec.action === 'delete-menu') {
+            if (typeof conf?.actions?.deleteSelected !== 'function' && typeof conf?.actions?.deleteAll !== 'function') continue;
+          } else if (typeof fn !== 'function') {
+            continue;
+          }
         }
         const b = document.createElement('button');
         b.type = 'button';
@@ -23894,18 +23944,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // --- Bulk expand level menu (5 levels) ---
+  // --- Bulk expand level menu (6 levels) ---
   const PANEL_BULK_EXPAND_OPTIONS = [
     { level: 0, icon: '▶', title: '名前のみ' },
     { level: 1, icon: '▽', title: 'タグのみ' },
     { level: 2, icon: '🔗', title: 'リンク' },
     { level: 3, icon: '📝', title: '説明のみ' },
-    { level: 4, icon: '◆', title: 'すべて表示' },
+    { level: 4, icon: '🗒', title: '説明＋詳細' },
+    { level: 5, icon: '◆', title: 'すべて表示' },
   ];
 
   function getUniformExpandLevel(list){
     if(!Array.isArray(list) || list.length === 0) return { level: 0, mixed: false, count: 0 };
-    const getLvl = (c) => Math.max(0, Math.min(4, Number(c?.expandLevel) || 0));
+    const getLvl = (c) => Math.max(0, Math.min(5, Number(c?.expandLevel) || 0));
     const base = getLvl(list[0]);
     for (const c of list){
       if (getLvl(c) !== base) return { level: base, mixed: true, count: list.length };
@@ -23914,7 +23965,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function applyBulkExpandLevel(paneId, level){
-    const lvl = Math.max(0, Math.min(4, Number(level) || 0));
+    const lvl = Math.max(0, Math.min(5, Number(level) || 0));
 
     // Prefer dedicated setters exported from each panel module (modules are IIFEs; internal save/render are not on window)
     try {
@@ -23999,6 +24050,24 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       menu.appendChild(item);
     });
+    if (typeof conf?.actions?.collapseAll === 'function') {
+      const collapseSep = document.createElement('div');
+      collapseSep.style.height = '1px';
+      collapseSep.style.background = 'var(--border-color)';
+      collapseSep.style.margin = '4px 0';
+      menu.appendChild(collapseSep);
+
+      const collapseItem = document.createElement('div');
+      collapseItem.className = 'context-menu-item';
+      collapseItem.innerHTML = '⬇ 全折畳';
+      collapseItem.addEventListener('click', (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        hide();
+        try { conf.actions.collapseAll(); } catch(err) { console.error(err); }
+      });
+      menu.appendChild(collapseItem);
+    }
 
     const x = (ev && (ev.clientX||ev.pageX)) || 0;
     const y = (ev && (ev.clientY||ev.pageY)) || 0;
@@ -24009,6 +24078,65 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(()=>document.addEventListener('mousedown', onDocDown, true),0);
     window.addEventListener('resize', hide, true);
     window.addEventListener('scroll', hide, true);
+  }
+
+  function showDeleteMenu(ev, paneId){
+    if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+
+    let menu = document.getElementById('panelui-delete-menu');
+    if(!menu){
+      menu = document.createElement('div');
+      menu.id = 'panelui-delete-menu';
+      menu.className = 'context-menu';
+      menu.style.display = 'none';
+      document.body.appendChild(menu);
+    }
+
+    const conf = getPaneConf(paneId);
+    const delSelected = conf?.actions?.deleteSelected;
+    const delAll = conf?.actions?.deleteAll;
+
+    const hide = ()=>{
+      menu.style.display = 'none';
+      document.removeEventListener('mousedown', onDocDown, true);
+    };
+    const onDocDown = (e)=>{ if(!menu.contains(e.target)) hide(); };
+
+    menu.innerHTML = '';
+
+    if (typeof delSelected === 'function') {
+      const item = document.createElement('div');
+      item.className = 'context-menu-item';
+      item.textContent = '🧹 選択削除';
+      item.addEventListener('click', (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        hide();
+        delSelected();
+      });
+      menu.appendChild(item);
+    }
+
+    if (typeof delAll === 'function') {
+      const item = document.createElement('div');
+      item.className = 'context-menu-item';
+      item.textContent = '🚮 全削除';
+      item.addEventListener('click', (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        hide();
+        delAll();
+      });
+      menu.appendChild(item);
+    }
+
+    const x = (ev && (ev.clientX||ev.pageX)) || 0;
+    const y = (ev && (ev.clientY||ev.pageY)) || 0;
+    menu.style.left = (x + 8) + 'px';
+    menu.style.top  = (y + 8) + 'px';
+    menu.style.display = 'block';
+
+    setTimeout(()=>document.addEventListener('mousedown', onDocDown, true),0);
   }
 
   function handleToolbarClick(ev){
@@ -24026,6 +24154,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // 「全展開」ボタンは、最大展開ではなく「展開レベル選択メニュー」を開く
     if (action === 'expand-all') {
       showBulkExpandMenu(ev, paneId);
+      return;
+    }
+    if (action === 'delete-menu') {
+      showDeleteMenu(ev, paneId);
       return;
     }
 
