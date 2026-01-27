@@ -725,6 +725,18 @@ background: transparent;
     .dock-resizer:hover::before,
     .dock-resizer.resizing::before { background: #3b82f6; }
 
+
+    /* ===== Modal open: prevent resizer lines from appearing above dialogs ===== */
+    body.cc-modal-open .pane-resizer,
+    body.cc-modal-open .dock-resizer,
+    body.cc-modal-open .dynamic-dock-resizer {
+        pointer-events: none !important;
+    }
+    body.cc-modal-open .pane-resizer::before,
+    body.cc-modal-open .dock-resizer::before {
+        opacity: 0 !important;
+    }
+
     /* ドック境界の誤操作を減らす（プレビュー｜メモ の境界を優先） */
     #resizer-memo { z-index: 20; }
     #resizer-memo-outline { z-index: 8; width: calc(var(--divider-hit-area) - 6px); }
@@ -1162,7 +1174,7 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
 
     .modal-overlay {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.5); z-index: 1000;
+        background: rgba(0,0,0,0.5); z-index: 10050;
         display: none; pointer-events: none; justify-content: center; align-items: center;
     }
     .modal-overlay.show { display: flex; pointer-events: auto; }
@@ -1176,14 +1188,161 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
     .modal-close:hover { color: #dc2626; }
 
-    /* Card View Modal Styles */
-    .card-view-modal-content { max-width: 700px; }
-    .card-view-body { padding: 10px 0; max-height: 60vh; overflow-y: auto; }
-    .card-view-section { margin-bottom: 16px; padding: 12px; background: var(--pane-header-bg); border-radius: 6px; border-left: 3px solid #3b82f6; }
-    .card-view-section-title { font-weight: bold; font-size: 0.85rem; color: #3b82f6; margin-bottom: 8px; }
+
+    /* Card View Modal Styles (window-like: draggable + resizable) */
+    #card-view-modal.modal-overlay.show{
+        display: block; /* override flex centering for this modal */
+        pointer-events: auto;
+    }
+    #card-view-modal .card-view-modal-content{
+        width: min(900px, 92vw);
+        height: min(82vh, 820px);
+        max-width: 95vw;
+        max-height: 95vh;
+        min-width: 360px;
+        min-height: 240px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        left: 4vw;
+        top: 4vh;
+        resize: none; /* custom handles */
+    }
+    /* Make body follow modal size */
+    #card-view-modal .card-view-body{
+        padding: 10px 0;
+        flex: 1 1 auto;
+        overflow: auto;
+        max-height: none;
+    }
+    #card-view-modal .modal-header{
+        flex: 0 0 auto;
+        cursor: move;
+        user-select: none;
+    }
+    #card-view-modal .card-view-footer{ flex: 0 0 auto; }
+
+    /* Window-like resize handles (all edges / corners) */
+#card-view-modal .cc-resize-handle{
+    position: absolute;
+    background: transparent;
+    z-index: 5;
+    touch-action: none;
+    user-select: none;
+}
+/* edges */
+#card-view-modal .cc-resize-e{ top: 0; right: -6px; width: 14px; height: 100%; cursor: ew-resize; }
+#card-view-modal .cc-resize-w{ top: 0; left:  -6px; width: 14px; height: 100%; cursor: ew-resize; }
+#card-view-modal .cc-resize-s{ left: 0; bottom: -6px; width: 100%; height: 14px; cursor: ns-resize; }
+#card-view-modal .cc-resize-n{ left: 0; top:   -6px; width: 100%; height: 14px; cursor: ns-resize; }
+/* corners */
+#card-view-modal .cc-resize-se{ right: -6px; bottom: -6px; width: 18px; height: 18px; cursor: nwse-resize; }
+#card-view-modal .cc-resize-nw{ left:  -6px; top:    -6px; width: 18px; height: 18px; cursor: nwse-resize; }
+#card-view-modal .cc-resize-ne{ right: -6px; top:    -6px; width: 18px; height: 18px; cursor: nesw-resize; }
+#card-view-modal .cc-resize-sw{ left:  -6px; bottom: -6px; width: 18px; height: 18px; cursor: nesw-resize; }
+
+    /* Card View Window Frame + Panel Identity (accent color follows panel) */
+    #card-view-modal{
+        --cv-accent: #3b82f6;
+        --cv-accent-soft: #dbeafe;
+        --cv-accent-text: #1d4ed8;
+    }
+    #card-view-modal .card-view-modal-content{
+        padding: 0 !important; /* manage padding per region */
+        background: var(--panel-bg);
+        border-radius: 12px;
+        border: 1px solid rgba(0,0,0,0.12);
+        border-top: 5px solid var(--cv-accent);
+        box-shadow: 0 16px 50px rgba(0,0,0,0.28);
+    }
+    #card-view-modal .card-view-titlebar{
+        margin-bottom: 0;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-color);
+        background: linear-gradient(to bottom, var(--cv-accent-soft), rgba(255,255,255,0));
+    }
+    #card-view-modal .card-view-titlewrap{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+    #card-view-modal #card-view-title{
+        margin: 0;
+        font-size: 1.1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    #card-view-modal .card-view-panel-badge{
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        background: var(--cv-accent-soft);
+        color: var(--cv-accent-text);
+        border: 1px solid rgba(0,0,0,0.08);
+        white-space: nowrap;
+        flex: 0 0 auto;
+    }
+    #card-view-modal .card-view-body{
+        padding: 12px 16px !important;
+    }
+    #card-view-modal .card-view-footer{
+        padding: 10px 16px;
+        border-top: 1px solid var(--border-color);
+        background: rgba(0,0,0,0.02);
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    #card-view-modal .cc-resize-se::after{
+        content: '';
+        position: absolute;
+        right: 6px;
+        bottom: 6px;
+        width: 10px;
+        height: 10px;
+        border-right: 2px solid rgba(107,114,128,0.55);
+        border-bottom: 2px solid rgba(107,114,128,0.55);
+        border-radius: 0 0 4px 0;
+        pointer-events: none;
+    }
+    body.theme-dark #card-view-modal .cc-resize-se::after{
+        border-right-color: rgba(156,163,175,0.55);
+        border-bottom-color: rgba(156,163,175,0.55);
+    }
+
+    /* While dragging/resizing: prevent text selection */
+    html.cc-window-dragging, html.cc-window-resizing{
+        user-select: none;
+    }
+    html.cc-window-dragging *, html.cc-window-resizing *{
+        user-select: none !important;
+    }
+
+    @media (max-width: 640px){
+        #card-view-modal .card-view-modal-content{
+            width: 96vw;
+            height: 92vh;
+            left: 2vw;
+            top: 2vh;
+        }
+        #card-view-modal .cc-resize-handle{ display: none; }
+        #card-view-modal .modal-header{ cursor: default; }
+    }
+
+    }
+
+    .card-view-section { margin-bottom: 16px; padding: 12px; background: var(--pane-header-bg); border-radius: 8px; border: 1px solid rgba(0,0,0,0.06); border-left: 4px solid var(--cv-accent, #3b82f6); }
+    .card-view-section-title { font-weight: bold; font-size: 0.85rem; color: var(--cv-accent, #3b82f6); margin-bottom: 8px; }
     .card-view-section-content { font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
     .card-view-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-    .card-view-tag { background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; }
+    .card-view-tag { background: var(--cv-accent-soft, #dbeafe); color: var(--cv-accent-text, #1d4ed8); padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; border: 1px solid rgba(0,0,0,0.06); }
     .card-view-tag.role { background: #fef3c7; color: #92400e; }
     .card-view-tag.level { background: #d1fae5; color: #065f46; }
     .card-view-tag.status { background: #ede9fe; color: #5b21b6; }
@@ -1194,6 +1353,8 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     .card-view-link[data-panel="character"]:hover { background: #f59e0b; color: #fff; }
     .card-view-link[data-panel="world"] { background: #d1fae5; color: #065f46; }
     .card-view-link[data-panel="world"]:hover { background: #10b981; color: #fff; }
+    .card-view-link[data-panel="terms"] { background: #fef3c7; color: #92400e; }
+    .card-view-link[data-panel="terms"]:hover { background: #f59e0b; color: #fff; }
     .card-view-link[data-panel="terms"] { background: #ede9fe; color: #5b21b6; }
     .card-view-link[data-panel="terms"]:hover { background: #8b5cf6; color: #fff; }
     .card-view-link[data-panel="structure"] { background: #dbeafe; color: #1d4ed8; }
@@ -1277,7 +1438,7 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
 
     .save-dialog-overlay {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.5); z-index: 1000;
+        background: rgba(0,0,0,0.5); z-index: 10050;
         display: flex; justify-content: center; align-items: center;
     }
     .import-dialog-overlay {
@@ -1605,7 +1766,8 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
       display: flex;
       align-items: center;
       gap: 6px;
-      flex: 0 0 auto;
+      flex: 0 1 auto;
+      min-width: 0;
     }
 
     :where(.card-select, .structure-select, .character-select, .world-select, .terms-select){
@@ -1719,6 +1881,51 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
       background: var(--badge-bg, rgba(0,0,0,0.06));
       color: var(--badge-fg, var(--text-muted));
     }
+
+
+    /* Details indicator (shown only when "details" is present) */
+    .card-details-indicator{
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.06);
+      color: var(--text-muted);
+      border: 1px solid rgba(0,0,0,0.08);
+      line-height: 1;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+
+/* ===== Header right-side icon priority =====
+   - Keep detail icon visible even when badges are long.
+   - Prefer truncating category/role badges before truncating title.
+*/
+:where(.card-head-right, .terms-card-head-right){
+  overflow: visible !important;       /* never clip right-side indicators */
+  flex: 0 1 auto !important;
+  min-width: 0;
+}
+:where(.card-badge, .character-role-badge, .world-level-badge, .terms-category-badge){
+  flex: 0 1 auto !important;          /* allow shrinking */
+  min-width: 1.2em !important;        /* can shrink down to ~1 character */
+  max-width: 10em;                    /* keep badges from eating the header */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card-details-indicator{
+  flex: 0 0 auto !important;          /* never shrink */
+}
+/* Mini badge: show 1 character (no ellipsis) when space is tight */
+.cc-badge-mini{
+  padding: 2px 4px !important;
+  min-width: 1.6em !important;
+  max-width: 1.6em !important;   /* 1 full-width char */
+  text-overflow: clip !important;
+}
+
+
 
     /* Character role badge colors: use parent role class */
     .character-card.role-protagonist .character-role-badge{ --badge-bg:#fce7f3; --badge-fg:#be185d; }
@@ -2027,7 +2234,7 @@ body.theme-dark .structure-content {
 
     .structure-status {
         font-size: 0.65rem; padding: 2px 6px; border-radius: 10px;
-        white-space: nowrap; flex-shrink: 0;
+        white-space: nowrap; flex-shrink: 1;
     }
     .structure-status.status-none { background: #f3f4f6; color: #6b7280; }
     .structure-status.status-draft { background: #fef3c7; color: #92400e; }
@@ -3484,31 +3691,48 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
   }
 
   /* Context menu styles */
-  .context-menu {
-    position: fixed;
-    min-width: 200px;
-    background: var(--panel-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    z-index: 2000;
-    display: none;
-    padding: 6px 0;
-  }
-  .context-menu.show { display: block; }
-  .context-menu-item {
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 0.85rem;
-  }
-  .context-menu-item:hover {
-    background: var(--pane-header-bg, #f3f4f6);
-  }
-  body.theme-dark .context-menu-item:hover {
-    background: #4b5563;
-  }
-
-  /* Floating panel styles */
+.context-menu {
+  position: fixed;
+  min-width: 200px;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  z-index: 2000;
+  display: none;
+  padding: 6px 0;
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.context-menu.context-submenu {
+  z-index: 2001;
+  min-width: 180px;
+}
+.context-menu.show { display: block; }
+.context-menu-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.context-menu-item.has-submenu {
+  position: relative;
+  padding-right: 30px;
+}
+.context-menu-item.has-submenu::after {
+  content: "▸";
+  position: absolute;
+  right: 12px;
+  opacity: 0.6;
+}
+.context-menu-item:hover {
+  background: var(--pane-header-bg, #f3f4f6);
+}
+body.theme-dark .context-menu-item:hover {
+  background: #4b5563;
+}
+/* Floating panel styles */
   .floating-panel {
     font-family: inherit;
   }
@@ -5555,6 +5779,27 @@ body.theme-dark{
     </div>
 </div>
 
+
+<div id="project-load-dialog" class="save-dialog-overlay" style="display:none;">
+  <div class="save-dialog" style="max-width:430px;">
+    <h3>📂 プロジェクト読込</h3>
+    <p id="proj-load-fileinfo" style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">読み込む項目を選択してください</p>
+    <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+      <button class="btn" style="padding:6px 10px; font-size:0.8rem;" onclick="setProjectLoadAll(true)">全選択</button>
+      <button class="btn" style="padding:6px 10px; font-size:0.8rem;" onclick="setProjectLoadAll(false)">全解除</button>
+    </div>
+    <div id="proj-load-options" style="margin-bottom: 15px; font-size: 0.85rem; max-height:230px; overflow-y:auto;"></div>
+    <div style="margin: 0 0 12px 0; font-size:0.78rem; color:var(--text-muted); line-height:1.45;">
+      チェックを外した項目は現在のデータを保持します。<br>
+      ※リンク（構成⇄登場人物など）は、関連項目を読み込まないと参照切れになることがあります。
+    </div>
+    <div class="save-dialog-buttons">
+      <button class="btn btn-save" onclick="applyProjectLoadSelection()">📂 読み込む</button>
+      <button class="btn" onclick="closeProjectLoadDialog()">キャンセル</button>
+    </div>
+  </div>
+</div>
+
 <!-- パネル別インポートダイアログ -->
 <div id="panel-import-dialog" class="import-dialog-overlay">
     <div class="import-dialog">
@@ -5601,8 +5846,11 @@ body.theme-dark{
 <!-- カード閲覧モーダル -->
 <div id="card-view-modal" class="modal-overlay" data-card-id="" data-panel-type="">
     <div class="modal-content card-view-modal-content">
-        <div class="modal-header">
-            <h3 id="card-view-title">カード詳細</h3>
+        <div class="modal-header card-view-titlebar">
+            <div class="card-view-titlewrap">
+                <span id="card-view-panel-badge" class="card-view-panel-badge">📌 パネル</span>
+                <h3 id="card-view-title">カード詳細</h3>
+            </div>
             <button class="modal-close" onclick="window.closeCardViewModal()">&times;</button>
         </div>
         <div id="card-view-body" class="card-view-body"></div>
@@ -6275,7 +6523,107 @@ memo: 'cc_memo_width_px',
     let autoSaveTarget = { handle: null, type: null };
 
     // Utility function - must be defined before use in renderInputTabs
-    function escapeHtml(s) { return s.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m])); }
+    function escapeHtml(s) {
+      s = (s === null || s === undefined) ? '' : String(s);
+      return s.replace(/[&<>"']/g, m => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      }[m]));
+    }
+
+/* === Header badge priority: keep titles readable; badges shrink to 1 char first === */
+function cc_isTruncated(el){
+  if(!el) return false;
+  return (el.scrollWidth - el.clientWidth) > 1;
+}
+function cc_prepareBadgeEl(badge, priorityDefault){
+  if(!badge) return;
+  if(!badge.dataset.ccFull){
+    badge.dataset.ccFull = badge.textContent || '';
+    const t = (badge.dataset.ccFull || '').trim();
+    badge.dataset.ccMin = t ? t.slice(0,1) : '';
+  }
+  if(!badge.dataset.ccPri){
+    badge.dataset.ccPri = String(priorityDefault ?? 2);
+  }
+}
+function cc_refreshHeaderRow(header){
+  if(!header) return;
+  const title = header.querySelector('.card-title, .structure-title, .character-name, .world-name');
+  const right = header.querySelector('.card-head-right, .terms-card-head-right');
+  if(!title || !right) return;
+
+  // Collect badges excluding detail icon
+  const badges = Array.from(right.querySelectorAll('.card-badge, .structure-status, .structure-level-badge, .character-role-badge, .world-level-badge, .terms-category-badge'))
+    .filter(b => !b.classList.contains('card-details-indicator'));
+
+  badges.forEach(b=>{
+    // Structure: status is higher priority than level
+    if(b.classList.contains('structure-status')) cc_prepareBadgeEl(b, 1);
+    else if(b.classList.contains('structure-level-badge')) cc_prepareBadgeEl(b, 2);
+    else cc_prepareBadgeEl(b, 2);
+  });
+
+  // reset to full text first
+  badges.forEach(b=>{
+    b.textContent = b.dataset.ccFull || '';
+    b.classList.remove('cc-badge-mini');
+  });
+
+  // Stage 1: shrink low-priority badges (>=2)
+  if(cc_isTruncated(title)){
+    badges.filter(b=>parseInt(b.dataset.ccPri||'2',10) >= 2).forEach(b=>{
+      b.textContent = b.dataset.ccMin || '';
+      b.classList.add('cc-badge-mini');
+    });
+  }
+
+  // Stage 2: if still tight, shrink high-priority too (<2)
+  if(cc_isTruncated(title)){
+    badges.filter(b=>parseInt(b.dataset.ccPri||'2',10) < 2).forEach(b=>{
+      b.textContent = b.dataset.ccMin || '';
+      b.classList.add('cc-badge-mini');
+    });
+  }
+}
+function cc_applyHeaderBadgePriority(root){
+  const scope = root || document;
+  const headers = scope.querySelectorAll('.card-shell > .card-header');
+  headers.forEach(h=>cc_refreshHeaderRow(h));
+}
+
+// apply on resize (debounced)
+(function(){
+  let __t = null;
+  window.addEventListener('resize', ()=>{
+    clearTimeout(__t);
+    __t = setTimeout(()=>cc_applyHeaderBadgePriority(document), 80);
+  }, {passive:true});
+})();
+// apply on panel resize too (splitter drag doesn't trigger window resize)
+(function(){
+  if(!('ResizeObserver' in window)) return;
+  let __ro_t = null;
+  const __schedule = ()=>{ 
+    clearTimeout(__ro_t);
+    __ro_t = setTimeout(()=>cc_applyHeaderBadgePriority(document), 60);
+  };
+  const __init = ()=>{
+    try{
+      const __ro = new ResizeObserver(__schedule);
+      const ids = ['structure-panel','character-panel','world-panel','terms-panel','memo-panel','outline-panel','search-panel','pane-stack'];
+      ids.forEach(id=>{
+        const el = document.getElementById(id);
+        if(el) __ro.observe(el);
+      });
+    }catch(e){}
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', __init);
+  else __init();
+})();
 
     // ===== Common: linked input tab field (unified across panels) =====
     function ccGetInputTabById(tabId){
@@ -6971,27 +7319,31 @@ function addNewTab() {
     }
 
     function startNewProject() {
-        // --- コンテンツ系の保存データをクリア ---
-        try { localStorage.removeItem(TABS_KEY); } catch(e){}
-        try { localStorage.removeItem(MEMO_KEY); } catch(e){}
-        try { localStorage.removeItem(BOOKMARKS_KEY); } catch(e){}
-        try { localStorage.removeItem(NOVEL_TITLE_KEY); } catch(e){}
-        try { localStorage.removeItem(TODAY_START_KEY); } catch(e){}
-        try { localStorage.removeItem(WRITING_TIME_KEY); } catch(e){}
-        try { localStorage.removeItem('cc_outline_rules_v1'); } catch(e){}
-        try { localStorage.removeItem('cc_reader_bookmarks_v1'); } catch(e){}
-        try { localStorage.removeItem('cc_reader_bookmarks_v2'); } catch(e){}
+        // ✅ 新規プロジェクト（完全初期化）
+        // - 入力 / メモ / ブックマーク / カードデータを空に
+        // - 設定（表示/テーマ/色/分割/パネル配置/幅/高さ/オートセーブ等）も初期状態へ
+        // - 機能（UI/ボタン等）は残したまま、保存された“状態”だけをまっさらにします
 
-        // 構成/人物/世界観カード
-        try { localStorage.removeItem('cc_structure_data');
-        localStorage.removeItem('cc_character_data');
-        localStorage.removeItem('cc_world_data');
-        localStorage.removeItem('cc_terms_data'); } catch(e){}
-        try { localStorage.removeItem('cc_character_data'); } catch(e){}
-        try { localStorage.removeItem('cc_world_data');
-        localStorage.removeItem('cc_terms_data'); } catch(e){}
+        // --- 1) 保存データを徹底的にクリア（このアプリのキーだけ） ---
+        try {
+            const prefixes = ['cc_', 'cc_editor_'];
+            for (let idx = localStorage.length - 1; idx >= 0; idx--) {
+                const k = localStorage.key(idx);
+                if (!k) continue;
+                if (prefixes.some(p => k.startsWith(p))) localStorage.removeItem(k);
+            }
+        } catch (e) {}
 
-        // --- 画面上の状態も初期化 ---
+        try {
+            const prefixes = ['cc_', 'cc_editor_'];
+            for (let idx = sessionStorage.length - 1; idx >= 0; idx--) {
+                const k = sessionStorage.key(idx);
+                if (!k) continue;
+                if (prefixes.some(p => k.startsWith(p))) sessionStorage.removeItem(k);
+            }
+        } catch (e) {}
+
+        // --- 2) 画面上の内容を空に ---
         inputTabs = [{ id: 1, name: '本文', content: '' }];
         window.inputTabs = inputTabs;
         activeTabId = 1;
@@ -7011,7 +7363,122 @@ function addNewTab() {
         if (memoArea) memoArea.value = '';
         setNovelTitle(DEFAULT_NOVEL_TITLE);
 
-        // 再描画＆保存
+        // 検索系の入力もクリア
+        try {
+            const searchInput = document.getElementById('search-input');
+            const replaceInput = document.getElementById('replace-input');
+            if (searchInput) searchInput.value = '';
+            if (replaceInput) replaceInput.value = '';
+        } catch (e) {}
+
+        // --- 3) 設定（UI値）を初期値へ（＝完全まっさら） ---
+        try {
+            // 表示/入力/プレビュー
+            document.getElementById('st-in-size').value = 17;
+            document.getElementById('st-in-line').value = 1.7;
+            document.getElementById('st-in-font').value = 'font-gothic';
+            document.getElementById('st-in-v').checked = true;
+
+            document.getElementById('st-pv-size').value = 17;
+            document.getElementById('st-pv-line').value = 1.7;
+            document.getElementById('st-pv-font').value = 'font-gothic';
+            document.getElementById('st-pv-v').checked = true;
+
+            document.getElementById('check-show-input').checked = true;
+            document.getElementById('check-show-preview').checked = true;
+            document.getElementById('st-show-space').checked = true;
+            document.getElementById('st-show-highlight').checked = true;
+            document.getElementById('st-default-preview-hidden').checked = false;
+
+            // 執筆補助
+            document.getElementById('st-typewriter-mode').checked = false;
+            document.getElementById('st-writing-tracker').checked = true;
+
+            // 目標/換算
+            document.getElementById('st-goal-chars').value = 150000;
+            document.getElementById('st-today-goal').value = 2000;
+            document.getElementById('st-celebrate-goal').checked = true;
+            document.getElementById('st-show-reading-time').checked = true;
+
+            document.getElementById('st-manuscript-rows').value = 34;
+            document.getElementById('st-manuscript-cols').value = 42;
+            document.getElementById('st-show-manuscript').checked = true;
+
+            // 開くモード
+            const openCurrent = document.querySelector('input[name="st-open-mode"][value="current"]');
+            if (openCurrent) openCurrent.checked = true;
+
+            // オートセーブ
+            document.getElementById('st-autosave-interval').value = 60;
+            document.getElementById('st-autosave-enabled').checked = false;
+            settingsCache.autosaveInterval = 60;
+            settingsCache.autosaveEnabled = false;
+            autoSaveTarget = { handle: null, type: null, scope: 'current' };
+            setAutoSaveEnabled(false);
+
+            // テーマ/色
+            document.getElementById('st-theme-preset').value = '';
+            document.getElementById('st-text-color-text').value = '';
+            document.getElementById('st-text-color').value = '#1f2937';
+            const mp = document.getElementById('st-max-pinned-panels');
+            if (mp) mp.value = '4';
+
+            // 分割・寸法（入力/プレビュー/サイド/各パネル）
+            resetPaneWidths();
+            resetPaneHeights();
+            resetDividerWidth();
+        } catch (e) {}
+
+        // テーマクラスとアクティブタブ色を初期化
+        try {
+            document.body.classList.remove('theme-dark', 'theme-sepia', 'theme-blue', 'theme-green');
+            document.documentElement.style.setProperty('--active-tab-bg', '#fff59d');
+        } catch (e) {}
+
+        // ヘッダー/背景カラー（個別パネル色）も初期化
+        try {
+            const headerVars = ['--pane-input-head', '--pane-preview-head', '--pane-memo-head', '--pane-outline-head', '--pane-structure-head', '--pane-search-head', '--pane-terms-head', '--pane-world-head', '--pane-character-head'];
+            headerVars.forEach(v => {
+                document.documentElement.style.removeProperty(v);
+                try { localStorage.removeItem('cc_' + v.replace('--', '')); } catch(e){}
+            });
+            const bgVars = ['--pane-input-bg', '--pane-preview-bg', '--pane-memo-bg', '--pane-outline-bg', '--pane-structure-bg', '--pane-search-bg', '--pane-terms-bg', '--pane-world-bg', '--pane-character-bg'];
+            bgVars.forEach(v => {
+                document.documentElement.style.removeProperty(v);
+                try { localStorage.removeItem('cc_' + v.replace('--', '')); } catch(e){}
+            });
+        } catch (e) {}
+
+        // パネル配置（左右・並び順）も初期状態へ
+        try {
+            if (window.settingsCache) {
+                settingsCache.panelSides = {};
+                settingsCache.panelOrderLeft = null;
+                settingsCache.panelOrderRight = null;
+                // panelSideMap は初期値へ（全部左）
+                settingsCache.panelSideMap = { memo:'left', outline:'left', search:'left', structure:'left', character:'left', world:'left', terms:'left' };
+            }
+            if (typeof window.__ccInitPanelSideState === 'function') window.__ccInitPanelSideState();
+        } catch (e) {}
+
+        // レイアウトを初期状態へ（横並び・左=入力 / 右=プレビュー）
+        try {
+            layoutAxis = 'row';
+            layoutReversed = false;
+            applyLayoutState();
+            saveLayoutSettings();
+        } catch (e) {}
+
+        // 設定を反映（＆保存）
+        try {
+            applyAllSettings();
+            saveSettingsToStorage();
+        } catch (e) {}
+
+        // 入力/プレビューの分割を等分へ
+        try { if (typeof setPaneSplitEqual === 'function') setPaneSplitEqual(); } catch (e) {}
+
+        // --- 4) 再描画＆保存 ---
         renderInputTabs();
         renderPreviewTabs();
         renderBookmarks();
@@ -7023,14 +7490,29 @@ function addNewTab() {
         saveMemoTabs();
         saveWritingTime();
 
-        // パネル側も空状態に
+        // --- 5) カードパネル側も空状態に ---
+        try { if (typeof closeSearchPanel === 'function') closeSearchPanel(); } catch (e) {}
+        try { if (typeof closeStructurePanel === 'function') closeStructurePanel(true); } catch (e) {}
+        try { if (typeof closeCharacterPanel === 'function') closeCharacterPanel(true); } catch (e) {}
+        try { if (typeof closeWorldPanel === 'function') closeWorldPanel(true); } catch (e) {}
+        try { if (typeof closeTermsPanel === 'function') closeTermsPanel(true); } catch (e) {}
+
         if (typeof window.initStructureFromReset === 'function') window.initStructureFromReset();
         if (typeof window.initCharacterFromReset === 'function') window.initCharacterFromReset();
         if (typeof window.initWorldFromReset === 'function') window.initWorldFromReset();
+        if (typeof window.initTermsFromReset === 'function') window.initTermsFromReset();
 
-        // 日次カウンタなどの初期化
+        // 既定ドックレイアウトも適用（初回状態へ）
         applyDefaultStartupLayoutAfterReset();
+
+        requestAnimationFrame(() => {
+            try { if (typeof applyPaneWidthSettings === 'function') applyPaneWidthSettings(); } catch (e) {}
+            try { if (typeof updateDockSplitState === 'function') updateDockSplitState(); } catch (e) {}
+            try { if (typeof updateDockTopOffset === 'function') updateDockTopOffset(); } catch (e) {}
+            try { if (typeof updatePanelButtonStates === 'function') updatePanelButtonStates(); } catch (e) {}
+        });
     }
+
 
     function resetInputToStartup() {
         // コンテンツのリセット
@@ -7115,6 +7597,7 @@ function addNewTab() {
         localStorage.removeItem('cc_structure_data');
         localStorage.removeItem('cc_character_data');
         localStorage.removeItem('cc_world_data');
+        localStorage.removeItem('cc_terms_data');
         localStorage.removeItem('cc_pane_colors_v3');
         localStorage.removeItem(TEXT_COLOR_KEY);
         sessionStorage.removeItem('cc_editor_session_started');
@@ -7169,6 +7652,8 @@ function addNewTab() {
         if (typeof window.initCharacterFromReset === 'function') window.initCharacterFromReset();
         if (typeof closeWorldPanel === 'function') closeWorldPanel(true);
         if (typeof window.initWorldFromReset === 'function') window.initWorldFromReset();
+        if (typeof closeTermsPanel === 'function') closeTermsPanel(true);
+        if (typeof window.initTermsFromReset === 'function') window.initTermsFromReset();
         applyDefaultStartupLayoutAfterReset();
         requestAnimationFrame(() => {
             if (typeof applyPaneWidthSettings === 'function') applyPaneWidthSettings();
@@ -9122,14 +9607,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Click-path helper: robust even if the UI re-renders during the click
     function eventPathHas(e, selector) {
+        // composedPath() が使える環境ではそれを優先。UI再描画が起きても path が安定しやすい
         const path = (typeof e.composedPath === 'function') ? e.composedPath() : [];
-        return path.some(node => node instanceof Element && node.matches(selector));
+        if (path.some(node => node instanceof Element && node.matches(selector))) return true;
+        // composedPath が無い/空の環境向けフォールバック
+        const t = (e.target instanceof Element) ? e.target : (e.target && e.target.parentElement);
+        return !!(t && typeof t.closest === 'function' && t.closest(selector));
+    }
+
+    // スクロールバー（DOMツリー外扱いになるケース）対策: クリック座標が要素の矩形内なら「内側クリック」とみなす
+    function clickInsideRect(e, el){
+        if (!el) return false;
+        const rect = el.getBoundingClientRect();
+        const x = e.clientX, y = e.clientY;
+        // clientX/Y が取れないケースは false
+        if (typeof x !== 'number' || typeof y !== 'number') return false;
+        return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
     }
 
     // Close non-pinned control panels on outside click (robust)
+    // NOTE: Some environments may not include the panel/button in composedPath (e.g. scrollbar/overlay quirks).
+    // We therefore add a coordinate-based "inside" check before closing panels.
     document.addEventListener('click', e => {
-        if (eventPathHas(e, '.control-panel, .btn, .dropdown')) return;
-        document.querySelectorAll('.control-panel.open').forEach(p => {
+        // モーダル/ダイアログ表示中は背面の自動クローズを抑止
+        if (document.body && document.body.classList.contains('cc-modal-open')) return;
+        if (eventPathHas(e, '.control-panel, .btn, .dropdown, .context-menu')) return;
+
+        const __open = Array.from(document.querySelectorAll('.control-panel.open'));
+        if (__open.some(p => clickInsideRect(e, p))) return;
+
+        __open.forEach(p => {
             if (!pinnedPanels.has(p.id)) p.classList.remove('open');
         });
         updateControlPanelScrollState();
@@ -9140,18 +9647,29 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', e => {
         // パネル操作中（タブクリック等）に誤って閉じないようにする
         if (window.memoInteracting || window.outlineInteracting || window.structureInteracting || window.characterInteracting || window.worldInteracting) return;
+        // 編集モーダル/保存・読込ダイアログ等が開いている間は背面パネルを自動で閉じない
+        if (document.body && document.body.classList.contains('cc-modal-open')) return;
+
 
         // モーダルやダイアログ、コンテキストメニュー、色選択が開いている場合は閉じない
         if (eventPathHas(e, '.modal-overlay, .save-dialog-overlay, .import-dialog-overlay')) return;
-        if (eventPathHas(e, '#structure-edit-modal, #character-edit-modal, #world-edit-modal')) return;
-        if (eventPathHas(e, '#structure-context-menu, #character-context-menu, #world-context-menu')) return;
-        if (eventPathHas(e, '#structure-color-popup, #character-color-popup, #world-color-popup')) return;
+        if (eventPathHas(e, '#structure-edit-modal, #character-edit-modal, #world-edit-modal, #terms-edit-modal')) return;
+        if (eventPathHas(e, '#structure-context-menu, #character-context-menu, #world-context-menu, #terms-context-menu')) return;
+        if (eventPathHas(e, '.context-menu')) return;
+        if (eventPathHas(e, '#structure-color-popup, #character-color-popup, #world-color-popup, #terms-color-popup')) return;
         if (eventPathHas(e, '.structure-link-popup, .tag-suggestions, .structure-tag-suggestions')) return;
 
         // パネル本体・トグルボタン・リサイズをクリックした場合は閉じない
-        if (eventPathHas(e, '#memo-panel, #outline-panel, #structure-panel, #character-panel, #world-panel, #search-panel')) return;
+        if (eventPathHas(e, '#memo-panel, #outline-panel, #structure-panel, #character-panel, #world-panel, #search-panel, #terms-panel')) return;
         if (eventPathHas(e, '#btn-toggle-memo, #btn-toggle-outline, #btn-toggle-structure, #btn-toggle-character, #btn-toggle-world, #btn-toggle-search, #btn-toggle-terms')) return;
         if (eventPathHas(e, '#resizer-memo, #resizer-outline, #resizer-structure, #resizer-character, #resizer-world, #resizer-search, #resizer-terms')) return;
+
+        // スクロールバークリック等で composedPath にパネルが含まれない場合があるため、座標でも内側判定する
+        const __openPanels = ['memo-panel','outline-panel','structure-panel','character-panel','world-panel','search-panel','terms-panel']
+            .map(id => document.getElementById(id))
+            .filter(el => el && el.classList.contains('open'));
+        if (__openPanels.some(el => clickInsideRect(e, el))) return;
+
 
         const mainContainer = document.getElementById('main-container');
         if (!mainContainer.classList.contains('memo-docked')) {
@@ -10553,41 +11071,180 @@ if (typeof applyPaneHeightSettings === 'function') {
         input.value = '';
     }
 
+    
+    // -----------------------------
+    // 📂 プロジェクト読込（項目選択）
+    // -----------------------------
+    let __ccPendingProjectImport = null;
+
+    function __ccPickFirst(obj, keys) {
+        if (!obj || typeof obj !== 'object') return undefined;
+        for (const k of keys) {
+            if (obj[k] !== undefined) return obj[k];
+        }
+        return undefined;
+    }
+
+    function __ccCountItems(sectionValue) {
+        if (!sectionValue) return 0;
+        if (Array.isArray(sectionValue)) return sectionValue.length;
+        if (typeof sectionValue === 'object') {
+            if (Array.isArray(sectionValue.data)) return sectionValue.data.length;
+            if (Array.isArray(sectionValue.tabs)) return sectionValue.tabs.length;
+        }
+        return 1;
+    }
+
     async function loadProjectFromFile(file) {
         try {
             const text = await file.text();
-            const project = JSON.parse(text);
-            if (!project.version) throw new Error('Invalid project file');
+            const raw = JSON.parse(text);
 
-            if (project.tabs) {
-                const tabs = Array.isArray(project.tabs) ? project.tabs : (project.tabs.tabs || []);
-                const activeTabId = project.currentTabId || project.activeTabId || project.tabs.activeTabId || (tabs[0]?.id ?? 1);
-                const nextTabId = project.nextTabId || project.tabs.nextTabId || (Math.max(0, ...tabs.map(t => t.id||0)) + 1);
-                localStorage.setItem(TABS_KEY, JSON.stringify({ tabs, activeTabId, nextTabId }));
+            // 互換: キー名ゆらぎ（古い/外部生成）を吸収
+            const project = raw || {};
+            const sections = {
+                tabs: __ccPickFirst(project, ['tabs', 'textTabs', 'text', 'editorTabs']),
+                memoTabs: __ccPickFirst(project, ['memoTabs', 'memos', 'memo', 'memo_tabs']),
+                structure: __ccPickFirst(project, ['structure', 'outline', 'plot']),
+                character: __ccPickFirst(project, ['character', 'characters', 'person', 'people']),
+                world: __ccPickFirst(project, ['world', 'worlds', 'setting', 'settings_world']),
+                terms: __ccPickFirst(project, ['terms', 'term', 'glossary', 'words']),
+                bookmarks: __ccPickFirst(project, ['bookmarks', 'bookmark']),
+                settings: __ccPickFirst(project, ['settings', 'config'])
+            };
+
+            const seemsProject = !!(sections.tabs || sections.memoTabs || sections.structure || sections.character || sections.world || sections.terms || sections.bookmarks || sections.settings);
+            if (!project.version && !seemsProject) throw new Error('Invalid project file');
+
+            openProjectLoadDialog(project, sections, file?.name || '（無名ファイル）');
+        } catch (e) {
+            alert('プロジェクトファイルの読み込みに失敗しました: ' + e.message);
+        }
+    }
+
+    function openProjectLoadDialog(project, sections, fileName) {
+        __ccPendingProjectImport = { project, sections, fileName };
+
+        const dialog = document.getElementById('project-load-dialog');
+        const info = document.getElementById('proj-load-fileinfo');
+        const opt = document.getElementById('proj-load-options');
+        if (!dialog || !opt) {
+            alert('読込ダイアログの初期化に失敗しました。ページを再読み込みしてから再度お試しください。');
+            return;
+        }
+
+        const items = [
+            { id: 'proj-load-text', key: 'tabs', label: '入力テキスト（本文タブ）' },
+            { id: 'proj-load-memo', key: 'memoTabs', label: 'メモ（全タブ）' },
+            { id: 'proj-load-structure', key: 'structure', label: '構成' },
+            { id: 'proj-load-character', key: 'character', label: '登場人物' },
+            { id: 'proj-load-world', key: 'world', label: '世界観' },
+            { id: 'proj-load-terms', key: 'terms', label: '用語' },
+            { id: 'proj-load-bookmarks', key: 'bookmarks', label: 'しおり' },
+            { id: 'proj-load-settings', key: 'settings', label: '設定（ペイン幅・色など）' }
+        ];
+
+        if (info) {
+            const v = project.version ? `v${project.version}` : '（version無し）';
+            info.textContent = `ファイル: ${fileName} / ${v} / 読み込む項目を選択してください`;
+        }
+
+        const rows = items.map(it => {
+            const val = sections[it.key];
+            const present = val !== undefined && val !== null;
+            const count = present ? __ccCountItems(val) : 0;
+            const disabled = !present;
+            const checked = present ? 'checked' : '';
+            const badge = present ? `<span style="color:var(--text-muted); font-size:0.78rem; margin-left:6px;">(${count}件)</span>` : `<span style="color:var(--text-muted); font-size:0.78rem; margin-left:6px;">(なし)</span>`;
+            return `
+              <label style="display:flex; align-items:center; gap:8px; margin-bottom:6px; opacity:${disabled ? 0.55 : 1};">
+                <input type="checkbox" id="${it.id}" ${checked} ${disabled ? 'disabled' : ''}>
+                <span>${it.label}${badge}</span>
+              </label>
+            `;
+        }).join('');
+
+        opt.innerHTML = rows;
+
+        dialog.style.display = 'flex';
+    }
+
+    function closeProjectLoadDialog() {
+        const dialog = document.getElementById('project-load-dialog');
+        if (dialog) dialog.style.display = 'none';
+        __ccPendingProjectImport = null;
+    }
+
+    function setProjectLoadAll(checked) {
+        const opt = document.getElementById('proj-load-options');
+        if (!opt) return;
+        opt.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            if (cb.disabled) return;
+            cb.checked = !!checked;
+        });
+    }
+
+    function __ccGetTabsPayload(tabsAny, project) {
+        const tabs = Array.isArray(tabsAny) ? tabsAny : (tabsAny && Array.isArray(tabsAny.tabs) ? tabsAny.tabs : []);
+        const activeTabId = project.currentTabId || project.activeTabId || (tabsAny && tabsAny.activeTabId) || (tabs[0]?.id ?? 1);
+        const nextTabId = project.nextTabId || (tabsAny && tabsAny.nextTabId) || (Math.max(0, ...tabs.map(t => t.id || 0)) + 1);
+        return { tabs, activeTabId, nextTabId };
+    }
+
+    function __ccGetMemoPayload(memoAny, project) {
+        const tabs = Array.isArray(memoAny) ? memoAny : (memoAny && Array.isArray(memoAny.tabs) ? memoAny.tabs : []);
+        const activeId = project.currentMemoTabId || project.activeMemoTabId || (memoAny && memoAny.activeId) || (tabs[0]?.id ?? 1);
+        const nextId = project.nextMemoTabId || (memoAny && memoAny.nextId) || (Math.max(0, ...tabs.map(t => t.id || 0)) + 1);
+        return { tabs, activeId, nextId };
+    }
+
+    function applyProjectLoadSelection() {
+        if (!__ccPendingProjectImport) return;
+        const { project, sections } = __ccPendingProjectImport;
+
+        const should = (id) => !!document.getElementById(id)?.checked;
+
+        try {
+            // 本文タブ
+            if (should('proj-load-text') && sections.tabs !== undefined) {
+                const payload = __ccGetTabsPayload(sections.tabs, project);
+                localStorage.setItem(TABS_KEY, JSON.stringify(payload));
             }
-            if (project.memoTabs) {
-                const tabs = Array.isArray(project.memoTabs) ? project.memoTabs : (project.memoTabs.tabs || []);
-                const activeId = project.currentMemoTabId || project.activeMemoTabId || project.memoTabs.activeId || (tabs[0]?.id ?? 1);
-                const nextId = project.nextMemoTabId || project.memoTabs.nextId || (Math.max(0, ...tabs.map(t => t.id||0)) + 1);
-                localStorage.setItem(MEMO_KEY, JSON.stringify({ tabs, activeId, nextId }));
+
+            // メモ
+            if (should('proj-load-memo') && sections.memoTabs !== undefined) {
+                const payload = __ccGetMemoPayload(sections.memoTabs, project);
+                localStorage.setItem(MEMO_KEY, JSON.stringify(payload));
             }
-            if (project.structure) {
-                localStorage.setItem('cc_structure_data', JSON.stringify(project.structure));
+
+            // 構成
+            if (should('proj-load-structure') && sections.structure !== undefined) {
+                localStorage.setItem('cc_structure_data', JSON.stringify(sections.structure));
             }
-            if (project.character) {
-                localStorage.setItem('cc_character_data', JSON.stringify(project.character));
+
+            // 登場人物
+            if (should('proj-load-character') && sections.character !== undefined) {
+                localStorage.setItem('cc_character_data', JSON.stringify(sections.character));
             }
-            if (project.world) {
-                localStorage.setItem('cc_world_data', JSON.stringify(project.world));
+
+            // 世界観
+            if (should('proj-load-world') && sections.world !== undefined) {
+                localStorage.setItem('cc_world_data', JSON.stringify(sections.world));
             }
-                        if (project.terms) {
-                localStorage.setItem('cc_terms_data', JSON.stringify(project.terms));
+
+            // 用語
+            if (should('proj-load-terms') && sections.terms !== undefined) {
+                localStorage.setItem('cc_terms_data', JSON.stringify(sections.terms));
             }
-if (project.bookmarks) {
-                localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(project.bookmarks));
+
+            // しおり
+            if (should('proj-load-bookmarks') && sections.bookmarks !== undefined) {
+                localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(sections.bookmarks));
             }
-            if (project.settings) {
-                const s = project.settings;
+
+            // 設定
+            if (should('proj-load-settings') && sections.settings !== undefined) {
+                const s = sections.settings || {};
                 if (s.paneWidths) {
                     Object.entries(s.paneWidths).forEach(([k, v]) => {
                         if (v) localStorage.setItem(`cc_${k === 'input' ? 'pane_input' : k === 'preview' ? 'pane_preview' : k}_width_px`, v);
@@ -10597,12 +11254,16 @@ if (project.bookmarks) {
                 if (s.autoSave !== undefined) localStorage.setItem('cc_autosave_enabled', s.autoSave);
                 if (s.autoSaveInterval) localStorage.setItem('cc_autosave_interval', s.autoSaveInterval);
             }
-            alert('プロジェクトを読み込みました。ページを再読み込みします。');
+
+            closeProjectLoadDialog();
+            alert('選択した項目を読み込みました。ページを再読み込みします。');
             location.reload();
         } catch (e) {
-            alert('プロジェクトファイルの読み込みに失敗しました: ' + e.message);
+            alert('読み込みの適用に失敗しました: ' + e.message);
         }
     }
+
+
 
     // プロジェクト保存機能
     function openProjectSaveDialog() {
@@ -10643,6 +11304,12 @@ if (project.bookmarks) {
     }
 
     function executeProjectSave() {
+        // 直前の入力を取りこぼさないよう、まずローカル保存を同期
+        try { if (typeof saveTabsToStorage === 'function') saveTabsToStorage(); } catch(e){}
+        try { if (typeof saveMemoTabs === 'function') saveMemoTabs(); } catch(e){}
+        try { if (typeof saveWritingTime === 'function') saveWritingTime(); } catch(e){}
+        try { if (typeof saveSettingsToStorage === 'function') saveSettingsToStorage(); } catch(e){}
+
         const selectedFormat = document.querySelector('input[name="proj-save-format"]:checked')?.value || 'ccproj';
         
         if (selectedFormat === 'txt') {
@@ -14669,6 +15336,9 @@ panel.style.width = '320px';
       menu.className = 'context-menu';
       menu.style.cssText = 'position:fixed; background:var(--panel-bg); border:1px solid var(--border-color); border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:10000; padding:4px 0; min-width:160px;';
       document.body.appendChild(menu);
+      // Prevent this menu from triggering "outside click" panel closers
+      menu.addEventListener('mousedown', (e)=>{ e.stopPropagation(); }, true);
+      menu.addEventListener('click', (e)=>{ e.stopPropagation(); }, true);
     }
 
         let html = `
@@ -15534,6 +16204,8 @@ function showPresetPanelColorPicker(paneId){
     if (structureData.length === 0) {
       container.innerHTML = '<div style="color:var(--text-muted); font-style:italic; padding:20px; text-align:center;">構成カードがありません。<br>上のボタンから章・話・シーンを追加してください。</div>';
       updateStructureBulkButtons();
+    // keep header badges from stealing title space
+    requestAnimationFrame(()=>cc_applyHeaderBadgePriority(container));
       return;
     }
 
@@ -16095,27 +16767,97 @@ function showPresetPanelColorPicker(paneId){
   let structureMenuClickHandler = null;
   let structureColorPickerHandler = null;
 
-  // コンテキストメニューの位置を画面内に収める
-  function adjustContextMenuPosition(menu, x, y) {
-    menu.style.left = x + 'px';
-    menu.style.top = y + 'px';
-    menu.style.display = 'block';
-    // メニューの実際のサイズを取得
-    const rect = menu.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    // 右端を超える場合は左に寄せる
-    if (rect.right > viewportWidth) {
-      menu.style.left = Math.max(0, viewportWidth - rect.width - 10) + 'px';
-    }
-    // 下端を超える場合は上に寄せる
-    if (rect.bottom > viewportHeight) {
-      menu.style.top = Math.max(0, viewportHeight - rect.height - 10) + 'px';
-    }
-  }
-  window.adjustContextMenuPosition = adjustContextMenuPosition;
+  // コンテキストメニューの位置を画面内に収める（高さもクランプ）
+function adjustContextMenuPosition(menu, x, y) {
+  const vw = window.innerWidth || document.documentElement.clientWidth;
+  const vh = window.innerHeight || document.documentElement.clientHeight;
 
-  // カード名のインライン編集機能
+  menu.style.display = 'block';
+  menu.style.maxHeight = Math.max(120, vh - 16) + 'px';
+  menu.style.overflowY = 'auto';
+
+  let left = x;
+  let top = y;
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+
+  const rect = menu.getBoundingClientRect();
+  if (rect.right > vw - 8) left = Math.max(8, vw - rect.width - 8);
+  if (rect.bottom > vh - 8) top = Math.max(8, vh - rect.height - 8);
+
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+}
+window.adjustContextMenuPosition = adjustContextMenuPosition;
+
+// 2段階メニュー（展開レベルサブメニュー）
+function hideExpandLevelSubmenu() {
+  const sm = document.getElementById('cc-expandlevel-submenu');
+  if (sm) sm.style.display = 'none';
+}
+
+function showExpandLevelSubmenu(anchorEl, currentLevel, onPick) {
+  hideExpandLevelSubmenu();
+  let sm = document.getElementById('cc-expandlevel-submenu');
+  if (!sm) {
+    sm = document.createElement('div');
+    sm.id = 'cc-expandlevel-submenu';
+    sm.className = 'context-menu context-submenu';
+    sm.style.cssText = 'position:fixed; background:var(--panel-bg); border:1px solid var(--border-color); border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:10001; padding:4px 0; min-width:180px;';
+    sm.addEventListener('mousedown', (e)=>e.stopPropagation());
+    sm.addEventListener('click', (e)=>e.stopPropagation());
+    document.body.appendChild(sm);
+  }
+
+  const labels = ['名前のみ','タグのみ','リンク','説明のみ','すべて表示'];
+  const icons  = ['▶','▽','🔗','📝','◆'];
+  sm.innerHTML = labels.map((lab, i)=>{
+    const check = (i === currentLevel) ? ' ✓' : '';
+    return `<div class="context-menu-item" data-lv="${i}">${icons[i]} ${lab}${check}</div>`;
+  }).join('');
+
+  sm.querySelectorAll('.context-menu-item').forEach(it=>{
+    it.onclick = (ev)=>{
+      ev.stopPropagation();
+      const lv = parseInt(it.dataset.lv, 10);
+      if (!Number.isNaN(lv)) onPick(lv);
+      hideExpandLevelSubmenu();
+    };
+  });
+
+  // anchor の右側へ。はみ出る場合は左に反転。
+  const a = anchorEl.getBoundingClientRect();
+  const vw = window.innerWidth || document.documentElement.clientWidth;
+  const vh = window.innerHeight || document.documentElement.clientHeight;
+
+  sm.style.display = 'block';
+  sm.style.maxHeight = Math.max(120, vh - 16) + 'px';
+  sm.style.overflowY = 'auto';
+
+  let left = a.right + 6;
+  let top = a.top;
+  sm.style.left = left + 'px';
+  sm.style.top = top + 'px';
+
+  const r = sm.getBoundingClientRect();
+  if (r.right > vw - 8) left = Math.max(8, a.left - r.width - 6);
+  if (r.bottom > vh - 8) top = Math.max(8, vh - r.height - 8);
+
+  sm.style.left = left + 'px';
+  sm.style.top = top + 'px';
+}
+window.showExpandLevelSubmenu = showExpandLevelSubmenu;
+window.hideExpandLevelSubmenu = hideExpandLevelSubmenu;
+
+// サブメニュー外クリックで閉じる
+document.addEventListener('mousedown', (e)=>{
+  const sm = document.getElementById('cc-expandlevel-submenu');
+  if (!sm) return;
+  if (e.target && e.target.closest && e.target.closest('#cc-expandlevel-submenu')) return;
+  hideExpandLevelSubmenu();
+}, true);
+
+// カード名のインライン編集機能
   function startInlineEdit(titleElement, currentValue, onSave) {
     if (titleElement.querySelector('input')) return; // 既に編集中
     const originalText = titleElement.textContent;
@@ -16205,6 +16947,7 @@ function showPresetPanelColorPicker(paneId){
     if (!card) return;
 
     const expandLevel = card.expandLevel || 0;
+    const expandLabel = ['名前のみ','タグのみ','リンク','説明のみ','すべて表示'][Math.max(0, Math.min(4, Number(expandLevel) || 0))] || '名前のみ';
 
     const moveTargets = getMoveTargetsForCard(card);
     const moveSection = moveTargets.length
@@ -16222,12 +16965,7 @@ function showPresetPanelColorPicker(paneId){
       <div class="context-menu-item" data-action="edit">✏️ 編集</div>
       <div class="context-menu-item" data-action="duplicate">📋 複製</div>
       <div class="context-menu-item" data-action="toggle">↕ 次の展開レベル</div>
-      <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
-      <div class="context-menu-item" data-action="expand-0" style="padding-left:24px;">▶ 名前のみ${expandLevel === 0 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-1" style="padding-left:24px;">▽ タグのみ${expandLevel === 1 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-2" style="padding-left:24px;">🔗 リンク${expandLevel === 2 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-3" style="padding-left:24px;">📝 説明のみ${expandLevel === 3 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-4" style="padding-left:24px;">◆ すべて表示${expandLevel === 4 ? ' ✓' : ''}</div>
+      <div class="context-menu-item has-submenu" data-action="expand-submenu">展開レベル（現在: ${expandLabel}）</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
       <div class="context-menu-item" data-action="color">🎨 カード色を変更</div>
       <div class="context-menu-item" data-action="reset-color">↩ 色をリセット</div>
@@ -16243,6 +16981,21 @@ function showPresetPanelColorPicker(paneId){
       item.onclick = (ev) => {
         ev.stopPropagation();
         const action = item.dataset.action;
+        if (action === 'expand-submenu') {
+          if (typeof window.showExpandLevelSubmenu === 'function') {
+            window.showExpandLevelSubmenu(item, Math.max(0, Math.min(4, Number(expandLevel) || 0)), (lv)=>{
+              const target = structureData.find(c => c.id === cardId);
+              if (target) {
+                target.expandLevel = lv;
+                saveStructureData();
+                renderStructureList();
+              }
+              hideStructureContextMenu();
+            });
+          }
+          return;
+        }
+
         if (action === 'new-card') createStructureCardFromSelection();
         if (action === 'view') showStructureCardView(cardId);
         if (action === 'edit') openEditModal(cardId);
@@ -16504,6 +17257,30 @@ function openStructureCardColorPicker(cardId, anchorEl){
     return div.innerHTML;
   };
 
+  // Card View: show which panel the card belongs to, and apply panel accent color
+  const CARD_VIEW_PANEL_THEMES = {
+    structure: { name: '構成', emoji: '🧩', accent: '#a5b4fc', soft: '#eef2ff', text: '#3730a3' },
+    character: { name: '人物', emoji: '👤', accent: '#f9a8d4', soft: '#fce7f3', text: '#9d174d' },
+    world:     { name: '世界観', emoji: '🌍', accent: '#6ee7b7', soft: '#ecfdf5', text: '#065f46' },
+    terms:     { name: '用語', emoji: '📚', accent: '#fbbf24', soft: '#fef3c7', text: '#92400e' },
+    memo:      { name: 'メモ', emoji: '📝', accent: '#fcd34d', soft: '#fef9c3', text: '#92400e' },
+    outline:   { name: '目次', emoji: '📑', accent: '#93c5fd', soft: '#dbeafe', text: '#1e40af' }
+  };
+
+  window.applyCardViewPanelTheme = function(panelType){
+    const modal = document.getElementById('card-view-modal');
+    if (!modal) return;
+    const badge = document.getElementById('card-view-panel-badge');
+    const t = CARD_VIEW_PANEL_THEMES[panelType] || { name: panelType || 'カード', emoji: '📌', accent: '#3b82f6', soft: '#dbeafe', text: '#1d4ed8' };
+
+    modal.style.setProperty('--cv-accent', t.accent);
+    modal.style.setProperty('--cv-accent-soft', t.soft);
+    modal.style.setProperty('--cv-accent-text', t.text);
+
+    if (badge) badge.textContent = (t.emoji ? (t.emoji + ' ') : '') + (t.name || '');
+  };
+
+
   window.closeCardViewModal = function() {
     const modal = document.getElementById('card-view-modal');
     if (modal) {
@@ -16575,6 +17352,7 @@ function openStructureCardColorPicker(cardId, anchorEl){
 
     modal.dataset.cardId = cardId;
     modal.dataset.panelType = 'structure';
+    window.applyCardViewPanelTheme('structure');
     title.textContent = card.title || '（無題）';
 
     let html = '<div class="card-view-header-badges">';
@@ -16582,9 +17360,11 @@ function openStructureCardColorPicker(cardId, anchorEl){
       const levelLabel = LEVEL_LABELS[card.level] || card.level;
       html += `<span class="card-view-tag level">${window.escapeHtmlView(levelLabel)}</span>`;
     }
-    if (card.status && card.status !== 'none') {
-      const statusLabels = { draft: '草稿', revise: '推敲', done: '完了' };
-      html += `<span class="card-view-tag status">${window.escapeHtmlView(statusLabels[card.status] || card.status)}</span>`;
+    // 進捗ステータス（未着手も表示）
+    {
+      const statusLabels = { none: '未着手', draft: '草稿', revise: '推敲', done: '完了' };
+      const st = (card.status && String(card.status).trim() !== '') ? card.status : 'none';
+      html += `<span class="card-view-tag status">${window.escapeHtmlView(statusLabels[st] || st)}</span>`;
     }
     html += '</div>';
 
@@ -16947,6 +17727,16 @@ if (termContainer) {
     renderStructureList();
   }
 
+
+  // ========== 任意の一括展開レベル設定（0〜4） ==========
+  function setStructureBulkExpandLevel(level) {
+    const lvl = Math.max(0, Math.min(4, Number(level) || 0));
+    structureBulkExpandLevel = lvl;
+    structureData.forEach(c => { c.expandLevel = lvl; });
+    saveStructureData();
+    renderStructureList();
+  }
+
   // ========== 全画面モード ==========
   function toggleStructureFullscreen() {
     document.body.classList.toggle('structure-fullscreen-mode');
@@ -17282,6 +18072,7 @@ window.__ccSyncTermsLinks = __ccSyncTermsLinks;
   window.deleteAllStructureCards = deleteAllStructureCards;
   window.expandAllStructure = expandAllStructure;
   window.collapseAllStructure = collapseAllStructure;
+  window.setStructureBulkExpandLevel = setStructureBulkExpandLevel;
   window.toggleStructureExpand = toggleStructureExpand;
   window.toggleStructureFullscreen = toggleStructureFullscreen;
   window.exportStructureText = exportStructureText;
@@ -17612,6 +18403,26 @@ if (swapBtn) swapBtn.classList.remove('is-active');
           // expanded (boolean) から expandLevel (0..4) への移行対応
           expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
         }));
+
+        // 旧データ互換: description 内に「詳細：」が混ざっている場合は details に分離する
+        characterData.forEach(c => {
+          try{
+            const detailsEmpty = (c.details === null || c.details === undefined || String(c.details).trim() === '');
+            if (detailsEmpty && typeof c.description === 'string') {
+              const re = /(?:^|\n)\s*詳細\s*[:：]\s*\n?/;
+              const m = c.description.match(re);
+              if (m) {
+                const idx = c.description.search(re);
+                const marker = m[0] || '';
+                const head = c.description.slice(0, idx).trim();
+                const tail = c.description.slice(idx + marker.length).trim();
+                c.description = head;
+                c.details = tail;
+              }
+            }
+          }catch(e){}
+        });
+
         characterNextId = parsed.nextId || 1;
       }
     } catch (e) {
@@ -17681,6 +18492,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
       container.innerHTML = '<div style="color:var(--text-muted); font-style:italic; padding:20px; text-align:center;">登場人物がいません。<br>上のボタンから追加してください。</div>';
       updateCharacterCount();
       updateCharacterBulkButtons();
+    requestAnimationFrame(()=>cc_applyHeaderBadgePriority(container));
       return;
     }
 
@@ -17834,6 +18646,7 @@ div.innerHTML = `
         </div>
         <div class="card-head-right card-badges">
           <span class="card-badge character-role-badge">${escapeHtml(CHARACTER_ROLES[card.role] || card.role || '未設定')}</span>
+          ${((card.details||'').trim()) ? `<span class="card-details-indicator" title="詳細あり">🗒</span>` : ''}
         </div>
       </div>
       ${level > 0 ? `<div class="character-card-body">${bodyContent}</div>` : ''}
@@ -17965,6 +18778,7 @@ function getUniformCharacterExpandLevel() {
 
     modal.dataset.cardId = cardId;
     modal.dataset.panelType = 'character';
+    window.applyCardViewPanelTheme('character');
 
     let titleText = card.name || '（無題）';
     if (card.reading) titleText += `（${card.reading}）`;
@@ -18206,18 +19020,20 @@ function toggleCharacterTermLink(termId){
     const middleNameR = document.getElementById('character-edit-middlename-reading').value.trim();
     const firstNameR = document.getElementById('character-edit-firstname-reading').value.trim();
 
-    // 名前を結合（空白で区切る、空の部分はスキップ）
+    // 名前を結合（ミドルネームが入っている場合は「・」で区切る）
     const nameParts = [lastName, middleName, firstName].filter(p => p);
     const readingParts = [lastNameR, middleNameR, firstNameR].filter(p => p);
 
+    const sep = middleName ? '・' : ' ';
     if (nameParts.length > 0) {
-      document.getElementById('character-edit-name').value = nameParts.join(' ');
+      document.getElementById('character-edit-name').value = nameParts.join(sep);
     }
     if (readingParts.length > 0) {
-      document.getElementById('character-edit-reading').value = readingParts.join(' ');
+      document.getElementById('character-edit-reading').value = readingParts.join(sep);
     }
   }
   window.applyNameParts = applyNameParts;
+
 
   function closeCharacterEditModal() {
     const modal = document.getElementById('character-edit-modal');
@@ -18421,6 +19237,8 @@ if (termContainer) {
     const currentCard = characterData.find(c => c.id === cardId);
     const expandLevel = currentCard ? (currentCard.expandLevel || 0) : 0;
 
+    const expandLabel = ['名前のみ','タグのみ','リンク','説明のみ','すべて表示'][Math.max(0, Math.min(4, Number(expandLevel) || 0))] || '名前のみ';
+
     menu.innerHTML = `
       <div class="context-menu-item" data-action="new-card">＋新しいカード</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
@@ -18428,12 +19246,7 @@ if (termContainer) {
       <div class="context-menu-item" data-action="edit">✏️ 編集</div>
       <div class="context-menu-item" data-action="duplicate">📋 複製</div>
       <div class="context-menu-item" data-action="toggle">↕ 次の展開レベル</div>
-      <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
-      <div class="context-menu-item" data-action="expand-0" style="padding-left:24px;">▶ 名前のみ${expandLevel === 0 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-1" style="padding-left:24px;">▽ タグのみ${expandLevel === 1 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-2" style="padding-left:24px;">🔗 リンク${expandLevel === 2 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-3" style="padding-left:24px;">📝 説明のみ${expandLevel === 3 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-4" style="padding-left:24px;">◆ すべて表示${expandLevel === 4 ? ' ✓' : ''}</div>
+      <div class="context-menu-item has-submenu" data-action="expand-submenu">展開レベル（現在: ${expandLabel}）</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
       <div class="context-menu-item" data-action="color">🎨 色を変更</div>
       <div class="context-menu-item" data-action="reset-color">↩ 色をリセット</div>
@@ -18451,6 +19264,21 @@ if (termContainer) {
       item.onclick = (ev) => {
         ev.stopPropagation();
         const action = item.dataset.action;
+        if (action === 'expand-submenu') {
+          if (typeof window.showExpandLevelSubmenu === 'function') {
+            window.showExpandLevelSubmenu(item, Math.max(0, Math.min(4, Number(expandLevel) || 0)), (lv)=>{
+              const target = characterData.find(c => c.id === cardId);
+              if (target) {
+                target.expandLevel = lv;
+                saveCharacterData();
+                renderCharacterList();
+              }
+              hideCharacterContextMenu();
+            });
+          }
+          return;
+        }
+
         if (action === 'new-card') createCharacterCardFromSelection();
         if (action === 'view') showCharacterCardView(cardId);
         if (action === 'edit') openCharacterEditModal(cardId);
@@ -18776,6 +19604,16 @@ if (termContainer) {
     // 一括で最小表示（名前のみ）にする
     characterBulkExpandLevel = 0;
     characterData.forEach(c => { c.expandLevel = 0; });
+    saveCharacterData();
+    renderCharacterList();
+  }
+
+
+  // ========== 任意の一括展開レベル設定（0〜4） ==========
+  function setCharacterBulkExpandLevel(level) {
+    const lvl = Math.max(0, Math.min(4, Number(level) || 0));
+    characterBulkExpandLevel = lvl;
+    characterData.forEach(c => { c.expandLevel = lvl; });
     saveCharacterData();
     renderCharacterList();
   }
@@ -19148,6 +19986,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
   window.changeCharacterRole = changeCharacterRole;
   window.expandAllCharacter = expandAllCharacter;
   window.collapseAllCharacter = collapseAllCharacter;
+  window.setCharacterBulkExpandLevel = setCharacterBulkExpandLevel;
   window.initCharacterFromReset = initCharacterFromReset;
   window.getAllCharacterAffiliationTags = getAllCharacterAffiliationTags;
   window.getAllCharacterFreeTags = getAllCharacterFreeTags;
@@ -19251,6 +20090,26 @@ if (swapBtn) swapBtn.classList.remove('is-active');
           // expanded (boolean) から expandLevel (0..4) への移行対応
           expandLevel: (card.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(card.expandLevel) || 0)) : (card.expanded ? 4 : 0))
         }));
+
+        // 旧データ互換: description 内に「詳細：」が混ざっている場合は details に分離する
+        worldData.forEach(c => {
+          try{
+            const detailsEmpty = (c.details === null || c.details === undefined || String(c.details).trim() === '');
+            if (detailsEmpty && typeof c.description === 'string') {
+              const re = /(?:^|\n)\s*詳細\s*[:：]\s*\n?/;
+              const m = c.description.match(re);
+              if (m) {
+                const idx = c.description.search(re);
+                const marker = m[0] || '';
+                const head = c.description.slice(0, idx).trim();
+                const tail = c.description.slice(idx + marker.length).trim();
+                c.description = head;
+                c.details = tail;
+              }
+            }
+          }catch(e){}
+        });
+
         worldNextId = parsed.nextId || 1;
       }
     } catch (e) {
@@ -19319,6 +20178,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
       container.innerHTML = '<div style="color:var(--text-muted); font-style:italic; padding:20px; text-align:center;">世界観設定がありません。<br>上のボタンから追加してください。</div>';
       updateWorldCount();
       updateWorldBulkButtons();
+    requestAnimationFrame(()=>cc_applyHeaderBadgePriority(container));
       return;
     }
 
@@ -19474,6 +20334,7 @@ div.innerHTML = `
         </div>
         <div class="card-head-right card-badges">
           <span class="card-badge world-level-badge">${escapeHtml(WORLD_LEVELS[card.level] || card.level || '未設定')}</span>
+          ${(((card.details ?? card.detail ?? '')+'').trim()) ? `<span class="card-details-indicator" title="詳細あり">🗒</span>` : ''}
         </div>
       </div>
       ${expandLevel > 0 ? `<div class="world-card-body">${bodyContent}</div>` : ''}
@@ -19605,7 +20466,10 @@ function getUniformWorldExpandLevel() {
 
     modal.dataset.cardId = cardId;
     modal.dataset.panelType = 'world';
+    window.applyCardViewPanelTheme('world');
     title.textContent = card.name || '（無題）';
+
+    const worldDetailsText = (card.details ?? card.detail ?? '');
 
     let html = '<div class="card-view-header-badges">';
     if (card.level) {
@@ -19708,7 +20572,7 @@ function getUniformWorldExpandLevel() {
 
     document.getElementById('world-edit-termtags').value = (card.termTags || []).join(', ');
     document.getElementById('world-edit-description').value = card.description || '';
-    document.getElementById('world-edit-details').value = card.details || '';
+    document.getElementById('world-edit-details').value = (card.details ?? card.detail ?? '') || '';
     updateWorldDescriptionCount();
     updateWorldDetailsCount();
 
@@ -20031,6 +20895,8 @@ if (termContainer) {
     const currentCard = worldData.find(c => c.id === cardId);
     const expandLevel = currentCard ? (currentCard.expandLevel || 0) : 0;
 
+    const expandLabel = ['名前のみ','タグのみ','リンク','説明のみ','すべて表示'][Math.max(0, Math.min(4, Number(expandLevel) || 0))] || '名前のみ';
+
     menu.innerHTML = `
       <div class="context-menu-item" data-action="new-card">＋新しいカード</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
@@ -20038,12 +20904,7 @@ if (termContainer) {
       <div class="context-menu-item" data-action="edit">✏️ 編集</div>
       <div class="context-menu-item" data-action="duplicate">📋 複製</div>
       <div class="context-menu-item" data-action="toggle">↕ 次の展開レベル</div>
-      <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
-      <div class="context-menu-item" data-action="expand-0" style="padding-left:24px;">▶ 名前のみ${expandLevel === 0 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-1" style="padding-left:24px;">▽ タグのみ${expandLevel === 1 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-2" style="padding-left:24px;">🔗 リンク${expandLevel === 2 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-3" style="padding-left:24px;">📝 説明のみ${expandLevel === 3 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-4" style="padding-left:24px;">◆ すべて表示${expandLevel === 4 ? ' ✓' : ''}</div>
+      <div class="context-menu-item has-submenu" data-action="expand-submenu">展開レベル（現在: ${expandLabel}）</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
       <div class="context-menu-item" data-action="color">🎨 色を変更</div>
       <div class="context-menu-item" data-action="reset-color">↩ 色をリセット</div>
@@ -20061,6 +20922,21 @@ if (termContainer) {
       item.onclick = (ev) => {
         ev.stopPropagation();
         const action = item.dataset.action;
+        if (action === 'expand-submenu') {
+          if (typeof window.showExpandLevelSubmenu === 'function') {
+            window.showExpandLevelSubmenu(item, Math.max(0, Math.min(4, Number(expandLevel) || 0)), (lv)=>{
+              const target = worldData.find(c => c.id === cardId);
+              if (target) {
+                target.expandLevel = lv;
+                saveWorldData();
+                renderWorldList();
+              }
+              hideWorldContextMenu();
+            });
+          }
+          return;
+        }
+
         if (action === 'new-card') createWorldCardFromSelection();
         if (action === 'view') showWorldCardView(cardId);
         if (action === 'edit') openWorldEditModal(cardId);
@@ -20388,6 +21264,16 @@ if (termContainer) {
     // 一括で最小表示（名前のみ）にする
     worldBulkExpandLevel = 0;
     worldData.forEach(c => { c.expandLevel = 0; });
+    saveWorldData();
+    renderWorldList();
+  }
+
+
+  // ========== 任意の一括展開レベル設定（0〜4） ==========
+  function setWorldBulkExpandLevel(level) {
+    const lvl = Math.max(0, Math.min(4, Number(level) || 0));
+    worldBulkExpandLevel = lvl;
+    worldData.forEach(c => { c.expandLevel = lvl; });
     saveWorldData();
     renderWorldList();
   }
@@ -20725,6 +21611,7 @@ if (swapBtn) swapBtn.classList.remove('is-active');
   window.changeWorldLevel = changeWorldLevel;
   window.expandAllWorld = expandAllWorld;
   window.collapseAllWorld = collapseAllWorld;
+  window.setWorldBulkExpandLevel = setWorldBulkExpandLevel;
   window.initWorldFromReset = initWorldFromReset;
   window.getAllWorldTermTags = getAllWorldTermTags;
   window.getWorldData = function() { return worldData; };
@@ -21037,7 +21924,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
       cb.type = 'checkbox';
       cb.className = 'card-select terms-select';
       cb.checked = !!term.selected;
-      cb.onchange = () => { term.selected = cb.checked; saveTermsData(); updateTermsCount(); };
+      cb.onchange = () => { term.selected = cb.checked; updateTermsCount(); };
       left.appendChild(cb);
 
       const moveGroup = document.createElement('div');
@@ -21090,6 +21977,15 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
         cat.className = 'card-badge terms-category-badge';
         cat.textContent = term.category;
         right.appendChild(cat);
+      }
+
+      // details indicator (only when details exists)
+      if ((term.details || '').trim()) {
+        const det = document.createElement('span');
+        det.className = 'card-details-indicator';
+        det.title = '詳細あり';
+        det.textContent = '🗒';
+        right.appendChild(det);
       }
 
       head.appendChild(left);
@@ -21216,6 +22112,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
     });
 
     updateTermsCount();
+    requestAnimationFrame(()=>cc_applyHeaderBadgePriority(list));
   }
 
   function buildLinkTags(container, items, getId, getLabel, selectedIds, onToggle){
@@ -21294,6 +22191,7 @@ window.openMemoImportDialog = function() { showImportDialog('memo', '📂 メモ
 
     modal.dataset.cardId = cardId;
     modal.dataset.panelType = 'terms';
+    window.applyCardViewPanelTheme('terms');
 
     let titleText = term.name || '（無題）';
     if (term.reading) titleText += `（${term.reading}）`;
@@ -21563,7 +22461,8 @@ loadTermsData();
             name: t.name || '',
             reading: (t.reading || '').toString(),
             category: t.category || '',
-            desc: t.desc || '',
+            desc: (t.desc ?? t.description ?? ''),
+            details: (t.details ?? t.detail ?? t.more ?? ''),
             tabId: t.tabId ?? null,
             linkedStructures: Array.isArray(t.linkedStructures) ? t.linkedStructures : [],
             linkedCharacters: Array.isArray(t.linkedCharacters) ? t.linkedCharacters : [],
@@ -21583,7 +22482,8 @@ termsNextId = imported.nextId || (Math.max(0, ...termsData.map(x => x.id || 0)) 
               name: t.name || '',
               reading: (t.reading || '').toString(),
               category: t.category || '',
-              desc: t.desc || '',
+              desc: (t.desc ?? t.description ?? ''),
+              details: (t.details ?? t.detail ?? t.more ?? ''),
               tabId: t.tabId ?? null,
               linkedStructures: Array.isArray(t.linkedStructures) ? t.linkedStructures : [],
               linkedCharacters: Array.isArray(t.linkedCharacters) ? t.linkedCharacters : [],
@@ -21675,11 +22575,21 @@ window.refreshTermsPanel = function(){
     renderTermsList();
   };
 
-  window.deleteSelectedTerms = function(){
+
+  window.setTermsBulkExpandLevel = function(level){
     loadTermsData();
-    const before = termsData.length;
-    termsData = termsData.filter(t => !t.selected);
-    if (termsData.length === before) return;
+    const lvl = Math.max(0, Math.min(4, Number(level) || 0));
+    termsBulkExpandLevel = lvl;
+    termsData.forEach(t => { t.expandLevel = lvl; });
+    saveTermsData();
+    renderTermsList();
+  };
+
+  window.deleteSelectedTerms = function(){
+    const selectedCount = (termsData || []).filter(t => t.selected).length;
+    if (selectedCount === 0) { alert('選択された用語がありません。'); return; }
+    if (!confirm(`${selectedCount}件の用語を削除しますか？`)) return;
+    termsData = (termsData || []).filter(t => !t.selected);
     saveTermsData();
     renderTermsList();
   };
@@ -21858,6 +22768,8 @@ let menu = document.getElementById('terms-context-menu');
     // normalize expand level to 0-4 (5 levels unified with other panels)
     let expandLevel = Math.max(0, Math.min(4, Number(term.expandLevel) || 0));
 
+    const expandLabel = ['名前のみ','タグのみ','リンク','説明のみ','すべて表示'][expandLevel] || '名前のみ';
+
     menu.innerHTML = `
       <div class="context-menu-item" data-action="new-card">＋新しいカード</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
@@ -21865,12 +22777,7 @@ let menu = document.getElementById('terms-context-menu');
       <div class="context-menu-item" data-action="edit">✏️ 編集</div>
       <div class="context-menu-item" data-action="duplicate">📋 複製</div>
       <div class="context-menu-item" data-action="toggle">↕ 次の展開レベル</div>
-      <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
-      <div class="context-menu-item" data-action="expand-0" style="padding-left:24px;">▶ 名前のみ${expandLevel === 0 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-1" style="padding-left:24px;">▽ タグのみ${expandLevel === 1 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-2" style="padding-left:24px;">🔗 リンク${expandLevel === 2 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-3" style="padding-left:24px;">📝 説明のみ${expandLevel === 3 ? ' ✓' : ''}</div>
-      <div class="context-menu-item" data-action="expand-4" style="padding-left:24px;">◆ すべて表示${expandLevel === 4 ? ' ✓' : ''}</div>
+      <div class="context-menu-item has-submenu" data-action="expand-submenu">展開レベル（現在: ${expandLabel}）</div>
       <div class="context-menu-separator" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
       <div class="context-menu-item" data-action="card-color">🎨 カード色を変更</div>
       <div class="context-menu-item" data-action="reset-color">↩ 色をリセット</div>
@@ -21887,6 +22794,18 @@ menu.querySelectorAll('.context-menu-item').forEach(item => {
       item.onclick = (ev) => {
         ev.stopPropagation();
         const action = item.dataset.action;
+        if (action === 'expand-submenu') {
+          if (typeof window.showExpandLevelSubmenu === 'function') {
+            window.showExpandLevelSubmenu(item, expandLevel, (lv)=>{
+              term.expandLevel = lv;
+              saveTermsData();
+              renderTermsList();
+              hideTermsContextMenu();
+            });
+          }
+          return;
+        }
+
 
         if (action === 'new-card') {
           createTermsCard();
@@ -21961,6 +22880,45 @@ menu.querySelectorAll('.context-menu-item').forEach(item => {
       renderTermsList();
     }
   };
+  // リセット時の初期化（他の初期化処理から呼べるように window に公開）
+  function initTermsFromReset(){
+    termsData = [];
+    termsNextId = 1;
+    editingTermId = null;
+    draggingTermId = null;
+    try { localStorage.removeItem(TERMS_KEY); } catch(e){}
+    saveTermsData();
+    renderTermsList();
+    updateTermsCount();
+  }
+  window.initTermsFromReset = initTermsFromReset;
+
+  // 共有インポート/リンク同期などから呼ぶために公開
+  window.renderTermsList = renderTermsList;
+  window.saveTermsData = function(payload){
+    try{
+      const p = payload || {};
+      const data = Array.isArray(p) ? p : (Array.isArray(p.data) ? p.data : []);
+      const nextId = (p.nextId || p.nextID || p.next_id || (Math.max(0, ...data.map(x=>x?.id||0)) + 1) || 1);
+      termsData = (data||[]).map(t => ({
+        ...t,
+        linkedCharacters: t?.linkedCharacters || [],
+        linkedWorlds: t?.linkedWorlds || [],
+        linkedStructures: t?.linkedStructures || [],
+        tabId: t?.tabId ?? null,
+        selected: false,
+        expandLevel: (t?.expandLevel !== undefined ? Math.max(0, Math.min(4, Number(t.expandLevel) || 0)) : (t?.expanded ? 4 : 0)),
+        bgColor: t?.bgColor || ''
+      }));
+      termsNextId = nextId;
+      saveTermsData();
+      renderTermsList();
+      updateTermsCount();
+    }catch(e){
+      console.warn('用語データの適用に失敗:', e);
+    }
+  };
+
 
 })();
 
@@ -22988,14 +23946,141 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // --- Bulk expand level menu (5 levels) ---
+  const PANEL_BULK_EXPAND_OPTIONS = [
+    { level: 0, icon: '▶', title: '名前のみ' },
+    { level: 1, icon: '▽', title: 'タグのみ' },
+    { level: 2, icon: '🔗', title: 'リンク' },
+    { level: 3, icon: '📝', title: '説明のみ' },
+    { level: 4, icon: '◆', title: 'すべて表示' },
+  ];
+
+  function getUniformExpandLevel(list){
+    if(!Array.isArray(list) || list.length === 0) return { level: 0, mixed: false, count: 0 };
+    const getLvl = (c) => Math.max(0, Math.min(4, Number(c?.expandLevel) || 0));
+    const base = getLvl(list[0]);
+    for (const c of list){
+      if (getLvl(c) !== base) return { level: base, mixed: true, count: list.length };
+    }
+    return { level: base, mixed: false, count: list.length };
+  }
+
+  function applyBulkExpandLevel(paneId, level){
+    const lvl = Math.max(0, Math.min(4, Number(level) || 0));
+
+    // Prefer dedicated setters exported from each panel module (modules are IIFEs; internal save/render are not on window)
+    try {
+      if (paneId === 'structure-panel' && typeof window.setStructureBulkExpandLevel === 'function') { window.setStructureBulkExpandLevel(lvl); return; }
+      if (paneId === 'character-panel' && typeof window.setCharacterBulkExpandLevel === 'function') { window.setCharacterBulkExpandLevel(lvl); return; }
+      if (paneId === 'world-panel' && typeof window.setWorldBulkExpandLevel === 'function') { window.setWorldBulkExpandLevel(lvl); return; }
+      if (paneId === 'terms-panel' && typeof window.setTermsBulkExpandLevel === 'function') { window.setTermsBulkExpandLevel(lvl); return; }
+    } catch(e){ console.error(e); }
+
+    // Fallback: mutate the list and then try to refresh the panel
+    const conf = getPaneConf(paneId);
+    if(!conf?.supportsCards) return;
+    const list = conf.data?.get?.() || [];
+    if(!Array.isArray(list) || list.length === 0) return;
+
+    list.forEach(c => { c.expandLevel = lvl; });
+
+    try { conf.data?.save?.(list); } catch(e){ console.error(e); }
+    try { conf.data?.render?.(); } catch(e){ console.error(e); }
+    if (typeof conf?.actions?.refresh === 'function') {
+      try { conf.actions.refresh(); } catch(e){ console.error(e); }
+    }
+  }
+
+  function showBulkExpandMenu(ev, paneId){
+    if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+
+    let menu = document.getElementById('panelui-expand-menu');
+    if(!menu){
+      menu = document.createElement('div');
+      menu.id = 'panelui-expand-menu';
+      menu.className = 'context-menu';
+      menu.style.display = 'none';
+      document.body.appendChild(menu);
+    }
+
+    const conf = getPaneConf(paneId);
+    const list = conf?.data?.get?.() || [];
+    const info = getUniformExpandLevel(list);
+
+    const hide = ()=>{
+      menu.style.display = 'none';
+      document.removeEventListener('mousedown', onDocDown, true);
+      window.removeEventListener('resize', hide, true);
+      window.removeEventListener('scroll', hide, true);
+    };
+    const onDocDown = (e)=>{ if(!menu.contains(e.target)) hide(); };
+
+    menu.innerHTML = '';
+
+    const header = document.createElement('div');
+    header.className = 'context-menu-item';
+    header.style.fontWeight = '600';
+    header.style.cursor = 'default';
+    header.style.opacity = '0.9';
+    if(!info.count){
+      header.textContent = '展開レベル（カードがありません）';
+    }else if(info.mixed){
+      header.textContent = '展開レベル（現在: 混在）';
+    }else{
+      const cur = PANEL_BULK_EXPAND_OPTIONS.find(x=>x.level===info.level) || PANEL_BULK_EXPAND_OPTIONS[0];
+      header.textContent = `展開レベル（現在: ${cur.icon} ${cur.title}）`;
+    }
+    menu.appendChild(header);
+
+    const sep = document.createElement('div');
+    sep.style.height = '1px';
+    sep.style.background = 'var(--border-color)';
+    sep.style.margin = '4px 0';
+    menu.appendChild(sep);
+
+    PANEL_BULK_EXPAND_OPTIONS.forEach(opt=>{
+      const item = document.createElement('div');
+      item.className = 'context-menu-item';
+      const checked = (!info.mixed && info.count && info.level === opt.level);
+      item.innerHTML = `${checked ? '✓ ' : ''}${opt.icon} ${opt.title}`;
+      item.addEventListener('click', (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        hide();
+        applyBulkExpandLevel(paneId, opt.level);
+      });
+      menu.appendChild(item);
+    });
+
+    const x = (ev && (ev.clientX||ev.pageX)) || 0;
+    const y = (ev && (ev.clientY||ev.pageY)) || 0;
+    menu.style.left = (x + 8) + 'px';
+    menu.style.top  = (y + 8) + 'px';
+    menu.style.display = 'block';
+
+    setTimeout(()=>document.addEventListener('mousedown', onDocDown, true),0);
+    window.addEventListener('resize', hide, true);
+    window.addEventListener('scroll', hide, true);
+  }
+
   function handleToolbarClick(ev){
     const btn = ev.target.closest('button[data-action][data-pane-id]');
     if(!btn) return;
+    // Important: stop propagation early so global "outside click" closers do not fold panels.
+    ev.preventDefault();
+    ev.stopPropagation();
     const paneId = btn.dataset.paneId;
     const conf = getPaneConf(paneId);
     if(!conf) return;
 
     const action = btn.dataset.action;
+
+    // 「全展開」ボタンは、最大展開ではなく「展開レベル選択メニュー」を開く
+    if (action === 'expand-all') {
+      showBulkExpandMenu(ev, paneId);
+      return;
+    }
+
     const fn = toolbarActionToFn(conf, action);
     if(typeof fn === 'function'){
       try { fn(); } catch(e){ console.error(e); }
@@ -23003,7 +24088,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.addEventListener('DOMContentLoaded', ()=>{
     generateToolbars();
-    document.addEventListener('click', handleToolbarClick);
+    // Bind in *window capture* so we can stop propagation before other document-level closers run.
+    window.addEventListener('click', handleToolbarClick, true);
     if (typeof window.applyPanelOrderOverrides === 'function') window.applyPanelOrderOverrides();
   });
   
@@ -23337,5 +24423,302 @@ patchViewRibbon();
   });
 })();
 </script>
+
+<script>
+/* Keep background resizers from capturing pointer events while any dialog/modal is open */
+(function(){
+  function isVisible(el){
+    if (!el) return false;
+    const s = getComputedStyle(el);
+    if (s.display === 'none' || s.visibility === 'hidden') return false;
+    const r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0;
+  }
+
+  function update(){
+    const candidates = document.querySelectorAll(
+      '.modal-overlay, .save-dialog-overlay, .import-dialog-overlay,' +
+      ' #ruby-modal, #focus-overlay,' +
+      ' #structure-edit-modal, #character-edit-modal, #world-edit-modal, #terms-edit-modal'
+    );
+    let open = false;
+    for (const el of candidates){
+      if (isVisible(el)){
+        open = true;
+        break;
+      }
+    }
+    document.body.classList.toggle('cc-modal-open', open);
+  }
+
+  // Initial + react to modal show/hide (class/style changes)
+  const mo = new MutationObserver(() => requestAnimationFrame(update));
+  function start(){
+    update();
+    mo.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class','style'] });
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    start();
+  }
+})();
+
+/* ===== Card View: draggable title bar + desktop-like resize (right/bottom) ===== */
+(function(){
+  const modal = document.getElementById('card-view-modal');
+  if (!modal) return;
+
+  const win = modal.querySelector('.card-view-modal-content');
+  const header = win ? win.querySelector('.modal-header') : null;
+  if (!win || !header) return;
+
+  // Add resize handles once
+  (function ensureHandles(){
+  if (win.querySelector('.cc-resize-handle')) return;
+  const make = (cls) => { const d = document.createElement('div'); d.className = 'cc-resize-handle ' + cls; return d; };
+  // 8-direction handles (Windows-like)
+  const handles = [
+    make('cc-resize-n'),
+    make('cc-resize-e'),
+    make('cc-resize-s'),
+    make('cc-resize-w'),
+    make('cc-resize-ne'),
+    make('cc-resize-nw'),
+    make('cc-resize-se'),
+    make('cc-resize-sw'),
+  ];
+  handles.forEach(h => win.appendChild(h));
+})();
+
+  const mqMobile = window.matchMedia ? window.matchMedia('(max-width: 640px)') : null;
+  const isMobile = () => mqMobile ? mqMobile.matches : (window.innerWidth <= 640);
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+  let state = null; // session state: {left, top, width, height}
+
+  function getMinMax(){
+    const cs = getComputedStyle(win);
+    const minW = parseFloat(cs.minWidth) || 360;
+    const minH = parseFloat(cs.minHeight) || 240;
+    return { minW, minH };
+  }
+
+  function applyStateOrCenter(){
+    if (isMobile()) return;
+
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const { minW, minH } = getMinMax();
+
+    // Apply saved size first (so centering uses actual size)
+    if (state && typeof state.width === 'number' && typeof state.height === 'number'){
+      const maxW = vw - 16;
+      const maxH = vh - 16;
+      const w = clamp(state.width,  minW, maxW);
+      const h = clamp(state.height, minH, maxH);
+      win.style.width  = Math.round(w) + 'px';
+      win.style.height = Math.round(h) + 'px';
+    }
+
+    const rect = win.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+
+    let left = (state && typeof state.left === 'number') ? state.left : Math.round((vw - w) / 2);
+    let top  = (state && typeof state.top  === 'number') ? state.top  : Math.round((vh - h) / 2);
+
+    left = clamp(left, 8, vw - w - 8);
+    top  = clamp(top,  8, vh - h - 8);
+
+    win.style.left = Math.round(left) + 'px';
+    win.style.top  = Math.round(top)  + 'px';
+  }
+
+  function captureState(){
+    if (isMobile()) return;
+    const r = win.getBoundingClientRect();
+    state = { left: r.left, top: r.top, width: r.width, height: r.height };
+  }
+
+  // When the modal is shown, set initial position (center or last state)
+  const mo = new MutationObserver(() => {
+    if (modal.classList.contains('show')){
+      requestAnimationFrame(applyStateOrCenter);
+    }
+  });
+  mo.observe(modal, { attributes: true, attributeFilter: ['class'] });
+
+  // Re-clamp on viewport resize
+  window.addEventListener('resize', () => {
+    if (!modal.classList.contains('show') || isMobile()) return;
+
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const { minW, minH } = getMinMax();
+
+    const r = win.getBoundingClientRect();
+    const left = clamp(r.left, 0, vw - r.width);
+    const top  = clamp(r.top,  0, vh - r.height);
+
+    const maxW = vw - left - 8;
+    const maxH = vh - top  - 8;
+
+    win.style.left = Math.round(left) + 'px';
+    win.style.top  = Math.round(top)  + 'px';
+    win.style.width  = Math.round(clamp(r.width,  minW, maxW)) + 'px';
+    win.style.height = Math.round(clamp(r.height, minH, maxH)) + 'px';
+    captureState();
+  });
+
+  // Drag (title bar)
+  header.addEventListener('pointerdown', (ev) => {
+    if (isMobile()) return;
+    if (ev.button !== 0) return;
+    if (ev.target && ev.target.closest('button, a, input, textarea, select, .modal-close')) return;
+
+    ev.preventDefault();
+
+    const startRect = win.getBoundingClientRect();
+    const startX = ev.clientX;
+    const startY = ev.clientY;
+    const w = startRect.width;
+    const h = startRect.height;
+
+    document.documentElement.classList.add('cc-window-dragging');
+
+    const onMove = (e) => {
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+
+      let left = startRect.left + dx;
+      let top  = startRect.top  + dy;
+
+      left = clamp(left, 0, vw - w);
+      top  = clamp(top,  0, vh - h);
+
+      win.style.left = Math.round(left) + 'px';
+      win.style.top  = Math.round(top)  + 'px';
+    };
+
+    const onUp = () => {
+      document.documentElement.classList.remove('cc-window-dragging');
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      captureState();
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  });
+
+// Resize handles (all edges / corners)
+function beginResize(dir, ev){
+  if (isMobile()) return;
+  if (ev.button !== 0) return;
+  ev.preventDefault();
+  ev.stopPropagation();
+
+  // Try to keep pointer capture for smoother resizing
+  try { ev.target && ev.target.setPointerCapture && ev.target.setPointerCapture(ev.pointerId); } catch(_) {}
+
+  const r = win.getBoundingClientRect();
+  const startX = ev.clientX;
+  const startY = ev.clientY;
+
+  const startLeft = r.left;
+  const startTop  = r.top;
+  const startW = r.width;
+  const startH = r.height;
+
+  const startRight  = startLeft + startW;
+  const startBottom = startTop  + startH;
+
+  const { minW, minH } = getMinMax();
+
+  document.documentElement.classList.add('cc-window-resizing');
+
+  const onMove = (e) => {
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    let newLeft = startLeft;
+    let newTop  = startTop;
+    let newW    = startW;
+    let newH    = startH;
+
+    // Horizontal
+    if (dir.includes('e')){
+      const maxW = vw - startLeft - 8;
+      newW = clamp(startW + dx, minW, maxW);
+    }
+    if (dir.includes('w')){
+      newLeft = clamp(startLeft + dx, 8, startRight - minW);
+      newW = startRight - newLeft;
+    }
+
+    // Vertical
+    if (dir.includes('s')){
+      const maxH = vh - startTop - 8;
+      newH = clamp(startH + dy, minH, maxH);
+    }
+    if (dir.includes('n')){
+      newTop = clamp(startTop + dy, 8, startBottom - minH);
+      newH = startBottom - newTop;
+    }
+
+    // Final safety clamp (keeps window inside viewport)
+    newW = clamp(newW, minW, vw - newLeft - 8);
+    newH = clamp(newH, minH, vh - newTop  - 8);
+
+    win.style.left   = Math.round(newLeft) + 'px';
+    win.style.top    = Math.round(newTop)  + 'px';
+    win.style.width  = Math.round(newW)    + 'px';
+    win.style.height = Math.round(newH)    + 'px';
+  };
+
+  const onUp = () => {
+    document.documentElement.classList.remove('cc-window-resizing');
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+    captureState();
+  };
+
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+}
+
+const bindResize = (cls, dir) => {
+  const el = win.querySelector('.' + cls);
+  if (!el) return;
+  el.addEventListener('pointerdown', beginResize.bind(null, dir));
+};
+bindResize('cc-resize-n',  'n');
+bindResize('cc-resize-e',  'e');
+bindResize('cc-resize-s',  's');
+bindResize('cc-resize-w',  'w');
+bindResize('cc-resize-ne', 'ne');
+bindResize('cc-resize-nw', 'nw');
+bindResize('cc-resize-se', 'se');
+bindResize('cc-resize-sw', 'sw');
+
+  // Capture state on any close path (Escape / overlay click / buttons)
+  const originalClose = window.closeCardViewModal;
+  if (typeof originalClose === 'function'){
+    window.closeCardViewModal = function(){
+      try { captureState(); } catch(_) {}
+      return originalClose.apply(this, arguments);
+    };
+  }
+})();
+
+</script>
+
 </body>
 </html>
