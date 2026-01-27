@@ -1799,15 +1799,47 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
       font-size: 0.8rem;
     }
 
-    /* Card badges: shrink to min 1 char when space is limited */
-    .card-badge, .character-role-badge, .world-level-badge {
-      flex: 0 1 auto;
-      min-width: 1.5em;
-      max-width: 100%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    /* Card badges: title-first, progressive ellipsis (CSS; fast)
+   - Badges truncate with an ellipsis so users can see it is shortened (e.g., キリシ…)
+   - Badge truncation responds automatically to panel/card width (no JS needed)
+   - Title area keeps priority; right side is width-capped so it won't steal space
+*/
+:where(.card-head-right, .terms-card-head-right){
+  max-width: 46%;
+  min-width: 0;
+}
+:where(.card-head-right.card-badges, .terms-card-head-right.card-badges){
+  overflow: hidden;
+}
+
+/* Default badge sizing: keep at least 1 visible char (+ ellipsis), never shrink below that */
+:where(.card-badge, .character-role-badge, .world-level-badge, .terms-category-badge, .structure-level-badge, .structure-status){
+  flex: 0 1 auto;
+  min-width: 2ch; /* ~ 1 char + ellipsis */
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Keep detail icon visible; never shrink */
+.card-details-indicator{
+  flex: 0 0 auto !important;
+  min-width: auto !important;
+  max-width: none !important;
+}
+
+/* Panel-specific tuning */
+.terms-category-badge{ flex-shrink: 2; }
+.character-role-badge{ flex-shrink: 2; }
+.world-level-badge{ flex-shrink: 2; }
+
+/* Structure: prefer keeping status (草/未など) over level (章/話/シーン)
+   - level truncates earlier; status truncates later
+*/
+.structure-level-badge{ flex-shrink: 3; }
+.structure-status{ flex-shrink: 1; }
+
 
     /* Card header layout: name priority */
     .card-head-left {
@@ -6534,96 +6566,12 @@ memo: 'cc_memo_width_px',
       }[m]));
     }
 
-/* === Header badge priority: keep titles readable; badges shrink to 1 char first === */
-function cc_isTruncated(el){
-  if(!el) return false;
-  return (el.scrollWidth - el.clientWidth) > 1;
-}
-function cc_prepareBadgeEl(badge, priorityDefault){
-  if(!badge) return;
-  if(!badge.dataset.ccFull){
-    badge.dataset.ccFull = badge.textContent || '';
-    const t = (badge.dataset.ccFull || '').trim();
-    badge.dataset.ccMin = t ? t.slice(0,1) : '';
-  }
-  if(!badge.dataset.ccPri){
-    badge.dataset.ccPri = String(priorityDefault ?? 2);
-  }
-}
-function cc_refreshHeaderRow(header){
-  if(!header) return;
-  const title = header.querySelector('.card-title, .structure-title, .character-name, .world-name');
-  const right = header.querySelector('.card-head-right, .terms-card-head-right');
-  if(!title || !right) return;
+/* === Header badge ellipsis (CSS-based, fast) ===
+   Badges now use CSS text-overflow:ellipsis with max-width rules.
+   The previous JS-based binary-search fitting caused heavy reflow and lag.
+   Keep this function as a no-op for backward compatibility (some renderers call it). */
+function cc_applyHeaderBadgePriority(_root){ /* no-op: handled by CSS */ }
 
-  // Collect badges excluding detail icon
-  const badges = Array.from(right.querySelectorAll('.card-badge, .structure-status, .structure-level-badge, .character-role-badge, .world-level-badge, .terms-category-badge'))
-    .filter(b => !b.classList.contains('card-details-indicator'));
-
-  badges.forEach(b=>{
-    // Structure: status is higher priority than level
-    if(b.classList.contains('structure-status')) cc_prepareBadgeEl(b, 1);
-    else if(b.classList.contains('structure-level-badge')) cc_prepareBadgeEl(b, 2);
-    else cc_prepareBadgeEl(b, 2);
-  });
-
-  // reset to full text first
-  badges.forEach(b=>{
-    b.textContent = b.dataset.ccFull || '';
-    b.classList.remove('cc-badge-mini');
-  });
-
-  // Stage 1: shrink low-priority badges (>=2)
-  if(cc_isTruncated(title)){
-    badges.filter(b=>parseInt(b.dataset.ccPri||'2',10) >= 2).forEach(b=>{
-      b.textContent = b.dataset.ccMin || '';
-      b.classList.add('cc-badge-mini');
-    });
-  }
-
-  // Stage 2: if still tight, shrink high-priority too (<2)
-  if(cc_isTruncated(title)){
-    badges.filter(b=>parseInt(b.dataset.ccPri||'2',10) < 2).forEach(b=>{
-      b.textContent = b.dataset.ccMin || '';
-      b.classList.add('cc-badge-mini');
-    });
-  }
-}
-function cc_applyHeaderBadgePriority(root){
-  const scope = root || document;
-  const headers = scope.querySelectorAll('.card-shell > .card-header');
-  headers.forEach(h=>cc_refreshHeaderRow(h));
-}
-
-// apply on resize (debounced)
-(function(){
-  let __t = null;
-  window.addEventListener('resize', ()=>{
-    clearTimeout(__t);
-    __t = setTimeout(()=>cc_applyHeaderBadgePriority(document), 80);
-  }, {passive:true});
-})();
-// apply on panel resize too (splitter drag doesn't trigger window resize)
-(function(){
-  if(!('ResizeObserver' in window)) return;
-  let __ro_t = null;
-  const __schedule = ()=>{ 
-    clearTimeout(__ro_t);
-    __ro_t = setTimeout(()=>cc_applyHeaderBadgePriority(document), 60);
-  };
-  const __init = ()=>{
-    try{
-      const __ro = new ResizeObserver(__schedule);
-      const ids = ['structure-panel','character-panel','world-panel','terms-panel','memo-panel','outline-panel','search-panel','pane-stack'];
-      ids.forEach(id=>{
-        const el = document.getElementById(id);
-        if(el) __ro.observe(el);
-      });
-    }catch(e){}
-  };
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', __init);
-  else __init();
-})();
 
     // ===== Common: linked input tab field (unified across panels) =====
     function ccGetInputTabById(tabId){
