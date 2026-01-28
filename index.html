@@ -7931,7 +7931,8 @@ function addNewTab() {
         renderInputTabs();
     }
     startAutoSaveTimer();
-    window.addEventListener('beforeunload', e => { persistLocalState(); saveWritingTime(); e.preventDefault(); e.returnValue = ''; });
+    let __ccSkipBeforeUnloadSave = false;
+    window.addEventListener('beforeunload', e => { if (!__ccSkipBeforeUnloadSave) { persistLocalState(); saveWritingTime(); } e.preventDefault(); e.returnValue = ''; });
 
     function undoInput() { inputArea.focus(); document.execCommand('undo'); }
     function redoInput() { inputArea.focus(); document.execCommand('redo'); }
@@ -11641,6 +11642,7 @@ if (typeof applyPaneHeightSettings === 'function') {
 
             closeProjectLoadDialog();
             alert('選択した項目を読み込みました。ページを再読み込みします。');
+            __ccSkipBeforeUnloadSave = true;
             location.reload();
         } catch (e) {
             alert('読み込みの適用に失敗しました: ' + e.message);
@@ -11933,10 +11935,12 @@ if (typeof applyPaneHeightSettings === 'function') {
                 }
                 if (project.character) {
                     localStorage.setItem('cc_character_data', JSON.stringify(project.character));
+                    __ccSkipBeforeUnloadSave = true;
                     location.reload();
                 }
                 if (project.world) {
                     localStorage.setItem('cc_world_data', JSON.stringify(project.world));
+                    __ccSkipBeforeUnloadSave = true;
                     location.reload();
                 }
                 if (project.bookmarks) {
@@ -11957,6 +11961,7 @@ if (typeof applyPaneHeightSettings === 'function') {
 
                 closeProjectSaveDialog();
                 alert('プロジェクトを読み込みました。ページを再読み込みして完全に反映します。');
+                __ccSkipBeforeUnloadSave = true;
                 location.reload();
             } catch (err) {
                 alert('プロジェクトファイルの読み込みに失敗しました: ' + err.message);
