@@ -5286,6 +5286,7 @@ body.theme-dark{
             <div class="help-section" style="flex: 1; min-width: 180px;">
                 <div class="help-title">【ショートカットキー】</div>
                 ・<b>Ctrl+S</b>：保存ダイアログ<br>
+                ・<b>Ctrl+Z</b>：元に戻す / <b>Ctrl+Y</b>：やり直し<br>
                 ・<b>Ctrl+F</b>：検索（NAV/検索）<br>
                 ・<b>Ctrl+G</b>：行番号ジャンプ<br>
                 ・<b>Ctrl+N</b>：新規本文タブ<br>
@@ -7410,6 +7411,7 @@ function addNewTab() {
 ・Ctrl+Alt+Enter：同期 / Ctrl+Alt+L：集中 / Ctrl+Alt+R：閲覧 / Ctrl+Alt+A：分析
 ・Ctrl+Alt+H：使い方
 ・Alt+O/M/F/B：目次/メモ/検索/しおり
+・Ctrl+Z：元に戻す / Ctrl+Y：やり直し
 
 ■ 16. データの保存場所（重要）
 ・基本データはブラウザ内（localStorage）に保存されます
@@ -12229,6 +12231,19 @@ if (typeof applyPaneHeightSettings === 'function') {
         if (e.key === 'Escape') { if (document.body.classList.contains('focus-mode')) toggleFocusMode(); closeJumpDialog(); closeAnalysis(); closeMemoSaveDialog(); }
         if (e.ctrlKey && !e.altKey && !e.metaKey) {
             const k = (e.key || '').toLowerCase();
+            const isMainInput = e.target === inputArea;
+            if (k === 'z' && !e.shiftKey && isMainInput) {
+                e.preventDefault();
+                e.stopPropagation();
+                undoInput();
+                return;
+            }
+            if (k === 'y' && !e.shiftKey && isMainInput) {
+                e.preventDefault();
+                e.stopPropagation();
+                redoInput();
+                return;
+            }
             if (k === 'g') { e.preventDefault(); e.stopPropagation(); showJumpDialog(); }
             if (k === 'f' && e.shiftKey) { e.preventDefault(); e.stopPropagation(); insertRubyToSelection(); }
             if (k === 'f' && !e.shiftKey) {
