@@ -5298,6 +5298,12 @@ body.theme-dark{
                 ・<b>Ctrl+Shift+H</b>：使い方パネル<br>
                 ・<b>Ctrl+Shift+F</b>：振り仮名（ルビ）<br>
                 ・<b>Ctrl+Shift+B</b>：傍点<br>
+                ・<b>Ctrl+Shift+1</b>：構成パネル<br>
+                ・<b>Ctrl+Shift+2</b>：世界観パネル<br>
+                ・<b>Ctrl+Shift+3</b>：人物パネル<br>
+                ・<b>Ctrl+Shift+4</b>：用語パネル<br>
+                ・<b>Ctrl+Shift+5</b>：メモパネル<br>
+                ・<b>Ctrl+Shift+6</b>：目次パネル<br>
                 ・<b>Esc</b>：ダイアログ閉じる
             </div>
             <div class="help-section" style="flex: 1; min-width: 180px;">
@@ -12232,6 +12238,34 @@ if (typeof applyPaneHeightSettings === 'function') {
         if (e.ctrlKey && !e.altKey && !e.metaKey) {
             const k = (e.key || '').toLowerCase();
             const isMainInput = e.target === inputArea;
+            if (e.shiftKey) {
+                const panelShortcutMap = {
+                    Digit1: 'structure',
+                    Digit2: 'world',
+                    Digit3: 'character',
+                    Digit4: 'terms',
+                    Digit5: 'memo',
+                    Digit6: 'outline'
+                };
+                const panelTarget = panelShortcutMap[e.code];
+                if (panelTarget) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (panelTarget === 'structure' && typeof toggleStructurePanel === 'function') toggleStructurePanel();
+                    if (panelTarget === 'world' && typeof toggleWorldPanel === 'function') toggleWorldPanel();
+                    if (panelTarget === 'character' && typeof toggleCharacterPanel === 'function') toggleCharacterPanel();
+                    if (panelTarget === 'terms' && typeof toggleTermsPanel === 'function') toggleTermsPanel();
+                    if (panelTarget === 'memo') {
+                        if (typeof window.openNavTab === 'function') window.openNavTab('memo');
+                        else if (typeof toggleMemoPanel === 'function') toggleMemoPanel();
+                    }
+                    if (panelTarget === 'outline') {
+                        if (typeof window.openNavTab === 'function') window.openNavTab('outline');
+                        else if (typeof toggleOutlinePanel === 'function') toggleOutlinePanel();
+                    }
+                    return;
+                }
+            }
             if (k === 'z' && !e.shiftKey && isMainInput) {
                 e.preventDefault();
                 e.stopPropagation();
