@@ -3648,6 +3648,96 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
     #structure-panel .structure-card.has-custom-color.level-episode{ border-left-color: #3b82f6 !important; }
     #structure-panel .structure-card.has-custom-color.level-scene{ border-left-color: #60a5fa !important; }
 
+
+/* ===== Card Edit Modals: window-like draggable + resizable (all edges/corners) ===== */
+/* Make the *outer frame* the thing you drag/resize, and put scrolling inside .cc-window-body */
+.cc-window-box{
+  position: fixed !important;
+  resize: none !important;
+  box-sizing: border-box !important;
+  max-width: 95vw !important;
+  max-height: 95vh !important; /* override original 85vh caps so resizing can grow */
+  min-width: 360px;
+  min-height: 240px;
+
+  /* critical: padding/overflow moved to inner body so resize handles align to outer border */
+  padding: 0 !important;
+  overflow: visible !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.cc-window-titlebar{
+  cursor: move;
+  user-select: none;
+  /* restore padding that used to be on the box */
+  padding: 16px 16px 8px !important;
+  margin-bottom: 0 !important;
+}
+
+.cc-window-body{
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 12px 16px 16px;
+}
+
+/* footer (actions area) — keep visible while body scrolls */
+.cc-window-box .structure-edit-actions,
+.cc-window-box .character-edit-actions,
+.cc-window-box .world-edit-actions{
+  margin-top: 0 !important;
+  padding: 12px 16px 16px;
+  background: var(--panel-bg);
+  border-top: 1px solid var(--border-color);
+}
+
+/* shared resize handles */
+.cc-window-box .cc-resize-handle{
+  position: absolute;
+  background: transparent;
+  z-index: 6;
+  touch-action: none;
+  user-select: none;
+}
+
+/* Place hit-areas on the OUTER frame (not inside the padded content area).
+   Slight negative offset helps grab the border without interfering with inner scrollbars. */
+:root{
+  --cc-win-hit: 10px;
+  --cc-win-hit-offset: 2px;
+  --cc-win-corner: 14px;
+}
+
+/* edges */
+.cc-window-box .cc-resize-e{ top: 0; right: calc(-1 * var(--cc-win-hit-offset)); width: var(--cc-win-hit); height: 100%; cursor: ew-resize; }
+.cc-window-box .cc-resize-w{ top: 0; left:  calc(-1 * var(--cc-win-hit-offset)); width: var(--cc-win-hit); height: 100%; cursor: ew-resize; }
+.cc-window-box .cc-resize-s{ left: 0; bottom: calc(-1 * var(--cc-win-hit-offset)); width: 100%; height: var(--cc-win-hit); cursor: ns-resize; }
+.cc-window-box .cc-resize-n{ left: 0; top:   calc(-1 * var(--cc-win-hit-offset)); width: 100%; height: var(--cc-win-hit); cursor: ns-resize; }
+
+/* corners */
+.cc-window-box .cc-resize-se{ right: calc(-1 * var(--cc-win-hit-offset)); bottom: calc(-1 * var(--cc-win-hit-offset)); width: var(--cc-win-corner); height: var(--cc-win-corner); cursor: nwse-resize; }
+.cc-window-box .cc-resize-nw{ left:  calc(-1 * var(--cc-win-hit-offset)); top:    calc(-1 * var(--cc-win-hit-offset)); width: var(--cc-win-corner); height: var(--cc-win-corner); cursor: nwse-resize; }
+.cc-window-box .cc-resize-ne{ right: calc(-1 * var(--cc-win-hit-offset)); top:    calc(-1 * var(--cc-win-hit-offset)); width: var(--cc-win-corner); height: var(--cc-win-corner); cursor: nesw-resize; }
+.cc-window-box .cc-resize-sw{ left:  calc(-1 * var(--cc-win-hit-offset)); bottom: calc(-1 * var(--cc-win-hit-offset)); width: var(--cc-win-corner); height: var(--cc-win-corner); cursor: nesw-resize; }
+
+/* optional resize grip indicator (bottom-right) */
+.cc-window-box .cc-resize-se::after{
+  content: '';
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid rgba(107,114,128,0.55);
+  border-bottom: 2px solid rgba(107,114,128,0.55);
+  border-radius: 0 0 4px 0;
+  pointer-events: none;
+}
+body.theme-dark .cc-window-box .cc-resize-se::after{
+  border-right-color: rgba(156,163,175,0.55);
+  border-bottom-color: rgba(156,163,175,0.55);
+}
+
 </style>
 
 <!-- ===== v0.96 hotfix (reader/search/bookmark, active tab color, tab context menu, per-tab stats, focus shortcuts) ===== -->
@@ -4437,7 +4527,31 @@ function contrastRatioRgb(bg, fg){
     ov.querySelector('#fo-close')?.addEventListener('click', closeFocusOverlay);
     return ov;
   }
+  let __cc_focus_preview_return = null;
+  function __cc_restore_focus_preview(){
+    const info = __cc_focus_preview_return;
+    if (!info || !info.node || !info.parent) return;
+    const node = info.node;
+    const parent = info.parent;
+    const placeholder = info.placeholder;
+
+    // keep current scroll position
+    const st = node.scrollTop;
+
+    try {
+      if (placeholder && placeholder.parentNode === parent) {
+        parent.insertBefore(node, placeholder);
+        parent.removeChild(placeholder);
+      } else {
+        parent.appendChild(node);
+      }
+    } catch(e) {}
+
+    try { node.scrollTop = st; } catch(e) {}
+    __cc_focus_preview_return = null;
+  }
   function openFocusOverlay(kind){
+
     const ov = ensureFocusOverlay();
     const titleEl = ov.querySelector('#fo-title');
     const bodyEl = ov.querySelector('#fo-body');
@@ -4450,13 +4564,31 @@ function contrastRatioRgb(bg, fg){
     if (kind === 'preview') {
       titleEl.textContent = '🪞 プレビュー（一時表示）';
       try { if (typeof updatePreview === 'function') updatePreview(); } catch(e) {}
-      // previewScroll が縦書きなら同様に
+
       const pvScroll = document.getElementById('preview-scroll');
       const pvContent = document.getElementById('preview-content');
-      const wrap = document.createElement('div');
-      wrap.innerHTML = pvContent ? pvContent.innerHTML : '';
-      bodyEl.appendChild(wrap);
-      if (pvScroll && pvScroll.classList.contains('vertical-mode')) bodyEl.classList.add('vertical-mode');
+
+      if (pvScroll && pvScroll.parentNode) {
+        // Safety: if something was previously moved, restore first
+        try { __cc_restore_focus_preview(); } catch(e) {}
+
+        const parent = pvScroll.parentNode;
+        const placeholder = document.createComment('cc-preview-placeholder');
+        parent.insertBefore(placeholder, pvScroll);
+
+        // Remember for restore
+        __cc_focus_preview_return = { node: pvScroll, parent, placeholder };
+
+        // Move the live preview container into the overlay (no DOM cloning / no HTML re-parse)
+        bodyEl.appendChild(pvScroll);
+
+        if (pvScroll.classList.contains('vertical-mode')) bodyEl.classList.add('vertical-mode');
+      } else {
+        // Fallback: clone HTML if preview container is missing
+        const wrap = document.createElement('div');
+        wrap.innerHTML = pvContent ? pvContent.innerHTML : '';
+        bodyEl.appendChild(wrap);
+      }
     } else if (kind === 'memo') {
       titleEl.textContent = '🗒 メモ（一時表示）';
       const memoArea = document.getElementById('memo-area');
@@ -4476,6 +4608,17 @@ function contrastRatioRgb(bg, fg){
   function closeFocusOverlay(){
     const ov = document.getElementById('focus-overlay');
     if (!ov) return;
+
+    // Restore live preview container if it was moved into the overlay
+    try { __cc_restore_focus_preview(); } catch(e) {}
+
+    // Cleanup overlay body
+    const bodyEl = ov.querySelector('#fo-body');
+    if (bodyEl) {
+      bodyEl.classList.remove('vertical-mode');
+      bodyEl.innerHTML = '';
+    }
+
     ov.classList.remove('show');
   }
   // Escで閉じる（Reader優先）
@@ -4967,7 +5110,7 @@ body.theme-dark{
             <button class="app-icon" id="app-icon" title="アプリメニュー">
                 <img src="icons/favicon-32.png" alt="アプリアイコン">
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.0.99</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.00</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -6581,6 +6724,31 @@ memo: 'cc_memo_width_px',
       }[m]));
     }
 
+    // Utility: net character length (excludes whitespace + markup like ruby/bouten)
+    function computeNetLength(text) {
+      let s = (text === null || text === undefined) ? '' : String(text);
+
+      // Ruby: ｜漢字《かんじ》 or 漢字《かんじ》  -> count only base text
+      s = s.replace(/｜([^《\n]+?)《[^》\n]*?》/g, '$1');
+      s = s.replace(/([一-龠々〆ヵヶ]+)《[^》\n]*?》/g, '$1');
+
+      // Bouten: 《《強調》》 -> 強調
+      s = s.replace(/《《([^\n]+?)》》/g, '$1');
+
+      // Markup markers
+      s = s.replace(/__([^\n]+?)__/g, '$1');  // underline
+      s = s.replace(/==([^\n]+?)==/g, '$1');  // highlight
+
+      // Any leftover ruby delimiters
+      s = s.replace(/[｜《》]/g, '');
+
+      // Remove whitespace incl fullwidth space
+      s = s.replace(/[\s\u3000]/g, '');
+
+      return s.length;
+    }
+
+
 /* === Header badge ellipsis (CSS-based, fast) ===
    Badges now use CSS text-overflow:ellipsis with max-width rules.
    The previous JS-based binary-search fitting caused heavy reflow and lag.
@@ -6856,10 +7024,46 @@ function addNewTab() {
             try {
                 const d = JSON.parse(s);
                 if (d.tabs && d.tabs.length > 0) {
-                    inputTabs = d.tabs;
+                    inputTabs = (d.tabs || []);
+                    // 旧版のサンプル（「見本」タブ）が localStorage に残っている場合、最初の1回だけ取り除く
+                    try {
+                        const __ccMigKey = 'cc_migrated_remove_sample_v1';
+                        if (!localStorage.getItem(__ccMigKey)) {
+                            const beforeLen = inputTabs.length;
+                            inputTabs = inputTabs.filter(t => {
+                                const n = (t && typeof t.name === 'string') ? t.name : '';
+                                const c = (t && typeof t.content === 'string') ? t.content : '';
+                                const isOldSample = (n === '見本') && (t.id === 2 || c.length > 5000);
+                                return !isOldSample;
+                            });
+
+                            // 変化があった場合は、ここで一度だけ保存しておく（次回以降に復活しないように）
+                            if (inputTabs.length !== beforeLen && inputTabs.length > 0) {
+                                const maxIdTmp = inputTabs.reduce((mx, t) => Math.max(mx, Number(t.id)||0), 0);
+                                let newActive = d.activeTabId || inputTabs[0].id;
+                                if (!inputTabs.some(t => t.id === newActive)) newActive = inputTabs[0].id;
+                                let newNext = d.nextTabId || (maxIdTmp + 1);
+                                if (newNext <= maxIdTmp) newNext = maxIdTmp + 1;
+
+                                let ok = false;
+                                try {
+                                    localStorage.setItem(TABS_KEY, JSON.stringify({ tabs: inputTabs, activeTabId: newActive, nextTabId: newNext }));
+                                    ok = true;
+                                } catch (e) {}
+                                if (ok) { try { localStorage.setItem(__ccMigKey, '1'); } catch (e) {} }
+                            } else {
+                                try { localStorage.setItem(__ccMigKey, '1'); } catch (e) {}
+                            }
+                        }
+                    } catch (e) {}
+                    if (!inputTabs || inputTabs.length === 0) {
+                        inputTabs = [{ id: 1, name: 'タブはリネームできます', content: defaultText }];
+                    }
                     window.inputTabs = inputTabs;
                     activeTabId = d.activeTabId || inputTabs[0].id;
-                    nextTabId = d.nextTabId || inputTabs.length + 1;
+                    if (!inputTabs.some(t => t.id === activeTabId)) activeTabId = inputTabs[0].id;
+                    const maxId = inputTabs.reduce((mx, t) => Math.max(mx, Number(t.id)||0), 0);
+                    nextTabId = d.nextTabId || (maxId + 1);
                     const activeTab = inputTabs.find(t => t.id === activeTabId);
                     if (activeTab) inputArea.value = activeTab.content;
                     return true;
@@ -7067,7 +7271,7 @@ function addNewTab() {
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-    const defaultText = `　ⓒエディタ（使い方） v0.99
+    const defaultText = `　ⓒエディタ（使い方） v1.00
 
 ■ はじめに（最短で使い始める）
 
@@ -7185,52 +7389,6 @@ function addNewTab() {
 
 （このタブは初期化すると復元されます）
 `;
-
-
-    const sampleText = `奉教人の死
-芥川龍之介
-
-　たとひ三百歳の齢《よはひ》を保ち、楽しみ身に余ると云ふとも、未来永々の果しなき楽しみに比ぶれば、夢幻《ゆめまぼろし》の如し。
-　―慶長訳 Guia do Pecador―
-
-　善の道に立ち入りたらん人は、御教《みをしへ》にこもる不可思議の甘味を覚ゆべし。
-　―慶長訳 Imitatione Christi―
-
-　　　　　　　Ⅰ
-
-　去《さ》んぬる頃、日本長崎の「さんた・るちや」と申す「えけれしや」（寺院）に、「ろおれんぞ」と申すこの国の少年がござつた。これは或年御降誕の祭の夜、その「えけれしや」の戸口に、餓ゑ疲れてうち伏して居つたを、参詣の奉教人衆《ほうけうにんしゆう》が介抱し、それより伴天連《ばてれん》の憐みにて、寺中に養はれる事となつたげでござるが、何故かその身の素性《すじやう》を問へば、故郷《ふるさと》は「はらいそ」（天国）父の名は「でうす」（天主）などと、何時も事もなげな笑に紛らいて、とんとまことは明した事もござない。なれど親の代から「ぜんちよ」（異教徒）の輩《ともがら》であらなんだ事だけは、手くびにかけた青玉《あをだま》の「こんたつ」（念珠）を見ても、知れたと申す。されば伴天連はじめ、多くの「いるまん」衆（法兄弟）も、よも怪しいものではござるまいとおぼされて、ねんごろに扶持して置かれたが、その信心の堅固なは、幼いにも似ず「すぺりおれす」（長老衆）が舌を捲くばかりであつたれば、一同も「ろおれんぞ」は天童の生れがはりであらうずなど申し、いづくの生れ、たれの子とも知れぬものを、無下《むげ》にめでいつくしんで居つたげでござる。
-　して又この「ろおれんぞ」は、顔かたちが玉のやうに清らかであつたに、声ざまも女のやうに優しかつたれば、一《ひと》しほ人々のあはれみを惹《ひ》いたのでござらう。中でもこの国の「いるまん」に「しめおん」と申したは、「ろおれんぞ」を弟《おとと》のやうにもてなし、「えけれしや」の出入りにも、必《かならず》仲よう手を組み合せて居つた。この「しめおん」は、元さる大名に仕へた、槍一すぢの家がらなものぢや。されば身のたけも抜群なに、性得《しやうとく》の剛力であつたに由つて、伴天連が「ぜんちよ」ばらの石瓦にうたるるを、防いで進ぜた事も、一度二度の沙汰ではごさない。それが「ろおれんぞ」と睦《むつま》じうするさまは、とんと鳩になづむ荒鷲のやうであつたとも申さうか。或は「ればのん」山の檜《ひのき》に、葡萄《えび》かづらが纏《まと》ひついて、花咲いたやうであつたとも申さうず。
-　さる程に三年あまりの年月は、流るるやうにすぎたに由つて、「ろおれんぞ」はやがて元服もすべき時節となつた。したがその頃怪しげな噂が伝はつたと申すは、「さんた・るちや」から遠からぬ町方の傘張の娘が、「ろおれんぞ」と親しうすると云ふ事ぢや。この傘張の翁《おきな》も天主の御教を奉ずる人故、娘ともども「えけれしや」へは参る慣《ならはし》であつたに、御祈の暇にも、娘は香炉をさげた「ろおれんぞ」の姿から、眼を離したと申す事がござない。まして「えけれしや」への出入りには、必《かならず》髪かたちを美しうして、「ろおれんぞ」のゐる方へ眼づかひをするが定《ぢやう》であつた。さればおのづと奉教人衆の人目にも止り、娘が行きずりに「ろおれんぞ」の足を踏んだと云ひ出すものもあれば、二人が艶書をとりかはすをしかと見とどけたと申すものも、出て来たげでござる。
-　由つて伴天連にも、すて置かれず思《おぼ》されたのでござらう。或日「ろおれんぞ」を召されて、白ひげを噛みながら、「その方、傘張の娘と兎角の噂ある由を聞いたが、よもやまことではあるまい。どうぢや」ともの優しう尋ねられた。したが「ろおれんぞ」は、唯《ただ》憂はしげに頭を振つて、「そのやうな事は一向に存じよう筈もござらぬ」と、涙声に繰返すばかり故、伴天達もさすがに我《が》を折られて、年配と云ひ、日頃の信心と云ひ、かうまで申すものに偽はあるまいと思されたげでござる。
-　さて一応伴天連の疑《うたがひ》は晴れてぢやが、「さんた・るちや」へ参る人々の間では、容易にとかうの沙汰が絶えさうもござない。されば兄弟同様にして居つた「しめおん」の気がかりは、又人一倍ぢや。始はかやうな淫《みだら》な事を、ものものしう詮議立てするが、おのれにも恥しうて、うちつけに尋ねようは元より、「ろおれんぞ」の顔さへまさかとは見られぬ程であつたが、或時「さんた・るちや」の後の庭で、「ろおれんぞ」へ宛てた娘の艶書を拾うたに由つて、人気《ひとけ》ない部屋にゐたを幸《さいはひ》、「ろおれんぞ」の前にその文をつきつけて、嚇《おど》しつ賺《すか》しつ、さまざまに問ひただいた。なれど「ろおれんぞ」は唯、美しい顔を赤らめて、「娘は私に心を寄せましたげでござれど、私は文を貰うたばかり、とんと口を利《き》いた事もござらぬ」と申す。なれど世間のそしりもある事でござれば、「しめおん」は猶《なほ》も押して問ひ詰《なじ》つたに、「ろおれんぞ」はわびしげな眼で、ぢつと相手を見つめたと思へば、「私はお主《ぬし》にさへ、嘘をつきさうな人間に見えるさうな」と、咎《とが》めるやうに云ひ放つて、とんと燕《つばくろ》か何ぞのやうに、その儘つと部屋を立つて行つてしまうた。かう云はれて見れば、「しめおん」も己の疑深かつたのが恥しうもなつたに由つて、悄々《すごすご》その場を去らうとしたに、いきなり駈けこんで来たは、少年の「ろおれんぞ」ぢや。それが飛びつくやうに「しめおん」の頸《うなじ》を抱くと、喘《あへ》ぐやうに「私が悪かつた。許して下されい」と囁《ささや》いて、こなたが一言《ひとこと》も答へぬ間に、涙に濡れた顔を隠さう為か、相手をつきのけるやうに身を開いて、一散に又元来た方へ、走つて往《い》んでしまうたと申す。さればその「私が悪かつた」と囁いたのも、娘と密通したのが悪かつたと云ふのやら、或は「しめおん」につれなうしたのが悪かつたと云ふのやら、一円合点《いちゑんがてん》の致さうやうがなかつたとの事でござる。
-　するとその後間もなう起つたのは、その傘張の娘が孕《みごも》つたと云ふ騒ぎぢや。しかも腹の子の父親は、「さんた・るちや」の「ろおれんぞ」ぢやと、正《まさ》しう父の前で申したげでござる。されば傘張の翁は火のやうに憤《いきどほ》つて、即刻伴天連のもとへ委細を訴へに参つた。かうなる上は「ろおれんぞ」も、かつふつ云ひ訳の致しやうがござない。その日の中に伴天連を始め、「いるまん」衆一同の談合に由つて、破門を申し渡される事になつた。元より破門の沙汰がある上は、伴天連の手もとをも追ひ払はれる事でござれば、糊口のよすがに困るのも目前ぢや。したがかやうな罪人を、この儘「さんた・るちや」に止めて置いては、御主《おんあるじ》の「ぐろおりや」（栄光）にも関《かかは》る事ゆゑ、日頃親しう致いた人々も、涙をのんで「ろおれんぞ」を追ひ払つたと申す事でござる。
-　その中でも哀れをとどめたは、兄弟のやうにして居つた「しめおん」の身の上ぢや。これは「ろおれんぞ」が追ひ出されると云ふ悲しさよりも、「ろおれんぞ」に欺かれたと云ふ腹立たしさが一倍故、あのいたいけな少年が、折からの凩《こがらし》が吹く中へ、しをしをと戸口を出かかつたに、傍から拳《こぶし》をふるうて、したたかその美しい顔を打つた。「ろおれんぞ」は剛力に打たれたに由つて、思はずそこへ倒れたが、やがて起きあがると、涙ぐんだ眼で、空を仰ぎながら、「御主も許させ給へ。『しめおん』は、己《おの》が仕業もわきまへぬものでござる」と、わななく声で祈つたと申す事ぢや。「しめおん」もこれには気が挫けたのでござらう。暫くは唯戸口に立つて、拳を空《くう》にふるうて居つたが、その外の「いるまん」衆も、いろいろととりないたれば、それを機会《しほ》に手を束《つか》ねて、嵐も吹き出でようず空の如く、凄《すさま》じく顔を曇らせながら、悄々《すごすご》「さんた・るちや」の門を出る「ろおれんぞ」の後姿を、貪るやうにきつと見送つて居つた。その時居合はせた奉教人衆の話を伝へ聞けば、時しも凩にゆらぐ日輪が、うなだれて歩む「ろおれんぞ」の頭のかなた、長崎の西の空に沈まうず景色であつたに由つて、あの少年のやさしい姿は、とんと一天の火焔の中に、立ちきはまつたやうに見えたと申す。
-　その後の「ろおれんぞ」は、「さんた・るちや」の内陣に香炉をかざした昔とは打つて変つて、町はづれの非人小屋に起き伏しする、世にも哀れな乞食《こつじき》であつた。ましてその前身は、「ぜんちよ」の輩《ともがら》にはゑとりのやうにさげしまるる、天主の御教を奉ずるものぢや。されば町を行けば、心ない童部《わらべ》に嘲《あざけ》らるるは元より、刀杖瓦石《たうぢやうぐわせき》の難に遭《あ》うた事も、度々ござるげに聞き及んだ。いや、嘗《か》つては、長崎の町にはびこつた、恐しい熱病にとりつかれて、七日七夜の間、道ばたに伏しまろんでは、苦み悶《もだ》えたとも申す事でござる。したが、「でうす」無量無辺の御愛憐は、その都度「ろおれんぞ」が一命を救はせ給うたのみか、施物の米銭のない折々には、山の木の実、海の魚介など、その日の糧《かて》を恵ませ給ふのが常であつた。由つて「ろおれんぞ」も、朝夕の祈は「さんた・るちや」に在つた昔を忘れず、手くびにかけた「こんたつ」も、青玉の色を変へなかつたと申す事ぢや。なんの、それのみか、夜毎に更闌《かうた》けて人音も静まる頃となれば、この少年はひそかに町はづれの非人小屋を脱け出《いだ》いて、月を踏んでは住み馴れた「さんた・るちや」へ、御主「ぜす・きりしと」の御加護を祈りまゐらせに詣でて居つた。
-　なれど同じ「えけれしや」に詣づる奉教人衆も、その頃はとんと「ろおれんぞ」を疎《うと》んじはてて、伴天連はじめ、誰一人憐みをかくるものもござらなんだ。ことわりかな、破門の折から所行無慚《しよぎやうむざん》の少年と思ひこんで居つたに由つて、何として夜毎に、独り「えけれしや」へ参る程の、信心ものぢやとは知られうぞ。これも「でうす」千万無量の御計らひの一つ故、よしない儀とは申しながら、「ろおれんぞ」が身にとつては、いみじくも亦哀れな事でござつた。
-　さる程に、こなたはあの傘張の娘ぢや。「ろおれんぞ」が破門されると間もなく、月も満たず女の子を産み落いたが、さすがにかたくなしい父の翁も、初孫の顔は憎からず思うたのでござらう、娘ともども大切に介抱して、自ら抱きもしかかへもし、時にはもてあそびの人形などもとらせたと申す事でござる。翁は元よりさもあらうずなれど、ここに稀有《けう》なは「いるまん」の「しめおん」ぢや。あの「ぢやぼ」（悪魔）をも挫《ひし》がうず大男が、娘に子が産まれるや否や、暇ある毎に傘張の翁を訪れて、無骨な腕に幼子を抱き上げては、にがにがしげな顔に涙を浮べて、弟と愛《いつく》しんだ、あえかな「ろおれんぞ」の優姿を、思ひ慕つて居つたと申す。唯、娘のみは、「さんた・るちや」を出でてこの方、絶えて「ろおれんぞ」が姿を見せぬのを、怨めしう歎きわびた気色《けしき》であつたれば、「しめおん」の訪れるのさへ、何かと快からず思ふげに見えた。
-　この国の諺《ことわざ》にも、光陰に関守《せきもり》なしと申す通り、とかうする程に、一年《ひととせ》あまりの年月は、瞬《またた》くひまに過ぎたと思召《おぼしめ》されい。ここに思ひもよらぬ大変が起つたと申すは、一夜の中に長崎の町の半ばを焼き払つた、あの大火事のあつた事ぢや。まことにその折の景色の凄じさは、末期《まつご》の御裁判《おんさばき》の喇叭《らつぱ》の音が、一天の火の光をつんざいて、鳴り渡つたかと思はれるばかり、世にも身の毛のよだつものでござつた。その時、あの傘張の翁の家は、運悪う風下にあつたに由つて、見る見る焔に包れたが、さて親子｜眷族《けんぞく》、慌てふためいて、逃げ出《いだ》いて見れば、娘が産んだ女の子の姿が見えぬと云ふ始末ぢや。一定《いちぢやう》、一間《ひとま》どころに寝かいて置いたを、忘れてここまで逃げのびたのであらうず。されば翁は足ずりをして罵りわめく。娘も亦、人に遮《さへぎ》られずば、火の中へも馳《は》せ入つて、助け出さう気色《けしき》に見えた。なれど風は益《ますます》加はつて、焔の舌は天上の星をも焦さうず吼《たけ》りやうぢや。それ故火を救ひに集つた町方の人々も、唯、あれよあれよと立ち騒いで、狂気のやうな娘をとり鎮めるより外に、せん方も亦あるまじい。所へひとり、多くの人を押しわけて、馳《か》けつけて参つたは、あの「いるまん」の「しめおん」でござる。これは矢玉の下もくぐつたげな、逞しい大丈夫でござれば、ありやうを見るより早く、勇んで焔の中へ向うたが、あまりの火勢に辟易《へきえき》致いたのでござらう。二三度煙をくぐつたと見る間に、背《そびら》をめぐらして、一散に逃げ出いた。して翁と娘とが佇《たたず》んだ前へ来て、「これも『でうす』万事にかなはせたまふ御計らひの一つぢや。詮ない事とあきらめられい」と申す。その時翁の傍から、誰とも知らず、高らかに「御主《おんあるじ》、助け給へ」と叫ぶものがござつた。声ざまに聞き覚えもござれば、「しめおん」が頭《かうべ》をめぐらして、その声の主をきつと見れば、いかな事、これは紛《まが》ひもない「ろおれんぞ」ぢや。清らかに痩せ細つた顔は、火の光に赤うかがやいて、風に乱れる黒髪も、肩に余るげに思はれたが、哀れにも美しい眉目《みめ》のかたちは、一目見てそれと知られた。その「ろおれんぞ」が、乞食の姿のまま、群《むらが》る人々の前に立つて、目もはなたず燃えさかる家を眺めて居る。と思うたのは、まことに瞬《またた》く間もない程ぢや。一しきり焔を煽《あふ》つて、恐しい風が吹き渡つたと見れば、「ろおれんぞ」の姿はまつしぐらに、早くも火の柱、火の壁、火の梁《うつばり》の中にはいつて居つた。「しめおん」は思はず遍身に汗を流いて、空高く「くるす」（十字）を描きながら、己も「御主、助け給へ」と叫んだが、何故かその時心の眼には、凩《こがらし》に揺るる日輪の光を浴びて、「さんた・るちや」の門に立ちきはまつた、美しく悲しげな、「ろおれんぞ」の姿が浮んだと申す。
-　なれどあたりに居つた奉教人衆は、「ろおれんぞ」が健気《けなげ》な振舞に驚きながらも、破戒の昔を忘れかねたのでもござらう。忽《たちまち》兎角の批判は風に乗つて、人どよめきの上を渡つて参つた。と申すは、「さすが親子の情あひは争はれぬものと見えた。己が身の罪を恥ぢて、このあたりへは影も見せなんだ『ろおれんぞ』が、今こそ一人子の命を救はうとて、火の中へはいつたぞよ」と、誰ともなく罵りかはしたのでござる。これには翁《おきな》さへ同心と覚えて、「ろおれんぞ」の姿を眺めてからは、怪しい心の騒ぎを隠さうず為か、立ちつ居つ身を悶えて、何やら愚《おろか》しい事のみを、声高《こわだか》にひとりわめいて［＃「わめいて」は底本では「わめいつて」］居つた。なれど当の娘ばかりは、狂ほしく大地に跪《ひざまづ》いて、両の手で顔をうづめながら、一心不乱に祈誓を凝《こ》らいて、身動きをする気色さへもござない。その空には火の粉が雨のやうに降りかかる。煙も地を掃《はら》つて、面《おもて》を打つた。したが娘は黙然と頭を垂れて、身も世も忘れた祈り三昧《ざんまい》でござる。
-　とかうする程に、再《ふたたび》火の前に群つた人々が、一度にどつとどよめくかと見れば、髪をふり乱いた「ろおれんぞ」が、もろ手に幼子をかい抱いて、乱れとぶ焔の中から、天《あま》くだるやうに姿を現《あらは》いた。なれどその時、燃え尽きた梁《うつばり》の一つが、俄《にはか》に半ばから折れたのでござらう。凄じい音と共に、一なだれの煙焔《えんえん》が半空《なかぞら》に迸《ほとばし》つたと思ふ間もなく、「ろおれんぞ」の姿ははたと見えずなつて、跡には唯火の柱が、珊瑚の如くそば立つたばかりでござる。
-　あまりの凶事に心も消えて、「しめおん」をはじめ翁まで、居あはせた程の奉教人衆は、皆目の眩《くら》む思ひがござつた。中にも娘はけたたましう泣き叫んで、一度は脛《はぎ》もあらはに躍り立つたが、やがて雷《いかづち》に打たれた人のやうに、そのまま大地にひれふしたと申す。さもあらばあれ、ひれふした娘の手には、何時かあの幼い女の子が、生死不定《しやうじふぢやう》の姿ながら、ひしと抱かれて居つたをいかにしようぞ。ああ、広大無辺なる「でうす」の御知慧《おんちゑ》、御力は、何とたたへ奉る詞《ことば》だにござない。燃え崩れる梁に打たれながら、「ろおれんぞ」が必死の力をしぼつて、こなたへ投げた幼子は、折よく娘の足もとへ、怪我もなくまろび落ちたのでござる。
-　されば娘が大地にひれ伏して、嬉し涙に咽《むせ》んだ声と共に、もろ手をさしあげて立つた翁の口からは、「でうす」の御慈悲をほめ奉る声が、自らおごそかに溢れて参つた。いや、まさに溢れようずけはひであつたとも申さうか。それより先に「しめおん」は、さかまく火の嵐の中へ、「ろおれんぞ」を救はうず一念から、真一文字に躍りこんだに由つて、翁の声は再《ふたたび》気づかはしげな、いたましい祈りの言《ことば》となつて、夜空に高くあがつたのでござる。これは元より翁のみではござない。親子を囲んだ奉教人衆は、皆一同に声を揃へて、「御主、助け給へ」と、泣く泣く祈りを捧げたのぢや。して「びるぜん・まりや」の御子《みこ》、なべての人の苦しみと悲しみとを己《おの》がものの如くに見そなはす、われらが御主「ぜす・きりしと」は、遂にこの祈りを聞き入れ給うた。見られい。むごたらしう焼けただれた「ろおれんぞ」は、「しめおん」が腕に抱かれて、早くも火と煙とのただ中から、救ひ出されて参つたではないか。
-　なれどその夜の大変は、これのみではござなんだ。息も絶え絶えな「ろおれんぞ」が、とりあへず奉教人衆の手に舁《か》かれて、風上にあつたあの「えけれしや」の門へ横へられた時の事ぢや。それまで幼子を胸に抱きしめて、涙にくれてゐた傘張の娘は、折から門へ出でられた伴天連の足もとに跪《ひざまづ》くと、並み居る人々の目前で、「この女子《をなご》は『ろおれんぞ』様の種ではおぢやらぬ。まことは妾が家隣の『ぜんちよ』の子と密通して、まうけた娘でおぢやるわいの」と思ひもよらぬ「こひさん」（懴悔）を仕《つかま》つた。その思ひつめた声ざまの震へと申し、その泣きぬれた双の眼のかがやきと申し、この「こひさん」には、露ばかりの偽さへ、あらうとは思はれ申さぬ。道理《ことわり》かな、肩を並べた奉教人衆は、天を焦がす猛火も忘れて、息さへつかぬやうに声を呑んだ。
-　娘が涙ををさめて、申し次いだは、「妾は日頃『ろおれんぞ』様を恋ひ慕うて居つたなれど、御信心の堅固さからあまりにつれなくもてなされる故、つい怨む心も出て、腹の子を『ろおれんぞ』様の種と申し偽り、妾につらかつた口惜しさを思ひ知らさうと致いたのでおぢやる。なれど『ろおれんぞ』様のお心の気高さは、妾が大罪をも憎ませ給はいで、今宵は御身の危さをもうち忘れ、『いんへるの』（地獄）にもまがふ火焔の中から、妾娘の一命を辱《かたじけな》くも救はせ給うた。その御憐み、御計らひ、まことに御主『ぜす・きりしと』の再来かともをがまれ申す。さるにても妾が重々の極悪を思へば、この五体は忽《たちまち》『ぢやぼ』の爪にかかつて、寸々に裂かれようとも、中々怨む所はおぢやるまい。」娘は「こひさん」を致いも果てず、大地に身を投げて泣き伏した。
-　二重三重《ふたへみへ》に群つた奉教人衆の間から、「まるちり」（殉教）ぢや、「まるちり」ぢやと云ふ声が、波のやうに起つたのは、丁度この時の事でござる。殊勝にも「ろおれんぞ」は、罪人を憐む心から、御主「ぜす・きりしと」の御行跡を踏んで、乞食にまで身を落いた。して父と仰ぐ伴天連も、兄とたのむ「しめおん」も、皆その心を知らなんだ。これが「まるちり」でなうて、何でござらう。
-　したが、当の「ろおれんぞ」は、娘の「こひさん」を聞きながらも、僅に二三度｜頷《うなづ》いて見せたばかり、髪は焼け肌は焦げて、手も足も動かぬ上に、口をきかう気色《けしき》さへも今は全く尽きたげでござる。娘の「こひさん」に胸を破つた翁と「しめおん」とは、その枕がみに蹲《うづくま》つて、何かと介抱を致いて居つたが、「ろおれんぞ」の息は、刻々に短うなつて、最期《さいご》ももはや遠くはあるまじい。唯、日頃と変らぬのは、遙に天上を仰いで居る、星のやうな瞳の色ばかりぢや。
-　やがて娘の「こひさん」に耳をすまされた伴天連は、吹き荒《すさ》ぶ夜風に白ひげをなびかせながら、「さんた・るちや」の門を後にして、おごそかに申されたは、「悔い改むるものは、幸《さいはひ》ぢや。何しにその幸なものを、人間の手に罰しようぞ。これより益《ますます》、『でうす』の御戒《おんいましめ》を身にしめて、心静に末期《まつご》の御裁判《おんさばき》の日を待つたがよい。又『ろおれんぞ』がわが身の行儀を、御主『ぜす・きりしと』とひとしく奉らうず志は、この国の奉教人衆の中にあつても、類《たぐひ》稀なる徳行でござる。別して少年の身とは云ひ――」ああ、これは又何とした事でござらうぞ。ここまで申された伴天連は、俄《にはか》にはたと口を噤《つぐ》んで、あたかも「はらいそ」の光を望んだやうに、ぢつと足もとの「ろおれんぞ」の姿を見守られた。その恭《うやうや》しげな容子《ようす》はどうぢや。その両の手のふるへざまも、尋常《よのつね》の事ではござるまい。おう、伴天連のからびた頬の上には、とめどなく涙が溢れ流れるぞよ。
-　見られい。「しめおん」。見られい。傘張の翁。御主「ぜす・きりしと」の御血潮よりも赤い、火の光を一身に浴びて、声もなく「さんた・るちや」の門に横はつた、いみじくも美しい少年の胸には、焦げ破れた衣《ころも》のひまから、清らかな二つの乳房が、玉のやうに露《あらは》れて居るではないか。今は焼けただれた面輪《おもわ》にも、自《おのづか》らなやさしさは、隠れようすべもあるまじい。おう、「ろおれんぞ」は女ぢや。「ろおれんぞ」は女ぢや。見られい。猛火を後にして、垣のやうに佇んでゐる奉教人衆、邪淫の戒を破つたに由つて「さんた・るちや」を逐《お》はれた「ろおれんぞ」は、傘張の娘と同じ、眼《ま》なざしのあでやかなこの国の女ぢや。
-　まことにその刹那《せつな》の尊い恐しさは、あたかも「でうす」の御声が、星の光も見えぬ遠い空から、伝はつて来るやうであつたと申す。されば「さんた・るちや」の前に居並んだ奉教人衆は、風に吹かれる穂麦のやうに、誰からともなく頭を垂れて、悉《ことごとく》「ろおれんぞ」のまはりに跪《ひざまづ》いた。その中で聞えるものは、唯、空をどよもして燃えしきる、万丈の焔の響ばかりでござる。いや、誰やらの啜《すす》り泣く声も聞えたが、それは傘張の娘でござらうか。或は又自ら兄とも思うた、あの「いるまん」の「しめおん」でござらうか。やがてその寂寞《じやくまく》たるあたりをふるはせて、「ろおれんぞ」の上に高く手をかざしながら、伴天連の御経を誦《ず》せられる声が、おごそかに悲しく耳にはいつた。して御経の声がやんだ時、「ろおれんぞ」と呼ばれた、この国のうら若い女は、まだ暗い夜のあなたに、「はらいそ」の「ぐろおりや」を仰ぎ見て、安らかなほほ笑みを唇に止めたまま、静に息が絶えたのでござる。……
-　その女の一生は、この外に何一つ、知られなんだげに聞き及んだ。なれどそれが、何事でござらうぞ。なべて人の世の尊さは、何ものにも換へ難い、刹那の感動に極るものぢや。暗夜の海にも譬《たと》へようず煩悩心《ぼんなうしん》の空に一波をあげて、未《いまだ》出ぬ月の光を、水沫《みなわ》の中に捕へてこそ、生きて甲斐ある命とも申さうず。されば「ろおれんぞ」が最期を知るものは、「ろおれんぞ」の一生を知るものではござるまいか。
-
-　　　　　　　Ⅱ
-
-　予が所蔵に関る、長崎耶蘇会出版の一書、題して「れげんだ・おうれあ」と云ふ。蓋《けだ》し、LEGENDA AUREA の意なり。されど内容は必しも、西欧の所謂《いはゆる》「黄金伝説」ならず。彼土《かのど》の使徒聖人が言行を録すると共に、併《あは》せて本邦西教徒が勇猛精進の事蹟をも採録し、以て福音伝道の一助たらしめんとせしものの如し。
-　体裁は上下二巻、美濃紙摺《みのがみずり》草体交《さうたいまじ》り平仮名文にして、印刷甚しく鮮明を欠き、活字なりや否やを明にせず。上巻の扉には、羅甸《ラテン》字にて書名を横書し、その下に漢字にて「御出世以来千五百九十六年、慶長二年三月上旬｜鏤刻《るこく》也」の二行を縦書す。年代の左右には喇叭《らつぱ》を吹ける天使の画像あり。技巧｜頗《すこぶる》幼稚なれども、亦｜掬《きく》す可き趣致なしとせず。下巻も扉に「五月中旬鏤刻也」の句あるを除いては、全く上巻と異同なし。
-　両巻とも紙数は約六十頁にして、載《の》する所の黄金伝説は、上巻八章、下巻十章を数ふ。その他各巻の巻首に著者不明の序文及｜羅甸《ラテン》字を加へたる目次あり。序文は文章｜雅馴《がじゆん》ならずして、間々《まま》欧文を直訳せる如き語法を交へ、一見その伴天連たる西人の手になりしやを疑はしむ。
-　以上採録したる「奉教人の死」は、該《がい》「れげんだ・おうれあ」下巻第二章に依るものにして、恐らくは当時長崎の一西教寺院に起りし、事実の忠実なる記録ならんか。但、記事中の大火なるものは、「長崎港草」以下諸書に徴するも、その有無をすら明にせざるを以て、事実の正確なる年代に至つては、全くこれを決定するを得ず。
-　予は「奉教人の死」に於て、発表の必要上、多少の文飾を敢《あへ》てしたり。もし原文の平易雅馴なる筆致にして、甚しく毀損《きそん》せらるる事なからんか、予の幸甚とする所なりと云爾《しかいふ》。
-　　（大正七年八月）`;
-
     function confirmResetInput() {
         const first = confirm('入力を初期化しますが、よろしいですか？');
         if (!first) return;
@@ -7487,12 +7645,11 @@ function addNewTab() {
     function resetInputToStartup() {
         // コンテンツのリセット
         inputTabs = [
-            { id: 1, name: 'タブはリネームできます', content: defaultText },
-            { id: 2, name: '見本', content: sampleText }
+            { id: 1, name: 'タブはリネームできます', content: defaultText }
         ];
         window.inputTabs = inputTabs;
         activeTabId = 1;
-        nextTabId = 3;
+        nextTabId = 2;
         inputArea.value = defaultText;
         previewTabId = null;
         previewShowAll = false;
@@ -7829,7 +7986,11 @@ function addNewTab() {
     }
 
     function updateInputStats() {
-        const t = inputArea.value, tl = t.replace(/[\n\r]/g, '').length, nl = t.replace(/[\n\s　]/g, '').length, ll = t.split('\n').length;
+        
+        const t = inputArea.value;
+        const tl = t.replace(/[\n\r]/g, '').length;
+        const nl = computeNetLength(t);
+        const ll = t.split('\n').length;
         charCountEl.innerText = `全体: ${tl}`; inputNetCountEl.innerText = `実質: ${nl}`; lineCountEl.innerText = `${ll} 行`;
         const g = settingsCache.goalChars;
         if (g > 0) { const p = Math.round((nl / g) * 100); inputGoalEl.innerText = `目標: ${nl}/${g} (${p}%)`; inputGoalEl.className = 'goal-display ' + getGoalColorClass(p); } else { inputGoalEl.innerText = ''; }
@@ -8039,7 +8200,6 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
     }
 
     function updatePreview() {
-        renderPreviewTabs();
         const t = getPreviewContent(), ss = settingsCache.showSpace, sh = settingsCache.showHighlight;
         let s = escapeHtml(t); if (sh) previewContent.classList.add('highlight-active'); else previewContent.classList.remove('highlight-active');
         const MZ = '\uE001', MH = '\uE002'; if (ss) { s = s.replace(/　/g, MZ).replace(/ /g, MH); }
@@ -8050,7 +8210,10 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
         if (sh) s = s.replace(/([―─]{2,}|…{2,})/g, '<span class="symbol-hl">$1</span>');
         if (ss) { s = s.split(MZ).join('<span class="space-zen">□</span>').split(MH).join('<span class="space-han">･</span>'); }
         s = s.replace(/\n/g, '<br>'); previewContent.innerHTML = s;
-        const tl = t.replace(/[\n\r]/g, '').length, nl = t.replace(/[\n\s　｜《》]/g, '').length, ll = t.split('\n').length;
+        
+        const tl = t.replace(/[\n\r]/g, '').length;
+        const nl = computeNetLength(t);
+        const ll = t.split('\n').length;
         pvTotalCountEl.innerText = `全体: ${tl}`; pvNetCountEl.innerText = `実質: ${nl}`; pvLineCountEl.innerText = `${ll} 行`;
         const g = settingsCache.goalChars; if (g > 0) { const p = Math.round((nl / g) * 100); pvGoalEl.innerText = `目標: ${nl}/${g} (${p}%)`; pvGoalEl.className = 'goal-display ' + getGoalColorClass(p); } else { pvGoalEl.innerText = ''; }
         const tg = settingsCache.todayGoal; if (tg > 0) { const tw = Math.max(0, nl - todayStartChars), tp = Math.round((tw / tg) * 100); pvTodayGoalEl.innerText = `今日: ${tw}/${tg} (${tp}%)`; pvTodayGoalEl.className = tw >= tg ? 'today-goal achieved' : 'today-goal'; } else { pvTodayGoalEl.innerText = ''; }
@@ -8113,7 +8276,6 @@ function syncPreviewPositionCore() {
 
     function updatePreviewAndShow() {
         updatePreview();
-        renderPreviewTabs();
         const previewPane = document.getElementById('pane-preview');
         if (previewPane.classList.contains('hidden')) {
             previewPane.classList.remove('hidden');
@@ -10393,8 +10555,7 @@ function toggleMemoDock() {
             content = currentTab ? currentTab.content : '';
         }
         const blob = new Blob([content], { type: 'text/plain' });
-        const n = new Date();
-        const name = `memo_${n.getFullYear()}${(n.getMonth()+1).toString().padStart(2,'0')}${n.getDate().toString().padStart(2,'0')}.txt`;
+        const name = sanitizeFileName(`${getNovelBaseName()}_memo_${getDateStamp()}.txt`);
         const result = await saveBlobWithPicker(blob, name, [{ description: 'Text', accept: { 'text/plain': ['.txt'] } }], lastMemoSaveHandle);
         if (result.handle) lastMemoSaveHandle = result.handle;
         if (!result.handled) {
@@ -11569,6 +11730,18 @@ if (typeof applyPaneHeightSettings === 'function') {
         const base = sanitizeFileName(novelTitle || DEFAULT_NOVEL_TITLE);
         return base || 'novel';
     }
+    function getDateStamp(d = new Date()) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}${m}${day}`;
+    }
+    function buildSuggestedName(ext, scope = getSaveScope()) {
+        const base = getNovelBaseName();
+        const date = getDateStamp();
+        const suffix = (scope === 'all') ? '_all' : '';
+        return sanitizeFileName(`${base}_${date}${suffix}.${ext}`);
+    }
     function getSaveScope() { return document.querySelector('input[name="save-scope"]:checked')?.value || 'current'; }
     function getContentToSave(scope = getSaveScope()) { return scope === 'all' ? getAllTabsContent() : getCurrentTabContent(); }
     function setAutoSaveTarget(handle, type, scope) {
@@ -11587,7 +11760,7 @@ if (typeof applyPaneHeightSettings === 'function') {
         const scope = getSaveScope();
         const content = getContentToSave(scope);
         const b = new Blob([content], { type: 'text/plain' });
-        const name = `${getNovelBaseName()}.txt`;
+        const name = buildSuggestedName('txt', scope);
         const result = await saveBlobWithPicker(b, name, [{ description: 'Text', accept: { 'text/plain': ['.txt'] } }], lastTextSaveHandle);
         if (result.handle) lastTextSaveHandle = result.handle;
         if (!result.handled) {
@@ -11608,7 +11781,7 @@ if (typeof applyPaneHeightSettings === 'function') {
         const scope = getSaveScope();
         const h = buildHtmlExport(scope);
         const b = new Blob([h], { type: 'text/html' });
-        const name = `${getNovelBaseName()}.html`;
+        const name = buildSuggestedName('html', scope);
         const result = await saveBlobWithPicker(b, name, [{ description: 'HTML', accept: { 'text/html': ['.html'] } }], lastHtmlSaveHandle);
         if (result.handle) lastHtmlSaveHandle = result.handle;
         if (!result.handled) {
@@ -12303,7 +12476,7 @@ function updateActiveTabTitle() {}
 
     // Apply default preview hidden setting on first load
 // 初回（スーパーリロード・初起動）はプレビューを必ず表示
-if (!localStorage.getItem('cc_editor_session_started')) {
+if (!sessionStorage.getItem('cc_editor_session_started')) {
   const cb = document.getElementById('check-show-preview');
   const pane = document.getElementById('pane-preview');
   if (cb) cb.checked = true;
@@ -24813,6 +24986,319 @@ bindResize('cc-resize-sw', 'sw');
     };
   }
 })();
+
+/* ===== Card Edit Modals: draggable title bar + desktop-like resize (all edges/corners) ===== */
+(function(){
+  const mqMobile = window.matchMedia ? window.matchMedia('(max-width: 640px)') : null;
+  const isMobile = () => mqMobile ? mqMobile.matches : (window.innerWidth <= 640);
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+  const configs = [
+    { id: 'structure-edit-modal', winSel: '.structure-edit-box', headerSel: '.structure-edit-header', isShown: (m)=>m.classList.contains('show'), closeFn: 'closeStructureEditModal' },
+    { id: 'character-edit-modal', winSel: '.character-edit-box', headerSel: '.character-edit-header', isShown: (m)=>m.classList.contains('show'), closeFn: 'closeCharacterEditModal' },
+    { id: 'world-edit-modal',     winSel: '.world-edit-box',     headerSel: '.world-edit-header',     isShown: (m)=>m.classList.contains('show'), closeFn: 'closeWorldEditModal' },
+    // Terms modal uses inline style display switching
+    { id: 'terms-edit-modal',     winSel: '.structure-edit-box', headerSel: '.structure-edit-header', isShown: (m)=>{ const s = getComputedStyle(m); return s.display !== 'none' && s.visibility !== 'hidden'; }, closeFn: 'closeTermEditModal' },
+  ];
+
+  const states = Object.create(null); // per modal id: {left, top, width, height}
+
+  function initOne(cfg){
+    const modal = document.getElementById(cfg.id);
+    if (!modal) return;
+
+    const win = modal.querySelector(cfg.winSel);
+    const header = win ? win.querySelector(cfg.headerSel) : null;
+    if (!win || !header) return;
+
+    if (win.dataset.ccWindowInit === '1') return;
+    win.dataset.ccWindowInit = '1';
+
+    // Mark window + titlebar for shared CSS
+    win.classList.add('cc-window-box');
+    header.classList.add('cc-window-titlebar');
+
+    // Add resize handles once
+    (function ensureHandles(){
+      if (win.querySelector('.cc-resize-handle')) return;
+      const make = (cls) => { const d = document.createElement('div'); d.className = 'cc-resize-handle ' + cls; return d; };
+      const handles = [
+        make('cc-resize-n'),
+        make('cc-resize-e'),
+        make('cc-resize-s'),
+        make('cc-resize-w'),
+        make('cc-resize-ne'),
+        make('cc-resize-nw'),
+        make('cc-resize-se'),
+        make('cc-resize-sw'),
+      ];
+      handles.forEach(h => win.appendChild(h));
+    })();
+
+    // Put scrolling inside an inner body so the outer frame can be resized on its border
+    (function ensureScrollBody(){
+      if (win.querySelector(':scope > .cc-window-body')) return;
+
+      // Actions footer differs by modal; terms/structure share .structure-edit-actions
+      const actions = win.querySelector(':scope > .structure-edit-actions, :scope > .character-edit-actions, :scope > .world-edit-actions');
+      if (!actions) return;
+
+      const body = document.createElement('div');
+      body.className = 'cc-window-body';
+
+      // Move everything between header and actions into body
+      let node = header.nextSibling;
+      while (node && node !== actions){
+        const next = node.nextSibling;
+        body.appendChild(node);
+        node = next;
+      }
+
+      win.insertBefore(body, actions);
+    })();
+
+
+    function getMinMax(){
+      const cs = getComputedStyle(win);
+      const minW = parseFloat(cs.minWidth) || 360;
+      const minH = parseFloat(cs.minHeight) || 240;
+      return { minW, minH };
+    }
+
+    function captureState(){
+      if (isMobile()) return;
+      const r = win.getBoundingClientRect();
+      states[cfg.id] = { left: r.left, top: r.top, width: r.width, height: r.height };
+    }
+
+    function applyStateOrCenter(){
+      if (isMobile()) return;
+
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const { minW, minH } = getMinMax();
+      const st = states[cfg.id];
+
+      // Apply saved size first (so centering uses actual size)
+      if (st && typeof st.width === 'number' && typeof st.height === 'number'){
+        const maxW = vw - 16;
+        const maxH = vh - 16;
+        const w = clamp(st.width,  minW, maxW);
+        const h = clamp(st.height, minH, maxH);
+        win.style.width  = Math.round(w) + 'px';
+        win.style.height = Math.round(h) + 'px';
+      }
+
+      const rect = win.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      let left = (st && typeof st.left === 'number') ? st.left : Math.round((vw - w) / 2);
+      let top  = (st && typeof st.top  === 'number') ? st.top  : Math.round((vh - h) / 2);
+
+      left = clamp(left, 8, vw - w - 8);
+      top  = clamp(top,  8, vh - h - 8);
+
+      win.style.left = Math.round(left) + 'px';
+      win.style.top  = Math.round(top)  + 'px';
+    }
+
+    // React to show/hide
+    let lastVisible = null;
+    const mo = new MutationObserver(() => {
+      const vis = !!cfg.isShown(modal);
+      if (vis && !lastVisible){
+        requestAnimationFrame(applyStateOrCenter);
+      }
+      if (!vis && lastVisible){
+        try{ captureState(); }catch(_){}
+      }
+      lastVisible = vis;
+    });
+    mo.observe(modal, { attributes: true, attributeFilter: ['class','style'] });
+
+    // If already visible at load (rare)
+    lastVisible = !!cfg.isShown(modal);
+    if (lastVisible) requestAnimationFrame(applyStateOrCenter);
+
+    // Re-clamp on viewport resize
+    window.addEventListener('resize', () => {
+      if (!cfg.isShown(modal) || isMobile()) return;
+
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const { minW, minH } = getMinMax();
+
+      const r = win.getBoundingClientRect();
+      let left = clamp(r.left, 0, vw - r.width);
+      let top  = clamp(r.top,  0, vh - r.height);
+
+      const maxW = vw - left - 8;
+      const maxH = vh - top  - 8;
+
+      win.style.left = Math.round(left) + 'px';
+      win.style.top  = Math.round(top)  + 'px';
+      win.style.width  = Math.round(clamp(r.width,  minW, maxW)) + 'px';
+      win.style.height = Math.round(clamp(r.height, minH, maxH)) + 'px';
+      captureState();
+    });
+
+    // Drag (title bar)
+    header.addEventListener('pointerdown', (ev) => {
+      if (isMobile()) return;
+      if (ev.button !== 0) return;
+      if (ev.target && ev.target.closest('button, a, input, textarea, select, details, summary')) return;
+
+      ev.preventDefault();
+
+      const startRect = win.getBoundingClientRect();
+      const startX = ev.clientX;
+      const startY = ev.clientY;
+      const w = startRect.width;
+      const h = startRect.height;
+
+      document.documentElement.classList.add('cc-window-dragging');
+
+      const onMove = (e) => {
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        let left = startRect.left + dx;
+        let top  = startRect.top  + dy;
+
+        left = clamp(left, 0, vw - w);
+        top  = clamp(top,  0, vh - h);
+
+        win.style.left = Math.round(left) + 'px';
+        win.style.top  = Math.round(top)  + 'px';
+      };
+
+      const onUp = () => {
+        document.documentElement.classList.remove('cc-window-dragging');
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        captureState();
+      };
+
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    });
+
+    // Resize handles (all edges / corners)
+    function beginResize(dir, ev){
+      if (isMobile()) return;
+      if (ev.button !== 0) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+
+      try { ev.target && ev.target.setPointerCapture && ev.target.setPointerCapture(ev.pointerId); } catch(_) {}
+
+      const r = win.getBoundingClientRect();
+      const startX = ev.clientX;
+      const startY = ev.clientY;
+
+      const startLeft = r.left;
+      const startTop  = r.top;
+      const startW = r.width;
+      const startH = r.height;
+
+      const startRight  = startLeft + startW;
+      const startBottom = startTop  + startH;
+
+      const { minW, minH } = getMinMax();
+
+      document.documentElement.classList.add('cc-window-resizing');
+
+      const onMove = (e) => {
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        let newLeft = startLeft;
+        let newTop  = startTop;
+        let newW    = startW;
+        let newH    = startH;
+
+        // Horizontal
+        if (dir.includes('e')){
+          const maxW = vw - startLeft - 8;
+          newW = clamp(startW + dx, minW, maxW);
+        }
+        if (dir.includes('w')){
+          newLeft = clamp(startLeft + dx, 8, startRight - minW);
+          newW = startRight - newLeft;
+        }
+
+        // Vertical
+        if (dir.includes('s')){
+          const maxH = vh - startTop - 8;
+          newH = clamp(startH + dy, minH, maxH);
+        }
+        if (dir.includes('n')){
+          newTop = clamp(startTop + dy, 8, startBottom - minH);
+          newH = startBottom - newTop;
+        }
+
+        // Final safety clamp (keeps window inside viewport)
+        newW = clamp(newW, minW, vw - newLeft - 8);
+        newH = clamp(newH, minH, vh - newTop  - 8);
+
+        win.style.left   = Math.round(newLeft) + 'px';
+        win.style.top    = Math.round(newTop)  + 'px';
+        win.style.width  = Math.round(newW)    + 'px';
+        win.style.height = Math.round(newH)    + 'px';
+      };
+
+      const onUp = () => {
+        document.documentElement.classList.remove('cc-window-resizing');
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        captureState();
+      };
+
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    }
+
+    const bindResize = (cls, dir) => {
+      const el = win.querySelector('.' + cls);
+      if (!el) return;
+      el.addEventListener('pointerdown', beginResize.bind(null, dir));
+    };
+    bindResize('cc-resize-n',  'n');
+    bindResize('cc-resize-e',  'e');
+    bindResize('cc-resize-s',  's');
+    bindResize('cc-resize-w',  'w');
+    bindResize('cc-resize-ne', 'ne');
+    bindResize('cc-resize-nw', 'nw');
+    bindResize('cc-resize-se', 'se');
+    bindResize('cc-resize-sw', 'sw');
+
+    // Capture state on any close function (if present)
+    const fnName = cfg.closeFn;
+    if (fnName && typeof window[fnName] === 'function' && !window[fnName].__ccWindowWrapped){
+      const orig = window[fnName];
+      const wrapped = function(){
+        try { captureState(); } catch(_) {}
+        return orig.apply(this, arguments);
+      };
+      wrapped.__ccWindowWrapped = true;
+      window[fnName] = wrapped;
+    }
+  }
+
+  function initAll(){ configs.forEach(initOne); }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', initAll, { once: true });
+  } else {
+    initAll();
+  }
+})();
+
 
 </script>
 
