@@ -159,8 +159,8 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
         --panel-body-pad: 18px 10px 10px 10px;
     }
     body.theme-dark {
-  /* ensure character header+toolbar use same tone in dark theme */
-  body.theme-dark { --pane-character-head-strong: var(--pane-character-head); }
+        /* ensure character header+toolbar use same tone in dark theme */
+        --pane-character-head-strong: var(--pane-character-head);
         --bg-color: #1f2937; --panel-bg: #374151; --border-color: #4b5563;
         --preview-bg-color: #2d3748; --text-color: #f3f4f6; --text-muted: #9ca3af;
         --header-bg: #111827; --pane-header-bg: #4b5563;
@@ -9595,10 +9595,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
     }
 
-    // Close non-pinned control panels on outside click (robust)
-    // NOTE: Some environments may not include the panel/button in composedPath (e.g. scrollbar/overlay quirks).
-    // We therefore add a coordinate-based "inside" check before closing panels.
-    document.addEventListener('click', e => {
+    function handleControlPanelOutsideClick(e) {
         // モーダル/ダイアログ表示中は背面の自動クローズを抑止
         if (document.body && document.body.classList.contains('cc-modal-open')) return;
         if (eventPathHas(e, '.control-panel, .btn, .dropdown, .context-menu')) return;
@@ -9611,15 +9608,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         updateControlPanelScrollState();
         updatePanelButtonStates();
-    }, true);
+    }
 
-    // Close non-docked memo/outline/structure/character/world/search on outside click (robust)
-    document.addEventListener('click', e => {
+    function handleDockedPanelOutsideClick(e) {
         // パネル操作中（タブクリック等）に誤って閉じないようにする
         if (window.memoInteracting || window.outlineInteracting || window.structureInteracting || window.characterInteracting || window.worldInteracting) return;
         // 編集モーダル/保存・読込ダイアログ等が開いている間は背面パネルを自動で閉じない
         if (document.body && document.body.classList.contains('cc-modal-open')) return;
-
 
         // モーダルやダイアログ、コンテキストメニュー、色選択が開いている場合は閉じない
         if (eventPathHas(e, '.modal-overlay, .save-dialog-overlay, .import-dialog-overlay')) return;
@@ -9639,7 +9634,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .map(id => document.getElementById(id))
             .filter(el => el && el.classList.contains('open'));
         if (__openPanels.some(el => clickInsideRect(e, el))) return;
-
 
         const mainContainer = document.getElementById('main-container');
         if (!mainContainer.classList.contains('memo-docked')) {
@@ -9666,6 +9660,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof updateTermsButtonState === 'function') updateTermsButtonState();
         if (typeof updateCharacterButtonState === 'function') updateCharacterButtonState();
         if (typeof updateWorldButtonState === 'function') updateWorldButtonState();
+    }
+
+    // Close panels on outside click (robust)
+    // NOTE: Some environments may not include the panel/button in composedPath (e.g. scrollbar/overlay quirks).
+    // We therefore add a coordinate-based "inside" check before closing panels.
+    document.addEventListener('click', e => {
+        handleControlPanelOutsideClick(e);
+        handleDockedPanelOutsideClick(e);
     }, true);
 
     function hidePane(t) {
@@ -12804,12 +12806,16 @@ function setupMemoInteractionGuard() {
   
 // Ensure these helpers exist globally (some context-menu code lives in other script scopes)
 window.hideContextMenusOnly = window.hideContextMenusOnly || function(){
-  ['tab-context-menu','header-context-menu'].forEach(id=>{
+  ['tab-context-menu', 'header-context-menu'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display='none';
   });
 };
 window.hideAllContextMenus = window.hideAllContextMenus || function(){
-  ['tab-context-menu','header-context-menu','color-picker-popup'].forEach(id=>{
+  [
+    'tab-context-menu', 'header-context-menu', 'color-picker-popup',
+    'structure-context-menu','character-context-menu','world-context-menu','terms-context-menu',
+    'memo-context-menu','outline-context-menu','search-context-menu'
+  ].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display='none';
   });
 };
@@ -15297,7 +15303,7 @@ panel.style.width = '320px';
       }
 
       // Pane header right-click for header color
-      const header = e.target.closest('.pane-header, .panel-header, .panel-header, .panel-header, .panel-header, .panel-header, .panel-header');
+      const header = e.target.closest('.pane-header, .panel-header');
       if (header && !e.target.closest('#novel-title')) {
         e.preventDefault();
         showHeaderContextMenu(e, header);
@@ -15322,12 +15328,13 @@ panel.style.width = '320px';
       menu.addEventListener('click', (e)=>{ e.stopPropagation(); }, true);
     }
 
-        let html = `
-      <div class="context-menu-item" data-action="header-color" data-pane="${paneId}">🎨 ヘッダーカラーの変更</div>
-      <div class="context-menu-item" data-action="bg-color" data-pane="${paneId}">🖼️ 背景色の変更</div>
+    let html = `
+      <div class="context-menu-item" data-action="rename">✏️ タブ名を変更</div>
+      <div class="context-menu-item" data-action="duplicate">📄 タブを複製</div>
+      <div class="context-menu-item" data-action="new">➕ 新しいタブ</div>
+      <div class="context-menu-item" data-action="color">🎨 タブ色の変更</div>
       <div class="context-menu-sep"></div>
-      <div class="context-menu-item" data-action="header-reset" data-pane="${paneId}">↩️ ヘッダーカラーをリセット</div>
-      <div class="context-menu-item" data-action="bg-reset" data-pane="${paneId}">↩️ 背景色をリセット</div>
+      <div class="context-menu-item" data-action="close">🗑️ タブを閉じる</div>
     `;
     menu.innerHTML = html;
 // Add event listeners to menu items
@@ -15412,27 +15419,13 @@ panel.style.width = '320px';
     }, 0);
   }
 
-  function hideContextMenusOnly(){
-    ['tab-context-menu', 'header-context-menu'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = 'none';
-    });
-  }
-
   function hideAllContextMenus(){
-    ['tab-context-menu', 'header-context-menu', 'color-picker-popup',
-     'structure-context-menu','character-context-menu','world-context-menu','terms-context-menu',
-     'memo-context-menu','outline-context-menu','search-context-menu'
-    ].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = 'none';
-    });
+    if (window.hideAllContextMenus) window.hideAllContextMenus();
     if (contextMenuClickHandler) {
       document.removeEventListener('click', contextMenuClickHandler);
       contextMenuClickHandler = null;
     }
   }
-  window.hideAllContextMenus = hideAllContextMenus;
 
   function normalizePaneKey(pane){
     if (!pane) return '';
