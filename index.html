@@ -13109,7 +13109,7 @@ function setupMemoInteractionGuard() {
       // parse structured tabs (reuse if exists)
       const parseStructuredTabs = window.parseStructuredTabs || function(text, marker){
         const lines = String(text).split(/\r?\n/);
-        const rx = new RegExp(`^\${marker}\s*(.*)$`);
+        const rx = new RegExp(`^\\${marker}\\s*(.*)$`);
         const tabs=[];
         let cur=null;
         for(const line of lines){
