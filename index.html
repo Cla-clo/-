@@ -943,14 +943,80 @@ background: transparent;
     }
     textarea::selection { background-color: #bae6fd; color: #000; }
     .vertical-mode textarea { overflow-x: auto; overflow-y: hidden; }
-    textarea.typewriter-mode { padding-bottom: 45%; }
-    .vertical-mode textarea.typewriter-mode { padding-bottom: 20px; padding-left: 45%; }
+    textarea.typewriter-mode { padding-bottom: var(--typewriter-pad-bottom, 45%); }
+    .vertical-mode textarea.typewriter-mode { padding-bottom: 20px; padding-left: var(--typewriter-pad-left, 45%); }
     #input-mirror-container {
         position: absolute; top: 0; left: 0; right: 0; bottom: 0;
         visibility: hidden; pointer-events: none;
         white-space: pre-wrap; word-wrap: break-word; overflow: hidden; padding: 20px; box-sizing: border-box;
     }
     .vertical-mode textarea, .vertical-mode #input-mirror-container { writing-mode: vertical-rl; text-orientation: upright; }
+
+    #pane-input .pane-body { position: relative; }
+    .typewriter-ruler {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        pointer-events: none;
+        z-index: 4;
+    }
+    .typewriter-ruler.is-active { display: flex; }
+    .typewriter-ruler-line {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: rgba(245, 158, 11, 0.6);
+        box-shadow: 0 1px 6px rgba(245, 158, 11, 0.35);
+    }
+    .typewriter-ruler-label {
+        background: var(--panel-bg);
+        color: var(--text-muted);
+        font-size: 0.7rem;
+        padding: 2px 10px;
+        border: 1px dashed rgba(245, 158, 11, 0.55);
+        border-radius: 999px;
+        position: relative;
+        z-index: 1;
+        white-space: nowrap;
+        pointer-events: auto;
+    }
+    .typewriter-ruler-handle {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2px solid rgba(245, 158, 11, 0.7);
+        background: var(--panel-bg);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+        pointer-events: auto;
+        cursor: ns-resize;
+        position: relative;
+        z-index: 1;
+    }
+    .typewriter-ruler.is-vertical {
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        flex-direction: column;
+    }
+    .typewriter-ruler.is-vertical .typewriter-ruler-line {
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        right: auto;
+        width: 2px;
+        height: 100%;
+        transform: translateX(-50%);
+    }
+    .typewriter-ruler.is-vertical .typewriter-ruler-handle { cursor: ew-resize; }
 
     #preview-scroll { width: 100%; height: 100%; padding: 20px; scroll-behavior: smooth; overflow-x: auto; overflow-y: auto; box-sizing: border-box; min-width: 0; position: relative; }
     #preview-scroll.vertical-mode { overflow-x: auto !important; overflow-y: hidden !important; height: 100%; width: 100%; max-width: 100%; }
@@ -5565,6 +5631,11 @@ body.theme-dark{
             </div>
             <div class="pane-subheader" id="input-pos-bar">現在: 1 行目</div>
             <div class="pane-body">
+                <div id="typewriter-ruler" class="typewriter-ruler" aria-hidden="true">
+                    <div class="typewriter-ruler-line"></div>
+                    <div class="typewriter-ruler-label">ここで書く</div>
+                    <div class="typewriter-ruler-handle" title="ドラッグで位置を調整"></div>
+                </div>
                 <div id="input-mirror-container"></div>
                 <textarea id="input-area" spellcheck="false"></textarea>
                 <div id="input-sel-overlay" class="selection-overlay"></div>
@@ -6673,6 +6744,7 @@ initTabScrollers();
     const inputReadingEl = document.getElementById('input-reading-time');
     const inputManuscriptEl = document.getElementById('input-manuscript');
     const inputSelOverlay = document.getElementById('input-sel-overlay');
+    const typewriterRuler = document.getElementById('typewriter-ruler');
     const pvTotalCountEl = document.getElementById('pv-total-count');
     const pvNetCountEl = document.getElementById('pv-net-count');
     const pvLineCountEl = document.getElementById('pv-line-count');
@@ -6695,7 +6767,7 @@ initTabScrollers();
     let settingsCache = {
         goalChars: 150000, todayGoal: 2000, manuscriptRows: 34, manuscriptCols: 42,
         showReadingTime: true, showManuscript: true, showSpace: true, showHighlight: true,
-        typewriterMode: false, writingTracker: true, defaultPreviewHidden: false,
+        typewriterMode: false, writingTracker: true, defaultPreviewHidden: false, typewriterRulerPos: 0.5,
         celebrateGoal: true, openMode: 'current', autosaveInterval: 60, autosaveEnabled: false, maxPinnedPanels: 4,
         panelSideMap: { memo:'left', outline:'left', search:'left', structure:'left', character:'left', world:'left', terms:'left' }
     };
@@ -7201,7 +7273,7 @@ function addNewTab() {
             input: { size: document.getElementById('st-in-size').value, line: document.getElementById('st-in-line').value, font: document.getElementById('st-in-font').value, vertical: document.getElementById('st-in-v').checked },
             preview: { size: document.getElementById('st-pv-size').value, line: document.getElementById('st-pv-line').value, font: document.getElementById('st-pv-font').value, vertical: document.getElementById('st-pv-v').checked },
             display: { showSpace: document.getElementById('st-show-space').checked, showHighlight: document.getElementById('st-show-highlight').checked, showInput: document.getElementById('check-show-input').checked, showPreview: document.getElementById('check-show-preview').checked, defaultPreviewHidden: document.getElementById('st-default-preview-hidden').checked },
-            writing: { typewriter: document.getElementById('st-typewriter-mode').checked, tracker: document.getElementById('st-writing-tracker').checked },
+            writing: { typewriter: document.getElementById('st-typewriter-mode').checked, tracker: document.getElementById('st-writing-tracker').checked, rulerPos: settingsCache.typewriterRulerPos ?? 0.5 },
             goal: { chars: document.getElementById('st-goal-chars').value, today: document.getElementById('st-today-goal').value, showReading: document.getElementById('st-show-reading-time').checked, celebrate: document.getElementById('st-celebrate-goal').checked },
             manuscript: { rows: document.getElementById('st-manuscript-rows').value, cols: document.getElementById('st-manuscript-cols').value, show: document.getElementById('st-show-manuscript').checked },
             open: { mode: document.querySelector('input[name="st-open-mode"]:checked')?.value || 'current' },
@@ -7235,7 +7307,14 @@ function addNewTab() {
             document.getElementById('check-show-preview').checked = s.display.showPreview !== false;
             document.getElementById('st-default-preview-hidden').checked = s.display.defaultPreviewHidden || false;
         }
-        if (s.writing) { document.getElementById('st-typewriter-mode').checked = s.writing.typewriter || false; document.getElementById('st-writing-tracker').checked = s.writing.tracker !== false; }
+        if (s.writing) {
+            document.getElementById('st-typewriter-mode').checked = s.writing.typewriter || false;
+            document.getElementById('st-writing-tracker').checked = s.writing.tracker !== false;
+            if (s.writing.rulerPos !== undefined) {
+                const parsed = parseFloat(s.writing.rulerPos);
+                if (!Number.isNaN(parsed)) settingsCache.typewriterRulerPos = Math.min(0.95, Math.max(0.05, parsed));
+            }
+        }
         if (s.goal) { document.getElementById('st-goal-chars').value = s.goal.chars || 150000; document.getElementById('st-today-goal').value = s.goal.today || 2000; document.getElementById('st-show-reading-time').checked = s.goal.showReading !== false; document.getElementById('st-celebrate-goal').checked = s.goal.celebrate !== false; }
         if (s.manuscript) {
             document.getElementById('st-manuscript-rows').value = s.manuscript.rows || 34;
@@ -7549,6 +7628,7 @@ function addNewTab() {
             // 執筆補助
             document.getElementById('st-typewriter-mode').checked = false;
             document.getElementById('st-writing-tracker').checked = true;
+            settingsCache.typewriterRulerPos = 0.5;
 
             // 目標/換算
             document.getElementById('st-goal-chars').value = 150000;
@@ -7710,6 +7790,7 @@ function addNewTab() {
         document.getElementById('st-default-preview-hidden').checked = false;
         document.getElementById('st-typewriter-mode').checked = false;
         document.getElementById('st-writing-tracker').checked = true;
+        settingsCache.typewriterRulerPos = 0.5;
         document.getElementById('st-goal-chars').value = 150000;
         document.getElementById('st-today-goal').value = 2000;
         document.getElementById('st-celebrate-goal').checked = true;
@@ -8615,6 +8696,7 @@ const fontMap = { 'font-gothic': '"Noto Sans JP", sans-serif', 'font-mincho': '"
     else inputArea.parentElement.classList.remove('vertical-mode');
 
     if (typeof invalidateInputStyleCache === 'function') invalidateInputStyleCache();
+    updateTypewriterRulerPosition();
     updateWritingModeButtonLabels();
 }
 
@@ -8652,9 +8734,12 @@ function applyDisplaySettings() {
         if (typeof invalidateInputStyleCache === 'function') invalidateInputStyleCache();
         if (settingsCache.typewriterMode) {
             inputArea.classList.add('typewriter-mode');
+            updateTypewriterRulerVisibility();
+            updateTypewriterRulerPosition();
             scrollToCursorPosition(inputArea.selectionStart);
         } else {
             inputArea.classList.remove('typewriter-mode');
+            updateTypewriterRulerVisibility();
         }
     }
     function applyGoalSettings() { settingsCache.goalChars = parseInt(document.getElementById('st-goal-chars').value) || 0; settingsCache.todayGoal = parseInt(document.getElementById('st-today-goal').value) || 0; settingsCache.showReadingTime = document.getElementById('st-show-reading-time').checked; settingsCache.celebrateGoal = document.getElementById('st-celebrate-goal').checked; goalAchieved = { today: false, total: false }; updateInputStats(); updatePreview(); }
@@ -10208,6 +10293,55 @@ if (typeof adjustPaneHeightsOnVisibility === 'function') {
         cachedInputStyle = null;
     }
 
+    function getTypewriterRulerRatio() {
+        if (typeof settingsCache.typewriterRulerPos === 'number') return settingsCache.typewriterRulerPos;
+        return 0.5;
+    }
+
+    function getTypewriterPadding(ratio, isVertical) {
+        const padPercent = Math.round((1 - ratio) * 100);
+        if (isVertical) {
+            return { padBottom: '20px', padLeft: `${padPercent}%` };
+        }
+        return { padBottom: `${padPercent}%`, padLeft: '20px' };
+    }
+
+    function updateTypewriterRulerVisibility() {
+        if (!typewriterRuler) return;
+        typewriterRuler.classList.toggle('is-active', settingsCache.typewriterMode);
+    }
+
+    function updateTypewriterRulerPosition() {
+        if (!typewriterRuler || !inputArea) return;
+        const ratio = getTypewriterRulerRatio();
+        const isVertical = inputArea.parentElement.classList.contains('vertical-mode');
+        typewriterRuler.classList.toggle('is-vertical', isVertical);
+        if (isVertical) {
+            typewriterRuler.style.left = `${ratio * 100}%`;
+            typewriterRuler.style.top = '0';
+            typewriterRuler.style.bottom = '0';
+            typewriterRuler.style.right = 'auto';
+            typewriterRuler.style.transform = 'translateX(-50%)';
+        } else {
+            typewriterRuler.style.top = `${ratio * 100}%`;
+            typewriterRuler.style.left = '0';
+            typewriterRuler.style.right = '0';
+            typewriterRuler.style.bottom = 'auto';
+            typewriterRuler.style.transform = 'translateY(-50%)';
+        }
+        const pad = getTypewriterPadding(ratio, isVertical);
+        inputArea.style.setProperty('--typewriter-pad-bottom', pad.padBottom);
+        inputArea.style.setProperty('--typewriter-pad-left', pad.padLeft);
+    }
+
+    function setTypewriterRulerRatio(value, { persist = true, scroll = false } = {}) {
+        const ratio = Math.min(0.95, Math.max(0.05, value));
+        settingsCache.typewriterRulerPos = ratio;
+        updateTypewriterRulerPosition();
+        if (persist && typeof saveSettingsToStorage === 'function') saveSettingsToStorage();
+        if (scroll && settingsCache.typewriterMode) scrollToCursorPosition(inputArea.selectionStart);
+    }
+
     function scrollToCursorPosition(idx) {
         if (scrollToCursorTimeout) clearTimeout(scrollToCursorTimeout);
         scrollToCursorTimeout = setTimeout(() => scrollToCursorPositionCore(idx), 16);
@@ -10215,17 +10349,78 @@ if (typeof adjustPaneHeightsOnVisibility === 'function') {
 
     function scrollToCursorPositionCore(idx) {
         const t = inputArea.value, v = document.getElementById('st-in-v').checked, cs = getCachedInputStyle();
-        const padBottom = v ? '20px' : '45%';
-        const padLeft = v ? '45%' : '20px';
+        const ratio = getTypewriterRulerRatio();
+        const pad = getTypewriterPadding(ratio, v);
+        const padBottom = pad.padBottom;
+        const padLeft = pad.padLeft;
         inputMirror.style.cssText = `font-size:${cs.fontSize};line-height:${cs.lineHeight};font-family:${cs.fontFamily};width:${inputArea.clientWidth}px;height:${inputArea.clientHeight}px;padding:20px 20px ${padBottom} ${padLeft};box-sizing:border-box;${v ? 'writing-mode:vertical-rl;text-orientation:upright;' : ''}`;
         const tc = t.substring(0, idx), m = document.createElement('span'); m.textContent = '|'; inputMirror.innerHTML = ''; inputMirror.appendChild(document.createTextNode(tc)); inputMirror.appendChild(m);
         const mr = m.getBoundingClientRect(), mir = inputMirror.getBoundingClientRect(), mot = mr.top - mir.top + inputMirror.scrollTop, mol = mr.left - mir.left + inputMirror.scrollLeft;
         if (v) {
-            inputArea.scrollLeft = mol - (inputArea.clientWidth / 2);
+            inputArea.scrollLeft = mol - (inputArea.clientWidth * ratio);
         } else {
-            inputArea.scrollTop = mot - (inputArea.clientHeight / 2);
+            inputArea.scrollTop = mot - (inputArea.clientHeight * ratio);
         }
     }
+
+    let rulerDragging = false;
+    function getPointerPosition(event) {
+        if (event.touches && event.touches[0]) {
+            return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+        }
+        return { x: event.clientX, y: event.clientY };
+    }
+
+    function updateRulerFromPointer(event) {
+        if (!inputArea) return;
+        const paneBody = inputArea.parentElement;
+        const rect = paneBody.getBoundingClientRect();
+        const isVertical = paneBody.classList.contains('vertical-mode');
+        const point = getPointerPosition(event);
+        const ratio = isVertical ? (point.x - rect.left) / rect.width : (point.y - rect.top) / rect.height;
+        setTypewriterRulerRatio(ratio, { persist: true, scroll: true });
+    }
+
+    function stopRulerDrag() {
+        rulerDragging = false;
+        document.body.classList.remove('ruler-dragging');
+        window.removeEventListener('mousemove', onRulerDrag);
+        window.removeEventListener('mouseup', stopRulerDrag);
+        window.removeEventListener('touchmove', onRulerDrag);
+        window.removeEventListener('touchend', stopRulerDrag);
+    }
+
+    function onRulerDrag(event) {
+        if (!rulerDragging) return;
+        event.preventDefault();
+        updateRulerFromPointer(event);
+    }
+
+    function startRulerDrag(event) {
+        if (!settingsCache.typewriterMode) return;
+        rulerDragging = true;
+        document.body.classList.add('ruler-dragging');
+        updateRulerFromPointer(event);
+        window.addEventListener('mousemove', onRulerDrag);
+        window.addEventListener('mouseup', stopRulerDrag);
+        window.addEventListener('touchmove', onRulerDrag, { passive: false });
+        window.addEventListener('touchend', stopRulerDrag);
+    }
+
+    if (typewriterRuler) {
+        const dragTargets = [
+            typewriterRuler.querySelector('.typewriter-ruler-handle'),
+            typewriterRuler.querySelector('.typewriter-ruler-label')
+        ].filter(Boolean);
+        dragTargets.forEach(target => {
+            target.addEventListener('mousedown', startRulerDrag);
+            target.addEventListener('touchstart', startRulerDrag, { passive: false });
+        });
+    }
+
+    window.addEventListener('resize', () => {
+        updateTypewriterRulerPosition();
+    });
 
 
     function getPreviewLineStartRect(lineNum) {
