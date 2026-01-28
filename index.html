@@ -943,6 +943,8 @@ background: transparent;
     }
     textarea::selection { background-color: #bae6fd; color: #000; }
     .vertical-mode textarea { overflow-x: auto; overflow-y: hidden; }
+    textarea.typewriter-mode { padding-bottom: 45%; }
+    .vertical-mode textarea.typewriter-mode { padding-bottom: 20px; padding-left: 45%; }
     #input-mirror-container {
         position: absolute; top: 0; left: 0; right: 0; bottom: 0;
         visibility: hidden; pointer-events: none;
@@ -8032,7 +8034,12 @@ function addNewTab() {
     }
     function updateCursorLineDisplay() { const p = inputArea.selectionStart, c = (inputArea.value.substring(0, p).match(/\n/g) || []).length + 1; inputPosBar.innerText = `現在: ${c} 行目`; }
 
+    let allTabsStatsTimeout = null;
     function updateAllTabsStats() {
+        if (allTabsStatsTimeout) clearTimeout(allTabsStatsTimeout);
+        allTabsStatsTimeout = setTimeout(updateAllTabsStatsCore, 300);
+    }
+    function updateAllTabsStatsCore() {
         const currentTab = inputTabs.find(t => t.id === activeTabId);
         if (currentTab) currentTab.content = inputArea.value;
         const allText = inputTabs.map(t => t.content || '').join('\n');
@@ -8606,6 +8613,7 @@ const fontMap = { 'font-gothic': '"Noto Sans JP", sans-serif', 'font-mincho': '"
     if (v) inputArea.parentElement.classList.add('vertical-mode');
     else inputArea.parentElement.classList.remove('vertical-mode');
 
+    if (typeof invalidateInputStyleCache === 'function') invalidateInputStyleCache();
     updateWritingModeButtonLabels();
 }
 
@@ -8636,7 +8644,18 @@ function applyDisplaySettings() {
         adjustPaneWidthsOnVisibility();
         updatePreview();
     }
-    function applyWritingSettings() { settingsCache.typewriterMode = document.getElementById('st-typewriter-mode').checked; settingsCache.writingTracker = document.getElementById('st-writing-tracker').checked; updateWritingTimeDisplay(); }
+    function applyWritingSettings() {
+        settingsCache.typewriterMode = document.getElementById('st-typewriter-mode').checked;
+        settingsCache.writingTracker = document.getElementById('st-writing-tracker').checked;
+        updateWritingTimeDisplay();
+        if (typeof invalidateInputStyleCache === 'function') invalidateInputStyleCache();
+        if (settingsCache.typewriterMode) {
+            inputArea.classList.add('typewriter-mode');
+            scrollToCursorPosition(inputArea.selectionStart);
+        } else {
+            inputArea.classList.remove('typewriter-mode');
+        }
+    }
     function applyGoalSettings() { settingsCache.goalChars = parseInt(document.getElementById('st-goal-chars').value) || 0; settingsCache.todayGoal = parseInt(document.getElementById('st-today-goal').value) || 0; settingsCache.showReadingTime = document.getElementById('st-show-reading-time').checked; settingsCache.celebrateGoal = document.getElementById('st-celebrate-goal').checked; goalAchieved = { today: false, total: false }; updateInputStats(); updatePreview(); }
     function applyManuscriptSettings() {
         settingsCache.manuscriptRows = parseInt(document.getElementById('st-manuscript-rows').value) || 34;
@@ -10171,12 +10190,40 @@ if (typeof adjustPaneHeightsOnVisibility === 'function') {
         hideQuickInsertPopup();
     }
 
+    let scrollToCursorTimeout = null;
+    let cachedInputStyle = null;
+    let cachedInputStyleTime = 0;
+
+    function getCachedInputStyle() {
+        const now = Date.now();
+        if (!cachedInputStyle || now - cachedInputStyleTime > 500) {
+            cachedInputStyle = window.getComputedStyle(inputArea);
+            cachedInputStyleTime = now;
+        }
+        return cachedInputStyle;
+    }
+
+    function invalidateInputStyleCache() {
+        cachedInputStyle = null;
+    }
+
     function scrollToCursorPosition(idx) {
-        const t = inputArea.value, v = document.getElementById('st-in-v').checked, cs = window.getComputedStyle(inputArea);
-        inputMirror.style.fontSize = cs.fontSize; inputMirror.style.lineHeight = cs.lineHeight; inputMirror.style.fontFamily = cs.fontFamily; inputMirror.style.width = inputArea.clientWidth + 'px'; inputMirror.style.height = inputArea.clientHeight + 'px';
+        if (scrollToCursorTimeout) clearTimeout(scrollToCursorTimeout);
+        scrollToCursorTimeout = setTimeout(() => scrollToCursorPositionCore(idx), 16);
+    }
+
+    function scrollToCursorPositionCore(idx) {
+        const t = inputArea.value, v = document.getElementById('st-in-v').checked, cs = getCachedInputStyle();
+        const padBottom = v ? '20px' : '45%';
+        const padLeft = v ? '45%' : '20px';
+        inputMirror.style.cssText = `font-size:${cs.fontSize};line-height:${cs.lineHeight};font-family:${cs.fontFamily};width:${inputArea.clientWidth}px;height:${inputArea.clientHeight}px;padding:20px 20px ${padBottom} ${padLeft};box-sizing:border-box;${v ? 'writing-mode:vertical-rl;text-orientation:upright;' : ''}`;
         const tc = t.substring(0, idx), m = document.createElement('span'); m.textContent = '|'; inputMirror.innerHTML = ''; inputMirror.appendChild(document.createTextNode(tc)); inputMirror.appendChild(m);
         const mr = m.getBoundingClientRect(), mir = inputMirror.getBoundingClientRect(), mot = mr.top - mir.top + inputMirror.scrollTop, mol = mr.left - mir.left + inputMirror.scrollLeft;
-        if (v) inputArea.scrollLeft = mol - (inputArea.clientWidth / 2); else inputArea.scrollTop = mot - (inputArea.clientHeight / 2);
+        if (v) {
+            inputArea.scrollLeft = mol - (inputArea.clientWidth / 2);
+        } else {
+            inputArea.scrollTop = mot - (inputArea.clientHeight / 2);
+        }
     }
 
 
