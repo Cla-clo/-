@@ -873,6 +873,19 @@ background: transparent;
     .pane-zoom-btn:hover { background: #fde68a; }
     body.theme-dark .pane-zoom-btn { background: #78350f; border-color: #92400e; color: #fef3c7; }
     body.theme-dark .pane-zoom-btn:hover { background: #92400e; }
+    .zoom-display {
+        font-family: monospace; font-size: 0.7rem; color: #0369a1;
+        background: #e0f2fe; padding: 1px 5px; border-radius: 3px;
+        cursor: pointer; user-select: none;
+    }
+    .zoom-display:hover { background: #bae6fd; }
+    body.theme-dark .zoom-display { background: #1e3a5f; color: #93c5fd; }
+    body.theme-dark .zoom-display:hover { background: #1e40af; }
+    .zoom-input {
+        font-family: monospace; font-size: 0.7rem; width: 45px;
+        padding: 1px 3px; border: 1px solid #2563eb; border-radius: 3px;
+        text-align: right; background: var(--panel-bg);
+    }
     .pane-subheader {
         background: #f0f9ff; color: #0369a1; font-size: 0.75rem; padding: 2px 10px;
         border-bottom: 1px solid #e0f2fe; text-align: right; font-family: monospace; flex-shrink: 0;
@@ -5563,6 +5576,7 @@ body.theme-dark{
                 <span id="input-writing-time" class="writing-time"></span>
                 <span id="input-reading-time" class="reading-time"></span>
                 <span id="input-manuscript" class="manuscript-pages"></span>
+                <span id="input-zoom-display" class="zoom-display" ondblclick="startEditInputZoom()" title="ダブルクリックで拡大率を入力">100%</span>
             </div>
         </div>
 
@@ -5605,6 +5619,7 @@ body.theme-dark{
                 <span id="pv-today-goal" class="today-goal"></span>
                 <span id="pv-reading-time" class="reading-time"></span>
                 <span id="pv-manuscript" class="manuscript-pages"></span>
+                <span id="preview-zoom-display" class="zoom-display" ondblclick="startEditPreviewZoom()" title="ダブルクリックで拡大率を入力">100%</span>
             </div>
         </div>
     </div>
@@ -8328,12 +8343,14 @@ function syncPreviewPositionCore() {
 
     function zoomInput(delta) {
         inputZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, inputZoomIndex + delta));
+        localStorage.removeItem('cc_input_zoom_custom'); // カスタム値をクリア
         applyInputZoom();
         saveZoomToStorage();
     }
 
     function zoomPreview(delta) {
         previewZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, previewZoomIndex + delta));
+        localStorage.removeItem('cc_preview_zoom_custom'); // カスタム値をクリア
         applyPreviewZoom();
         saveZoomToStorage();
     }
@@ -8344,12 +8361,118 @@ function syncPreviewPositionCore() {
         const mirrorContainer = document.getElementById('input-mirror-container');
         if (inputArea) inputArea.style.fontSize = `${zoomPercent}%`;
         if (mirrorContainer) mirrorContainer.style.fontSize = `${zoomPercent}%`;
+        updateInputZoomDisplay();
     }
 
     function applyPreviewZoom() {
         const zoomPercent = ZOOM_LEVELS[previewZoomIndex];
         const previewContent = document.getElementById('preview-content');
         if (previewContent) previewContent.style.fontSize = `${zoomPercent}%`;
+        updatePreviewZoomDisplay();
+    }
+
+    function updateInputZoomDisplay() {
+        const display = document.getElementById('input-zoom-display');
+        if (display && display.tagName === 'SPAN') {
+            display.textContent = `${ZOOM_LEVELS[inputZoomIndex]}%`;
+        }
+    }
+
+    function updatePreviewZoomDisplay() {
+        const display = document.getElementById('preview-zoom-display');
+        if (display && display.tagName === 'SPAN') {
+            display.textContent = `${ZOOM_LEVELS[previewZoomIndex]}%`;
+        }
+    }
+
+    function startEditInputZoom() {
+        const display = document.getElementById('input-zoom-display');
+        if (!display) return;
+        const currentZoom = ZOOM_LEVELS[inputZoomIndex];
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = 'zoom-input';
+        input.id = 'input-zoom-display';
+        input.value = currentZoom;
+        input.min = 10;
+        input.max = 500;
+        input.onblur = () => finishEditInputZoom(input.value);
+        input.onkeydown = e => {
+            if (e.key === 'Enter') input.blur();
+            if (e.key === 'Escape') { input.value = currentZoom; input.blur(); }
+        };
+        display.replaceWith(input);
+        input.focus();
+        input.select();
+    }
+
+    function finishEditInputZoom(value) {
+        const zoomPercent = Math.max(10, Math.min(500, parseInt(value, 10) || 100));
+        // 最も近いズームレベルを探すか、カスタム値を適用
+        const closestIndex = ZOOM_LEVELS.reduce((prev, curr, idx) =>
+            Math.abs(curr - zoomPercent) < Math.abs(ZOOM_LEVELS[prev] - zoomPercent) ? idx : prev, 0);
+        // カスタム値の場合は直接適用
+        const inputArea = document.getElementById('input-area');
+        const mirrorContainer = document.getElementById('input-mirror-container');
+        if (inputArea) inputArea.style.fontSize = `${zoomPercent}%`;
+        if (mirrorContainer) mirrorContainer.style.fontSize = `${zoomPercent}%`;
+        inputZoomIndex = closestIndex;
+        localStorage.setItem('cc_input_zoom_custom', zoomPercent);
+        saveZoomToStorage();
+        // spanに戻す
+        const input = document.querySelector('#input-zoom-display');
+        if (input) {
+            const span = document.createElement('span');
+            span.id = 'input-zoom-display';
+            span.className = 'zoom-display';
+            span.title = 'ダブルクリックで拡大率を入力';
+            span.ondblclick = startEditInputZoom;
+            span.textContent = `${zoomPercent}%`;
+            input.replaceWith(span);
+        }
+    }
+
+    function startEditPreviewZoom() {
+        const display = document.getElementById('preview-zoom-display');
+        if (!display) return;
+        const currentZoom = ZOOM_LEVELS[previewZoomIndex];
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = 'zoom-input';
+        input.id = 'preview-zoom-display';
+        input.value = currentZoom;
+        input.min = 10;
+        input.max = 500;
+        input.onblur = () => finishEditPreviewZoom(input.value);
+        input.onkeydown = e => {
+            if (e.key === 'Enter') input.blur();
+            if (e.key === 'Escape') { input.value = currentZoom; input.blur(); }
+        };
+        display.replaceWith(input);
+        input.focus();
+        input.select();
+    }
+
+    function finishEditPreviewZoom(value) {
+        const zoomPercent = Math.max(10, Math.min(500, parseInt(value, 10) || 100));
+        const closestIndex = ZOOM_LEVELS.reduce((prev, curr, idx) =>
+            Math.abs(curr - zoomPercent) < Math.abs(ZOOM_LEVELS[prev] - zoomPercent) ? idx : prev, 0);
+        const previewContent = document.getElementById('preview-content');
+        if (previewContent) previewContent.style.fontSize = `${zoomPercent}%`;
+        previewZoomIndex = closestIndex;
+        localStorage.setItem('cc_preview_zoom_custom', zoomPercent);
+        saveZoomToStorage();
+        // spanに戻す
+        const input = document.querySelector('#preview-zoom-display');
+        if (input) {
+            const span = document.createElement('span');
+            span.id = 'preview-zoom-display';
+            span.className = 'zoom-display';
+            span.title = 'ダブルクリックで拡大率を入力';
+            span.ondblclick = startEditPreviewZoom;
+            span.textContent = `${zoomPercent}%`;
+            input.replaceWith(span);
+        }
     }
 
     function saveZoomToStorage() {
@@ -8360,13 +8483,34 @@ function syncPreviewPositionCore() {
     function loadZoomFromStorage() {
         const savedInputZoom = localStorage.getItem('cc_input_zoom_index');
         const savedPreviewZoom = localStorage.getItem('cc_preview_zoom_index');
+        const customInputZoom = localStorage.getItem('cc_input_zoom_custom');
+        const customPreviewZoom = localStorage.getItem('cc_preview_zoom_custom');
         if (savedInputZoom !== null) inputZoomIndex = parseInt(savedInputZoom, 10);
         if (savedPreviewZoom !== null) previewZoomIndex = parseInt(savedPreviewZoom, 10);
         // 範囲外の値を修正
         inputZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, inputZoomIndex));
         previewZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, previewZoomIndex));
-        applyInputZoom();
-        applyPreviewZoom();
+        // カスタム値がある場合は直接適用
+        if (customInputZoom !== null) {
+            const zoomPercent = parseInt(customInputZoom, 10);
+            const inputArea = document.getElementById('input-area');
+            const mirrorContainer = document.getElementById('input-mirror-container');
+            if (inputArea) inputArea.style.fontSize = `${zoomPercent}%`;
+            if (mirrorContainer) mirrorContainer.style.fontSize = `${zoomPercent}%`;
+            const display = document.getElementById('input-zoom-display');
+            if (display) display.textContent = `${zoomPercent}%`;
+        } else {
+            applyInputZoom();
+        }
+        if (customPreviewZoom !== null) {
+            const zoomPercent = parseInt(customPreviewZoom, 10);
+            const previewContent = document.getElementById('preview-content');
+            if (previewContent) previewContent.style.fontSize = `${zoomPercent}%`;
+            const display = document.getElementById('preview-zoom-display');
+            if (display) display.textContent = `${zoomPercent}%`;
+        } else {
+            applyPreviewZoom();
+        }
     }
 
     // ===== 閲覧（全タブをまとめて全画面表示） =====
