@@ -866,6 +866,13 @@ background: transparent;
         cursor: pointer; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px;
     }
     .pane-layout-btn:hover { background: #bae6fd; }
+    .pane-zoom-btn {
+        background: #fef3c7; border: 1px solid #fcd34d; color: #92400e;
+        cursor: pointer; font-size: 0.65rem; padding: 2px 5px; border-radius: 4px;
+    }
+    .pane-zoom-btn:hover { background: #fde68a; }
+    body.theme-dark .pane-zoom-btn { background: #78350f; border-color: #92400e; color: #fef3c7; }
+    body.theme-dark .pane-zoom-btn:hover { background: #92400e; }
     .pane-subheader {
         background: #f0f9ff; color: #0369a1; font-size: 0.75rem; padding: 2px 10px;
         border-bottom: 1px solid #e0f2fe; text-align: right; font-family: monospace; flex-shrink: 0;
@@ -5528,6 +5535,8 @@ body.theme-dark{
             <span class="pane-total-stats" id="input-total-stats">全タブ: 0字 / 0行</span>
         </div>
                 <div class="pane-actions">
+                    <button class="pane-zoom-btn" id="btn-input-zoom-out" onclick="zoomInput(-1)" title="縮小">🔍−</button>
+                    <button class="pane-zoom-btn" id="btn-input-zoom-in" onclick="zoomInput(1)" title="拡大">🔍+</button>
                     <button class="pane-layout-btn" id="btn-input-writing-mode" onclick="toggleInputWritingMode()" title="書字方向切替">横書きへ</button>
                     <button class="pane-close-btn" onclick="hidePane('input')">✕</button>
                 </div>
@@ -5566,6 +5575,8 @@ body.theme-dark{
                     <span class="pane-total-stats" id="preview-total-stats">全タブ: 0字 / 0行</span>
                 </div>
                 <div class="pane-actions">
+                    <button class="pane-zoom-btn" id="btn-preview-zoom-out" onclick="zoomPreview(-1)" title="縮小">🔍−</button>
+                    <button class="pane-zoom-btn" id="btn-preview-zoom-in" onclick="zoomPreview(1)" title="拡大">🔍+</button>
                     <button class="pane-layout-btn" id="btn-preview-writing-mode" onclick="togglePreviewWritingMode()" title="書字方向切替">横書きへ</button>
                     <button class="pane-close-btn" onclick="hidePane('preview')">✕</button>
                 </div>
@@ -8307,6 +8318,55 @@ function syncPreviewPositionCore() {
 
         if (inBtn) inBtn.textContent = inV ? '横書きへ' : '縦書きへ';
         if (pvBtn) pvBtn.textContent = pvV ? '横書きへ' : '縦書きへ';
+    }
+
+    // ===== ズーム機能 =====
+    const ZOOM_LEVELS = [50, 60, 70, 80, 90, 100, 110, 125, 150, 175, 200];
+    const DEFAULT_ZOOM_INDEX = 5; // 100%
+    let inputZoomIndex = DEFAULT_ZOOM_INDEX;
+    let previewZoomIndex = DEFAULT_ZOOM_INDEX;
+
+    function zoomInput(delta) {
+        inputZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, inputZoomIndex + delta));
+        applyInputZoom();
+        saveZoomToStorage();
+    }
+
+    function zoomPreview(delta) {
+        previewZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, previewZoomIndex + delta));
+        applyPreviewZoom();
+        saveZoomToStorage();
+    }
+
+    function applyInputZoom() {
+        const zoomPercent = ZOOM_LEVELS[inputZoomIndex];
+        const inputArea = document.getElementById('input-area');
+        const mirrorContainer = document.getElementById('input-mirror-container');
+        if (inputArea) inputArea.style.fontSize = `${zoomPercent}%`;
+        if (mirrorContainer) mirrorContainer.style.fontSize = `${zoomPercent}%`;
+    }
+
+    function applyPreviewZoom() {
+        const zoomPercent = ZOOM_LEVELS[previewZoomIndex];
+        const previewContent = document.getElementById('preview-content');
+        if (previewContent) previewContent.style.fontSize = `${zoomPercent}%`;
+    }
+
+    function saveZoomToStorage() {
+        localStorage.setItem('cc_input_zoom_index', inputZoomIndex);
+        localStorage.setItem('cc_preview_zoom_index', previewZoomIndex);
+    }
+
+    function loadZoomFromStorage() {
+        const savedInputZoom = localStorage.getItem('cc_input_zoom_index');
+        const savedPreviewZoom = localStorage.getItem('cc_preview_zoom_index');
+        if (savedInputZoom !== null) inputZoomIndex = parseInt(savedInputZoom, 10);
+        if (savedPreviewZoom !== null) previewZoomIndex = parseInt(savedPreviewZoom, 10);
+        // 範囲外の値を修正
+        inputZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, inputZoomIndex));
+        previewZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, previewZoomIndex));
+        applyInputZoom();
+        applyPreviewZoom();
     }
 
     // ===== 閲覧（全タブをまとめて全画面表示） =====
@@ -11506,7 +11566,17 @@ if (typeof applyPaneHeightSettings === 'function') {
         const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `project_${new Date().toISOString().slice(0,10)}.ccproj`;
+        // プロジェクトタイトルがデフォルト以外ならファイル名の先頭につける
+        const dateStr = new Date().toISOString().slice(0,10);
+        let filename;
+        if (novelTitle && novelTitle !== DEFAULT_NOVEL_TITLE) {
+            // ファイル名に使えない文字を除去
+            const safeTitle = novelTitle.replace(/[\\/:*?"<>|]/g, '').trim();
+            filename = safeTitle ? `${safeTitle}_${dateStr}.ccproj` : `project_${dateStr}.ccproj`;
+        } else {
+            filename = `project_${dateStr}.ccproj`;
+        }
+        a.download = filename;
         a.click();
         closeProjectSaveDialog();
     }
@@ -11626,7 +11696,16 @@ if (typeof applyPaneHeightSettings === 'function') {
         const blob = new Blob([text], { type: 'text/plain; charset=utf-8' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `project_${new Date().toISOString().slice(0,10)}.txt`;
+        // プロジェクトタイトルがデフォルト以外ならファイル名の先頭につける
+        const dateStr = new Date().toISOString().slice(0,10);
+        let filename;
+        if (novelTitle && novelTitle !== DEFAULT_NOVEL_TITLE) {
+            const safeTitle = novelTitle.replace(/[\\/:*?"<>|]/g, '').trim();
+            filename = safeTitle ? `${safeTitle}_${dateStr}.txt` : `project_${dateStr}.txt`;
+        } else {
+            filename = `project_${dateStr}.txt`;
+        }
+        a.download = filename;
         a.click();
         closeProjectSaveDialog();
     }
@@ -12461,6 +12540,7 @@ function updateActiveTabTitle() {}
     loadLayoutSettings();
         if (typeof updateWritingModeButtonLabels === 'function') updateWritingModeButtonLabels();
     loadSettingsFromStorage();
+    loadZoomFromStorage();
     initTextColorSettings();
 	applyDefaultStartupPrefsOnce();
     loadPaneWidthSettings();
