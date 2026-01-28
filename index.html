@@ -624,7 +624,7 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
     .btn-search-reset:hover { background: #fecaca; color: #991b1b; }
     .search-meta { color: var(--text-muted); font-size: 0.85em; }
 
-    #help-bar { background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; line-height: 1.8; flex-direction: column; padding-right: 48px; order: 1; }
+    #help-bar { background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; line-height: 1.8; flex-direction: column; padding-right: 48px; order: 1; max-height: calc(100vh - 120px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
     #help-bar.open { display: flex; }
     body.theme-dark #help-bar { background: #451a03; border-color: #854d0e; color: #fcd34d; }
     .help-section { margin-bottom: 12px; }
