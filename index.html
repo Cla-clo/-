@@ -5120,12 +5120,17 @@ body.theme-dark{
             </div>
             <div class="help-section" style="flex: 1; min-width: 180px;">
                 <div class="help-title">【ショートカットキー】</div>
-                ・<b>Ctrl+S</b>：保存ダイアログ<br>
-                ・<b>Ctrl+F</b>：検索パネル<br>
-                ・<b>Ctrl+G</b>：行番号ジャンプ<br>
-                ・<b>Ctrl+Z</b>：元に戻す<br>
-                ・<b>Ctrl+Y</b>：やり直し<br>
-                ・<b>F11</b>：集中モード切替<br>
+                ・<b>Ctrl+Alt+S</b>：保存ダイアログ<br>
+                ・<b>Ctrl+Alt+F</b>：検索（NAV/検索）<br>
+                ・<b>Ctrl+Alt+G</b>：行番号ジャンプ<br>
+                ・<b>Ctrl+Alt+N</b>：新規本文タブ<br>
+                ・<b>Ctrl+Alt+M</b>：新規メモタブ<br>
+                ・<b>Ctrl+Alt+Enter</b>：同期（更新＋位置合わせ）<br>
+                ・<b>Ctrl+Alt+L</b>：集中モード切替<br>
+                ・<b>Ctrl+Alt+R</b>：閲覧モード<br>
+                ・<b>Ctrl+Alt+A</b>：分析<br>
+                ・<b>Ctrl+Alt+H</b>：使い方パネル<br>
+                ・<b>Alt+O/M/F/B</b>：目次/メモ/検索/しおり<br>
                 ・<b>Esc</b>：ダイアログ閉じる
             </div>
             <div class="help-section" style="flex: 1; min-width: 180px;">
@@ -7067,7 +7072,7 @@ function addNewTab() {
 ■ はじめに（最短で使い始める）
 
 1．左の「入力」に書く
-2．📲 同期（Ctrl+Shift+S）で右の「プレビュー」を更新
+2．📲 同期（Ctrl+Alt+Enter）で右の「プレビュー」を更新
 3．必要なら 👁 閲覧 で全タブを結合表示して読み返す
 4．💾 保存 で TXT / HTML を出力（現在タブ or 全タブ結合を選べます）
 
@@ -7080,7 +7085,7 @@ function addNewTab() {
 ■ 1. 入力 → プレビュー（同期）
 ・📲 同期：入力内容をプレビューに反映（更新）し、カーソル行へ位置合わせ
 ・プレビューが閉じている時に同期すると、プレビューを開いてから同期
-・ショートカット：Ctrl+Shift+S 
+・ショートカット：Ctrl+Alt+Enter 
 
 ■ 2. 閲覧（全タブ一括表示）
 ・👁 閲覧：全タブを結合して全画面表示（区切り記号「◆」を表示）
@@ -7092,6 +7097,7 @@ function addNewTab() {
 ・🔍 検索パネルで「このタブ／全タブ」を切り替え
 ・ヒット一覧：見つかった箇所を一覧表示。クリックでその場所へジャンプ
 ・置換：現在ヒットのみ／全置換（このタブ／全タブ） 
+・ショートカット：Ctrl+Alt+F（NAV/検索）
 
 ■ 4. 保存（TXT / HTML）
 ・💾 保存 を押すと「保存形式を選択」ダイアログが開きます
@@ -7109,17 +7115,14 @@ function addNewTab() {
 
 ■ 6. 集中モード（UIを隠して執筆に集中）
 ・🧘 集中モード：ヘッダー／各種パネルを隠して執筆に集中（解除は Esc）
-・集中モード中の“確認だけ”ショートカット：
-　- Ctrl+Shift+P：プレビューを一時表示
-　- Ctrl+Shift+M：メモを一時表示
-　- Ctrl+Shift+O：目次を一時表示
-　※一時表示は Esc で閉じます 
+・ショートカット：Ctrl+Alt+L
 
 ■ 7. 目次（見出し抽出）・しおり（ブックマーク）
 ・📑 目次：見出し（例：■ □ ▲ など）を自動検出して一覧化
 ・🔖 しおり：任意の位置を保存して、クリックでジャンプ
 ・目次パネル上部に「目次／🔖しおり」タブがあります
 ・ジャンプ履歴（◀ / ▶）で移動できます 
+・ショートカット：Alt+O（目次） / Alt+B（しおり）
 
 （しおりを素早く追加）
 ・選択ポップアップから「🔖しおり」を追加できます（クイック挿入） 
@@ -7127,6 +7130,7 @@ function addNewTab() {
 ■ 8. メモ（複数タブ）＋インポート/エクスポート
 ・📝 メモ：本文とは別にメモを保持（メモもタブで複数管理）
 ・メモタブ：＋で追加／×で削除／ドラッグで並べ替え
+・ショートカット：Alt+M（メモ）
 ・📂 開く：メモJSONを読み込み（上書き／追加を選べます）
 ・💾 保存：メモJSONを書き出し
 ・📄 TXT：メモをテキストとして保存 
@@ -7153,6 +7157,7 @@ function addNewTab() {
 ・会話文比率（「」を会話文として集計）
 ・頻出語 TOP15
 ・ヒートマップ（段落長/漢字密度/文字頻度/文末表現/句読点密度） 
+・ショートカット：Ctrl+Alt+A
 
 ■ 13. プロジェクト保存（まとめてバックアップ）
 ・プロジェクト保存：本文タブ／メモ／構成／登場人物／世界観／しおり／設定などを“選んで”1ファイルに保存
@@ -7166,7 +7171,14 @@ function addNewTab() {
 　- 🔖しおり追加
 がワンクリックでできます 
 
-■ 15. データの保存場所（重要）
+■ 15. ショートカット早見
+・Ctrl+Alt+S：保存 / Ctrl+Alt+F：検索 / Ctrl+Alt+G：行番号ジャンプ
+・Ctrl+Alt+N：新規本文タブ / Ctrl+Alt+M：新規メモタブ
+・Ctrl+Alt+Enter：同期 / Ctrl+Alt+L：集中 / Ctrl+Alt+R：閲覧 / Ctrl+Alt+A：分析
+・Ctrl+Alt+H：使い方
+・Alt+O/M/F/B：目次/メモ/検索/しおり
+
+■ 16. データの保存場所（重要）
 ・基本データはブラウザ内（localStorage）に保存されます
 ・ブラウザの「サイトデータ削除」「プライベートモード」「端末変更」では消える可能性があるため、
 　定期的に「💾保存」や「プロジェクト保存」で外部ファイルとしてバックアップ推奨
@@ -11763,12 +11775,21 @@ if (typeof applyPaneHeightSettings === 'function') {
         }
 
         if (e.key === 'Escape') { if (document.body.classList.contains('focus-mode')) toggleFocusMode(); closeJumpDialog(); closeAnalysis(); closeMemoSaveDialog(); }
-        if (e.key === 'F11') { e.preventDefault(); toggleFocusMode(); }
-        if (e.ctrlKey && e.key === 'g') { e.preventDefault(); showJumpDialog(); }
-        if (e.ctrlKey && e.key === 'f') { e.preventDefault(); toggleSearchPanel(); }
-        if (e.ctrlKey && e.key === 's') { e.preventDefault(); showSaveDialog(); }
-        if (e.ctrlKey && !e.shiftKey && e.key === 't') { e.preventDefault(); addNewTab(); }
-        if (e.ctrlKey && e.shiftKey && e.key === 'T') { e.preventDefault(); addNewMemoTab(); }
+        if (e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey) {
+            const k = (e.key || '').toLowerCase();
+            if (k === 'g') { e.preventDefault(); showJumpDialog(); }
+            if (k === 'f') {
+                e.preventDefault();
+                if (typeof window.openNavTab === 'function') { window.openNavTab('search'); } else { toggleSearchPanel(); }
+            }
+            if (k === 's') { e.preventDefault(); showSaveDialog(); }
+            if (k === 'n') { e.preventDefault(); addNewTab(); }
+            if (k === 'm') { e.preventDefault(); addNewMemoTab(); }
+            if (k === 'l') { e.preventDefault(); toggleFocusMode(); }
+            if (k === 'r') { e.preventDefault(); openReaderView(); }
+            if (k === 'a') { e.preventDefault(); showAnalysis(); }
+            if (k === 'h') { e.preventDefault(); togglePanel('help-bar'); }
+        }
         // Ctrl+Alt+Enter: 同期（更新＋位置合わせを一発）
         if (e.ctrlKey && e.altKey && e.key === 'Enter') {
             e.preventDefault();
@@ -13833,7 +13854,7 @@ function applyPaneColors(colors){
     btnBack.addEventListener('click', ()=>renderHitList());
   }
 
-  // Ensure Ctrl+F opens panel still uses doSearch
+  // Ensure Ctrl+Alt+F opens panel still uses doSearch
 
   // -----------------------------
   // 11) Writing speed (chars/min or chars/hour) using tracker
@@ -14447,10 +14468,11 @@ function bulkResetCardsBgColor(paneId){
     const btnSearch = document.getElementById('btn-toggle-search');
     if (btnSearch) btnSearch.onclick = ()=> openNavTab('search');
 
-    // Ctrl+F -> nav search
+    // Ctrl+Alt+F -> nav search
     document.addEventListener('keydown', (e)=>{
-      if (e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey && (e.key==='f' || e.key==='F')){
+      if (e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && (e.key==='f' || e.key==='F')){
         e.preventDefault();
+        e.stopImmediatePropagation();
         openNavTab('search');
       }
     }, true);
@@ -14928,10 +14950,11 @@ function bulkResetCardsBgColor(paneId){
     const btnSearch = document.getElementById('btn-toggle-search');
     if (btnSearch) btnSearch.onclick = ()=> toggleSearchPanel();
 
-    // Ctrl+F -> search panel
+    // Ctrl+Alt+F -> search panel
     document.addEventListener('keydown', (e)=>{
-      if (e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey && (e.key==='f' || e.key==='F')){
+      if (e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && (e.key==='f' || e.key==='F')){
         e.preventDefault();
+        e.stopImmediatePropagation();
         toggleSearchPanel();
       }
     }, true);
