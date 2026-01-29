@@ -3760,7 +3760,7 @@ body.theme-dark .cc-window-box .cc-resize-se::after{
   border-bottom-color: rgba(156,163,175,0.55);
 }
 
-/* ===== v1.04 UX Enhancements ===== */
+/* ===== v1.05 UX Enhancements ===== */
 
 /* --- Reader mode page separator --- */
 .reader-page-separator {
@@ -5448,10 +5448,11 @@ body.theme-dark{
                 ・<b>Ctrl+Shift+4</b>：用語パネル<br>
                 ・<b>Ctrl+Shift+5</b>：メモパネル<br>
                 ・<b>Ctrl+Shift+6</b>：目次パネル<br>
-                ・<b>Ctrl+PageDown</b>：次のタブへ<br>
-                ・<b>Ctrl+PageUp</b>：前のタブへ<br>
-                ・<b>Alt+←</b>：前の編集位置へ戻る<br>
-                ・<b>Alt+→</b>：次の編集位置へ進む<br>
+                ・<b>Ctrl+PageDown</b> / <b>Ctrl+Alt+PageDown</b>：次のタブへ<br>
+                ・<b>Ctrl+PageUp</b> / <b>Ctrl+Alt+PageUp</b>：前のタブへ<br>
+                ・<b>Alt+←</b> / <b>Ctrl+Alt+←</b>：前の編集位置へ戻る<br>
+                ・<b>Alt+→</b> / <b>Ctrl+Alt+→</b>：次の編集位置へ進む<br>
+                <small>※ブラウザで競合する場合は Ctrl+Alt 系を推奨</small><br>
                 ・<b>Esc</b>：ダイアログ閉じる
             </div>
             <div class="help-section" style="flex: 1; min-width: 180px;">
@@ -7455,7 +7456,7 @@ function addNewTab() {
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-    const defaultText = `　ⓒエディタ（使い方） v1.04
+    const defaultText = `　ⓒエディタ（使い方） v1.05
 
 ■ はじめに（最短で使い始める）
 
@@ -25807,14 +25808,15 @@ bindResize('cc-resize-sw', 'sw');
   }
 })();
 
-/* ===== v1.04 UX Enhancements: Tab navigation, Edit history, Responsive ===== */
+/* ===== v1.05 UX Enhancements: Tab navigation, Edit history, Responsive ===== */
 (function(){
   'use strict';
 
-  // ========== 1. Tab Navigation (Ctrl+PageDown/PageUp) ==========
+  // ========== 1. Tab Navigation (Ctrl+PageDown/PageUp, Ctrl+Alt+PageDown/PageUp) ==========
   document.addEventListener('keydown', function(e) {
-    // Ctrl+PageDown for next tab, Ctrl+PageUp for previous tab
-    if (e.ctrlKey && !e.altKey && !e.metaKey && (e.key === 'PageDown' || e.key === 'PageUp')) {
+    // Ctrl+PageDown for next tab, Ctrl+PageUp for previous tab (fallback: Ctrl+Alt+PageDown/PageUp)
+    const isTabShortcut = e.ctrlKey && !e.metaKey && !e.shiftKey && (e.key === 'PageDown' || e.key === 'PageUp');
+    if (isTabShortcut) {
       // Only when input area is focused or no specific element is focused
       const activeEl = document.activeElement;
       const inputArea = document.getElementById('input-area');
@@ -25846,7 +25848,7 @@ bindResize('cc-resize-sw', 'sw');
     }
   }, true);
 
-  // ========== 2. Edit Position History (Alt+←/→) ==========
+  // ========== 2. Edit Position History (Alt+←/→, Ctrl+Alt+←/→) ==========
   const editHistory = [];
   const forwardHistory = [];
   const MAX_HISTORY = 30;
@@ -25962,9 +25964,15 @@ bindResize('cc-resize-sw', 'sw');
     }
   }
 
-  // Alt+← / Alt+→ shortcuts
+  // Alt+← / Alt+→ shortcuts (fallback: Ctrl+Alt+←/→)
   document.addEventListener('keydown', function(e) {
-    if (!e.altKey || e.ctrlKey || e.shiftKey || e.metaKey) return;
+    const inputArea = document.getElementById('input-area');
+    const activeEl = document.activeElement;
+    if (activeEl !== inputArea && !(activeEl && activeEl.closest && activeEl.closest('#pane-input'))) return;
+
+    const isAltOnly = e.altKey && !e.ctrlKey && !e.shiftKey && !e.metaKey;
+    const isCtrlAlt = e.altKey && e.ctrlKey && !e.shiftKey && !e.metaKey;
+    if (!isAltOnly && !isCtrlAlt) return;
 
     if (e.key === 'ArrowLeft') {
       if (goBackInHistory()) {
@@ -26059,7 +26067,7 @@ bindResize('cc-resize-sw', 'sw');
 })();
 </script>
 
-<!-- ===== v1.04 Reader Page Separator Enhancement ===== -->
+<!-- ===== v1.05 Reader Page Separator Enhancement ===== -->
 <script>
 (function(){
   'use strict';
