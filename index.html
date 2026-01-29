@@ -5132,7 +5132,7 @@ body.theme-dark{
             <button class="app-icon" id="app-icon" title="アプリメニュー">
                 <img src="icons/favicon-32.png" alt="アプリアイコン">
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.01</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.02</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -5292,6 +5292,7 @@ body.theme-dark{
                 ・<b>Ctrl+N</b>：新規本文タブ<br>
                 ・<b>Ctrl+Shift+N</b>：新規メモタブ<br>
                 ・<b>Ctrl+Enter</b>：同期（更新＋位置合わせ）<br>
+                ・<b>Ctrl+Alt+=</b>：入力拡大 / <b>Ctrl+Alt+-</b>：入力縮小<br>
                 ・<b>Ctrl+L</b>：集中モード切替<br>
                 ・<b>Ctrl+R</b>：閲覧モード<br>
                 ・<b>Ctrl+Shift+A</b>：分析<br>
@@ -5558,8 +5559,8 @@ body.theme-dark{
             <span class="pane-total-stats" id="input-total-stats">全タブ: 0字 / 0行</span>
         </div>
                 <div class="pane-actions">
-                    <button class="pane-zoom-btn" id="btn-input-zoom-out" onclick="zoomInput(-1)" title="縮小">🔍−</button>
-                    <button class="pane-zoom-btn" id="btn-input-zoom-in" onclick="zoomInput(1)" title="拡大">🔍+</button>
+                    <button class="pane-zoom-btn" id="btn-input-zoom-out" onclick="zoomInput(-1)" title="縮小" data-shortcut="Ctrl+Alt+-">🔍−</button>
+                    <button class="pane-zoom-btn" id="btn-input-zoom-in" onclick="zoomInput(1)" title="拡大" data-shortcut="Ctrl+Alt+=">🔍+</button>
                     <button class="pane-layout-btn" id="btn-input-writing-mode" onclick="toggleInputWritingMode()" title="書字方向切替">横書きへ</button>
                     <button class="pane-close-btn" onclick="hidePane('input')">✕</button>
                 </div>
@@ -7307,7 +7308,7 @@ function addNewTab() {
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-    const defaultText = `　ⓒエディタ（使い方） v1.01
+    const defaultText = `　ⓒエディタ（使い方） v1.02
 
 ■ はじめに（最短で使い始める）
 
@@ -7415,6 +7416,7 @@ function addNewTab() {
 ・Ctrl+Alt+S：保存 / Ctrl+Alt+F：検索 / Ctrl+Alt+G：行番号ジャンプ
 ・Ctrl+Alt+N：新規本文タブ / Ctrl+Alt+M：新規メモタブ
 ・Ctrl+Alt+Enter：同期 / Ctrl+Alt+L：集中 / Ctrl+Alt+R：閲覧 / Ctrl+Alt+A：分析
+・Ctrl+Alt+=/−：入力拡大/縮小
 ・Ctrl+Alt+H：使い方
 ・Alt+O/M/F/B：目次/メモ/検索/しおり
 ・Ctrl+Z：元に戻す / Ctrl+Y：やり直し
@@ -12249,9 +12251,24 @@ if (typeof applyPaneHeightSettings === 'function') {
         }
 
         if (e.key === 'Escape') { if (document.body.classList.contains('focus-mode')) toggleFocusMode(); closeJumpDialog(); closeAnalysis(); closeMemoSaveDialog(); }
+        const isMainInput = e.target === inputArea;
+        if (e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && isMainInput) {
+            const key = e.key || '';
+            if (key === '+' || key === '=' || e.code === 'NumpadAdd') {
+                e.preventDefault();
+                e.stopPropagation();
+                zoomInput(1);
+                return;
+            }
+            if (key === '-' || key === '_' || e.code === 'NumpadSubtract') {
+                e.preventDefault();
+                e.stopPropagation();
+                zoomInput(-1);
+                return;
+            }
+        }
         if (e.ctrlKey && !e.altKey && !e.metaKey) {
             const k = (e.key || '').toLowerCase();
-            const isMainInput = e.target === inputArea;
             if (e.shiftKey) {
                 const panelShortcutMap = {
                     Digit1: 'structure',
