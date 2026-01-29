@@ -900,6 +900,11 @@ background: transparent;
         flex-wrap: wrap; flex-shrink: 0; row-gap: 4px;
     }
     .net-count { font-weight: bold; color: var(--text-color); background: var(--pane-header-bg); padding: 0 4px; border-radius: 3px; }
+    .cursor-pos { font-family: monospace; color: #2563eb; font-weight: bold; }
+    body.theme-dark .cursor-pos { color: #60a5fa; }
+    .selection-info { font-weight: bold; color: #059669; background: #d1fae5; padding: 0 6px; border-radius: 3px; }
+    body.theme-dark .selection-info { background: #065f46; color: #6ee7b7; }
+    .footer-separator { width: 1px; height: 12px; background: var(--border-color); margin: 0 4px; }
     .timestamp { font-family: monospace; color: #059669; }
     .goal-display { font-weight: bold; }
     .goal-0-24 { color: #1f2937; } .goal-25-49 { color: #16a34a; } .goal-50-74 { color: #2563eb; }
@@ -3760,6 +3765,51 @@ body.theme-dark .cc-window-box .cc-resize-se::after{
   border-bottom-color: rgba(156,163,175,0.55);
 }
 
+/* ===== Responsive breakpoints (Office-like adaptive UI) ===== */
+/* Medium screens: condense ribbon and status bar */
+@media (max-width: 1200px) {
+  .ribbon-menu-btn { padding: 2px 6px; font-size: 0.75rem; }
+  .app-title { max-width: 200px; }
+  .pane-footer { gap: 6px; }
+  .pane-footer > span { font-size: 0.65rem; }
+}
+
+/* Small screens: further simplification */
+@media (max-width: 900px) {
+  .ribbon-row { gap: 8px; }
+  .ribbon-menu { gap: 4px; }
+  .ribbon-menu-btn { padding: 2px 4px; }
+  .app-title { max-width: 150px; font-size: 0.85rem; }
+  .ribbon-home-left { gap: 2px; }
+  .ribbon-home-left .btn { padding: 4px 6px; font-size: 0.75rem; }
+  .btn-undo { width: 28px; }
+  .pane-footer > span:not(.cursor-pos):not(.net-count):not(.zoom-display) { display: none; }
+  .pane-footer .footer-separator { display: none; }
+}
+
+/* Very small screens: collapse to essentials */
+@media (max-width: 700px) {
+  header { padding: 6px 8px; gap: 4px; }
+  .app-title { max-width: 100px; font-size: 0.8rem; }
+  .ribbon-menu-btn { font-size: 0.7rem; padding: 2px 3px; }
+  .ribbon-toggle { font-size: 0.7rem; padding: 2px 6px !important; }
+  /* Auto-collapse ribbon on very small screens */
+  body:not(.ribbon-collapsed):not(.ribbon-ultra-collapsed) .ribbon-section:not(.ribbon-home) { display: none; }
+  .pane-header h2 { font-size: 0.85rem; }
+  .pane-footer { min-height: 20px; padding: 0 6px; }
+  .pane-footer .cursor-pos { font-size: 0.6rem; }
+  .pane-footer .zoom-display { font-size: 0.6rem; }
+}
+
+/* Height-based responsive: for short viewports */
+@media (max-height: 600px) {
+  header { padding: 4px 8px; }
+  .ribbon-row { gap: 6px; }
+  .pane-header { min-height: 32px; padding: 4px 8px; }
+  .pane-subheader { padding: 1px 8px; font-size: 0.7rem; }
+  .pane-footer { min-height: 18px; }
+}
+
 </style>
 
 <!-- ===== v0.96 hotfix (reader/search/bookmark, active tab color, tab context menu, per-tab stats, focus shortcuts) ===== -->
@@ -3926,6 +3976,25 @@ body.theme-dark .context-menu-item:hover {
     b = Math.round((t-b)*p + b);
     return '#' + ((1<<24) + (r<<16) + (g<<8) + b).toString(16).slice(1);
   }
+
+  // --- Performance utilities (debounce/throttle for resize events) ---
+  window.__ccDebounce = function(fn, wait) {
+    let timeout;
+    return function(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => fn.apply(this, args), wait);
+    };
+  };
+  window.__ccThrottle = function(fn, limit) {
+    let lastCall = 0;
+    return function(...args) {
+      const now = Date.now();
+      if (now - lastCall >= limit) {
+        lastCall = now;
+        fn.apply(this, args);
+      }
+    };
+  };
 
   // --- Color helpers for outline accent (keep strip visible even when card is dyed) ---
 function hexToRgbObj(hex){
@@ -4805,6 +4874,18 @@ function contrastRatioRgb(bg, fg){
     }
   }
 
+  // Panel snap widths (Office-like behavior)
+  const PANEL_SNAP_WIDTHS = [200, 250, 300, 350, 400, 450];
+  const SNAP_THRESHOLD = 15; // pixels within which to snap
+  function snapToWidth(width) {
+    for (const snap of PANEL_SNAP_WIDTHS) {
+      if (Math.abs(width - snap) <= SNAP_THRESHOLD) {
+        return snap;
+      }
+    }
+    return width;
+  }
+
   // Drag handling for dynamic resizers
   function bindResizerDrag(){
     const ov = document.getElementById('dock-resizer-overlay');
@@ -4850,6 +4931,8 @@ function contrastRatioRgb(bg, fg){
       if (leftFixed && rightFixed){
         let newLeft = drag.startLeftW + dx;
         newLeft = Math.max(minW, Math.min(maxTotal - minW, newLeft));
+        // Apply snap to common widths
+        newLeft = snapToWidth(newLeft);
         const newRight = maxTotal - newLeft;
 
         // apply both
@@ -4865,6 +4948,8 @@ function contrastRatioRgb(bg, fg){
         const startW = isLeftTarget ? drag.startLeftW : drag.startRightW;
         let newW = startW + (isLeftTarget ? dx : -dx);
         newW = Math.max(minW, newW);
+        // Apply snap to common widths
+        newW = snapToWidth(newW);
 
         const key = keyFromPanelId(targetEl.id);
         if (key) { applyWidthToPanel(key, Math.round(newW)); setSettingWidth(key, Math.round(newW)); }
@@ -5132,7 +5217,7 @@ body.theme-dark{
             <button class="app-icon" id="app-icon" title="アプリメニュー">
                 <img src="icons/favicon-32.png" alt="アプリアイコン">
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.03</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.04</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -5183,6 +5268,9 @@ body.theme-dark{
                     <div class="header-file-dropdown-content">
                         <div class="dropdown-item" onclick="openFileWithChoice(); closeAllFileDropdowns();">📂 開く</div>
                         <div class="dropdown-item" onclick="showTextSaveOptions(); closeAllFileDropdowns();"><span class="btn-icn" aria-hidden="true">💾</span><span class="btn-text">保存</span></div>
+                        <div class="dropdown-divider" style="height:1px; background:var(--border-color); margin:4px 0;"></div>
+                        <div class="dropdown-header" style="padding:4px 10px; font-size:0.7rem; color:var(--text-muted); font-weight:bold;">最近のファイル</div>
+                        <div id="recent-files-list" class="recent-files-list" style="max-height:150px; overflow-y:auto;"></div>
                     </div>
                 </div>
                 <div class="header-file-dropdown" id="project-file-dropdown">
@@ -5579,6 +5667,9 @@ body.theme-dark{
                 <div id="input-sel-overlay" class="selection-overlay"></div>
             </div>
             <div class="pane-footer">
+                <span id="input-cursor-pos" class="cursor-pos" title="カーソル位置（行:列）">1:1</span>
+                <span id="input-selection-info" class="selection-info" style="display:none;" title="選択範囲の文字数"></span>
+                <span class="footer-separator"></span>
                 <span id="char-count">全体: 0</span>
                 <span id="input-net-count" class="net-count">実質: 0</span>
                 <span id="line-count">0 行</span>
@@ -5902,12 +5993,15 @@ body.theme-dark{
 </div>
 
 <div id="quick-insert-popup" class="quick-insert-popup">
-    <button class="qip-ruby" onclick="quickInsertRuby()">🔤ルビ</button>
-    <button class="qip-bouten" onclick="quickInsertBouten()">⚫傍点</button>
-    <button onclick="quickWrapSelection('「', '」')">「」</button>
-    <button onclick="quickWrapSelection('『', '』')">『』</button>
-    <button onclick="quickWrapSelection('（', '）')">（）</button>
-    <button style="color:#d97706;" onclick="quickAddBookmark()">🔖しおり</button>
+    <button class="qip-ruby" onclick="quickInsertRuby()" title="ルビを挿入">🔤ルビ</button>
+    <button class="qip-bouten" onclick="quickInsertBouten()" title="傍点を挿入">⚫傍点</button>
+    <button onclick="quickWrapSelection('「', '」')" title="鉤括弧で囲む">「」</button>
+    <button onclick="quickWrapSelection('『', '』')" title="二重鉤括弧で囲む">『』</button>
+    <button onclick="quickWrapSelection('（', '）')" title="丸括弧で囲む">（）</button>
+    <button onclick="quickWrapUnderline()" title="下線マークアップ" style="text-decoration:underline;">U̲</button>
+    <button onclick="quickWrapHighlight()" title="強調マークアップ" style="color:#eab308;">==</button>
+    <button onclick="quickSearchSelection()" title="選択テキストで検索" style="color:#0ea5e9;">🔍</button>
+    <button onclick="quickAddBookmark()" title="しおりを追加" style="color:#d97706;">🔖</button>
 </div>
 
 <div id="save-dialog-overlay" class="save-dialog-overlay" style="display:none;">
@@ -7308,7 +7402,7 @@ function addNewTab() {
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-    const defaultText = `　ⓒエディタ（使い方） v1.03
+    const defaultText = `　ⓒエディタ（使い方） v1.04
 
 ■ はじめに（最短で使い始める）
 
@@ -8044,7 +8138,36 @@ function addNewTab() {
         checkGoalAchievement(tw, tg, nl, g);
         updateAllTabsStats();
     }
-    function updateCursorLineDisplay() { const p = inputArea.selectionStart, c = (inputArea.value.substring(0, p).match(/\n/g) || []).length + 1; inputPosBar.innerText = `現在: ${c} 行目`; }
+    function updateCursorLineDisplay() {
+        const text = inputArea.value;
+        const start = inputArea.selectionStart;
+        const end = inputArea.selectionEnd;
+        const beforeCursor = text.substring(0, start);
+        const line = (beforeCursor.match(/\n/g) || []).length + 1;
+        const lastNewline = beforeCursor.lastIndexOf('\n');
+        const col = start - lastNewline;
+
+        // Update position bar
+        inputPosBar.innerText = `現在: ${line} 行目`;
+
+        // Update cursor position (line:col)
+        const cursorPosEl = document.getElementById('input-cursor-pos');
+        if (cursorPosEl) cursorPosEl.innerText = `${line}:${col}`;
+
+        // Update selection info
+        const selInfoEl = document.getElementById('input-selection-info');
+        if (selInfoEl) {
+            if (start !== end) {
+                const selLen = end - start;
+                const selText = text.substring(start, end);
+                const selLines = (selText.match(/\n/g) || []).length + 1;
+                selInfoEl.innerText = selLines > 1 ? `選択: ${selLen}字 / ${selLines}行` : `選択: ${selLen}字`;
+                selInfoEl.style.display = '';
+            } else {
+                selInfoEl.style.display = 'none';
+            }
+        }
+    }
 
     let allTabsStatsTimeout = null;
     function updateAllTabsStats() {
@@ -8159,6 +8282,53 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
         renderBookmarks();
         hideQuickInsertPopup();
     }
+
+    // Quick wrap with underline markup (__text__)
+    function quickWrapUnderline() {
+        const s = lastSelectionRange.start, e = lastSelectionRange.end;
+        if (s === e) return;
+        const st = inputArea.value.substring(s, e), b = inputArea.value.substring(0, s), a = inputArea.value.substring(e);
+        const wrapped = `__${st}__`;
+        inputArea.value = b + wrapped + a;
+        inputArea.setSelectionRange(s + wrapped.length, s + wrapped.length);
+        inputArea.focus();
+        updateInputStats();
+        hideQuickInsertPopup();
+    }
+    window.quickWrapUnderline = quickWrapUnderline;
+
+    // Quick wrap with highlight markup (==text==)
+    function quickWrapHighlight() {
+        const s = lastSelectionRange.start, e = lastSelectionRange.end;
+        if (s === e) return;
+        const st = inputArea.value.substring(s, e), b = inputArea.value.substring(0, s), a = inputArea.value.substring(e);
+        const wrapped = `==${st}==`;
+        inputArea.value = b + wrapped + a;
+        inputArea.setSelectionRange(s + wrapped.length, s + wrapped.length);
+        inputArea.focus();
+        updateInputStats();
+        hideQuickInsertPopup();
+    }
+    window.quickWrapHighlight = quickWrapHighlight;
+
+    // Quick search with selected text
+    function quickSearchSelection() {
+        const s = lastSelectionRange.start, e = lastSelectionRange.end;
+        if (s === e) return;
+        const st = inputArea.value.substring(s, e).trim();
+        hideQuickInsertPopup();
+        // Open search panel and set the search term
+        if (typeof toggleSearchPanel === 'function') toggleSearchPanel();
+        setTimeout(() => {
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.value = st;
+                searchInput.focus();
+                if (typeof doSearch === 'function') doSearch();
+            }
+        }, 100);
+    }
+    window.quickSearchSelection = quickSearchSelection;
 
     document.addEventListener('selectionchange', () => {
         const a = document.activeElement;
@@ -10198,6 +10368,10 @@ if (typeof adjustPaneHeightsOnVisibility === 'function') {
         }
     });
     inputArea.addEventListener('input', () => { lastInputTime = Date.now(); updateInputStats(); if (settingsCache.typewriterMode) scrollToCursorPosition(inputArea.selectionStart); });
+    // Update cursor position on selection change (mouse/keyboard navigation)
+    inputArea.addEventListener('click', updateCursorLineDisplay);
+    inputArea.addEventListener('keyup', (e) => { if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','PageUp','PageDown'].includes(e.key) || e.shiftKey) updateCursorLineDisplay(); });
+    document.addEventListener('selectionchange', () => { if (document.activeElement === inputArea) updateCursorLineDisplay(); });
 
     function insertText(t, o = 0) { const s = inputArea.selectionStart, e = inputArea.selectionEnd, b = inputArea.value.substring(0, s), a = inputArea.value.substring(e); inputArea.value = b + t + a; const np = s + t.length - o; inputArea.setSelectionRange(np, np); inputArea.focus(); updateInputStats(); document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show')); }
     function insertRubyToSelection() { const s = inputArea.selectionStart, e = inputArea.selectionEnd; if (s === e) { alert('ルビを付けたい文字を選択してください。'); return; } const st = inputArea.value.substring(s, e), b = inputArea.value.substring(0, s), a = inputArea.value.substring(e), rt = `｜${st}《》`; inputArea.value = b + rt + a; inputArea.setSelectionRange(s + st.length + 2, s + st.length + 2); inputArea.focus(); updateInputStats(); document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show')); }
@@ -12173,6 +12347,66 @@ if (typeof applyPaneHeightSettings === 'function') {
         if (!modal || !modal.classList.contains('show')) return;
         if (e.target === modal) closeOpenChoiceModal();
     });
+
+    // ===== Recent Files History (Office-like feature) =====
+    const RECENT_FILES_KEY = 'cc_recent_files';
+    const MAX_RECENT_FILES = 10;
+
+    function getRecentFiles() {
+        try {
+            const data = localStorage.getItem(RECENT_FILES_KEY);
+            return data ? JSON.parse(data) : [];
+        } catch (e) { return []; }
+    }
+
+    function addToRecentFiles(fileName, preview) {
+        try {
+            let recent = getRecentFiles();
+            // Remove if already exists
+            recent = recent.filter(f => f.name !== fileName);
+            // Add to front
+            recent.unshift({
+                name: fileName,
+                preview: preview.substring(0, 50) + (preview.length > 50 ? '...' : ''),
+                timestamp: Date.now()
+            });
+            // Keep only MAX_RECENT_FILES
+            if (recent.length > MAX_RECENT_FILES) recent = recent.slice(0, MAX_RECENT_FILES);
+            localStorage.setItem(RECENT_FILES_KEY, JSON.stringify(recent));
+            renderRecentFiles();
+        } catch (e) { console.warn('Failed to save recent file:', e); }
+    }
+
+    function renderRecentFiles() {
+        const container = document.getElementById('recent-files-list');
+        if (!container) return;
+        const recent = getRecentFiles();
+        if (recent.length === 0) {
+            container.innerHTML = '<div style="padding:6px 10px; font-size:0.75rem; color:var(--text-muted);">履歴なし</div>';
+            return;
+        }
+        container.innerHTML = recent.map((f, i) => `
+            <div class="dropdown-item recent-file-item" onclick="restoreRecentFileByIndex(${i})" style="display:flex; flex-direction:column; align-items:flex-start; padding:6px 10px;">
+                <span style="font-weight:500; font-size:0.8rem;">${escapeHtml(f.name)}</span>
+                <span style="font-size:0.7rem; color:var(--text-muted); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(f.preview)}</span>
+            </div>
+        `).join('');
+    }
+    window.renderRecentFiles = renderRecentFiles;
+
+    function restoreRecentFileByIndex(index) {
+        const recent = getRecentFiles();
+        if (!recent[index]) return;
+        // Recent files only store metadata, actual content is in localStorage tabs
+        // Show notification that this is for reference only
+        alert(`「${recent[index].name}」\n\n最近開いたファイルの履歴です。\n内容は現在のタブに保存されています。`);
+        closeAllFileDropdowns();
+    }
+    window.restoreRecentFileByIndex = restoreRecentFileByIndex;
+
+    // Initialize recent files on load
+    setTimeout(renderRecentFiles, 100);
+
     function loadFile(input) {
         const f = input.files[0]; if (!f) return;
         const r = new FileReader();
@@ -12238,6 +12472,8 @@ if (typeof applyPaneHeightSettings === 'function') {
             updateInputStats();
             updatePreview();
             saveTabsToStorage();
+            // Add to recent files history
+            addToRecentFiles(f.name, content.substring(0, 100));
             input.value = '';
             pendingOpenMode = null;
         };
