@@ -70,6 +70,41 @@ html.cc-boot #resizer-search {
     border-color: rgba(255,255,255,0.10);
   }
   #cc-panel-header-menu .cc-menu-hint{ color: var(--text-muted); font-size: 0.75rem; }
+.settings-section{
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 6px 8px;
+  margin-bottom: 12px;
+  background: rgba(255,255,255,0.6);
+}
+body.theme-dark .settings-section{ background: rgba(31,41,55,0.35); }
+.settings-section summary{
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+  list-style: none;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding: 4px 2px;
+}
+.settings-section summary::-webkit-details-marker{ display:none; }
+.settings-section summary::before{
+  content: '▸';
+  display:inline-block;
+  transform: translateY(-1px);
+  transition: transform 0.2s ease;
+  color: var(--text-muted);
+}
+.settings-section[open] summary::before{ transform: rotate(90deg); }
+.settings-section-body{ margin-top: 6px; display:flex; flex-direction:column; gap:10px; }
+.settings-section .setting-group{ margin: 0; }
+.setting-subtitle{
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin: 2px 0 6px;
+}
 .panel-header{
   padding: var(--panel-header-padding-y) var(--panel-header-padding-x);
   height: var(--panel-header-height);
@@ -899,6 +934,31 @@ background: transparent;
         display: flex; justify-content: flex-end; align-items: center; gap: 10px; min-height: 24px;
         flex-wrap: wrap; flex-shrink: 0; row-gap: 4px;
     }
+    .progress-wrap{
+        display:inline-flex;
+        align-items:center;
+        gap: 6px;
+        font-size: 0.72rem;
+    }
+    .progress-bar{
+        width: 90px;
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    .progress-bar-fill{
+        height: 100%;
+        width: 0%;
+        background: #38bdf8;
+        border-radius: 999px;
+        transition: width 0.2s ease;
+    }
+    .progress-wrap.compact .progress-text{ display:none; }
+    .save-timestamp{
+        font-size: 0.68rem;
+        color: var(--text-muted);
+    }
     .net-count { font-weight: bold; color: var(--text-color); background: var(--pane-header-bg); padding: 0 4px; border-radius: 3px; }
     .timestamp { font-family: monospace; color: #059669; }
     .goal-display { font-weight: bold; }
@@ -934,6 +994,73 @@ background: transparent;
     .quick-insert-popup button:hover { background: #e0f2fe; }
     .quick-insert-popup .qip-ruby { color: #dc2626; }
     .quick-insert-popup .qip-bouten { color: #7c3aed; }
+    .selection-tool-window{
+        position: fixed;
+        z-index: 9999;
+        bottom: 12px;
+        left: 12px;
+        background: var(--panel-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        min-width: 220px;
+        display: none;
+    }
+    .selection-tool-window.show{ display: block; }
+    .selection-tool-header{
+        display:flex;
+        align-items:center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 8px 10px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        border-bottom: 1px solid var(--border-color);
+        cursor: move;
+        user-select: none;
+    }
+    .selection-tool-header .selection-tool-info{
+        font-weight: 500;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+    }
+    .selection-tool-body{
+        display:flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 8px;
+    }
+    .selection-tool-body button{
+        background: #f3f4f6;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 4px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        width: 28px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .selection-tool-body button:disabled{
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .selection-tool-body .qip-ruby{ color: #dc2626; }
+    .selection-tool-body .qip-bouten{ color: #7c3aed; }
+    .selection-tool-resize{
+        position: absolute;
+        background: transparent;
+    }
+    .selection-tool-resize.n{ top:-4px; left:12px; right:12px; height:8px; cursor: n-resize; }
+    .selection-tool-resize.s{ bottom:-4px; left:12px; right:12px; height:8px; cursor: s-resize; }
+    .selection-tool-resize.e{ right:-4px; top:12px; bottom:12px; width:8px; cursor: e-resize; }
+    .selection-tool-resize.w{ left:-4px; top:12px; bottom:12px; width:8px; cursor: w-resize; }
+    .selection-tool-resize.ne{ top:-4px; right:-4px; width:12px; height:12px; cursor: ne-resize; }
+    .selection-tool-resize.nw{ top:-4px; left:-4px; width:12px; height:12px; cursor: nw-resize; }
+    .selection-tool-resize.se{ bottom:-4px; right:-4px; width:12px; height:12px; cursor: se-resize; }
+    .selection-tool-resize.sw{ bottom:-4px; left:-4px; width:12px; height:12px; cursor: sw-resize; }
 
     textarea {
         width: 100%; height: 100%; border: none; outline: none; resize: none;
@@ -3760,7 +3887,7 @@ body.theme-dark .cc-window-box .cc-resize-se::after{
   border-bottom-color: rgba(156,163,175,0.55);
 }
 
-/* ===== v1.05 UX Enhancements ===== */
+/* ===== v1.1 UX Enhancements ===== */
 
 /* --- Reader mode page separator --- */
 .reader-page-separator {
@@ -5275,7 +5402,7 @@ body.theme-dark{
             <button class="app-icon" id="app-icon" title="アプリメニュー">
                 <img src="icons/favicon-32.png" alt="アプリアイコン">
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.04</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.1</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -5504,197 +5631,237 @@ body.theme-dark{
             <button class="btn panel-icon-btn panel-pin-btn" onclick="togglePanelPin('settings-bar')" title="固定">📌</button>
             <button class="btn panel-icon-btn panel-close-btn" onclick="closeControlPanel('settings-bar')">✕</button>
         </div>
-        <div class="setting-group">
-            <div class="setting-title">入力エリア <button class="btn btn-apply" onclick="applyInputSettings()">適用</button></div>
-            <div class="setting-row vertical">
-                <label>文字: <input type="number" id="st-in-size" value="17" min="10" max="60"></label>
-                <label>行間: <input type="number" id="st-in-line" value="1.7" step="0.1" min="1.0" max="5.0"></label>
-                <label><input type="checkbox" id="st-in-v" checked> 縦書き</label>
-                    <label>フォント: 
-                    <select id="st-in-font">
-                        <option value="font-gothic" selected>ゴシック</option>
-                        <option value="font-mincho">明朝体</option>
-                        <option value="font-old">アンティーク</option>
-                        <option value="font-round">丸ゴシック</option>
-                        <option value="font-brush">筆文字</option>
-                    </select>
-                </label>
-            </div>
-        </div>
-
-        <div class="setting-group">
-            <div class="setting-title">プレビュー <button class="btn btn-apply" onclick="applyPreviewSettings()">適用</button></div>
-            <div class="setting-row vertical">
-                <label>文字: <input type="number" id="st-pv-size" value="17" min="10" max="60"></label>
-                <label>行間: <input type="number" id="st-pv-line" value="1.7" step="0.1" min="1.0" max="5.0"></label>
-                <label><input type="checkbox" id="st-pv-v" checked> 縦書き</label>
-                    <label>フォント: 
-                    <select id="st-pv-font">
-                        <option value="font-gothic" selected>ゴシック</option>
-                        <option value="font-mincho">明朝体</option>
-                        <option value="font-old">アンティーク</option>
-                        <option value="font-round">丸ゴシック</option>
-                        <option value="font-brush">筆文字</option>
-                    </select>
-                </label>
-            </div>
-        </div>
-
-        <div class="setting-group">
-            <div class="setting-title">表示オプション <button class="btn btn-apply" onclick="applyDisplaySettings()">適用</button></div>
-            <div class="setting-row">
-                <label><input type="checkbox" id="st-show-space" checked> スペース可視化</label>
-                <label><input type="checkbox" id="st-show-highlight" checked> ハイライト</label>
-            </div>
-            <div class="setting-row">
-                <label><input type="checkbox" id="check-show-input" checked> 入力表示</label>
-                <label><input type="checkbox" id="check-show-preview" checked> プレビュー表示</label>
-            </div>
-            <div class="setting-row">
-                <label><input type="checkbox" id="st-default-preview-hidden"> 起動時プレビュー非表示</label>
-            </div>
-        </div>
-
-        <div class="setting-group">
-            <div class="setting-title">執筆支援 <button class="btn btn-apply" onclick="applyWritingSettings()">適用</button></div>
-            <div class="setting-row vertical">
-                <label><input type="checkbox" id="st-typewriter-mode"> タイプライター</label>
-                <label><input type="checkbox" id="st-writing-tracker" checked> 時間トラッカー</label>
-            </div>
-            <div class="setting-row" id="writing-time-display" style="color: #8b5cf6; font-weight: bold;">執筆時間: 00:00:00</div>
-        </div>
-
-        <div class="setting-group">
-            <div class="setting-title">目標・統計 <button class="btn btn-apply" onclick="applyGoalSettings()">適用</button></div>
-            <div class="setting-row">
-                <label>全体目標: <input type="number" id="st-goal-chars" value="150000" min="0" max="999999" style="width:70px;"> 字</label>
-            </div>
-            <div class="setting-row">
-                <label>今日の目標: <input type="number" id="st-today-goal" value="2000" min="0" max="99999" style="width:60px;"> 字</label>
-            </div>
-            <div class="setting-row">
-                <button class="btn btn-apply" onclick="resetTodayStart()" style="font-size:0.65rem;">開始点リセット</button>
-            </div>
-            <div class="setting-row">
-              <label>「今日」の開始時刻: 
-                <input id="st-day-start" type="time" list="day-start-presets" value="00:00" style="width:120px;">
-              </label>
-              <datalist id="day-start-presets">
-                <option value="00:00"></option><option value="01:00"></option><option value="02:00"></option>
-                <option value="03:00"></option><option value="04:00"></option><option value="05:00"></option><option value="06:00"></option>
-              </datalist>
-              <button class="btn btn-apply" onclick="applyExtendedSettings()" style="font-size:0.65rem;">適用</button>
-            </div>
-            <div class="setting-row">
-                <label><input type="checkbox" id="st-show-reading-time" checked> 読み上げ時間</label>
-            </div>
-            <div class="setting-row">
-                <label><input type="checkbox" id="st-celebrate-goal" checked> 目標達成時にお祝い表示</label>
-            </div>
-        </div>
-
-        <div class="setting-group">
-            <div class="setting-title">用紙設定 <button class="btn btn-apply" onclick="applyPaperSettings()">適用</button></div>
-            <div class="setting-row vertical">
-                <div>行: <input type="number" id="st-manuscript-rows" value="34" min="1" max="100" style="width:50px;"> ×文字: <input type="number" id="st-manuscript-cols" value="42" min="1" max="100" style="width:50px;"></div>
-                <label><input type="checkbox" id="st-show-manuscript" checked> 換算表示</label>
-                <label>テーマ:
-                    <select id="st-theme-preset">
-                        <option value="">ライト</option>
-                        <option value="theme-dark">ダーク</option>
-                        <option value="theme-sepia">セピア</option>
-                        <option value="theme-blue">ブルー</option>
-                        <option value="theme-green">グリーン</option>
-                    </select>
-                </label>
-                <label>文字色:
-                    <span style="display:inline-flex; align-items:center; gap:6px;">
-                        <input type="color" id="st-text-color" value="#1f2937" style="width:44px; height:28px;">
-                        <input type="text" id="st-text-color-text" placeholder="#RRGGBB" style="width:96px;">
-                    </span>
-                </label>
-            </div>
-
-            <div class="setting-row">
-                <label>固定パネル上限:
-                    <select id="st-max-pinned-panels">
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4" selected>4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                    
-                        <option value="8">8</option></select>
-                </label>
-            </div>
-
-        </div>
-
-        <div class="setting-group">
-            <div class="setting-title">開く <button class="btn btn-apply" onclick="applyOpenSettingsAndSave()">適用</button></div>
-            <div class="setting-row vertical">
-                <label><input type="radio" name="st-open-mode" value="current" checked > 現在のタブに開く</label>
-                <label><input type="radio" name="st-open-mode" value="new" > 新しいタブに開く</label>
-            </div>
-        </div>
-
-        <!-- 目次抽出ルールは目次パネルの⚙ボタンから設定可能 -->
-
-        <div class="setting-group">
-            <div class="setting-title">ペイン幅 <button class="btn btn-apply" onclick="applyPaneWidthSettings()">適用</button></div>
-            <div class="setting-row vertical">
-                <label>入力: <input type="number" id="st-pane-input-width" value="520" min="120" max="3000" style="width:70px;">px</label>
-                <label>プレビュー: <input type="number" id="st-pane-preview-width" value="520" min="120" max="3000" style="width:70px;">px</label>
-                                <label>サイド: <input type="number" id="st-pane-side-width" value="300" min="160" max="1200" style="width:70px;">px</label>
-<label class="st-hide-pane-width">メモ: <input type="number" id="st-pane-memo-width" value="260" min="160" max="1200" style="width:70px;">px</label>
-                <label class="st-hide-pane-width">目次: <input type="number" id="st-pane-outline-width" value="260" min="160" max="1200" style="width:70px;">px</label>
-                <label class="st-hide-pane-width">構成: <input type="number" id="st-pane-structure-width" value="300" min="160" max="1200" style="width:70px;">px</label>
-                <label>検索: <input type="number" id="st-pane-search-width" value="320" min="160" max="1200" style="width:70px;">px</label>
-                <label class="st-hide-pane-width">登場人物: <input type="number" id="st-pane-character-width" value="300" min="160" max="1200" style="width:70px;">px</label>
-                <label class="st-hide-pane-width">世界観: <input type="number" id="st-pane-world-width" value="300" min="160" max="1200" style="width:70px;">px</label>
-                <label class="st-hide-pane-width">用語: <input type="number" id="st-pane-terms-width" value="300" min="160" max="1200" style="width:70px;">px</label>
-                <label>仕切り幅: <input type="number" id="st-divider-width" value="2" min="1" max="12" style="width:70px;" onchange="applyDividerSettings()">px</label>
-            </div>
-            <div class="setting-row">
-                <button class="btn btn-apply" onclick="resetPaneWidths()" style="font-size:0.65rem;">全幅リセット</button>
-                <button class="btn btn-apply" onclick="resetDividerWidth()" style="font-size:0.65rem;">仕切り初期化</button>
-                </div>
-        </div>
-
-        <div class="setting-group">
-            <div class="setting-title">保存 <button class="btn btn-apply" onclick="applyAutoSaveSettings()">適用</button></div>
-            <div class="setting-row vertical">
-                <label><input type="checkbox" id="st-autosave-enabled" onchange="applyAutoSaveSettings()"> 自動保存を有効にする</label>
-                <label>自動保存間隔: <input type="number" id="st-autosave-interval" value="60" min="5" max="600" style="width:70px;" onchange="applyAutoSaveSettings()"> 秒</label>
-            </div>
-        </div>
-
-        <div class="setting-group">
-            <div class="setting-title">縦並び高さ <button class="btn btn-apply" onclick="applyPaneHeightSettings()">適用</button></div>
-            <div class="setting-row vertical">
-                <label>入力: <input type="number" id="st-pane-input-height" value="520" min="160" max="2000" style="width:70px;">px</label>
-                <label>プレビュー: <input type="number" id="st-pane-preview-height" value="520" min="160" max="2000" style="width:70px;">px</label>
-            </div>
-            <div class="setting-row">
-                <button class="btn btn-apply" onclick="resetPaneHeights()" style="font-size:0.65rem;">高さをリセット</button>
-            </div>
-        </div>
-
-        <div class="setting-group settings-actions">
-            <div class="settings-actions-row">
-                <div class="dropdown settings-dropdown">
-                    <button class="btn settings-action-btn dropdown-btn" onclick="toggleDropdown('settings-transfer-dropdown')">📦 設定の移行</button>
-                    <div id="settings-transfer-dropdown" class="dropdown-content">
-                        <button onclick="exportSettings()">📤 設定をエクスポート</button>
-                        <button onclick="document.getElementById('settings-file-input').click()">📥 設定をインポート</button>
+        <details class="settings-section" open>
+            <summary>表示・外観</summary>
+            <div class="settings-section-body">
+                <div class="setting-group">
+                    <div class="setting-title">入力エリア <button class="btn btn-apply" onclick="applyInputSettings()">適用</button></div>
+                    <div class="setting-row vertical">
+                        <label>文字: <input type="number" id="st-in-size" value="17" min="10" max="60"></label>
+                        <label>行間: <input type="number" id="st-in-line" value="1.7" step="0.1" min="1.0" max="5.0"></label>
+                        <label><input type="checkbox" id="st-in-v" checked> 縦書き</label>
+                            <label>フォント: 
+                            <select id="st-in-font">
+                                <option value="font-gothic" selected>ゴシック</option>
+                                <option value="font-mincho">明朝体</option>
+                                <option value="font-old">アンティーク</option>
+                                <option value="font-round">丸ゴシック</option>
+                                <option value="font-brush">筆文字</option>
+                            </select>
+                        </label>
                     </div>
                 </div>
-                <button class="btn settings-action-btn" onclick="resetAllSettings()" style="font-size:0.7rem; background:#fee2e2; color:#dc2626; border-color:#fecaca;">🔄 設定を初期化</button>
-                <button class="btn btn-apply-all settings-action-btn" onclick="applyAllSettings()">⚡ 一括適用</button>
+
+                <div class="setting-group">
+                    <div class="setting-title">プレビュー <button class="btn btn-apply" onclick="applyPreviewSettings()">適用</button></div>
+                    <div class="setting-row vertical">
+                        <label>文字: <input type="number" id="st-pv-size" value="17" min="10" max="60"></label>
+                        <label>行間: <input type="number" id="st-pv-line" value="1.7" step="0.1" min="1.0" max="5.0"></label>
+                        <label><input type="checkbox" id="st-pv-v" checked> 縦書き</label>
+                            <label>フォント: 
+                            <select id="st-pv-font">
+                                <option value="font-gothic" selected>ゴシック</option>
+                                <option value="font-mincho">明朝体</option>
+                                <option value="font-old">アンティーク</option>
+                                <option value="font-round">丸ゴシック</option>
+                                <option value="font-brush">筆文字</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-title">表示オプション <button class="btn btn-apply" onclick="applyDisplaySettings()">適用</button></div>
+                    <div class="setting-row">
+                        <label><input type="checkbox" id="st-show-space" checked> スペース可視化</label>
+                        <label><input type="checkbox" id="st-show-highlight" checked> ハイライト</label>
+                    </div>
+                    <div class="setting-row">
+                        <label><input type="checkbox" id="check-show-input" checked> 入力表示</label>
+                        <label><input type="checkbox" id="check-show-preview" checked> プレビュー表示</label>
+                    </div>
+                    <div class="setting-row">
+                        <label><input type="checkbox" id="st-default-preview-hidden"> 起動時プレビュー非表示</label>
+                    </div>
+                    <div class="setting-row">
+                        <label><input type="checkbox" id="st-selection-tool-window" checked> 左下の選択ツールを表示</label>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-title">用紙設定 <button class="btn btn-apply" onclick="applyPaperSettings()">適用</button></div>
+                    <div class="setting-row vertical">
+                        <div>行: <input type="number" id="st-manuscript-rows" value="34" min="1" max="100" style="width:50px;"> ×文字: <input type="number" id="st-manuscript-cols" value="42" min="1" max="100" style="width:50px;"></div>
+                        <label><input type="checkbox" id="st-show-manuscript" checked> 換算表示</label>
+                        <label>テーマ:
+                            <select id="st-theme-preset">
+                                <option value="">ライト</option>
+                                <option value="theme-dark">ダーク</option>
+                                <option value="theme-sepia">セピア</option>
+                                <option value="theme-blue">ブルー</option>
+                                <option value="theme-green">グリーン</option>
+                            </select>
+                        </label>
+                        <label>文字色:
+                            <span style="display:inline-flex; align-items:center; gap:6px;">
+                                <input type="color" id="st-text-color" value="#1f2937" style="width:44px; height:28px;">
+                                <input type="text" id="st-text-color-text" placeholder="#RRGGBB" style="width:96px;">
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="setting-row">
+                        <label>固定パネル上限:
+                            <select id="st-max-pinned-panels">
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4" selected>4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                            
+                                <option value="8">8</option></select>
+                        </label>
+                    </div>
+
+                </div>
             </div>
-            <input type="file" id="settings-file-input" accept=".json" onchange="importSettings(this)" style="display:none;">
-        </div>
+        </details>
+
+        <details class="settings-section" open>
+            <summary>執筆支援・統計</summary>
+            <div class="settings-section-body">
+                <div class="setting-group">
+                    <div class="setting-title">執筆支援 <button class="btn btn-apply" onclick="applyWritingSettings()">適用</button></div>
+                    <div class="setting-row vertical">
+                        <label><input type="checkbox" id="st-typewriter-mode"> タイプライター</label>
+                        <label><input type="checkbox" id="st-writing-tracker" checked> 時間トラッカー</label>
+                    </div>
+                    <div class="setting-row" id="writing-time-display" style="color: #8b5cf6; font-weight: bold;">執筆時間: 00:00:00</div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-title">目標・統計 <button class="btn btn-apply" onclick="applyGoalSettings()">適用</button></div>
+                    <div class="setting-row">
+                        <label>全体目標: <input type="number" id="st-goal-chars" value="150000" min="0" max="999999" style="width:70px;"> 字</label>
+                    </div>
+                    <div class="setting-row">
+                        <label>今日の目標: <input type="number" id="st-today-goal" value="2000" min="0" max="99999" style="width:60px;"> 字</label>
+                    </div>
+                    <div class="setting-row">
+                        <button class="btn btn-apply" onclick="resetTodayStart()" style="font-size:0.65rem;">開始点リセット</button>
+                    </div>
+                    <div class="setting-row">
+                      <label>「今日」の開始時刻: 
+                        <input id="st-day-start" type="time" list="day-start-presets" value="00:00" style="width:120px;">
+                      </label>
+                      <datalist id="day-start-presets">
+                        <option value="00:00"></option><option value="01:00"></option><option value="02:00"></option>
+                        <option value="03:00"></option><option value="04:00"></option><option value="05:00"></option><option value="06:00"></option>
+                      </datalist>
+                      <button class="btn btn-apply" onclick="applyExtendedSettings()" style="font-size:0.65rem;">適用</button>
+                    </div>
+                    <div class="setting-row">
+                        <label><input type="checkbox" id="st-show-reading-time" checked> 読み上げ時間</label>
+                    </div>
+                    <div class="setting-row">
+                        <label><input type="checkbox" id="st-celebrate-goal" checked> 目標達成時にお祝い表示</label>
+                    </div>
+                    <div class="setting-row">
+                        <label><input type="checkbox" id="st-show-progress-bar" checked> 進捗バーを表示</label>
+                    </div>
+                    <div class="setting-row vertical">
+                        <label>対象:
+                            <select id="st-progress-bar-target">
+                                <option value="today" selected>今日の目標</option>
+                                <option value="total">全体目標</option>
+                            </select>
+                        </label>
+                        <label>表示:
+                            <select id="st-progress-bar-display">
+                                <option value="compact">バーのみ</option>
+                                <option value="detail" selected>バー＋数値</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </details>
+
+        <details class="settings-section">
+            <summary>レイアウト</summary>
+            <div class="settings-section-body">
+                <div class="setting-group">
+                    <div class="setting-title">ペイン幅 <button class="btn btn-apply" onclick="applyPaneWidthSettings()">適用</button></div>
+                    <div class="setting-row vertical">
+                        <label>入力: <input type="number" id="st-pane-input-width" value="520" min="120" max="3000" style="width:70px;">px</label>
+                        <label>プレビュー: <input type="number" id="st-pane-preview-width" value="520" min="120" max="3000" style="width:70px;">px</label>
+                                        <label>サイド: <input type="number" id="st-pane-side-width" value="300" min="160" max="1200" style="width:70px;">px</label>
+        <label class="st-hide-pane-width">メモ: <input type="number" id="st-pane-memo-width" value="260" min="160" max="1200" style="width:70px;">px</label>
+                        <label class="st-hide-pane-width">目次: <input type="number" id="st-pane-outline-width" value="260" min="160" max="1200" style="width:70px;">px</label>
+                        <label class="st-hide-pane-width">構成: <input type="number" id="st-pane-structure-width" value="300" min="160" max="1200" style="width:70px;">px</label>
+                        <label>検索: <input type="number" id="st-pane-search-width" value="320" min="160" max="1200" style="width:70px;">px</label>
+                        <label class="st-hide-pane-width">登場人物: <input type="number" id="st-pane-character-width" value="300" min="160" max="1200" style="width:70px;">px</label>
+                        <label class="st-hide-pane-width">世界観: <input type="number" id="st-pane-world-width" value="300" min="160" max="1200" style="width:70px;">px</label>
+                        <label class="st-hide-pane-width">用語: <input type="number" id="st-pane-terms-width" value="300" min="160" max="1200" style="width:70px;">px</label>
+                        <label>仕切り幅: <input type="number" id="st-divider-width" value="2" min="1" max="12" style="width:70px;" onchange="applyDividerSettings()">px</label>
+                    </div>
+                    <div class="setting-row">
+                        <button class="btn btn-apply" onclick="resetPaneWidths()" style="font-size:0.65rem;">全幅リセット</button>
+                        <button class="btn btn-apply" onclick="resetDividerWidth()" style="font-size:0.65rem;">仕切り初期化</button>
+                        </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-title">縦並び高さ <button class="btn btn-apply" onclick="applyPaneHeightSettings()">適用</button></div>
+                    <div class="setting-row vertical">
+                        <label>入力: <input type="number" id="st-pane-input-height" value="520" min="160" max="2000" style="width:70px;">px</label>
+                        <label>プレビュー: <input type="number" id="st-pane-preview-height" value="520" min="160" max="2000" style="width:70px;">px</label>
+                    </div>
+                    <div class="setting-row">
+                        <button class="btn btn-apply" onclick="resetPaneHeights()" style="font-size:0.65rem;">高さをリセット</button>
+                    </div>
+                </div>
+            </div>
+        </details>
+
+        <details class="settings-section">
+            <summary>保存・読込</summary>
+            <div class="settings-section-body">
+                <div class="setting-group">
+                    <div class="setting-title">開く <button class="btn btn-apply" onclick="applyOpenSettingsAndSave()">適用</button></div>
+                    <div class="setting-row vertical">
+                        <label><input type="radio" name="st-open-mode" value="current" checked > 現在のタブに開く</label>
+                        <label><input type="radio" name="st-open-mode" value="new" > 新しいタブに開く</label>
+                    </div>
+                </div>
+
+                <!-- 目次抽出ルールは目次パネルの⚙ボタンから設定可能 -->
+
+                <div class="setting-group">
+                    <div class="setting-title">保存 <button class="btn btn-apply" onclick="applyAutoSaveSettings()">適用</button></div>
+                    <div class="setting-row vertical">
+                        <label><input type="checkbox" id="st-autosave-enabled" onchange="applyAutoSaveSettings()"> 自動保存を有効にする</label>
+                        <label>自動保存間隔: <input type="number" id="st-autosave-interval" value="60" min="5" max="600" style="width:70px;" onchange="applyAutoSaveSettings()"> 秒</label>
+                    </div>
+                </div>
+
+                <div class="setting-group settings-actions">
+                    <div class="settings-actions-row">
+                        <div class="dropdown settings-dropdown">
+                            <button class="btn settings-action-btn dropdown-btn" onclick="toggleDropdown('settings-transfer-dropdown')">📦 設定の移行</button>
+                            <div id="settings-transfer-dropdown" class="dropdown-content">
+                                <button onclick="exportSettings()">📤 設定をエクスポート</button>
+                                <button onclick="document.getElementById('settings-file-input').click()">📥 設定をインポート</button>
+                            </div>
+                        </div>
+                        <button class="btn settings-action-btn" onclick="resetAllSettings()" style="font-size:0.7rem; background:#fee2e2; color:#dc2626; border-color:#fecaca;">🔄 設定を初期化</button>
+                        <button class="btn btn-apply-all settings-action-btn" onclick="applyAllSettings()">⚡ 一括適用</button>
+                    </div>
+                    <input type="file" id="settings-file-input" accept=".json" onchange="importSettings(this)" style="display:none;">
+                </div>
+            </div>
+        </details>
     </div>
 </div>
 
@@ -5724,7 +5891,6 @@ body.theme-dark{
             <div class="pane-body">
                 <div id="input-mirror-container"></div>
                 <textarea id="input-area" spellcheck="false"></textarea>
-                <div id="input-sel-overlay" class="selection-overlay"></div>
             </div>
             <div class="pane-footer">
                 <span id="char-count">全体: 0</span>
@@ -5735,6 +5901,12 @@ body.theme-dark{
                 <span id="input-writing-time" class="writing-time"></span>
                 <span id="input-reading-time" class="reading-time"></span>
                 <span id="input-manuscript" class="manuscript-pages"></span>
+                <span id="input-progress-wrap" class="progress-wrap compact" aria-label="進捗バー">
+                    <span class="progress-label">進捗</span>
+                    <span class="progress-bar"><span id="input-progress-fill" class="progress-bar-fill"></span></span>
+                    <span id="input-progress-text" class="progress-text"></span>
+                </span>
+                <span id="input-last-save" class="save-timestamp"></span>
                 <span id="input-zoom-display" class="zoom-display" ondblclick="startEditInputZoom()" title="ダブルクリックで拡大率を入力">100%</span>
             </div>
         </div>
@@ -5766,7 +5938,6 @@ body.theme-dark{
                 <div id="preview-scroll">
                     <div id="preview-content"></div>
                 </div>
-                <div id="preview-sel-overlay" class="selection-overlay"></div>
             </div>
             <div class="pane-footer">
                 <span id="pv-time" class="timestamp">未更新</span>
@@ -6056,6 +6227,29 @@ body.theme-dark{
     <button onclick="quickWrapSelection('『', '』')">『』</button>
     <button onclick="quickWrapSelection('（', '）')">（）</button>
     <button style="color:#d97706;" onclick="quickAddBookmark()">🔖しおり</button>
+</div>
+
+<div id="selection-tool-window" class="selection-tool-window" aria-live="polite">
+    <div class="selection-tool-header">
+        <span>選択ツール</span>
+        <span id="selection-tool-info" class="selection-tool-info">選択なし</span>
+    </div>
+    <div class="selection-tool-body">
+        <button class="qip-ruby" data-requires-selection="true" onclick="quickInsertRuby()" title="ルビ" aria-label="ルビ">🔤</button>
+        <button class="qip-bouten" data-requires-selection="true" onclick="quickInsertBouten()" title="傍点" aria-label="傍点">⚫</button>
+        <button data-requires-selection="true" onclick="quickWrapSelection('「', '」')" title="「」" aria-label="かぎ括弧">「」</button>
+        <button data-requires-selection="true" onclick="quickWrapSelection('『', '』')" title="『』" aria-label="二重かぎ括弧">『』</button>
+        <button data-requires-selection="true" onclick="quickWrapSelection('（', '）')" title="（）" aria-label="丸括弧">（）</button>
+        <button style="color:#d97706;" data-requires-selection="true" onclick="quickAddBookmark()" title="しおり" aria-label="しおり">🔖</button>
+    </div>
+    <div class="selection-tool-resize n" data-dir="n"></div>
+    <div class="selection-tool-resize e" data-dir="e"></div>
+    <div class="selection-tool-resize s" data-dir="s"></div>
+    <div class="selection-tool-resize w" data-dir="w"></div>
+    <div class="selection-tool-resize ne" data-dir="ne"></div>
+    <div class="selection-tool-resize nw" data-dir="nw"></div>
+    <div class="selection-tool-resize se" data-dir="se"></div>
+    <div class="selection-tool-resize sw" data-dir="sw"></div>
 </div>
 
 <div id="save-dialog-overlay" class="save-dialog-overlay" style="display:none;">
@@ -6829,6 +7023,10 @@ initTabScrollers();
     const inputWritingTimeEl = document.getElementById('input-writing-time');
     const inputReadingEl = document.getElementById('input-reading-time');
     const inputManuscriptEl = document.getElementById('input-manuscript');
+    const inputProgressWrap = document.getElementById('input-progress-wrap');
+    const inputProgressFill = document.getElementById('input-progress-fill');
+    const inputProgressText = document.getElementById('input-progress-text');
+    const inputLastSaveEl = document.getElementById('input-last-save');
     const inputSelOverlay = document.getElementById('input-sel-overlay');
     const pvTotalCountEl = document.getElementById('pv-total-count');
     const pvNetCountEl = document.getElementById('pv-net-count');
@@ -6844,6 +7042,7 @@ initTabScrollers();
 
     if (inputSelOverlay) inputSelOverlay.title = '選択中の文字数と行数を表示します。';
     if (previewSelOverlay) previewSelOverlay.title = 'プレビューで選択した範囲の文字数と行数を表示します。';
+    loadLastSaveDisplay();
 
     let layoutAxis = 'row', layoutReversed = false;
     const LAYOUT_AXIS_KEY = 'cc_layout_axis';
@@ -6853,6 +7052,8 @@ initTabScrollers();
         goalChars: 150000, todayGoal: 2000, manuscriptRows: 34, manuscriptCols: 42,
         showReadingTime: true, showManuscript: true, showSpace: true, showHighlight: true,
         typewriterMode: false, writingTracker: true, defaultPreviewHidden: false,
+        showProgressBar: true, progressBarTarget: 'today', progressBarDisplay: 'detail',
+        showSelectionToolWindow: true,
         celebrateGoal: true, openMode: 'current', autosaveInterval: 60, autosaveEnabled: false, maxPinnedPanels: 4,
         panelSideMap: { memo:'left', outline:'left', search:'left', structure:'left', character:'left', world:'left', terms:'left' }
     };
@@ -6887,6 +7088,7 @@ memo: 'cc_memo_width_px',
     const WRITING_TIME_KEY = 'cc_editor_writing_time';
     const BOOKMARKS_KEY = 'cc_editor_bookmarks';
     const SETTINGS_KEY = 'cc_editor_settings';
+    const LAST_SAVE_TIME_KEY = 'cc_last_save_time';
     const TABS_KEY = 'cc_editor_tabs';
     const NOVEL_TITLE_KEY = 'cc_editor_novel_title';
     const DEFAULT_NOVEL_TITLE = 'ここにプロジェクトタイトルを入力してください。';
@@ -6931,6 +7133,35 @@ memo: 'cc_memo_width_px',
       s = s.replace(/[\s\u3000]/g, '');
 
       return s.length;
+    }
+
+    function formatClockTime(d = new Date()) {
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return `${hh}:${mm}`;
+    }
+
+    function updateLastSaveDisplay(timestamp, label = '保存') {
+      if (!inputLastSaveEl) return;
+      if (!timestamp) {
+        inputLastSaveEl.textContent = '';
+        return;
+      }
+      const d = new Date(timestamp);
+      inputLastSaveEl.textContent = `${label}: ${formatClockTime(d)}`;
+    }
+
+    function recordLastSave(label) {
+      const now = Date.now();
+      try { localStorage.setItem(LAST_SAVE_TIME_KEY, String(now)); } catch (e) {}
+      updateLastSaveDisplay(now, label);
+    }
+
+    function loadLastSaveDisplay() {
+      try {
+        const t = localStorage.getItem(LAST_SAVE_TIME_KEY);
+        if (t) updateLastSaveDisplay(Number(t), '保存');
+      } catch (e) {}
     }
 
 
@@ -7357,9 +7588,9 @@ function addNewTab() {
             version: '3.5',
             input: { size: document.getElementById('st-in-size').value, line: document.getElementById('st-in-line').value, font: document.getElementById('st-in-font').value, vertical: document.getElementById('st-in-v').checked },
             preview: { size: document.getElementById('st-pv-size').value, line: document.getElementById('st-pv-line').value, font: document.getElementById('st-pv-font').value, vertical: document.getElementById('st-pv-v').checked },
-            display: { showSpace: document.getElementById('st-show-space').checked, showHighlight: document.getElementById('st-show-highlight').checked, showInput: document.getElementById('check-show-input').checked, showPreview: document.getElementById('check-show-preview').checked, defaultPreviewHidden: document.getElementById('st-default-preview-hidden').checked },
+            display: { showSpace: document.getElementById('st-show-space').checked, showHighlight: document.getElementById('st-show-highlight').checked, showInput: document.getElementById('check-show-input').checked, showPreview: document.getElementById('check-show-preview').checked, defaultPreviewHidden: document.getElementById('st-default-preview-hidden').checked, selectionToolWindow: document.getElementById('st-selection-tool-window')?.checked !== false },
             writing: { typewriter: document.getElementById('st-typewriter-mode').checked, tracker: document.getElementById('st-writing-tracker').checked },
-            goal: { chars: document.getElementById('st-goal-chars').value, today: document.getElementById('st-today-goal').value, showReading: document.getElementById('st-show-reading-time').checked, celebrate: document.getElementById('st-celebrate-goal').checked },
+            goal: { chars: document.getElementById('st-goal-chars').value, today: document.getElementById('st-today-goal').value, showReading: document.getElementById('st-show-reading-time').checked, celebrate: document.getElementById('st-celebrate-goal').checked, showProgressBar: document.getElementById('st-show-progress-bar')?.checked !== false, progressTarget: document.getElementById('st-progress-bar-target')?.value || 'today', progressDisplay: document.getElementById('st-progress-bar-display')?.value || 'detail' },
             manuscript: { rows: document.getElementById('st-manuscript-rows').value, cols: document.getElementById('st-manuscript-cols').value, show: document.getElementById('st-show-manuscript').checked },
             open: { mode: document.querySelector('input[name="st-open-mode"]:checked')?.value || 'current' },
             autosave: { interval: document.getElementById('st-autosave-interval').value, enabled: document.getElementById('st-autosave-enabled').checked },
@@ -7391,9 +7622,22 @@ function addNewTab() {
             document.getElementById('check-show-input').checked = s.display.showInput !== false;
             document.getElementById('check-show-preview').checked = s.display.showPreview !== false;
             document.getElementById('st-default-preview-hidden').checked = s.display.defaultPreviewHidden || false;
+            const stw = document.getElementById('st-selection-tool-window');
+            if (stw) stw.checked = s.display.selectionToolWindow !== false;
         }
         if (s.writing) { document.getElementById('st-typewriter-mode').checked = s.writing.typewriter || false; document.getElementById('st-writing-tracker').checked = s.writing.tracker !== false; }
-        if (s.goal) { document.getElementById('st-goal-chars').value = s.goal.chars || 150000; document.getElementById('st-today-goal').value = s.goal.today || 2000; document.getElementById('st-show-reading-time').checked = s.goal.showReading !== false; document.getElementById('st-celebrate-goal').checked = s.goal.celebrate !== false; }
+        if (s.goal) {
+            document.getElementById('st-goal-chars').value = s.goal.chars || 150000;
+            document.getElementById('st-today-goal').value = s.goal.today || 2000;
+            document.getElementById('st-show-reading-time').checked = s.goal.showReading !== false;
+            document.getElementById('st-celebrate-goal').checked = s.goal.celebrate !== false;
+            const spb = document.getElementById('st-show-progress-bar');
+            if (spb) spb.checked = s.goal.showProgressBar !== false;
+            const pt = document.getElementById('st-progress-bar-target');
+            if (pt) pt.value = s.goal.progressTarget || 'today';
+            const pd = document.getElementById('st-progress-bar-display');
+            if (pd) pd.value = s.goal.progressDisplay || 'detail';
+        }
         if (s.manuscript) {
             document.getElementById('st-manuscript-rows').value = s.manuscript.rows || 34;
             document.getElementById('st-manuscript-cols').value = s.manuscript.cols || 42;
@@ -7456,7 +7700,7 @@ function addNewTab() {
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-    const defaultText = `　ⓒエディタ（使い方） v1.05
+        const defaultText = `　ⓒエディタ（使い方） v1.1
 
 ■ はじめに（最短で使い始める）
 
@@ -7867,12 +8111,16 @@ function addNewTab() {
         document.getElementById('st-show-space').checked = true;
         document.getElementById('st-show-highlight').checked = true;
         document.getElementById('st-default-preview-hidden').checked = false;
+        document.getElementById('st-selection-tool-window').checked = true;
         document.getElementById('st-typewriter-mode').checked = false;
         document.getElementById('st-writing-tracker').checked = true;
         document.getElementById('st-goal-chars').value = 150000;
         document.getElementById('st-today-goal').value = 2000;
         document.getElementById('st-celebrate-goal').checked = true;
         document.getElementById('st-show-reading-time').checked = true;
+        document.getElementById('st-show-progress-bar').checked = true;
+        document.getElementById('st-progress-bar-target').value = 'today';
+        document.getElementById('st-progress-bar-display').value = 'detail';
         document.getElementById('st-manuscript-rows').value = 34;
         document.getElementById('st-manuscript-cols').value = 42;
         document.getElementById('st-show-manuscript').checked = true;
@@ -7903,6 +8151,7 @@ function addNewTab() {
         localStorage.removeItem(MEMO_KEY);
         localStorage.removeItem(NOVEL_TITLE_KEY);
         localStorage.removeItem(SETTINGS_KEY);
+        localStorage.removeItem(LAST_SAVE_TIME_KEY);
         localStorage.removeItem(DIVIDER_WIDTH_KEY);
         localStorage.removeItem('cc_outline_rules_v1');
         localStorage.removeItem('cc_active_tab_color');
@@ -8056,6 +8305,7 @@ function addNewTab() {
         const handled = await saveWithHandle(autoSaveTarget.handle, payload.blob);
         if (handled) {
             showAutoSaveToast();
+            recordLastSave('自動保存');
             return;
         }
         showAutoSaveError();
@@ -8187,10 +8437,43 @@ function addNewTab() {
         if (tg > 0) { tw = Math.max(0, nl - todayStartChars); const tp = Math.round((tw / tg) * 100); inputTodayGoalEl.innerText = `今日: ${tw}/${tg} (${tp}%)`; inputTodayGoalEl.className = tw >= tg ? 'today-goal achieved' : 'today-goal'; } else { inputTodayGoalEl.innerText = ''; }
         inputReadingEl.innerText = settingsCache.showReadingTime ? `約${Math.ceil(nl / 400)}分` : '';
         if (settingsCache.showManuscript) { const cpp = settingsCache.manuscriptRows * settingsCache.manuscriptCols; inputManuscriptEl.innerText = `原稿用紙: ${(nl / cpp).toFixed(1)}枚`; } else { inputManuscriptEl.innerText = ''; }
+        updateProgressBar(nl, tw, tg, g);
         updateCursorLineDisplay();
         // Check goal achievement
         checkGoalAchievement(tw, tg, nl, g);
         updateAllTabsStats();
+    }
+    function updateProgressBar(netChars, todayWritten, todayGoal, totalGoal) {
+        if (!inputProgressWrap || !inputProgressFill || !inputProgressText) return;
+        if (!settingsCache.showProgressBar) {
+            inputProgressWrap.style.display = 'none';
+            return;
+        }
+        inputProgressWrap.style.display = 'inline-flex';
+        const isCompact = settingsCache.progressBarDisplay === 'compact';
+        inputProgressWrap.classList.toggle('compact', isCompact);
+
+        let current = 0;
+        let goal = 0;
+        let label = '進捗';
+        if (settingsCache.progressBarTarget === 'total') {
+            current = netChars;
+            goal = totalGoal;
+            label = '全体';
+        } else {
+            current = todayWritten;
+            goal = todayGoal;
+            label = '今日';
+        }
+        if (!goal || goal <= 0) {
+            inputProgressFill.style.width = '0%';
+            inputProgressText.textContent = '';
+            inputProgressWrap.style.display = 'none';
+            return;
+        }
+        const pct = Math.min(100, Math.round((current / goal) * 100));
+        inputProgressFill.style.width = `${pct}%`;
+        inputProgressText.textContent = isCompact ? '' : `${label} ${current}/${goal} (${pct}%)`;
     }
     function updateCursorLineDisplay() { const p = inputArea.selectionStart, c = (inputArea.value.substring(0, p).match(/\n/g) || []).length + 1; inputPosBar.innerText = `現在: ${c} 行目`; }
 
@@ -8221,14 +8504,23 @@ function addNewTab() {
     }
 
     const quickInsertPopup = document.getElementById('quick-insert-popup');
+    const selectionToolWindow = document.getElementById('selection-tool-window');
+    const selectionToolInfo = document.getElementById('selection-tool-info');
+    const selectionToolButtons = selectionToolWindow ? Array.from(selectionToolWindow.querySelectorAll('[data-requires-selection="true"]')) : [];
     let lastSelectionRange = { start: 0, end: 0 };
 
     function showQuickInsertPopup() {
+        if (settingsCache.showSelectionToolWindow) {
+            quickInsertPopup.classList.remove('show');
+            return;
+        }
         const s = inputArea.selectionStart, e = inputArea.selectionEnd;
         if (s === e) { quickInsertPopup.classList.remove('show'); return; }
         lastSelectionRange = { start: s, end: e };
-        const overlayRect = inputSelOverlay.getBoundingClientRect();
         const inputRect = inputArea.getBoundingClientRect();
+        const overlayRect = (inputSelOverlay && inputSelOverlay.getBoundingClientRect().width)
+          ? inputSelOverlay.getBoundingClientRect()
+          : inputRect;
 const isVertical = inputArea.parentElement.classList.contains('vertical-mode');
 const margin = 8;
 const footerRect = document.querySelector('#pane-input .pane-footer')?.getBoundingClientRect();
@@ -8267,6 +8559,24 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
     }
 
     function hideQuickInsertPopup() { quickInsertPopup.classList.remove('show'); }
+
+    function updateSelectionToolWindowVisibility() {
+        if (!selectionToolWindow) return;
+        const activeEl = document.activeElement;
+        const inInput = activeEl === inputArea || (activeEl && activeEl.closest && activeEl.closest('#pane-input'));
+        const inTool = activeEl && activeEl.closest && activeEl.closest('#selection-tool-window');
+        if (settingsCache.showSelectionToolWindow && (inInput || inTool)) {
+            selectionToolWindow.classList.add('show');
+        } else {
+            selectionToolWindow.classList.remove('show');
+        }
+    }
+
+    function updateSelectionToolWindowState(hasSelection, infoText) {
+        if (!selectionToolWindow || !selectionToolInfo) return;
+        selectionToolInfo.textContent = infoText;
+        selectionToolButtons.forEach(btn => { btn.disabled = !hasSelection; });
+    }
 
     function quickInsertRuby() {
         const s = lastSelectionRange.start, e = lastSelectionRange.end;
@@ -8314,33 +8624,151 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
             const s = inputArea.selectionStart, e = inputArea.selectionEnd;
             if (s !== e) {
                 const t = inputArea.value.substring(s, e), c = t.replace(/[\n\r]/g, '').length, l = (t.match(/\n/g) || []).length + 1;
-                inputSelOverlay.textContent = `選択: ${c}字 / ${l}行`;
-                inputSelOverlay.classList.add('show');
                 showQuickInsertPopup();
+                updateSelectionToolWindowState(true, `${c}字 / ${l}行`);
             } else {
-                inputSelOverlay.classList.remove('show');
                 hideQuickInsertPopup();
+                updateSelectionToolWindowState(false, '選択なし');
             }
-            previewSelOverlay.classList.remove('show');
         }
         else if (previewScroll.contains(window.getSelection()?.anchorNode)) {
             const t = window.getSelection().toString();
             if (t.length > 0) {
-                const c = t.replace(/[\n\r]/g, '').length, l = (t.match(/\n/g) || []).length + 1;
-                previewSelOverlay.textContent = `選択: ${c}字 / ${l}行`;
-                previewSelOverlay.classList.add('show');
+                updateSelectionToolWindowState(false, 'プレビュー選択中');
             } else {
-                previewSelOverlay.classList.remove('show');
+                updateSelectionToolWindowState(false, '選択なし');
             }
-            inputSelOverlay.classList.remove('show');
             hideQuickInsertPopup();
         }
         else {
-            inputSelOverlay.classList.remove('show');
-            previewSelOverlay.classList.remove('show');
             hideQuickInsertPopup();
+            updateSelectionToolWindowState(false, '選択なし');
         }
+        updateSelectionToolWindowVisibility();
     });
+
+    const SELECTION_TOOL_POS_KEY = 'cc_selection_tool_pos_v1';
+    function restoreSelectionToolPosition() {
+        if (!selectionToolWindow) return;
+        try {
+            const raw = localStorage.getItem(SELECTION_TOOL_POS_KEY);
+            if (!raw) return;
+            const pos = JSON.parse(raw);
+            if (typeof pos.left === 'number' && typeof pos.top === 'number') {
+                selectionToolWindow.style.left = `${pos.left}px`;
+                selectionToolWindow.style.top = `${pos.top}px`;
+                selectionToolWindow.style.bottom = 'auto';
+            }
+        } catch (e) {}
+    }
+    function saveSelectionToolPosition(left, top) {
+        try { localStorage.setItem(SELECTION_TOOL_POS_KEY, JSON.stringify({ left, top })); } catch (e) {}
+    }
+    function enableSelectionToolDrag() {
+        if (!selectionToolWindow) return;
+        const header = selectionToolWindow.querySelector('.selection-tool-header');
+        if (!header) return;
+        header.addEventListener('pointerdown', (ev) => {
+            if (ev.button !== 0) return;
+            ev.preventDefault();
+            const rect = selectionToolWindow.getBoundingClientRect();
+            const startX = ev.clientX;
+            const startY = ev.clientY;
+            const startLeft = rect.left;
+            const startTop = rect.top;
+
+            const onMove = (e) => {
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                const left = Math.min(Math.max(8, startLeft + dx), window.innerWidth - rect.width - 8);
+                const top = Math.min(Math.max(8, startTop + dy), window.innerHeight - rect.height - 8);
+                selectionToolWindow.style.left = `${left}px`;
+                selectionToolWindow.style.top = `${top}px`;
+                selectionToolWindow.style.bottom = 'auto';
+            };
+            const onUp = () => {
+                const finalRect = selectionToolWindow.getBoundingClientRect();
+                saveSelectionToolPosition(finalRect.left, finalRect.top);
+                window.removeEventListener('pointermove', onMove);
+                window.removeEventListener('pointerup', onUp);
+            };
+            window.addEventListener('pointermove', onMove);
+            window.addEventListener('pointerup', onUp);
+        });
+    }
+
+    function enableSelectionToolResize() {
+        if (!selectionToolWindow) return;
+        const handles = selectionToolWindow.querySelectorAll('.selection-tool-resize');
+        if (!handles.length) return;
+        const minW = 180;
+        const minH = 56;
+        handles.forEach(handle => {
+            handle.addEventListener('pointerdown', (ev) => {
+                if (ev.button !== 0) return;
+                ev.preventDefault();
+                ev.stopPropagation();
+                const dir = handle.dataset.dir || '';
+                const rect = selectionToolWindow.getBoundingClientRect();
+                const startX = ev.clientX;
+                const startY = ev.clientY;
+                const startLeft = rect.left;
+                const startTop = rect.top;
+                const startW = rect.width;
+                const startH = rect.height;
+
+                const onMove = (e) => {
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+                    let newLeft = startLeft;
+                    let newTop = startTop;
+                    let newW = startW;
+                    let newH = startH;
+
+                    if (dir.includes('e')) newW = Math.max(minW, startW + dx);
+                    if (dir.includes('s')) newH = Math.max(minH, startH + dy);
+                    if (dir.includes('w')) {
+                        newW = Math.max(minW, startW - dx);
+                        newLeft = startLeft + dx;
+                    }
+                    if (dir.includes('n')) {
+                        newH = Math.max(minH, startH - dy);
+                        newTop = startTop + dy;
+                    }
+
+                    const maxLeft = window.innerWidth - newW - 8;
+                    const maxTop = window.innerHeight - newH - 8;
+                    newLeft = Math.min(Math.max(8, newLeft), Math.max(8, maxLeft));
+                    newTop = Math.min(Math.max(8, newTop), Math.max(8, maxTop));
+
+                    selectionToolWindow.style.left = `${newLeft}px`;
+                    selectionToolWindow.style.top = `${newTop}px`;
+                    selectionToolWindow.style.bottom = 'auto';
+                    selectionToolWindow.style.width = `${newW}px`;
+                    selectionToolWindow.style.height = `${newH}px`;
+                };
+
+                const onUp = () => {
+                    const finalRect = selectionToolWindow.getBoundingClientRect();
+                    saveSelectionToolPosition(finalRect.left, finalRect.top);
+                    window.removeEventListener('pointermove', onMove);
+                    window.removeEventListener('pointerup', onUp);
+                };
+
+                window.addEventListener('pointermove', onMove);
+                window.addEventListener('pointerup', onUp);
+            });
+        });
+    }
+
+    restoreSelectionToolPosition();
+    enableSelectionToolDrag();
+    enableSelectionToolResize();
+    updateSelectionToolWindowVisibility();
+    updateSelectionToolWindowState(false, '選択なし');
+
+    document.addEventListener('focusin', updateSelectionToolWindowVisibility);
+    document.addEventListener('pointerdown', updateSelectionToolWindowVisibility);
 
     previewScroll.addEventListener('scroll', () => {
         const v = document.getElementById('st-pv-v').checked; let p;
@@ -8794,15 +9222,17 @@ function applyPreviewSettings() {
     updatePreview();
 }
 
-function applyDisplaySettings() {
+    function applyDisplaySettings() {
         settingsCache.showSpace = document.getElementById('st-show-space').checked;
         settingsCache.showHighlight = document.getElementById('st-show-highlight').checked;
         settingsCache.defaultPreviewHidden = document.getElementById('st-default-preview-hidden').checked;
+        settingsCache.showSelectionToolWindow = document.getElementById('st-selection-tool-window')?.checked !== false;
         const si = document.getElementById('check-show-input').checked, sp = document.getElementById('check-show-preview').checked;
         if (si) document.getElementById('pane-input').classList.remove('hidden'); else document.getElementById('pane-input').classList.add('hidden');
         if (sp) document.getElementById('pane-preview').classList.remove('hidden'); else document.getElementById('pane-preview').classList.add('hidden');
         adjustPaneWidthsOnVisibility();
         updatePreview();
+        updateSelectionToolWindowVisibility();
     }
     function applyWritingSettings() {
         settingsCache.typewriterMode = document.getElementById('st-typewriter-mode').checked;
@@ -8816,7 +9246,18 @@ function applyDisplaySettings() {
             inputArea.classList.remove('typewriter-mode');
         }
     }
-    function applyGoalSettings() { settingsCache.goalChars = parseInt(document.getElementById('st-goal-chars').value) || 0; settingsCache.todayGoal = parseInt(document.getElementById('st-today-goal').value) || 0; settingsCache.showReadingTime = document.getElementById('st-show-reading-time').checked; settingsCache.celebrateGoal = document.getElementById('st-celebrate-goal').checked; goalAchieved = { today: false, total: false }; updateInputStats(); updatePreview(); }
+    function applyGoalSettings() {
+        settingsCache.goalChars = parseInt(document.getElementById('st-goal-chars').value) || 0;
+        settingsCache.todayGoal = parseInt(document.getElementById('st-today-goal').value) || 0;
+        settingsCache.showReadingTime = document.getElementById('st-show-reading-time').checked;
+        settingsCache.celebrateGoal = document.getElementById('st-celebrate-goal').checked;
+        settingsCache.showProgressBar = document.getElementById('st-show-progress-bar')?.checked !== false;
+        settingsCache.progressBarTarget = document.getElementById('st-progress-bar-target')?.value || 'today';
+        settingsCache.progressBarDisplay = document.getElementById('st-progress-bar-display')?.value || 'detail';
+        goalAchieved = { today: false, total: false };
+        updateInputStats();
+        updatePreview();
+    }
     function applyManuscriptSettings() {
         settingsCache.manuscriptRows = parseInt(document.getElementById('st-manuscript-rows').value) || 34;
         settingsCache.manuscriptCols = parseInt(document.getElementById('st-manuscript-cols').value) || 42;
@@ -12223,6 +12664,7 @@ if (typeof applyPaneHeightSettings === 'function') {
             setAutoSaveTarget(result.handle, 'text', scope);
             maybePromptEnableAutoSave();
         }
+        recordLastSave('保存');
         closeSaveDialog();
     }
     async function saveAsHTML() {
@@ -12244,6 +12686,7 @@ if (typeof applyPaneHeightSettings === 'function') {
             setAutoSaveTarget(result.handle, 'html', scope);
             maybePromptEnableAutoSave();
         }
+        recordLastSave('保存');
         closeSaveDialog();
     }
     function renderTextToHTML(text) {
@@ -25808,7 +26251,7 @@ bindResize('cc-resize-sw', 'sw');
   }
 })();
 
-/* ===== v1.05 UX Enhancements: Tab navigation, Edit history, Responsive ===== */
+/* ===== v1.1 UX Enhancements: Tab navigation, Edit history, Responsive ===== */
 (function(){
   'use strict';
 
@@ -26067,7 +26510,7 @@ bindResize('cc-resize-sw', 'sw');
 })();
 </script>
 
-<!-- ===== v1.05 Reader Page Separator Enhancement ===== -->
+<!-- ===== v1.1 Reader Page Separator Enhancement ===== -->
 <script>
 (function(){
   'use strict';
