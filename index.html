@@ -666,7 +666,7 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
     .help-section:last-child { margin-bottom: 0; }
     .help-title { font-weight: bold; font-size: 0.9rem; margin-bottom: 4px; border-bottom: 1px dashed #fcd34d; padding-bottom: 2px; }
 
-    #settings-bar { margin-bottom: 0; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; padding: 8px 10px; padding-right: 14px; order: 3; max-height: calc(100vh - 100px); overflow-y: auto; }
+    #settings-bar { margin-bottom: 0; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; padding: 8px 10px 72px; padding-right: 14px; order: 3; max-height: calc(100vh - 100px); overflow-y: auto; position: relative; }
     #settings-bar .panel-action-buttons { right: 2px; }
     .settings-panel-select{
         display:flex;
@@ -698,11 +698,21 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
     .setting-row.vertical { flex-direction: column; align-items: flex-start; gap: 6px; }
     input[type="number"] { width: 50px; }
     .settings-actions {
-        position: absolute; right: 2px; bottom: 2px;
-        display: flex; flex-direction: column;
-        align-items: flex-end; gap: 4px;
-        text-align: right; background: var(--panel-bg);
-        padding: 4px; border-radius: 4px;
+        position: sticky;
+        right: 2px;
+        bottom: 8px;
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+        text-align: right;
+        background: var(--panel-bg);
+        padding: 6px;
+        border-radius: 6px;
+        margin-left: auto;
+        z-index: 2;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
     .settings-actions-row {
         display: flex; gap: 8px; flex-direction: column;
@@ -5920,22 +5930,22 @@ body.theme-dark{
                     </div>
                 </div>
 
-                <div class="setting-group settings-actions">
-                    <div class="settings-actions-row">
-                        <div class="dropdown settings-dropdown">
-                            <button class="btn settings-action-btn dropdown-btn" onclick="toggleDropdown('settings-transfer-dropdown')">📦 設定の移行</button>
-                            <div id="settings-transfer-dropdown" class="dropdown-content">
-                                <button onclick="exportSettings()">📤 設定をエクスポート</button>
-                                <button onclick="document.getElementById('settings-file-input').click()">📥 設定をインポート</button>
-                            </div>
-                        </div>
-                        <button class="btn settings-action-btn" onclick="resetAllSettings()" style="font-size:0.7rem; background:#fee2e2; color:#dc2626; border-color:#fecaca;">🔄 設定を初期化</button>
-                        <button class="btn btn-apply-all settings-action-btn" onclick="applyAllSettings()">⚡ 一括適用</button>
-                    </div>
-                    <input type="file" id="settings-file-input" accept=".json" onchange="importSettings(this)" style="display:none;">
-                </div>
             </div>
         </details>
+        <div class="settings-actions">
+            <div class="settings-actions-row">
+                <div class="dropdown settings-dropdown">
+                    <button class="btn settings-action-btn dropdown-btn" onclick="toggleDropdown('settings-transfer-dropdown')">📦 設定の移行</button>
+                    <div id="settings-transfer-dropdown" class="dropdown-content">
+                        <button onclick="exportSettings()">📤 設定をエクスポート</button>
+                        <button onclick="document.getElementById('settings-file-input').click()">📥 設定をインポート</button>
+                    </div>
+                </div>
+                <button class="btn settings-action-btn" onclick="resetAllSettings()" style="font-size:0.7rem; background:#fee2e2; color:#dc2626; border-color:#fecaca;">🔄 設定を初期化</button>
+                <button class="btn btn-apply-all settings-action-btn" onclick="applyAllSettings()">⚡ 一括適用</button>
+            </div>
+            <input type="file" id="settings-file-input" accept=".json" onchange="importSettings(this)" style="display:none;">
+        </div>
     </div>
 </div>
 
