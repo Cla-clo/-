@@ -5448,8 +5448,8 @@ body.theme-dark{
                 ・<b>Ctrl+Shift+4</b>：用語パネル<br>
                 ・<b>Ctrl+Shift+5</b>：メモパネル<br>
                 ・<b>Ctrl+Shift+6</b>：目次パネル<br>
-                ・<b>Ctrl+Tab</b>：次のタブへ<br>
-                ・<b>Ctrl+Shift+Tab</b>：前のタブへ<br>
+                ・<b>Ctrl+PageDown</b>：次のタブへ<br>
+                ・<b>Ctrl+PageUp</b>：前のタブへ<br>
                 ・<b>Alt+←</b>：前の編集位置へ戻る<br>
                 ・<b>Alt+→</b>：次の編集位置へ進む<br>
                 ・<b>Esc</b>：ダイアログ閉じる
@@ -25811,10 +25811,17 @@ bindResize('cc-resize-sw', 'sw');
 (function(){
   'use strict';
 
-  // ========== 1. Ctrl+Tab Tab Navigation ==========
+  // ========== 1. Tab Navigation (Ctrl+PageDown/PageUp) ==========
   document.addEventListener('keydown', function(e) {
-    // Ctrl+Tab or Ctrl+Shift+Tab for tab switching
-    if (e.ctrlKey && e.key === 'Tab') {
+    // Ctrl+PageDown for next tab, Ctrl+PageUp for previous tab
+    if (e.ctrlKey && !e.altKey && !e.metaKey && (e.key === 'PageDown' || e.key === 'PageUp')) {
+      // Only when input area is focused or no specific element is focused
+      const activeEl = document.activeElement;
+      const inputArea = document.getElementById('input-area');
+      if (activeEl !== inputArea && activeEl !== document.body && !activeEl.closest('#pane-input')) {
+        return; // Let other elements handle it
+      }
+
       e.preventDefault();
       e.stopPropagation();
 
@@ -25824,7 +25831,7 @@ bindResize('cc-resize-sw', 'sw');
       if (currentIndex < 0) return;
 
       let nextIndex;
-      if (e.shiftKey) {
+      if (e.key === 'PageUp') {
         // Previous tab
         nextIndex = (currentIndex - 1 + window.inputTabs.length) % window.inputTabs.length;
       } else {
@@ -25888,7 +25895,7 @@ bindResize('cc-resize-sw', 'sw');
   }
 
   function setupEditHistoryTracking() {
-    const inputArea = document.getElementById('inputArea');
+    const inputArea = document.getElementById('input-area');
     if (!inputArea) return;
 
     // Record on significant cursor movements
@@ -25943,7 +25950,7 @@ bindResize('cc-resize-sw', 'sw');
     }
 
     // Set cursor position
-    const inputArea = window.inputArea || document.getElementById('inputArea');
+    const inputArea = window.inputArea || document.getElementById('input-area');
     if (inputArea) {
       inputArea.focus();
       inputArea.setSelectionRange(pos.selectionStart, pos.selectionEnd);
