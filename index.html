@@ -5132,7 +5132,7 @@ body.theme-dark{
             <button class="app-icon" id="app-icon" title="アプリメニュー">
                 <img src="icons/favicon-32.png" alt="アプリアイコン">
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.00</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.02</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -5146,10 +5146,10 @@ body.theme-dark{
     </div>
     <div class="ribbon-section ribbon-home" data-section="home">
         <div class="ribbon-home-left">
-            <button class="btn btn-undo" onclick="undoInput()" title="元に戻す">↩</button>
-            <button class="btn btn-undo" onclick="redoInput()" title="やり直し">↪</button>
+            <button class="btn btn-undo" onclick="undoInput()" title="元に戻す" data-desc="元に戻す" data-shortcut="Ctrl+Z">↩</button>
+            <button class="btn btn-undo" onclick="redoInput()" title="やり直し" data-desc="やり直し" data-shortcut="Ctrl+Y">↪</button>
             <span class="ribbon-separator">|</span>
-            <button class="btn panel-toggle" id="btn-toggle-search" onclick="toggleSearchPanel()" data-label="🔍 検索">
+            <button class="btn panel-toggle" id="btn-toggle-search" onclick="toggleSearchPanel()" data-label="🔍 検索" data-desc="検索パネルを開閉" data-shortcut="Ctrl+F">
                 <span class="panel-label">🔍 検索</span><span class="panel-state-icon">▾</span>
             </button>
             <span class="ribbon-separator">|</span>
@@ -5179,7 +5179,7 @@ body.theme-dark{
             <input type="file" id="project-file-input" accept=".ccproj,.json" onchange="handleProjectFileLoad(this)">
             <div class="header-file-group">
                 <div class="header-file-dropdown" id="text-file-dropdown">
-                    <button class="btn btn-text-file" onclick="toggleTextFileDropdown()" title="テキストファイル">📄 テキスト ▾</button>
+                <button class="btn btn-text-file" onclick="toggleTextFileDropdown()" title="テキストファイル">📄 テキスト ▾</button>
                     <div class="header-file-dropdown-content">
                         <div class="dropdown-item" onclick="openFileWithChoice(); closeAllFileDropdowns();">📂 開く</div>
                         <div class="dropdown-item" onclick="showTextSaveOptions(); closeAllFileDropdowns();"><span class="btn-icn" aria-hidden="true">💾</span><span class="btn-text">保存</span></div>
@@ -5199,23 +5199,23 @@ body.theme-dark{
     </div>
     <div class="ribbon-section ribbon-work" data-section="work">
         <div class="ribbon-group">
-            <button class="btn panel-toggle" id="btn-toggle-structure" onclick="toggleStructurePanel()" data-label="📋 構成">
+            <button class="btn panel-toggle" id="btn-toggle-structure" onclick="toggleStructurePanel()" data-label="📋 構成" data-desc="構成パネルを開閉" data-shortcut="Ctrl+Shift+1">
                 <span class="panel-label">📋 構成</span><span class="panel-state-icon">▾</span>
             </button>
-            <button class="btn panel-toggle" id="btn-toggle-world" onclick="toggleWorldPanel()" data-label="🌍 世界観">
+            <button class="btn panel-toggle" id="btn-toggle-world" onclick="toggleWorldPanel()" data-label="🌍 世界観" data-desc="世界観パネルを開閉" data-shortcut="Ctrl+Shift+2">
                 <span class="panel-label">🌍 世界観</span><span class="panel-state-icon">▾</span>
             </button>
-            <button class="btn panel-toggle" id="btn-toggle-character" onclick="toggleCharacterPanel()" data-label="👤 人物">
+            <button class="btn panel-toggle" id="btn-toggle-character" onclick="toggleCharacterPanel()" data-label="👤 人物" data-desc="人物パネルを開閉" data-shortcut="Ctrl+Shift+3">
                 <span class="panel-label">👤 人物</span><span class="panel-state-icon">▾</span>
             </button>
             
-            <button class="btn panel-toggle" id="btn-toggle-terms" onclick="toggleTermsPanel()" data-label="📚 用語">
+            <button class="btn panel-toggle" id="btn-toggle-terms" onclick="toggleTermsPanel()" data-label="📚 用語" data-desc="用語パネルを開閉" data-shortcut="Ctrl+Shift+4">
                 <span class="panel-label">📚 用語</span><span class="panel-state-icon">▾</span>
             </button>
-<button class="btn panel-toggle" id="btn-toggle-memo" onclick="toggleMemoPanel()" data-label="📝 メモ">
+<button class="btn panel-toggle" id="btn-toggle-memo" onclick="toggleMemoPanel()" data-label="📝 メモ" data-desc="メモパネルを開閉" data-shortcut="Ctrl+Shift+5">
                 <span class="panel-label">📝 メモ</span><span class="panel-state-icon">▾</span>
             </button>
-            <button class="btn panel-toggle" id="btn-toggle-outline" onclick="toggleOutlinePanel()" data-label="📑 目次">
+            <button class="btn panel-toggle" id="btn-toggle-outline" onclick="toggleOutlinePanel()" data-label="📑 目次" data-desc="目次パネルを開閉" data-shortcut="Ctrl+Shift+6">
                 <span class="panel-label">📑 目次</span><span class="panel-state-icon">▾</span>
             </button>
         </div>
@@ -5238,10 +5238,10 @@ body.theme-dark{
             </div>
             <span class="ribbon-separator">|</span>
             <div class="ribbon-subgroup">
-                <button class="btn btn-view" onclick="openReaderView()" title="全タブをまとめて閲覧（Escで戻る）">👁 閲覧</button>
-                <button class="btn btn-analysis" onclick="showAnalysis()">📊 分析</button>
-                <button class="btn btn-focus" id="btn-focus" onclick="toggleFocusMode()">🧘 集中</button>
-                <button class="btn btn-sync" id="btn-sync" onclick="syncPreviewPosition()">📲 同期</button>
+                <button class="btn btn-view" onclick="openReaderView()" title="全タブをまとめて閲覧（Escで戻る）" data-desc="全タブをまとめて閲覧（Escで戻る）" data-shortcut="Ctrl+R">👁 閲覧</button>
+                <button class="btn btn-analysis" onclick="showAnalysis()" data-desc="分析を開く" data-shortcut="Ctrl+Shift+A">📊 分析</button>
+                <button class="btn btn-focus" id="btn-focus" onclick="toggleFocusMode()" data-desc="集中モードを切替" data-shortcut="Ctrl+L">🧘 集中</button>
+                <button class="btn btn-sync" id="btn-sync" onclick="syncPreviewPosition()" data-desc="プレビューを同期" data-shortcut="Ctrl+Enter">📲 同期</button>
             </div>
         </div>
     </div>
@@ -5256,7 +5256,7 @@ body.theme-dark{
         <span class="ribbon-menu-item">🚧 開発中</span>
     </div>
     <div class="ribbon-section ribbon-help" data-section="help">
-        <button class="btn panel-toggle" id="btn-toggle-help" onclick="togglePanel('help-bar')" data-label="❓ 使い方">
+        <button class="btn panel-toggle" id="btn-toggle-help" onclick="togglePanel('help-bar')" data-label="❓ 使い方" data-desc="使い方パネルを開閉" data-shortcut="Ctrl+Shift+H">
             <span class="panel-label">❓ 使い方</span><span class="panel-state-icon">▾</span>
         </button>
     </div>
@@ -5304,6 +5304,7 @@ body.theme-dark{
                 ・<b>Ctrl+Shift+4</b>：用語パネル<br>
                 ・<b>Ctrl+Shift+5</b>：メモパネル<br>
                 ・<b>Ctrl+Shift+6</b>：目次パネル<br>
+                ・<b>Ctrl++ / Ctrl+-</b>：入力の拡大・縮小<br>
                 ・<b>Esc</b>：ダイアログ閉じる
             </div>
             <div class="help-section" style="flex: 1; min-width: 180px;">
@@ -5558,8 +5559,8 @@ body.theme-dark{
             <span class="pane-total-stats" id="input-total-stats">全タブ: 0字 / 0行</span>
         </div>
                 <div class="pane-actions">
-                    <button class="pane-zoom-btn" id="btn-input-zoom-out" onclick="zoomInput(-1)" title="縮小">🔍−</button>
-                    <button class="pane-zoom-btn" id="btn-input-zoom-in" onclick="zoomInput(1)" title="拡大">🔍+</button>
+                    <button class="pane-zoom-btn" id="btn-input-zoom-out" onclick="zoomInput(-1)" title="縮小" data-desc="入力の拡大率を縮小" data-shortcut="Ctrl+-">🔍−</button>
+                    <button class="pane-zoom-btn" id="btn-input-zoom-in" onclick="zoomInput(1)" title="拡大" data-desc="入力の拡大率を拡大" data-shortcut="Ctrl++">🔍+</button>
                     <button class="pane-layout-btn" id="btn-input-writing-mode" onclick="toggleInputWritingMode()" title="書字方向切替">横書きへ</button>
                     <button class="pane-close-btn" onclick="hidePane('input')">✕</button>
                 </div>
@@ -7307,7 +7308,7 @@ function addNewTab() {
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-    const defaultText = `　ⓒエディタ（使い方） v1.00
+    const defaultText = `　ⓒエディタ（使い方） v1.02
 
 ■ はじめに（最短で使い始める）
 
@@ -9970,6 +9971,20 @@ document.addEventListener('DOMContentLoaded', () => {
     try { setActiveRibbonSection('file'); } catch(e) {}
 });
 
+function applyShortcutTooltips() {
+    document.querySelectorAll('[data-shortcut]').forEach((el) => {
+        const shortcut = el.getAttribute('data-shortcut');
+        if (!shortcut) return;
+        const desc = el.getAttribute('data-desc') || el.getAttribute('aria-label') || el.getAttribute('title') || '';
+        const label = desc ? `${desc}（${shortcut}）` : `ショートカット：${shortcut}`;
+        el.setAttribute('title', label);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    try { applyShortcutTooltips(); } catch(e) {}
+});
+
     // Click-path helper: robust even if the UI re-renders during the click
     function eventPathHas(e, selector) {
         // composedPath() が使える環境ではそれを優先。UI再描画が起きても path が安定しやすい
@@ -12293,6 +12308,18 @@ if (typeof applyPaneHeightSettings === 'function') {
             if (k === 'a' && e.shiftKey) { e.preventDefault(); e.stopPropagation(); showAnalysis(); }
             if (k === 'h' && e.shiftKey) { e.preventDefault(); e.stopPropagation(); togglePanel('help-bar'); }
             if (k === 'b' && e.shiftKey) { e.preventDefault(); e.stopPropagation(); insertBoutenToSelection(); }
+            if (isMainInput && (e.key === '+' || (e.key === '=' && e.shiftKey))) {
+                e.preventDefault();
+                e.stopPropagation();
+                zoomInput(1);
+                return;
+            }
+            if (isMainInput && (e.key === '-' || e.key === '_')) {
+                e.preventDefault();
+                e.stopPropagation();
+                zoomInput(-1);
+                return;
+            }
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 e.stopPropagation();
