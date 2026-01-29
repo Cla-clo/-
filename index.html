@@ -4,7 +4,7 @@
 <script>(function(){try{document.documentElement.classList.add('cc-boot');}catch(e){}})();</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ（動作確認版）</title>
+<title>ⓒエディタ v1.1</title>
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
@@ -668,6 +668,29 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
 
     #settings-bar { margin-bottom: 0; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; padding: 8px 10px; padding-right: 14px; order: 3; max-height: calc(100vh - 100px); overflow-y: auto; }
     #settings-bar .panel-action-buttons { right: 2px; }
+    .settings-panel-select{
+        display:flex;
+        align-items:center;
+        gap: 8px;
+        margin: 2px 0 8px;
+        padding: 6px 8px;
+        background: var(--pane-header-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+    }
+    .settings-panel-select label{ font-weight: 700; font-size: 0.8rem; color: var(--text-muted); }
+    .settings-panel-select select{
+        flex: 1;
+        min-width: 160px;
+        padding: 6px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background: var(--panel-bg);
+        color: var(--text-color);
+        font-size: 0.82rem;
+    }
+    .settings-section{ display:none; }
+    .settings-section.is-active{ display:block; }
     .setting-group { display: flex; flex-direction: column; gap: 4px; border-right: 1px solid var(--border-color); padding-right: 12px; }
     .setting-group:last-child { border-right: none; }
     .setting-title { font-weight: bold; color: var(--text-muted); margin-bottom: 2px; font-size: 0.75rem; display: flex; align-items: center; gap: 6px; }
@@ -971,10 +994,10 @@ background: transparent;
 
     .selection-overlay {
         position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-        background: rgba(37, 99, 235, 0.9); color: white; padding: 6px 16px;
-        border-radius: 20px; font-size: 0.85rem; font-weight: bold; z-index: 50;
-        pointer-events: none; display: none; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        width: max-content; text-align: center;
+        background: transparent; color: transparent; padding: 0;
+        border-radius: 0; font-size: 0; font-weight: bold; z-index: 50;
+        pointer-events: none; display: none; box-shadow: none;
+        width: 0; height: 0; text-align: center;
     }
     .selection-overlay.show { display: block; }
 
@@ -1003,7 +1026,8 @@ background: transparent;
         border: 1px solid var(--border-color);
         border-radius: 10px;
         box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        min-width: 220px;
+        min-width: 120px;
+        min-height: 64px;
         display: none;
     }
     .selection-tool-window.show{ display: block; }
@@ -1018,6 +1042,10 @@ background: transparent;
         border-bottom: 1px solid var(--border-color);
         cursor: move;
         user-select: none;
+    }
+    .selection-tool-window.icon-only .selection-tool-header{
+        padding: 6px 8px;
+        font-size: 0.75rem;
     }
     .selection-tool-header .selection-tool-info{
         font-weight: 500;
@@ -1038,12 +1066,66 @@ background: transparent;
         font-size: 0.75rem;
         cursor: pointer;
     }
+    .selection-tool-window.icon-only .selection-tool-body{
+        gap: 4px;
+        padding: 6px;
+    }
+    .selection-tool-window.icon-only .selection-tool-body button{
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+    .selection-tool-window.icon-only .selection-tool-body button .btn-label{
+        display: none;
+    }
+    .selection-tool-window.icon-only .selection-tool-body button .btn-icon{
+        line-height: 1;
+    }
     .selection-tool-body button:disabled{
         opacity: 0.5;
         cursor: not-allowed;
     }
     .selection-tool-body .qip-ruby{ color: #dc2626; }
     .selection-tool-body .qip-bouten{ color: #7c3aed; }
+    .selection-tool-resize-handle{
+        position: absolute;
+        background: transparent;
+        z-index: 2;
+    }
+    .selection-tool-resize-handle.edge{
+        width: 10px;
+        height: 10px;
+    }
+    .selection-tool-resize-handle.top,
+    .selection-tool-resize-handle.bottom{
+        left: 8px;
+        right: 8px;
+        height: 8px;
+        cursor: ns-resize;
+    }
+    .selection-tool-resize-handle.top{ top: -4px; }
+    .selection-tool-resize-handle.bottom{ bottom: -4px; }
+    .selection-tool-resize-handle.left,
+    .selection-tool-resize-handle.right{
+        top: 8px;
+        bottom: 8px;
+        width: 8px;
+        cursor: ew-resize;
+    }
+    .selection-tool-resize-handle.left{ left: -4px; }
+    .selection-tool-resize-handle.right{ right: -4px; }
+    .selection-tool-resize-handle.corner{
+        width: 12px;
+        height: 12px;
+    }
+    .selection-tool-resize-handle.tl{ top: -6px; left: -6px; cursor: nwse-resize; }
+    .selection-tool-resize-handle.tr{ top: -6px; right: -6px; cursor: nesw-resize; }
+    .selection-tool-resize-handle.bl{ bottom: -6px; left: -6px; cursor: nesw-resize; }
+    .selection-tool-resize-handle.br{ bottom: -6px; right: -6px; cursor: nwse-resize; }
 
     textarea {
         width: 100%; height: 100%; border: none; outline: none; resize: none;
@@ -5385,7 +5467,7 @@ body.theme-dark{
             <button class="app-icon" id="app-icon" title="アプリメニュー">
                 <img src="icons/favicon-32.png" alt="アプリアイコン">
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.04</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.1</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -5614,7 +5696,16 @@ body.theme-dark{
             <button class="btn panel-icon-btn panel-pin-btn" onclick="togglePanelPin('settings-bar')" title="固定">📌</button>
             <button class="btn panel-icon-btn panel-close-btn" onclick="closeControlPanel('settings-bar')">✕</button>
         </div>
-        <details class="settings-section" open>
+        <div class="settings-panel-select">
+            <label for="settings-panel-selector">表示パネル</label>
+            <select id="settings-panel-selector" aria-label="設定パネルを選択">
+                <option value="display" selected>表示・外観</option>
+                <option value="writing">執筆支援・統計</option>
+                <option value="layout">レイアウト</option>
+                <option value="storage">保存・読込</option>
+            </select>
+        </div>
+        <details class="settings-section is-active" data-panel="display" open>
             <summary>表示・外観</summary>
             <div class="settings-section-body">
                 <div class="setting-group">
@@ -5711,7 +5802,7 @@ body.theme-dark{
             </div>
         </details>
 
-        <details class="settings-section" open>
+        <details class="settings-section" data-panel="writing">
             <summary>執筆支援・統計</summary>
             <div class="settings-section-body">
                 <div class="setting-group">
@@ -5771,7 +5862,7 @@ body.theme-dark{
             </div>
         </details>
 
-        <details class="settings-section">
+        <details class="settings-section" data-panel="layout">
             <summary>レイアウト</summary>
             <div class="settings-section-body">
                 <div class="setting-group">
@@ -5808,7 +5899,7 @@ body.theme-dark{
             </div>
         </details>
 
-        <details class="settings-section">
+        <details class="settings-section" data-panel="storage">
             <summary>保存・読込</summary>
             <div class="settings-section-body">
                 <div class="setting-group">
@@ -6214,19 +6305,39 @@ body.theme-dark{
     <button style="color:#d97706;" onclick="quickAddBookmark()">🔖しおり</button>
 </div>
 
-<div id="selection-tool-window" class="selection-tool-window" aria-live="polite">
+<div id="selection-tool-window" class="selection-tool-window icon-only" aria-live="polite">
     <div class="selection-tool-header">
         <span>選択ツール</span>
         <span id="selection-tool-info" class="selection-tool-info">選択なし</span>
     </div>
     <div class="selection-tool-body">
-        <button class="qip-ruby" data-requires-selection="true" onclick="quickInsertRuby()">🔤ルビ</button>
-        <button class="qip-bouten" data-requires-selection="true" onclick="quickInsertBouten()">⚫傍点</button>
-        <button data-requires-selection="true" onclick="quickWrapSelection('「', '」')">「」</button>
-        <button data-requires-selection="true" onclick="quickWrapSelection('『', '』')">『』</button>
-        <button data-requires-selection="true" onclick="quickWrapSelection('（', '）')">（）</button>
-        <button style="color:#d97706;" data-requires-selection="true" onclick="quickAddBookmark()">🔖しおり</button>
+        <button class="qip-ruby" data-requires-selection="true" onclick="quickInsertRuby()" aria-label="ルビ">
+            <span class="btn-icon" aria-hidden="true">🔤</span><span class="btn-label">ルビ</span>
+        </button>
+        <button class="qip-bouten" data-requires-selection="true" onclick="quickInsertBouten()" aria-label="傍点">
+            <span class="btn-icon" aria-hidden="true">⚫</span><span class="btn-label">傍点</span>
+        </button>
+        <button data-requires-selection="true" onclick="quickWrapSelection('「', '」')" aria-label="鉤括弧">
+            <span class="btn-icon" aria-hidden="true">「」</span><span class="btn-label">「」</span>
+        </button>
+        <button data-requires-selection="true" onclick="quickWrapSelection('『', '』')" aria-label="二重鉤括弧">
+            <span class="btn-icon" aria-hidden="true">『』</span><span class="btn-label">『』</span>
+        </button>
+        <button data-requires-selection="true" onclick="quickWrapSelection('（', '）')" aria-label="括弧">
+            <span class="btn-icon" aria-hidden="true">（）</span><span class="btn-label">（）</span>
+        </button>
+        <button style="color:#d97706;" data-requires-selection="true" onclick="quickAddBookmark()" aria-label="しおり">
+            <span class="btn-icon" aria-hidden="true">🔖</span><span class="btn-label">しおり</span>
+        </button>
     </div>
+    <div class="selection-tool-resize-handle edge top" data-resize="top"></div>
+    <div class="selection-tool-resize-handle edge right" data-resize="right"></div>
+    <div class="selection-tool-resize-handle edge bottom" data-resize="bottom"></div>
+    <div class="selection-tool-resize-handle edge left" data-resize="left"></div>
+    <div class="selection-tool-resize-handle corner tl" data-resize="top-left"></div>
+    <div class="selection-tool-resize-handle corner tr" data-resize="top-right"></div>
+    <div class="selection-tool-resize-handle corner bl" data-resize="bottom-left"></div>
+    <div class="selection-tool-resize-handle corner br" data-resize="bottom-right"></div>
 </div>
 
 <div id="save-dialog-overlay" class="save-dialog-overlay" style="display:none;">
@@ -7017,8 +7128,8 @@ initTabScrollers();
     const btnSwap = document.getElementById('btn-layout-swap');
     const paneStack = document.getElementById('pane-stack');
 
-    if (inputSelOverlay) inputSelOverlay.title = '選択中の文字数と行数を表示します。';
-    if (previewSelOverlay) previewSelOverlay.title = 'プレビューで選択した範囲の文字数と行数を表示します。';
+    if (inputSelOverlay) inputSelOverlay.title = '選択ポップアップの位置調整用（カウント表示なし）。';
+    if (previewSelOverlay) previewSelOverlay.title = 'プレビュー選択の補助表示（カウント表示なし）。';
     loadLastSaveDisplay();
 
     let layoutAxis = 'row', layoutReversed = false;
@@ -7036,6 +7147,34 @@ initTabScrollers();
     };
     let goalAchieved = { today: false, total: false };
     let previewUpdateTimeout = null;
+    const SETTINGS_PANEL_KEY = 'cc_settings_panel_active_v1';
+
+    function setActiveSettingsPanel(panelId, save = true) {
+        const selector = document.getElementById('settings-panel-selector');
+        const sections = document.querySelectorAll('#settings-bar .settings-section');
+        if (!sections.length) return;
+        sections.forEach(section => {
+            const isActive = section.dataset.panel === panelId;
+            section.classList.toggle('is-active', isActive);
+            if (isActive) section.setAttribute('open', '');
+            else section.removeAttribute('open');
+        });
+        if (selector) selector.value = panelId;
+        if (save) {
+            try { localStorage.setItem(SETTINGS_PANEL_KEY, panelId); } catch (e) {}
+        }
+    }
+
+    function initSettingsPanelSelector() {
+        const selector = document.getElementById('settings-panel-selector');
+        if (!selector) return;
+        const saved = localStorage.getItem(SETTINGS_PANEL_KEY);
+        const initial = saved || selector.value;
+        setActiveSettingsPanel(initial, false);
+        selector.addEventListener('change', () => {
+            setActiveSettingsPanel(selector.value);
+        });
+    }
 
     // 「📂 開く」を押した時に、その場で「現在タブ / 新規タブ」を選べるようにするための一時設定
     // （loadFile() 内で優先して参照し、処理後に null に戻します）
@@ -8537,7 +8676,9 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
 
     function updateSelectionToolWindowVisibility() {
         if (!selectionToolWindow) return;
-        if (settingsCache.showSelectionToolWindow) selectionToolWindow.classList.add('show');
+        const isInputFocused = document.activeElement === inputArea;
+        const isToolFocused = selectionToolWindow.contains(document.activeElement);
+        if (settingsCache.showSelectionToolWindow && (isInputFocused || isToolFocused)) selectionToolWindow.classList.add('show');
         else selectionToolWindow.classList.remove('show');
     }
 
@@ -8593,7 +8734,7 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
             const s = inputArea.selectionStart, e = inputArea.selectionEnd;
             if (s !== e) {
                 const t = inputArea.value.substring(s, e), c = t.replace(/[\n\r]/g, '').length, l = (t.match(/\n/g) || []).length + 1;
-                inputSelOverlay.textContent = `選択: ${c}字 / ${l}行`;
+                inputSelOverlay.textContent = '';
                 inputSelOverlay.classList.add('show');
                 showQuickInsertPopup();
                 updateSelectionToolWindowState(true, `${c}字 / ${l}行`);
@@ -8608,7 +8749,7 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
             const t = window.getSelection().toString();
             if (t.length > 0) {
                 const c = t.replace(/[\n\r]/g, '').length, l = (t.match(/\n/g) || []).length + 1;
-                previewSelOverlay.textContent = `選択: ${c}字 / ${l}行`;
+                previewSelOverlay.textContent = '';
                 previewSelOverlay.classList.add('show');
                 updateSelectionToolWindowState(false, 'プレビュー選択中');
             } else {
@@ -8627,6 +8768,7 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
     });
 
     const SELECTION_TOOL_POS_KEY = 'cc_selection_tool_pos_v1';
+    const SELECTION_TOOL_SIZE_KEY = 'cc_selection_tool_size_v1';
     function restoreSelectionToolPosition() {
         if (!selectionToolWindow) return;
         try {
@@ -8642,6 +8784,19 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
     }
     function saveSelectionToolPosition(left, top) {
         try { localStorage.setItem(SELECTION_TOOL_POS_KEY, JSON.stringify({ left, top })); } catch (e) {}
+    }
+    function restoreSelectionToolSize() {
+        if (!selectionToolWindow) return;
+        try {
+            const raw = localStorage.getItem(SELECTION_TOOL_SIZE_KEY);
+            if (!raw) return;
+            const size = JSON.parse(raw);
+            if (typeof size.width === 'number') selectionToolWindow.style.width = `${size.width}px`;
+            if (typeof size.height === 'number') selectionToolWindow.style.height = `${size.height}px`;
+        } catch (e) {}
+    }
+    function saveSelectionToolSize(width, height) {
+        try { localStorage.setItem(SELECTION_TOOL_SIZE_KEY, JSON.stringify({ width, height })); } catch (e) {}
     }
     function enableSelectionToolDrag() {
         if (!selectionToolWindow) return;
@@ -8675,11 +8830,80 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
             window.addEventListener('pointerup', onUp);
         });
     }
+    function enableSelectionToolResize() {
+        if (!selectionToolWindow) return;
+        const handles = Array.from(selectionToolWindow.querySelectorAll('.selection-tool-resize-handle'));
+        if (!handles.length) return;
+        const minWidth = 120;
+        const minHeight = 64;
+        handles.forEach(handle => {
+            handle.addEventListener('pointerdown', (ev) => {
+                if (ev.button !== 0) return;
+                ev.preventDefault();
+                ev.stopPropagation();
+                const dir = handle.dataset.resize;
+                const rect = selectionToolWindow.getBoundingClientRect();
+                const startX = ev.clientX;
+                const startY = ev.clientY;
+                const startWidth = rect.width;
+                const startHeight = rect.height;
+                const startLeft = rect.left;
+                const startTop = rect.top;
+
+                const onMove = (e) => {
+                    let newWidth = startWidth;
+                    let newHeight = startHeight;
+                    let newLeft = startLeft;
+                    let newTop = startTop;
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+
+                    if (dir.includes('right')) newWidth = startWidth + dx;
+                    if (dir.includes('left')) {
+                        newWidth = startWidth - dx;
+                        newLeft = startLeft + dx;
+                    }
+                    if (dir.includes('bottom')) newHeight = startHeight + dy;
+                    if (dir.includes('top')) {
+                        newHeight = startHeight - dy;
+                        newTop = startTop + dy;
+                    }
+
+                    newWidth = Math.max(minWidth, newWidth);
+                    newHeight = Math.max(minHeight, newHeight);
+                    const maxLeft = window.innerWidth - newWidth - 8;
+                    const maxTop = window.innerHeight - newHeight - 8;
+                    newLeft = Math.min(Math.max(8, newLeft), maxLeft);
+                    newTop = Math.min(Math.max(8, newTop), maxTop);
+
+                    selectionToolWindow.style.width = `${newWidth}px`;
+                    selectionToolWindow.style.height = `${newHeight}px`;
+                    selectionToolWindow.style.left = `${newLeft}px`;
+                    selectionToolWindow.style.top = `${newTop}px`;
+                    selectionToolWindow.style.bottom = 'auto';
+                };
+                const onUp = () => {
+                    const finalRect = selectionToolWindow.getBoundingClientRect();
+                    saveSelectionToolPosition(finalRect.left, finalRect.top);
+                    saveSelectionToolSize(finalRect.width, finalRect.height);
+                    window.removeEventListener('pointermove', onMove);
+                    window.removeEventListener('pointerup', onUp);
+                };
+                window.addEventListener('pointermove', onMove);
+                window.addEventListener('pointerup', onUp);
+            });
+        });
+    }
 
     restoreSelectionToolPosition();
+    restoreSelectionToolSize();
     enableSelectionToolDrag();
+    enableSelectionToolResize();
     updateSelectionToolWindowVisibility();
     updateSelectionToolWindowState(false, '選択なし');
+
+    inputArea.addEventListener('focus', () => updateSelectionToolWindowVisibility());
+    inputArea.addEventListener('blur', () => updateSelectionToolWindowVisibility());
 
     previewScroll.addEventListener('scroll', () => {
         const v = document.getElementById('st-pv-v').checked; let p;
@@ -10484,6 +10708,9 @@ function applyShortcutTooltips() {
 
 document.addEventListener('DOMContentLoaded', () => {
     try { applyShortcutTooltips(); } catch(e) {}
+});
+document.addEventListener('DOMContentLoaded', () => {
+    try { initSettingsPanelSelector(); } catch(e) {}
 });
 
     // Click-path helper: robust even if the UI re-renders during the click
