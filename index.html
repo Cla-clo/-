@@ -194,8 +194,8 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
         --panel-header-height: 44px;
         --panel-header-padding-y: 8px;
         --panel-header-padding-x: 10px;
-        --panel-toolbar-height: 42px;
-        --panel-toolbar-padding-y: 6px;
+        --panel-toolbar-height: 34px;
+        --panel-toolbar-padding-y: 4px;
         --panel-toolbar-padding-x: 10px;
         --panel-body-padding-top: 18px;
         --panel-body-pad: 18px 10px 10px 10px;
@@ -1079,10 +1079,10 @@ background: transparent;
         gap: 2px;
     }
     .selection-tool-window.in-footer .selection-tool-body button{
-        width: 22px;
-        height: 22px;
+        width: 18px;
+        height: 18px;
         padding: 0;
-        font-size: 0.7rem;
+        font-size: 0.6rem;
         border-radius: 4px;
     }
     .selection-tool-window.in-footer .selection-tool-resize-handle{ display: none; }
@@ -3669,7 +3669,15 @@ body.theme-dark .dynamic-dock-resizer:hover{ background: rgba(255,255,255,0.08);
   border-bottom: 1px solid var(--border-color);
   box-sizing: border-box;
 }
-.panel-toolbar .btn{ display:inline-flex; align-items:center; gap:4px; white-space: nowrap; height: 30px; padding: 0 9px; }
+.panel-toolbar .btn{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  white-space: nowrap;
+  height: 24px;
+  padding: 0 6px;
+  font-size: 0.75rem;
+}
 
 .panel-toolbar::-webkit-scrollbar{height:0;width:0;}
 body.structure-fullscreen-mode #structure-panel .fullscreen-layout-btn,
