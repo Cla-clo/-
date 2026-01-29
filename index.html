@@ -3760,6 +3760,149 @@ body.theme-dark .cc-window-box .cc-resize-se::after{
   border-bottom-color: rgba(156,163,175,0.55);
 }
 
+/* ===== v1.04 UX Enhancements ===== */
+
+/* --- Reader mode page separator --- */
+.reader-page-separator {
+  width: 100%;
+  border: none;
+  border-top: 1px dashed var(--border-color);
+  margin: 1.5em 0;
+  position: relative;
+}
+.reader-page-separator::after {
+  content: attr(data-page);
+  position: absolute;
+  left: 50%;
+  top: -0.7em;
+  transform: translateX(-50%);
+  background: var(--preview-bg-color);
+  padding: 0 12px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+#reader-scroll.vertical-mode .reader-page-separator {
+  width: auto;
+  height: 100%;
+  border-top: none;
+  border-right: 1px dashed var(--border-color);
+  margin: 0 1.5em;
+  writing-mode: horizontal-tb;
+}
+#reader-scroll.vertical-mode .reader-page-separator::after {
+  left: auto;
+  top: 50%;
+  right: -0.7em;
+  transform: translateY(-50%) rotate(90deg);
+  transform-origin: center center;
+}
+
+/* --- Responsive breakpoints --- */
+@media (max-width: 1023px) {
+  .ribbon-menu-btn .btn-label-text,
+  .ribbon-section .btn:not(.btn-undo) .btn-label-text {
+    display: none;
+  }
+  .ribbon-section .btn:not(.btn-undo) {
+    padding: 4px 8px;
+    min-width: 32px;
+    justify-content: center;
+  }
+  .app-title {
+    max-width: 180px;
+  }
+}
+@media (max-width: 767px) {
+  .ribbon-row {
+    flex-wrap: wrap;
+  }
+  .ribbon-left {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .ribbon-menu {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .app-title {
+    max-width: 140px;
+    font-size: 0.85rem;
+  }
+  header {
+    padding: 6px 8px;
+  }
+  .pane-stack {
+    flex-direction: column !important;
+  }
+  .pane-stack .pane {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
+    height: auto !important;
+    min-height: 300px;
+  }
+  .pane-stack .pane-resizer {
+    width: 100% !important;
+    height: var(--divider-hit-area) !important;
+    cursor: row-resize !important;
+    margin: calc(-1 * (var(--divider-hit-area) / 2)) 0 !important;
+  }
+  .pane-stack .pane-resizer::before {
+    width: 100% !important;
+    height: var(--divider-size) !important;
+  }
+}
+@media (max-width: 479px) {
+  .ribbon-section:not(.ribbon-home) {
+    display: none !important;
+  }
+  body:not(.ribbon-collapsed):not(.ribbon-ultra-collapsed) .ribbon-home {
+    border-top: none;
+    padding-top: 0;
+  }
+  .app-title {
+    max-width: 100px;
+    font-size: 0.8rem;
+  }
+  .ribbon-home-left .btn {
+    padding: 4px 6px;
+    font-size: 0.75rem;
+  }
+  .ribbon-home-left .btn-undo {
+    width: 28px;
+    font-size: 0.9rem;
+  }
+  #pane-preview {
+    display: none !important;
+  }
+  .main-container {
+    padding: 4px !important;
+  }
+}
+
+/* Mobile notification badge */
+.mobile-mode-badge {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 0.5s ease-out;
+  pointer-events: none;
+}
+.mobile-mode-badge.fade-out {
+  opacity: 0;
+}
+
 </style>
 
 <!-- ===== v0.96 hotfix (reader/search/bookmark, active tab color, tab context menu, per-tab stats, focus shortcuts) ===== -->
@@ -5132,7 +5275,7 @@ body.theme-dark{
             <button class="app-icon" id="app-icon" title="アプリメニュー">
                 <img src="icons/favicon-32.png" alt="アプリアイコン">
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.03</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.04</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -5305,6 +5448,10 @@ body.theme-dark{
                 ・<b>Ctrl+Shift+4</b>：用語パネル<br>
                 ・<b>Ctrl+Shift+5</b>：メモパネル<br>
                 ・<b>Ctrl+Shift+6</b>：目次パネル<br>
+                ・<b>Ctrl+Tab</b>：次のタブへ<br>
+                ・<b>Ctrl+Shift+Tab</b>：前のタブへ<br>
+                ・<b>Alt+←</b>：前の編集位置へ戻る<br>
+                ・<b>Alt+→</b>：次の編集位置へ進む<br>
                 ・<b>Esc</b>：ダイアログ閉じる
             </div>
             <div class="help-section" style="flex: 1; min-width: 180px;">
@@ -7308,7 +7455,7 @@ function addNewTab() {
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-    const defaultText = `　ⓒエディタ（使い方） v1.03
+    const defaultText = `　ⓒエディタ（使い方） v1.04
 
 ■ はじめに（最短で使い始める）
 
@@ -25660,7 +25807,336 @@ bindResize('cc-resize-sw', 'sw');
   }
 })();
 
+/* ===== v1.04 UX Enhancements: Tab navigation, Edit history, Responsive ===== */
+(function(){
+  'use strict';
 
+  // ========== 1. Ctrl+Tab Tab Navigation ==========
+  document.addEventListener('keydown', function(e) {
+    // Ctrl+Tab or Ctrl+Shift+Tab for tab switching
+    if (e.ctrlKey && e.key === 'Tab') {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!window.inputTabs || window.inputTabs.length <= 1) return;
+
+      const currentIndex = window.inputTabs.findIndex(t => t.id === window.activeTabId);
+      if (currentIndex < 0) return;
+
+      let nextIndex;
+      if (e.shiftKey) {
+        // Previous tab
+        nextIndex = (currentIndex - 1 + window.inputTabs.length) % window.inputTabs.length;
+      } else {
+        // Next tab
+        nextIndex = (currentIndex + 1) % window.inputTabs.length;
+      }
+
+      const nextTab = window.inputTabs[nextIndex];
+      if (nextTab && typeof window.switchTab === 'function') {
+        window.switchTab(nextTab.id);
+      }
+    }
+  }, true);
+
+  // ========== 2. Edit Position History (Alt+←/→) ==========
+  const editHistory = [];
+  const forwardHistory = [];
+  const MAX_HISTORY = 30;
+  let lastRecordedPosition = null;
+  let recordThrottleTimer = null;
+  const RECORD_THROTTLE_MS = 1500;
+
+  function recordEditPosition() {
+    if (!window.inputArea || !window.activeTabId) return;
+
+    const pos = {
+      tabId: window.activeTabId,
+      selectionStart: window.inputArea.selectionStart,
+      selectionEnd: window.inputArea.selectionEnd
+    };
+
+    // Skip if same position
+    if (lastRecordedPosition &&
+        lastRecordedPosition.tabId === pos.tabId &&
+        Math.abs(lastRecordedPosition.selectionStart - pos.selectionStart) < 50) {
+      return;
+    }
+
+    lastRecordedPosition = pos;
+    editHistory.push(pos);
+    if (editHistory.length > MAX_HISTORY) {
+      editHistory.shift();
+    }
+    // Clear forward history on new edit
+    forwardHistory.length = 0;
+  }
+
+  function throttledRecordPosition() {
+    if (recordThrottleTimer) return;
+    recordThrottleTimer = setTimeout(() => {
+      recordThrottleTimer = null;
+      recordEditPosition();
+    }, RECORD_THROTTLE_MS);
+  }
+
+  // Track cursor movements
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupEditHistoryTracking);
+  } else {
+    setupEditHistoryTracking();
+  }
+
+  function setupEditHistoryTracking() {
+    const inputArea = document.getElementById('inputArea');
+    if (!inputArea) return;
+
+    // Record on significant cursor movements
+    inputArea.addEventListener('mouseup', throttledRecordPosition);
+    inputArea.addEventListener('keyup', function(e) {
+      // Record on navigation keys
+      if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'].includes(e.key)) {
+        throttledRecordPosition();
+      }
+    });
+
+    // Record on tab switch
+    if (typeof window.switchTab === 'function' && !window.switchTab.__editHistoryWrapped) {
+      const originalSwitch = window.switchTab;
+      window.switchTab = function() {
+        recordEditPosition();
+        return originalSwitch.apply(this, arguments);
+      };
+      window.switchTab.__editHistoryWrapped = true;
+    }
+  }
+
+  function goBackInHistory() {
+    if (editHistory.length < 2) return false;
+
+    const current = editHistory.pop();
+    forwardHistory.push(current);
+
+    const target = editHistory[editHistory.length - 1];
+    if (!target) return false;
+
+    jumpToPosition(target);
+    return true;
+  }
+
+  function goForwardInHistory() {
+    if (forwardHistory.length === 0) return false;
+
+    const target = forwardHistory.pop();
+    editHistory.push(target);
+
+    jumpToPosition(target);
+    return true;
+  }
+
+  function jumpToPosition(pos) {
+    if (!pos) return;
+
+    // Switch tab if needed
+    if (pos.tabId !== window.activeTabId && typeof window.switchTab === 'function') {
+      window.switchTab(pos.tabId);
+    }
+
+    // Set cursor position
+    const inputArea = window.inputArea || document.getElementById('inputArea');
+    if (inputArea) {
+      inputArea.focus();
+      inputArea.setSelectionRange(pos.selectionStart, pos.selectionEnd);
+
+      // Scroll to cursor
+      if (typeof window.scrollToCursorPosition === 'function') {
+        setTimeout(() => window.scrollToCursorPosition(pos.selectionStart), 50);
+      }
+    }
+  }
+
+  // Alt+← / Alt+→ shortcuts
+  document.addEventListener('keydown', function(e) {
+    if (!e.altKey || e.ctrlKey || e.shiftKey || e.metaKey) return;
+
+    if (e.key === 'ArrowLeft') {
+      if (goBackInHistory()) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    } else if (e.key === 'ArrowRight') {
+      if (goForwardInHistory()) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }
+  }, true);
+
+  // ========== 3. Responsive Breakpoint Handler ==========
+  let lastBreakpoint = null;
+  let mobileNotificationShown = false;
+
+  function getBreakpoint() {
+    const w = window.innerWidth;
+    if (w <= 479) return 'mobile';
+    if (w <= 767) return 'tablet-small';
+    if (w <= 1023) return 'tablet';
+    return 'desktop';
+  }
+
+  function showMobileNotification(message) {
+    if (mobileNotificationShown) return;
+    mobileNotificationShown = true;
+
+    const badge = document.createElement('div');
+    badge.className = 'mobile-mode-badge';
+    badge.textContent = message;
+    document.body.appendChild(badge);
+
+    setTimeout(() => {
+      badge.classList.add('fade-out');
+      setTimeout(() => badge.remove(), 500);
+    }, 2500);
+  }
+
+  function handleBreakpointChange() {
+    const bp = getBreakpoint();
+    if (bp === lastBreakpoint) return;
+
+    const prevBp = lastBreakpoint;
+    lastBreakpoint = bp;
+
+    // Show notification when entering mobile/tablet modes
+    if (prevBp === 'desktop' && (bp === 'mobile' || bp === 'tablet-small')) {
+      showMobileNotification('📱 モバイル表示に切り替わりました');
+    }
+
+    // Auto-close panels on small screens
+    if (bp === 'mobile' || bp === 'tablet-small') {
+      const panelKeys = ['structure', 'character', 'world', 'terms', 'memo', 'outline', 'search'];
+      const mainContainer = document.getElementById('main-container');
+
+      panelKeys.forEach(key => {
+        const panel = document.getElementById(key + '-panel');
+        if (panel && panel.classList.contains('open') && mainContainer) {
+          // Only close if docked (takes up space)
+          if (mainContainer.classList.contains(key + '-docked')) {
+            panel.classList.remove('open');
+          }
+        }
+      });
+    }
+  }
+
+  // Initial check
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      lastBreakpoint = getBreakpoint();
+    });
+  } else {
+    lastBreakpoint = getBreakpoint();
+  }
+
+  // Debounced resize handler
+  let resizeTimer = null;
+  window.addEventListener('resize', function() {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(handleBreakpointChange, 150);
+  });
+
+  // ========== 4. Expose functions globally ==========
+  window.__ccGoBackInHistory = goBackInHistory;
+  window.__ccGoForwardInHistory = goForwardInHistory;
+  window.__ccRecordEditPosition = recordEditPosition;
+
+})();
+</script>
+
+<!-- ===== v1.04 Reader Page Separator Enhancement ===== -->
+<script>
+(function(){
+  'use strict';
+
+  // Wrap renderReaderContent to add page separators
+  function wrapRenderReaderContent() {
+    if (typeof window.renderReaderContent !== 'function') return;
+    if (window.renderReaderContent.__pageSeparatorWrapped) return;
+
+    const original = window.renderReaderContent;
+
+    window.renderReaderContent = function() {
+      // Call original first
+      original.apply(this, arguments);
+
+      // Add page separators
+      addPageSeparators();
+    };
+
+    window.renderReaderContent.__pageSeparatorWrapped = true;
+  }
+
+  function addPageSeparators() {
+    const contentEl = document.getElementById('reader-content');
+    if (!contentEl) return;
+
+    // Get manuscript settings
+    const rowsPerPage = (window.settingsCache && window.settingsCache.manuscriptRows) || 34;
+
+    // Get all reader-text elements
+    const textElements = contentEl.querySelectorAll('.reader-text');
+
+    textElements.forEach(textEl => {
+      // Remove existing separators
+      textEl.querySelectorAll('.reader-page-separator').forEach(sep => sep.remove());
+
+      // Get computed line-height
+      const style = window.getComputedStyle(textEl);
+      const lineHeight = parseFloat(style.lineHeight) || (parseFloat(style.fontSize) * 1.8);
+      const pageHeight = lineHeight * rowsPerPage;
+
+      // Get total height
+      const totalHeight = textEl.scrollHeight;
+      if (totalHeight <= pageHeight) return;
+
+      // Calculate number of pages
+      const numPages = Math.ceil(totalHeight / pageHeight);
+
+      // Insert separators using a different approach: wrap content in pages
+      const content = textEl.innerHTML;
+      const lines = content.split(/<br\s*\/?>/gi);
+
+      if (lines.length <= rowsPerPage) return;
+
+      let newContent = '';
+      let pageNum = 1;
+
+      for (let i = 0; i < lines.length; i++) {
+        newContent += lines[i];
+        if (i < lines.length - 1) newContent += '<br>';
+
+        // Insert page separator after every rowsPerPage lines
+        if ((i + 1) % rowsPerPage === 0 && i < lines.length - 1) {
+          pageNum++;
+          newContent += `<hr class="reader-page-separator" data-page="${pageNum}ページ目">`;
+        }
+      }
+
+      textEl.innerHTML = newContent;
+    });
+  }
+
+  // Initialize
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wrapRenderReaderContent);
+  } else {
+    // Delay to ensure renderReaderContent is defined
+    setTimeout(wrapRenderReaderContent, 100);
+  }
+
+  // Also expose for manual triggering
+  window.__ccAddPageSeparators = addPageSeparators;
+
+})();
 </script>
 
 </body>
