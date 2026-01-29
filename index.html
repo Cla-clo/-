@@ -4,7 +4,7 @@
 <script>(function(){try{document.documentElement.classList.add('cc-boot');}catch(e){}})();</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.1</title>
+<title>ⓒエディタ v1.11</title>
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
@@ -668,29 +668,7 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
 
     #settings-bar { margin-bottom: 0; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; padding: 8px 10px 72px; padding-right: 14px; order: 3; max-height: calc(100vh - 100px); overflow-y: auto; position: relative; }
     #settings-bar .panel-action-buttons { right: 2px; }
-    .settings-panel-select{
-        display:flex;
-        align-items:center;
-        gap: 8px;
-        margin: 2px 0 8px;
-        padding: 6px 8px;
-        background: var(--pane-header-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-    }
-    .settings-panel-select label{ font-weight: 700; font-size: 0.8rem; color: var(--text-muted); }
-    .settings-panel-select select{
-        flex: 1;
-        min-width: 160px;
-        padding: 6px 8px;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        background: var(--panel-bg);
-        color: var(--text-color);
-        font-size: 0.82rem;
-    }
-    .settings-section{ display:none; }
-    .settings-section.is-active{ display:block; }
+    .settings-section{ display:block; }
     .setting-group { display: flex; flex-direction: column; gap: 4px; border-right: 1px solid var(--border-color); padding-right: 12px; }
     .setting-group:last-child { border-right: none; }
     .setting-title { font-weight: bold; color: var(--text-muted); margin-bottom: 2px; font-size: 0.75rem; display: flex; align-items: center; gap: 6px; }
@@ -699,12 +677,13 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
     input[type="number"] { width: 50px; }
     .settings-actions {
         position: sticky;
-        right: 2px;
+        right: 8px;
         bottom: 8px;
         margin-top: auto;
         display: flex;
         flex-direction: column;
         align-items: flex-end;
+        align-self: flex-end;
         gap: 4px;
         text-align: right;
         background: var(--panel-bg);
@@ -964,8 +943,15 @@ background: transparent;
     .pane-footer {
         padding: 0 8px; font-size: 0.7rem; color: var(--text-muted);
         text-align: right; border-top: 1px solid var(--border-color); background: var(--panel-bg);
-        display: flex; justify-content: flex-end; align-items: center; gap: 10px; min-height: 24px;
+        display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 24px;
         flex-wrap: wrap; flex-shrink: 0; row-gap: 4px;
+    }
+    .pane-footer-left,
+    .pane-footer-right{
+        display:flex;
+        align-items:center;
+        gap: 10px;
+        flex-wrap: wrap;
     }
     .progress-wrap{
         display:inline-flex;
@@ -1041,6 +1027,33 @@ background: transparent;
         display: none;
     }
     .selection-tool-window.show{ display: block; }
+    .selection-tool-window.in-footer{
+        position: static;
+        bottom: auto;
+        left: auto;
+        min-width: auto;
+        min-height: auto;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        display: none;
+        z-index: auto;
+    }
+    .selection-tool-window.in-footer.show{ display: inline-flex; }
+    .selection-tool-window.in-footer .selection-tool-header{ display: none; }
+    .selection-tool-window.in-footer .selection-tool-body{
+        padding: 0;
+        gap: 4px;
+    }
+    .selection-tool-window.in-footer .selection-tool-body button{
+        width: 26px;
+        height: 26px;
+        padding: 0;
+        font-size: 0.8rem;
+        border-radius: 5px;
+    }
+    .selection-tool-window.in-footer .selection-tool-resize-handle{ display: none; }
     .selection-tool-header{
         display:flex;
         align-items:center;
@@ -5477,7 +5490,7 @@ body.theme-dark{
             <button class="app-icon" id="app-icon" title="アプリメニュー">
                 <img src="icons/favicon-32.png" alt="アプリアイコン">
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.1</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.11</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -5706,15 +5719,6 @@ body.theme-dark{
             <button class="btn panel-icon-btn panel-pin-btn" onclick="togglePanelPin('settings-bar')" title="固定">📌</button>
             <button class="btn panel-icon-btn panel-close-btn" onclick="closeControlPanel('settings-bar')">✕</button>
         </div>
-        <div class="settings-panel-select">
-            <label for="settings-panel-selector">表示パネル</label>
-            <select id="settings-panel-selector" aria-label="設定パネルを選択">
-                <option value="display" selected>表示・外観</option>
-                <option value="writing">執筆支援・統計</option>
-                <option value="layout">レイアウト</option>
-                <option value="storage">保存・読込</option>
-            </select>
-        </div>
         <details class="settings-section is-active" data-panel="display" open>
             <summary>表示・外観</summary>
             <div class="settings-section-body">
@@ -5812,8 +5816,8 @@ body.theme-dark{
             </div>
         </details>
 
-        <details class="settings-section" data-panel="writing">
-            <summary>執筆支援・統計</summary>
+        <details class="settings-section" data-panel="writing" open>
+            <summary>執筆支援</summary>
             <div class="settings-section-body">
                 <div class="setting-group">
                     <div class="setting-title">執筆支援 <button class="btn btn-apply" onclick="applyWritingSettings()">適用</button></div>
@@ -5872,7 +5876,7 @@ body.theme-dark{
             </div>
         </details>
 
-        <details class="settings-section" data-panel="layout">
+        <details class="settings-section" data-panel="layout" open>
             <summary>レイアウト</summary>
             <div class="settings-section-body">
                 <div class="setting-group">
@@ -5909,7 +5913,7 @@ body.theme-dark{
             </div>
         </details>
 
-        <details class="settings-section" data-panel="storage">
+        <details class="settings-section" data-panel="storage" open>
             <summary>保存・読込</summary>
             <div class="settings-section-body">
                 <div class="setting-group">
@@ -5978,21 +5982,53 @@ body.theme-dark{
                 <div id="input-sel-overlay" class="selection-overlay"></div>
             </div>
             <div class="pane-footer">
-                <span id="char-count">全体: 0</span>
-                <span id="input-net-count" class="net-count">実質: 0</span>
-                <span id="line-count">0 行</span>
-                <span id="input-goal-display" class="goal-display"></span>
-                <span id="input-today-goal" class="today-goal"></span>
-                <span id="input-writing-time" class="writing-time"></span>
-                <span id="input-reading-time" class="reading-time"></span>
-                <span id="input-manuscript" class="manuscript-pages"></span>
-                <span id="input-progress-wrap" class="progress-wrap compact" aria-label="進捗バー">
-                    <span class="progress-label">進捗</span>
-                    <span class="progress-bar"><span id="input-progress-fill" class="progress-bar-fill"></span></span>
-                    <span id="input-progress-text" class="progress-text"></span>
-                </span>
-                <span id="input-last-save" class="save-timestamp"></span>
-                <span id="input-zoom-display" class="zoom-display" ondblclick="startEditInputZoom()" title="ダブルクリックで拡大率を入力">100%</span>
+                <div class="pane-footer-left">
+                    <div id="selection-tool-window" class="selection-tool-window icon-only in-footer" aria-live="polite">
+                        <div class="selection-tool-header">
+                            <span>選択ツール</span>
+                            <span id="selection-tool-info" class="selection-tool-info">選択なし</span>
+                        </div>
+                        <div class="selection-tool-body">
+                            <button class="qip-ruby" data-requires-selection="true" onclick="quickInsertRuby()" aria-label="ルビ">
+                                <span class="btn-icon" aria-hidden="true">🔤</span><span class="btn-label">ルビ</span>
+                            </button>
+                            <button class="qip-bouten" data-requires-selection="true" onclick="quickInsertBouten()" aria-label="傍点">
+                                <span class="btn-icon" aria-hidden="true">⚫</span><span class="btn-label">傍点</span>
+                            </button>
+                            <button data-requires-selection="true" onclick="quickWrapSelection('「', '」')" aria-label="鉤括弧">
+                                <span class="btn-icon" aria-hidden="true">「」</span><span class="btn-label">「」</span>
+                            </button>
+                            <button data-requires-selection="true" onclick="quickWrapSelection('『', '』')" aria-label="二重鉤括弧">
+                                <span class="btn-icon" aria-hidden="true">『』</span><span class="btn-label">『』</span>
+                            </button>
+                            <button data-requires-selection="true" onclick="quickWrapSelection('（', '）')" aria-label="括弧">
+                                <span class="btn-icon" aria-hidden="true">（）</span><span class="btn-label">（）</span>
+                            </button>
+                            <button style="color:#d97706;" data-requires-selection="true" onclick="quickAddBookmark()" aria-label="しおり">
+                                <span class="btn-icon" aria-hidden="true">🔖</span><span class="btn-label">しおり</span>
+                            </button>
+                        </div>
+                        <div class="selection-tool-resize-handle edge top" data-resize="top"></div>
+                        <div class="selection-tool-resize-handle edge right" data-resize="right"></div>
+                        <div class="selection-tool-resize-handle edge bottom" data-resize="bottom"></div>
+                        <div class="selection-tool-resize-handle edge left" data-resize="left"></div>
+                        <div class="selection-tool-resize-handle corner tl" data-resize="top-left"></div>
+                        <div class="selection-tool-resize-handle corner tr" data-resize="top-right"></div>
+                        <div class="selection-tool-resize-handle corner bl" data-resize="bottom-left"></div>
+                        <div class="selection-tool-resize-handle corner br" data-resize="bottom-right"></div>
+                    </div>
+                    <span id="input-selection-count" class="selection-count">選択なし</span>
+                </div>
+                <div class="pane-footer-right">
+                    <span id="line-count">0 行</span>
+                    <span id="input-goal-display" class="goal-display"></span>
+                    <span id="input-today-goal" class="today-goal"></span>
+                    <span id="input-writing-time" class="writing-time"></span>
+                    <span id="input-reading-time" class="reading-time"></span>
+                    <span id="input-manuscript" class="manuscript-pages"></span>
+                    <span id="input-last-save" class="save-timestamp"></span>
+                    <span id="input-zoom-display" class="zoom-display" ondblclick="startEditInputZoom()" title="ダブルクリックで拡大率を入力">100%</span>
+                </div>
             </div>
         </div>
 
@@ -6026,16 +6062,17 @@ body.theme-dark{
                 <div id="preview-sel-overlay" class="selection-overlay"></div>
             </div>
             <div class="pane-footer">
-                <span id="pv-time" class="timestamp">未更新</span>
-                <span style="border-left:1px solid var(--border-color); height:12px; margin:0 5px;"></span>
-                <span id="pv-total-count">全体: 0</span>
-                <span id="pv-net-count" class="net-count">実質: 0</span>
-                <span id="pv-line-count">0 行</span>
-                <span id="pv-goal-display" class="goal-display"></span>
-                <span id="pv-today-goal" class="today-goal"></span>
-                <span id="pv-reading-time" class="reading-time"></span>
-                <span id="pv-manuscript" class="manuscript-pages"></span>
-                <span id="preview-zoom-display" class="zoom-display" ondblclick="startEditPreviewZoom()" title="ダブルクリックで拡大率を入力">100%</span>
+                <div class="pane-footer-left">
+                    <span id="pv-time" class="timestamp">未更新</span>
+                </div>
+                <div class="pane-footer-right">
+                    <span style="border-left:1px solid var(--border-color); height:12px; margin:0 5px;"></span>
+                    <span id="pv-line-count">0 行</span>
+                    <span id="pv-goal-display" class="goal-display"></span>
+                    <span id="pv-reading-time" class="reading-time"></span>
+                    <span id="pv-manuscript" class="manuscript-pages"></span>
+                    <span id="preview-zoom-display" class="zoom-display" ondblclick="startEditPreviewZoom()" title="ダブルクリックで拡大率を入力">100%</span>
+                </div>
             </div>
         </div>
     </div>
@@ -6313,41 +6350,6 @@ body.theme-dark{
     <button onclick="quickWrapSelection('『', '』')">『』</button>
     <button onclick="quickWrapSelection('（', '）')">（）</button>
     <button style="color:#d97706;" onclick="quickAddBookmark()">🔖しおり</button>
-</div>
-
-<div id="selection-tool-window" class="selection-tool-window icon-only" aria-live="polite">
-    <div class="selection-tool-header">
-        <span>選択ツール</span>
-        <span id="selection-tool-info" class="selection-tool-info">選択なし</span>
-    </div>
-    <div class="selection-tool-body">
-        <button class="qip-ruby" data-requires-selection="true" onclick="quickInsertRuby()" aria-label="ルビ">
-            <span class="btn-icon" aria-hidden="true">🔤</span><span class="btn-label">ルビ</span>
-        </button>
-        <button class="qip-bouten" data-requires-selection="true" onclick="quickInsertBouten()" aria-label="傍点">
-            <span class="btn-icon" aria-hidden="true">⚫</span><span class="btn-label">傍点</span>
-        </button>
-        <button data-requires-selection="true" onclick="quickWrapSelection('「', '」')" aria-label="鉤括弧">
-            <span class="btn-icon" aria-hidden="true">「」</span><span class="btn-label">「」</span>
-        </button>
-        <button data-requires-selection="true" onclick="quickWrapSelection('『', '』')" aria-label="二重鉤括弧">
-            <span class="btn-icon" aria-hidden="true">『』</span><span class="btn-label">『』</span>
-        </button>
-        <button data-requires-selection="true" onclick="quickWrapSelection('（', '）')" aria-label="括弧">
-            <span class="btn-icon" aria-hidden="true">（）</span><span class="btn-label">（）</span>
-        </button>
-        <button style="color:#d97706;" data-requires-selection="true" onclick="quickAddBookmark()" aria-label="しおり">
-            <span class="btn-icon" aria-hidden="true">🔖</span><span class="btn-label">しおり</span>
-        </button>
-    </div>
-    <div class="selection-tool-resize-handle edge top" data-resize="top"></div>
-    <div class="selection-tool-resize-handle edge right" data-resize="right"></div>
-    <div class="selection-tool-resize-handle edge bottom" data-resize="bottom"></div>
-    <div class="selection-tool-resize-handle edge left" data-resize="left"></div>
-    <div class="selection-tool-resize-handle corner tl" data-resize="top-left"></div>
-    <div class="selection-tool-resize-handle corner tr" data-resize="top-right"></div>
-    <div class="selection-tool-resize-handle corner bl" data-resize="bottom-left"></div>
-    <div class="selection-tool-resize-handle corner br" data-resize="bottom-right"></div>
 </div>
 
 <div id="save-dialog-overlay" class="save-dialog-overlay" style="display:none;">
@@ -7125,6 +7127,7 @@ initTabScrollers();
     const inputProgressFill = document.getElementById('input-progress-fill');
     const inputProgressText = document.getElementById('input-progress-text');
     const inputLastSaveEl = document.getElementById('input-last-save');
+    const inputSelectionCountEl = document.getElementById('input-selection-count');
     const inputSelOverlay = document.getElementById('input-sel-overlay');
     const pvTotalCountEl = document.getElementById('pv-total-count');
     const pvNetCountEl = document.getElementById('pv-net-count');
@@ -7157,35 +7160,6 @@ initTabScrollers();
     };
     let goalAchieved = { today: false, total: false };
     let previewUpdateTimeout = null;
-    const SETTINGS_PANEL_KEY = 'cc_settings_panel_active_v1';
-
-    function setActiveSettingsPanel(panelId, save = true) {
-        const selector = document.getElementById('settings-panel-selector');
-        const sections = document.querySelectorAll('#settings-bar .settings-section');
-        if (!sections.length) return;
-        sections.forEach(section => {
-            const isActive = section.dataset.panel === panelId;
-            section.classList.toggle('is-active', isActive);
-            if (isActive) section.setAttribute('open', '');
-            else section.removeAttribute('open');
-        });
-        if (selector) selector.value = panelId;
-        if (save) {
-            try { localStorage.setItem(SETTINGS_PANEL_KEY, panelId); } catch (e) {}
-        }
-    }
-
-    function initSettingsPanelSelector() {
-        const selector = document.getElementById('settings-panel-selector');
-        if (!selector) return;
-        const saved = localStorage.getItem(SETTINGS_PANEL_KEY);
-        const initial = saved || selector.value;
-        setActiveSettingsPanel(initial, false);
-        selector.addEventListener('change', () => {
-            setActiveSettingsPanel(selector.value);
-        });
-    }
-
     // 「📂 開く」を押した時に、その場で「現在タブ / 新規タブ」を選べるようにするための一時設定
     // （loadFile() 内で優先して参照し、処理後に null に戻します）
     let pendingOpenMode = null;
@@ -7826,7 +7800,7 @@ function addNewTab() {
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-        const defaultText = `　ⓒエディタ（使い方） v1.1
+        const defaultText = `　ⓒエディタ（使い方） v1.11
 
 ■ はじめに（最短で使い始める）
 
@@ -8555,12 +8529,19 @@ function addNewTab() {
         const tl = t.replace(/[\n\r]/g, '').length;
         const nl = computeNetLength(t);
         const ll = t.split('\n').length;
-        charCountEl.innerText = `全体: ${tl}`; inputNetCountEl.innerText = `実質: ${nl}`; lineCountEl.innerText = `${ll} 行`;
+        if (charCountEl) charCountEl.innerText = `全体: ${tl}`;
+        if (inputNetCountEl) inputNetCountEl.innerText = `実質: ${nl}`;
+        if (lineCountEl) lineCountEl.innerText = `${ll} 行`;
         const g = settingsCache.goalChars;
-        if (g > 0) { const p = Math.round((nl / g) * 100); inputGoalEl.innerText = `目標: ${nl}/${g} (${p}%)`; inputGoalEl.className = 'goal-display ' + getGoalColorClass(p); } else { inputGoalEl.innerText = ''; }
+        if (inputGoalEl) {
+            if (g > 0) { const p = Math.round((nl / g) * 100); inputGoalEl.innerText = `目標: ${nl}/${g} (${p}%)`; inputGoalEl.className = 'goal-display ' + getGoalColorClass(p); } else { inputGoalEl.innerText = ''; }
+        }
         const tg = settingsCache.todayGoal;
         let tw = 0;
-        if (tg > 0) { tw = Math.max(0, nl - todayStartChars); const tp = Math.round((tw / tg) * 100); inputTodayGoalEl.innerText = `今日: ${tw}/${tg} (${tp}%)`; inputTodayGoalEl.className = tw >= tg ? 'today-goal achieved' : 'today-goal'; } else { inputTodayGoalEl.innerText = ''; }
+        if (tg > 0) { tw = Math.max(0, nl - todayStartChars); }
+        if (inputTodayGoalEl) {
+            if (tg > 0) { const tp = Math.round((tw / tg) * 100); inputTodayGoalEl.innerText = `今日: ${tw}/${tg} (${tp}%)`; inputTodayGoalEl.className = tw >= tg ? 'today-goal achieved' : 'today-goal'; } else { inputTodayGoalEl.innerText = ''; }
+        }
         inputReadingEl.innerText = settingsCache.showReadingTime ? `約${Math.ceil(nl / 400)}分` : '';
         if (settingsCache.showManuscript) { const cpp = settingsCache.manuscriptRows * settingsCache.manuscriptCols; inputManuscriptEl.innerText = `原稿用紙: ${(nl / cpp).toFixed(1)}枚`; } else { inputManuscriptEl.innerText = ''; }
         updateProgressBar(nl, tw, tg, g);
@@ -8633,6 +8614,7 @@ function addNewTab() {
     const selectionToolWindow = document.getElementById('selection-tool-window');
     const selectionToolInfo = document.getElementById('selection-tool-info');
     const selectionToolButtons = selectionToolWindow ? Array.from(selectionToolWindow.querySelectorAll('[data-requires-selection="true"]')) : [];
+    const selectionToolInFooter = selectionToolWindow?.classList.contains('in-footer');
     let lastSelectionRange = { start: 0, end: 0 };
 
     function showQuickInsertPopup() {
@@ -8695,6 +8677,7 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
     function updateSelectionToolWindowState(hasSelection, infoText) {
         if (!selectionToolWindow || !selectionToolInfo) return;
         selectionToolInfo.textContent = infoText;
+        if (inputSelectionCountEl) inputSelectionCountEl.textContent = infoText;
         selectionToolButtons.forEach(btn => { btn.disabled = !hasSelection; });
     }
 
@@ -8780,7 +8763,7 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
     const SELECTION_TOOL_POS_KEY = 'cc_selection_tool_pos_v1';
     const SELECTION_TOOL_SIZE_KEY = 'cc_selection_tool_size_v1';
     function restoreSelectionToolPosition() {
-        if (!selectionToolWindow) return;
+        if (!selectionToolWindow || selectionToolInFooter) return;
         try {
             const raw = localStorage.getItem(SELECTION_TOOL_POS_KEY);
             if (!raw) return;
@@ -8796,7 +8779,7 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
         try { localStorage.setItem(SELECTION_TOOL_POS_KEY, JSON.stringify({ left, top })); } catch (e) {}
     }
     function restoreSelectionToolSize() {
-        if (!selectionToolWindow) return;
+        if (!selectionToolWindow || selectionToolInFooter) return;
         try {
             const raw = localStorage.getItem(SELECTION_TOOL_SIZE_KEY);
             if (!raw) return;
@@ -8809,7 +8792,7 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
         try { localStorage.setItem(SELECTION_TOOL_SIZE_KEY, JSON.stringify({ width, height })); } catch (e) {}
     }
     function enableSelectionToolDrag() {
-        if (!selectionToolWindow) return;
+        if (!selectionToolWindow || selectionToolInFooter) return;
         const header = selectionToolWindow.querySelector('.selection-tool-header');
         if (!header) return;
         header.addEventListener('pointerdown', (ev) => {
@@ -8841,7 +8824,7 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
         });
     }
     function enableSelectionToolResize() {
-        if (!selectionToolWindow) return;
+        if (!selectionToolWindow || selectionToolInFooter) return;
         const handles = Array.from(selectionToolWindow.querySelectorAll('.selection-tool-resize-handle'));
         if (!handles.length) return;
         const minWidth = 120;
@@ -8980,9 +8963,17 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
         const tl = t.replace(/[\n\r]/g, '').length;
         const nl = computeNetLength(t);
         const ll = t.split('\n').length;
-        pvTotalCountEl.innerText = `全体: ${tl}`; pvNetCountEl.innerText = `実質: ${nl}`; pvLineCountEl.innerText = `${ll} 行`;
-        const g = settingsCache.goalChars; if (g > 0) { const p = Math.round((nl / g) * 100); pvGoalEl.innerText = `目標: ${nl}/${g} (${p}%)`; pvGoalEl.className = 'goal-display ' + getGoalColorClass(p); } else { pvGoalEl.innerText = ''; }
-        const tg = settingsCache.todayGoal; if (tg > 0) { const tw = Math.max(0, nl - todayStartChars), tp = Math.round((tw / tg) * 100); pvTodayGoalEl.innerText = `今日: ${tw}/${tg} (${tp}%)`; pvTodayGoalEl.className = tw >= tg ? 'today-goal achieved' : 'today-goal'; } else { pvTodayGoalEl.innerText = ''; }
+        if (pvTotalCountEl) pvTotalCountEl.innerText = `全体: ${tl}`;
+        if (pvNetCountEl) pvNetCountEl.innerText = `実質: ${nl}`;
+        if (pvLineCountEl) pvLineCountEl.innerText = `${ll} 行`;
+        const g = settingsCache.goalChars;
+        if (pvGoalEl) {
+            if (g > 0) { const p = Math.round((nl / g) * 100); pvGoalEl.innerText = `目標: ${nl}/${g} (${p}%)`; pvGoalEl.className = 'goal-display ' + getGoalColorClass(p); } else { pvGoalEl.innerText = ''; }
+        }
+        const tg = settingsCache.todayGoal;
+        if (pvTodayGoalEl) {
+            if (tg > 0) { const tw = Math.max(0, nl - todayStartChars), tp = Math.round((tw / tg) * 100); pvTodayGoalEl.innerText = `今日: ${tw}/${tg} (${tp}%)`; pvTodayGoalEl.className = tw >= tg ? 'today-goal achieved' : 'today-goal'; } else { pvTodayGoalEl.innerText = ''; }
+        }
         pvReadingEl.innerText = settingsCache.showReadingTime ? `約${Math.ceil(nl / 400)}分` : '';
         if (settingsCache.showManuscript) { const cpp = settingsCache.manuscriptRows * settingsCache.manuscriptCols; pvManuscriptEl.innerText = `原稿用紙: ${(nl / cpp).toFixed(1)}枚`; } else { pvManuscriptEl.innerText = ''; }
         pvTimeEl.innerText = `更新: ${new Date().toLocaleTimeString('ja-JP', { hour12: false })}`;
@@ -10720,7 +10711,6 @@ document.addEventListener('DOMContentLoaded', () => {
     try { applyShortcutTooltips(); } catch(e) {}
 });
 document.addEventListener('DOMContentLoaded', () => {
-    try { initSettingsPanelSelector(); } catch(e) {}
 });
 
     // Click-path helper: robust even if the UI re-renders during the click
