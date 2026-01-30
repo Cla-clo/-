@@ -5,9 +5,9 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.16</title>
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ⓒエディタ v1.192</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -327,6 +327,10 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
         flex-shrink: 0;
     }
     .app-icon img { width: 18px; height: 18px; display: block; border-radius: 4px; }
+
+    .app-icon-img { width: 18px; height: 18px; display: block; border-radius: 4px; }
+    .app-icon.has-img .app-emoji-icon { display: none; }
+    .app-icon.no-img .app-icon-img { display: none; }
     .app-title {
         font-weight: 600;
         font-size: 0.95rem;
@@ -875,6 +879,39 @@ background: transparent;
 .tabs-scroll-wrap.memo-tabs-wrap { width: 100%; }
     .tabs-scroll-wrap.memo-tabs-wrap .memo-tabs { overflow-x: auto; overflow-y: hidden; }
 
+    /* === Memo tabs: keep scroll arrows on the SAME ROW as tabs (no wrap/shift) === */
+    #memo-panel .tabs-scroll-wrap.memo-tabs-wrap{
+        display: grid;
+        grid-template-columns: 26px 1fr 26px;
+        align-items: end;
+        column-gap: 4px;
+        width: 100%;
+    }
+    /* Keep buttons in layout always; toggle visibility via .show */
+    #memo-panel .tabs-scroll-wrap.memo-tabs-wrap .tab-scroll-btn{
+        display: flex !important;
+        width: 26px;
+        height: 26px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+    }
+    #memo-panel .tabs-scroll-wrap.memo-tabs-wrap .tab-scroll-btn.show{
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+    }
+    #memo-panel #memo-tabs-container.memo-tabs{
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: flex-end;
+        min-width: 0;
+    }
+    
+
     .tab-scroll-btn {
         width: 26px;
         flex: 0 0 26px;
@@ -1327,6 +1364,11 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
         font-family: inherit; color: var(--text-color); box-sizing: border-box;
     }
     #memo-area:focus { outline: none; }
+    .panel-body.memo-body{ display:flex; flex-direction:column; min-height:0; }
+    .panel-body.memo-body #memo-tabs-wrap{ flex:0 0 auto; }
+    .panel-body.memo-body #memo-area{ flex:1 1 auto; min-height: 220px; }
+    .panel-body.memo-body #memo-cards-wrap{ flex:1 1 auto; min-height:0; }
+
     .memo-footer {
         padding: 4px 10px; background: #fef3c7; border-top: 1px solid #fcd34d;
         text-align: right;
@@ -1465,7 +1507,11 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
         box-shadow: 0 4px 20px rgba(0,0,0,0.3); max-width: 600px; width: 90%;
         max-height: 80vh; overflow-y: auto; color: var(--text-color);
     }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    
+    /* v1.189: shortcut editor draggable/resizable */
+    .cc-shortcut-editor.cc-dragging { box-shadow: 0 6px 28px rgba(0,0,0,0.35); }
+    .cc-shortcut-editor-header { user-select: none; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     .modal-header h3 { margin: 0; font-size: 1.2rem; }
     .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
     .modal-close:hover { color: #dc2626; }
@@ -2315,7 +2361,36 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
         color: var(--text-color);
         cursor: pointer;
     }
-    .card-actions button:hover{ background: var(--pane-header-bg); }
+    
+    /* Memo card actions (align with other card panels) */
+    /* ===== Memo toolbar actions (unify with other card panels) ===== */
+    #memo-panel .memo-toolbar { display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding: 4px 6px; }
+    #memo-panel .memo-toolbar-actions{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding: 0; }
+    #memo-panel .memo-toolbar-actions .memo-action-btn{ padding:2px 10px; font-size:0.75rem; line-height:1.2; border-radius:6px; }
+    #memo-panel .memo-toolbar-actions .memo-action-btn.danger{ background: rgba(239, 68, 68, 0.10); border-color: rgba(239, 68, 68, 0.25); color:#dc2626; }
+    #memo-panel .memo-toolbar-actions .memo-action-btn.danger:hover{ background: rgba(239, 68, 68, 0.15); }
+
+    /* Active memo card highlight */
+    #memo-panel .memo-card.active{ outline: 2px solid rgba(59,130,246,0.55); outline-offset: 2px; }
+
+    /* Memo card header aligned with shared card UI */
+    #memo-panel .memo-card-header.card-header{ padding: 10px 10px 6px; }
+    #memo-panel .memo-card-title-input{ flex:1; min-width: 120px; font-size:0.92rem; font-weight:600; border:1px solid var(--border-color); border-radius:6px; padding:6px 8px; background: var(--panel-bg); color: var(--text-color); }
+    #memo-panel .memo-card-head-right .card-badge{ font-size:0.72rem; }
+
+    /* ===== Memo edit modal ===== */
+    #memo-edit-modal .memo-edit-modal-content{ width: min(900px, 94vw); height: min(82vh, 760px); display:flex; flex-direction:column; }
+    #memo-edit-modal.fullscreen .memo-edit-modal-content{ width: 96vw; height: 96vh; }
+    #memo-edit-modal .memo-edit-fields{ padding: 12px; display:flex; flex-direction:column; gap:10px; flex:1; overflow:auto; }
+    #memo-edit-modal .memo-edit-fields label{ font-size:0.8rem; color: var(--text-muted); }
+    #memo-edit-modal .memo-edit-title-input{ width: 100%; box-sizing:border-box; padding: 8px 10px; border:1px solid var(--border-color); border-radius:8px; background: var(--panel-bg); color: var(--text-color); font-weight:600; }
+    #memo-edit-modal .memo-edit-content-input{ width: 100%; flex:1; min-height: 260px; resize: none; box-sizing:border-box; padding: 10px; border:1px solid var(--border-color); border-radius:10px; background: var(--panel-bg); color: var(--text-color); font-family: inherit; }
+    #memo-edit-modal .memo-edit-footer{ display:flex; justify-content:flex-end; gap:8px; padding: 10px 12px 12px; border-top:1px solid var(--border-color); }
+
+
+    .memo-card-actions { display:flex; gap:4px; flex-wrap: wrap; padding: 8px 10px 10px; border-top: 1px dashed var(--border-color); justify-content: flex-end; }
+    .memo-card-actions button.btn-delete { background: rgba(239, 68, 68, 0.10); }
+        .card-actions button:hover{ background: var(--pane-header-bg); }
     .card-actions .btn-delete{ color: #dc2626; }
     .card-actions .btn-delete:hover{ background: #fee2e2; }
 
@@ -3682,6 +3757,18 @@ body.theme-dark .dynamic-dock-resizer:hover{ background: rgba(255,255,255,0.08);
   border-bottom: 1px solid var(--border-color);
   box-sizing: border-box;
 }
+
+#memo-panel .memo-tag-btn.active{
+  border-color: #f59e0b;
+  background: rgba(245,158,11,0.18);
+}
+body.theme-dark #memo-panel .memo-tag-btn{
+  background: rgba(255,255,255,0.08);
+}
+body.theme-dark #memo-panel .memo-tag-btn.active{
+  background: rgba(245,158,11,0.25);
+  border-color: #d97706;
+}
 .panel-toolbar .btn{
   display:inline-flex;
   align-items:center;
@@ -3718,6 +3805,47 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
   display: block;
   box-sizing: border-box;
   max-width: 100%;
+}
+
+/* === Memo cards view (v1.189) === */
+.memo-cards-wrap{ width:100%; }
+.memo-card{ cursor: default; }
+.memo-card .memo-card-header{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 8px;
+  border-bottom: 1px dashed var(--border-color);
+}
+.memo-card .memo-card-title{
+  flex:1 1 auto;
+  min-width: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 0.85rem;
+  background: var(--panel-bg);
+  color: var(--text-color);
+}
+.memo-card .memo-card-del{
+  border: 1px solid var(--border-color);
+  background: var(--panel-bg);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.memo-card .memo-card-content{
+  width:100%;
+  min-height: 90px;
+  border: none;
+  outline: none;
+  padding: 8px;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: inherit;
+  background: transparent;
+  color: var(--text-color);
 }
 
 
@@ -5540,9 +5668,11 @@ body.theme-dark{
     <div class="ribbon-row">
         <div class="ribbon-left">
             <button class="app-icon" id="app-icon" title="アプリメニュー">
+                
+                <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.16</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.192</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -5559,7 +5689,7 @@ body.theme-dark{
             <button class="btn btn-undo" onclick="undoInput()" title="元に戻す" data-desc="元に戻す" data-shortcut="Ctrl+Z">↩</button>
             <button class="btn btn-undo" onclick="redoInput()" title="やり直し" data-desc="やり直し" data-shortcut="Ctrl+Y">↪</button>
             <span class="ribbon-separator">|</span>
-            <button class="btn panel-toggle" id="btn-toggle-search" onclick="toggleSearchPanel()" data-label="🔍 検索" data-desc="検索パネルを開閉" data-shortcut="Ctrl+F">
+            <button class="btn panel-toggle" id="btn-toggle-search" onclick="toggleSearchPanel()" data-label="🔍 検索" data-desc="検索パネルを開閉" data-shortcut="Ctrl+Alt+F">
                 <span class="panel-label">🔍 検索</span><span class="panel-state-icon">▾</span>
             </button>
             <span class="ribbon-separator">|</span>
@@ -5648,10 +5778,10 @@ body.theme-dark{
             </div>
             <span class="ribbon-separator">|</span>
             <div class="ribbon-subgroup">
-                <button class="btn btn-view" onclick="openReaderView()" title="全タブをまとめて閲覧（Escで戻る）" data-desc="全タブをまとめて閲覧（Escで戻る）" data-shortcut="Ctrl+R">👁 閲覧</button>
-                <button class="btn btn-analysis" onclick="showAnalysis()" data-desc="分析を開く" data-shortcut="Ctrl+Shift+A">📊 分析</button>
-                <button class="btn btn-focus" id="btn-focus" onclick="toggleFocusMode()" data-desc="集中モードを切替" data-shortcut="Ctrl+L">🧘 集中</button>
-                <button class="btn btn-sync" id="btn-sync" onclick="syncPreviewPosition()" data-desc="プレビューを同期" data-shortcut="Ctrl+Enter">📲 同期</button>
+                <button class="btn btn-view" onclick="openReaderView()" title="全タブをまとめて閲覧（Escで戻る）" data-desc="全タブをまとめて閲覧（Escで戻る）" data-shortcut="Ctrl+Alt+V">👁 閲覧</button>
+                <button class="btn btn-analysis" onclick="showAnalysis()" data-desc="分析を開く" data-shortcut="Ctrl+Alt+A">📊 分析</button>
+                <button class="btn btn-focus" id="btn-focus" onclick="toggleFocusMode()" data-desc="集中モードを切替" data-shortcut="Ctrl+Alt+L">🧘 集中</button>
+                <button class="btn btn-sync" id="btn-sync" onclick="syncPreviewPosition()" data-desc="プレビューを同期" data-shortcut="Ctrl+Alt+Enter">📲 同期</button>
             </div>
         </div>
     </div>
@@ -5676,13 +5806,14 @@ body.theme-dark{
         <span class="ribbon-menu-item">🚧 開発中</span>
     </div>
     <div class="ribbon-section ribbon-help" data-section="help">
-        <button class="btn panel-toggle" id="btn-toggle-help" onclick="togglePanel('help-bar')" data-label="❓ 使い方" data-desc="使い方パネルを開閉" data-shortcut="Ctrl+Shift+H">
+        <button class="btn panel-toggle" id="btn-toggle-help" onclick="togglePanel('help-bar')" data-label="❓ 使い方" data-desc="使い方パネルを開閉" data-shortcut="Ctrl+Alt+H">
             <span class="panel-label">❓ 使い方</span><span class="panel-state-icon">▾</span>
         </button>
     </div>
 </header>
 
 <div id="app-context-menu" class="context-menu" role="menu" aria-label="アプリメニュー">
+    <div class="context-menu-item" data-action="edit-shortcuts">⌨ ショートカット変更</div>
     <div class="context-menu-item" data-action="reset-all">💀 全体初期化</div>
 </div>
 
@@ -5705,18 +5836,18 @@ body.theme-dark{
             </div>
             <div class="help-section" style="flex: 1; min-width: 180px;">
                 <div class="help-title">【ショートカットキー】</div>
-                ・<b>Ctrl+S</b>：保存ダイアログ<br>
+                ・<b>Ctrl+Alt+S</b>：保存ダイアログ<br>
                 ・<b>Ctrl+Z</b>：元に戻す / <b>Ctrl+Y</b>：やり直し<br>
-                ・<b>Ctrl+F</b>：検索（NAV/検索）<br>
-                ・<b>Ctrl+G</b>：行番号ジャンプ<br>
-                ・<b>Ctrl+N</b>：新規本文タブ<br>
-                ・<b>Ctrl+Shift+N</b>：新規メモタブ<br>
-                ・<b>Ctrl+Enter</b>：同期（更新＋位置合わせ）<br>
+                ・<b>Ctrl+Alt+F</b>：検索（NAV/検索）<br>
+                ・<b>Ctrl+Alt+G</b>：行番号ジャンプ<br>
+                ・<b>Ctrl+Alt+N</b>：新規本文タブ<br>
+                ・<b>Ctrl+Alt+M</b>：新規メモタブ<br>
+                ・<b>Ctrl+Alt+Enter</b>：同期（更新＋位置合わせ）<br>
                 ・<b>Alt+Shift+=</b>：入力拡大 / <b>Alt+Shift+-</b>：入力縮小<br>
-                ・<b>Ctrl+L</b>：集中モード切替<br>
-                ・<b>Ctrl+R</b>：閲覧モード<br>
-                ・<b>Ctrl+Shift+A</b>：分析<br>
-                ・<b>Ctrl+Shift+H</b>：使い方パネル<br>
+                ・<b>Ctrl+Alt+L</b>：集中モード切替<br>
+                ・<b>Ctrl+Alt+V</b>：閲覧モード<br>
+                ・<b>Ctrl+Alt+A</b>：分析<br>
+                ・<b>Ctrl+Alt+H</b>：使い方パネル<br>
                 ・<b>Ctrl+Shift+F</b>：振り仮名（ルビ）<br>
                 ・<b>Ctrl+Shift+B</b>：傍点<br>
                 ・<b>Ctrl+Shift+1</b>：構成パネル<br>
@@ -6190,25 +6321,27 @@ body.theme-dark{
       <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-right" data-pane="memo" title="右のパネルと入替" aria-label="右のパネルと入替">▶</button>
 <button class="btn panel-icon-btn panel-pin-btn" id="btn-memo-pin" data-action="toggle-pin" data-pane="memo" title="固定/浮動切り替え">📌</button>
 <input type="checkbox" id="check-memo-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="memo">
-      <button class="btn structure-fullscreen-btn" data-action="toggle-fullscreen" data-pane="memo">⛶</button>
-      <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="memo" data-args="true" style="background:none; border:none; cursor:pointer;">✖</button>
+<button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="memo" data-args="true">✕</button>
     </div>
   </div>
 
 
 
-    <div class="panel-toolbar memo-toolbar">
-        <div class="tabs-scroll-wrap memo-tabs-wrap" id="memo-tabs-wrap">
-            <button class="tab-scroll-btn left" type="button" aria-label="メモタブを左へ" data-target="memo-tabs-container">◀</button>
-            <div id="memo-tabs-container" class="memo-tabs"></div>
-            <button class="tab-scroll-btn right" type="button" aria-label="メモタブを右へ" data-target="memo-tabs-container">▶</button>
-        </div>
-    </div>
-    <div class="panel-body memo-body">
-      <textarea id="memo-area" placeholder="ここに入力..." oninput="updateMemoCharCount(); saveMemoTabs()" style="flex: 1; width: 100%; resize: none; border: none; padding: 8px; font-family: inherit; box-sizing: border-box; outline: none;"></textarea>
-    </div>
     
-    <div class="memo-footer" style="padding: 2px 8px; font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border-color); display:flex; justify-content:space-between;">
+<div class="panel-toolbar"></div>
+<div class="panel-body memo-body">
+  <div class="tabs-scroll-wrap memo-tabs-wrap" id="memo-tabs-wrap" style="display:none;">
+    <button class="tab-scroll-btn left" type="button" aria-label="タブを左へ" data-target="memo-tabs-container">◀</button>
+    <div class="memo-tabs" id="memo-tabs-container"></div>
+    <button class="tab-scroll-btn right" type="button" aria-label="タブを右へ" data-target="memo-tabs-container">▶</button>
+  </div>
+  <textarea id="memo-area" placeholder="ここに入力..." style="display:none;"></textarea>
+  <div id="memo-cards-wrap" class="memo-cards-wrap" style="display:block; padding:8px; box-sizing:border-box;">
+    <div id="memo-cards-list"></div>
+  </div>
+</div>
+
+<div class="memo-footer" style="padding: 2px 8px; font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; background: var(--pane-memo-head, #f9fafb);">
         <span id="memo-char-count">0字</span>
         <div class="memo-file-btns" style="display:flex; gap:4px;">
             <button onclick="openMemoImportDialog()" style="font-size:0.7rem; cursor:pointer; padding:2px 8px; border:1px solid var(--border-color); border-radius:4px; background:var(--panel-bg);">📂 開く</button>
@@ -6672,6 +6805,35 @@ body.theme-dark{
         </div>
     </div>
 </div>
+
+
+<!-- メモ編集モーダル -->
+<div id="memo-edit-modal" class="modal-overlay" data-tab-id="">
+  <div class="modal-content memo-edit-modal-content">
+    <div class="modal-header">
+      <h3>📝 メモを編集</h3>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <button class="btn" type="button" onclick="toggleMemoEditModalFullscreen()" title="全画面切替">⛶</button>
+        <button class="modal-close" type="button" onclick="closeMemoEditModal()">✕</button>
+      </div>
+    </div>
+    <div class="memo-edit-fields">
+      <div>
+        <label>タイトル</label>
+        <input id="memo-edit-title" class="memo-edit-title-input" type="text" placeholder="タイトル">
+      </div>
+      <div style="flex:1; display:flex; flex-direction:column;">
+        <label>本文</label>
+        <textarea id="memo-edit-content" class="memo-edit-content-input" placeholder="ここに入力..."></textarea>
+      </div>
+    </div>
+    <div class="memo-edit-footer">
+      <button class="btn" type="button" onclick="closeMemoEditModal()">キャンセル</button>
+      <button class="btn btn-save" type="button" onclick="saveMemoEditModal()">保存</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- 登場人物編集モーダル -->
 <div id="character-edit-modal">
@@ -9017,7 +9179,9 @@ window.openRubyInsertDialog = openRubyInsertDialog;
 
 // Global shortcut: Ctrl+Alt+R (only in input pane)
 document.addEventListener('keydown', function(e) {
-    const isRubyShortcut = e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && (e.key === 'r' || e.key === 'R');
+    const __api = window.__ccShortcutAPI;
+    const __combo = (__api && __api.getShortcuts ? (__api.getShortcuts().rubyDialog) : null) || 'Ctrl+Alt+R';
+    const isRubyShortcut = (__api && __api.matchesEvent) ? __api.matchesEvent(e, __combo) : (e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && (e.key === 'r' || e.key === 'R'));
     if (!isRubyShortcut) return;
 
     const ia = document.getElementById('input-area');
@@ -10889,11 +11053,24 @@ function updateDockSplitState() {
             menu.style.left = `${Math.max(8, left)}px`;
             menu.style.top = `${Math.max(8, top)}px`;
         });
+        icon.addEventListener('click', (event) => {
+            event.preventDefault();
+            menu.classList.add('show');
+            const { innerWidth, innerHeight } = window;
+            const rect = menu.getBoundingClientRect();
+            const iconRect = icon.getBoundingClientRect();
+            const left = Math.min(iconRect.left, innerWidth - rect.width - 8);
+            const top = Math.min(iconRect.bottom + 6, innerHeight - rect.height - 8);
+            menu.style.left = `${Math.max(8, left)}px`;
+            menu.style.top = `${Math.max(8, top)}px`;
+        });
         menu.addEventListener('click', (event) => {
             const item = event.target.closest('.context-menu-item');
             if (!item) return;
             const action = item.dataset.action;
-            if (action === 'reset-all') {
+            if (action === 'edit-shortcuts') {
+                if (window.__ccOpenShortcutEditor) window.__ccOpenShortcutEditor();
+            } else if (action === 'reset-all') {
                 confirmResetInput();
             }
             menu.classList.remove('show');
@@ -11769,9 +11946,38 @@ function toggleMemoDock() {
   }
 
 
-    function renderMemoTabs() {
+    
+    // Render memo "tag buttons" into toolbar (replaces tab strip)
+    function renderMemoTagStrip(){
+        const strip = document.getElementById('memo-tag-strip');
+        if (!strip) return;
+        strip.innerHTML = '';
+        if (!Array.isArray(memoTabs)) return;
+
+        memoTabs.forEach(tab => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'btn btn-lite memo-tag-btn' + (tab.id === activeMemoTabId ? ' active' : '');
+            b.textContent = tab.name || `メモ${tab.id}`;
+            b.dataset.tabId = tab.id;
+            b.title = 'クリックで切替 / ダブルクリックで名前変更';
+            b.addEventListener('click', (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                try{ switchMemoTab(tab.id); }catch(e){}
+            });
+            b.addEventListener('dblclick', (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                try{ startEditMemoTabName(tab.id); }catch(e){}
+            });
+            strip.appendChild(b);
+        });
+    }
+
+function renderMemoTabs() {
         const container = document.getElementById('memo-tabs-container');
-        if (!container) return;
+        if (!container) { try{ renderMemoTagStrip(); }catch(e){} return; }
         container.innerHTML = '';
         memoTabs.forEach(tab => {
             const tabEl = document.createElement('div');
@@ -11820,26 +12026,81 @@ function toggleMemoDock() {
     }
 
     function switchMemoTab(id) {
-        const currentTab = memoTabs.find(t => t.id === activeMemoTabId);
-        if (currentTab) currentTab.content = memoArea.value;
+        const mode = window.__ccGetMemoViewMode ? window.__ccGetMemoViewMode() : 'tabs';
+
+        // In tab-mode: persist textarea into active tab (カード時は上書きしない)
+        if (mode !== 'cards') {
+            const memoAreaEl = document.getElementById('memo-area');
+            const currentTab = memoTabs.find(t => t && t.id === activeMemoTabId);
+            if (currentTab && memoAreaEl) currentTab.content = memoAreaEl.value;
+        }
+
         activeMemoTabId = id;
-        const newTab = memoTabs.find(t => t.id === id);
-        memoArea.value = newTab ? newTab.content : '';
+
+        // In tab-mode: reflect selected tab into textarea
+        if (mode !== 'cards') {
+            const memoAreaEl = document.getElementById('memo-area');
+            const newTab = memoTabs.find(t => t && t.id === id);
+            if (memoAreaEl) memoAreaEl.value = newTab ? (newTab.content || '') : '';
+        }
+
         renderMemoTabs();
+
+        // In card-mode: scroll/focus the corresponding card (＝カード切り替え)
+        if (mode === 'cards') {
+            try{ syncActiveMemoCardUI(true); }catch(e){}
+            try{
+                const ta = document.querySelector(`#memo-cards-list .memo-card[data-id="${id}"] textarea`);
+                if (ta) { try{ ta.focus(); }catch(e){} }
+            }catch(e){}
+        }
+
         updateMemoCharCount();
         saveMemoTabs();
     }
 
+    function addNewMemoCard() {
+        try {
+            if (!Array.isArray(memoTabs)) memoTabs = [];
+        } catch(e) {
+            memoTabs = [];
+        }
+
+        // ensure next id
+        let newId = Number(nextMemoTabId || 1);
+        if (memoTabs.some(t => Number(t && t.id) === newId)) {
+            const maxId = memoTabs.reduce((m, t) => Math.max(m, Number(t && t.id) || 0), 0);
+            newId = maxId + 1;
+        }
+        nextMemoTabId = newId + 1;
+
+        const card = { id: newId, name: `メモ${newId}`, content: '', selected: false };
+        memoTabs.push(card);
+        activeMemoTabId = newId;
+
+        try{ saveMemoTabs(); }catch(e){}
+        try{ renderMemoTabs(); }catch(e){}
+        try{ renderMemoCards(); }catch(e){}
+        try{ applyMemoViewMode(); }catch(e){}
+        try{ window.updateMemoCharCount && window.updateMemoCharCount(); }catch(e){}
+
+        // 新規メモ作成時はメモパネルを開く（カードへスクロール）
+        try{ ensureMemoPanelOpenAndFront(); }catch(e){}
+        try{ syncActiveMemoCardUI && syncActiveMemoCardUI(true); }catch(e){}
+    
+        // If currently in tabs mode, focus the textarea for quick typing
+        try{
+            const __mMode = window.__ccGetMemoViewMode ? window.__ccGetMemoViewMode() : 'cards';
+            if (__mMode === 'tabs') {
+                const ta = document.getElementById('memo-area');
+                if (ta) { try{ ta.focus(); }catch(e){} }
+            }
+        }catch(e){}
+}
+
+    // Backward-compatible alias (旧名)
     function addNewMemoTab() {
-        const currentTab = memoTabs.find(t => t.id === activeMemoTabId);
-        if (currentTab) currentTab.content = memoArea.value;
-        memoTabs.push({ id: nextMemoTabId, name: `メモ${nextMemoTabId}`, content: '' });
-        activeMemoTabId = nextMemoTabId;
-        nextMemoTabId++;
-        memoArea.value = '';
-        renderMemoTabs();
-        updateMemoCharCount();
-        saveMemoTabs();
+        addNewMemoCard();
     }
 
     function deleteMemoTab(id) {
@@ -11882,12 +12143,15 @@ function toggleMemoDock() {
             } catch (e) { /* use defaults */ }
         }
         renderMemoTabs();
+        try{ applyMemoViewMode(); }catch(e){}
         updateMemoCharCount();
     }
 
     function saveMemoTabs() {
-        const currentTab = memoTabs.find(t => t.id === activeMemoTabId);
-        if (currentTab) currentTab.content = memoArea.value;
+        if (!(window.__ccIsMemoCardMode && window.__ccIsMemoCardMode())) {
+            const currentTab = memoTabs.find(t => t.id === activeMemoTabId);
+            if (currentTab) currentTab.content = memoArea.value;
+        }
         localStorage.setItem(MEMO_KEY, JSON.stringify({
             tabs: memoTabs,
             activeId: activeMemoTabId,
@@ -11895,7 +12159,197 @@ function toggleMemoDock() {
         }));
     }
 
-    function showMemoSaveDialog() {
+    
+    // ===== Memo: bulk/card helpers (v1.189) =====
+    function moveMemoTab(tabId, delta){
+        const from = memoTabs.findIndex(t => t && t.id === tabId);
+        if (from < 0) return;
+        const to = from + delta;
+        if (to < 0 || to >= memoTabs.length) return;
+        const [item] = memoTabs.splice(from, 1);
+        memoTabs.splice(to, 0, item);
+        window.memoTabs = memoTabs;
+        try{ renderMemoTabs(); }catch(e){}
+        try{ if (window.__ccIsMemoCardMode && window.__ccIsMemoCardMode()) renderMemoCards(); }catch(e){}
+        try{ saveMemoTabs(); }catch(e){}
+        try{ window.updateMemoCharCount && window.updateMemoCharCount(); }catch(e){}
+    }
+    window.moveMemoTab = moveMemoTab;
+
+    // Delete selected memo cards (cards-only)
+    function deleteSelectedMemoCards(){
+        if (!Array.isArray(memoTabs) || memoTabs.length === 0) return;
+        const selectedIds = memoTabs.filter(t => t && t.selected).map(t => t.id);
+        if (selectedIds.length === 0) {
+            alert('選択されているメモがありません');
+            return;
+        }
+        if (!confirm(`選択した${selectedIds.length}件のメモを削除しますか？`)) return;
+
+        memoTabs = memoTabs.filter(t => t && !t.selected);
+        // keep at least one
+        if (memoTabs.length === 0) {
+            memoTabs = [{ id: 1, name: 'メモ1', content: '', selected: false }];
+            nextMemoTabId = 2;
+            activeMemoTabId = 1;
+        } else {
+            // clear selection
+            memoTabs.forEach(t => { if (t) t.selected = false; });
+            if (!memoTabs.some(t => t && t.id === activeMemoTabId)) {
+                activeMemoTabId = memoTabs[0].id;
+            }
+            const maxId = memoTabs.reduce((m, t) => Math.max(m, Number(t && t.id) || 0), 0);
+            nextMemoTabId = Math.max(Number(nextMemoTabId || 1), maxId + 1);
+        }
+        window.memoTabs = memoTabs;
+
+        try{ saveMemoTabs(); }catch(e){}
+        try{ renderMemoCards(); }catch(e){}
+        try{ window.updateMemoCharCount && window.updateMemoCharCount(); }catch(e){}
+    }
+    window.deleteSelectedMemoCards = deleteSelectedMemoCards;
+
+    // Backward-compatible alias (旧名)
+    window.deleteSelectedMemoTabs = deleteSelectedMemoCards;
+
+
+    window.duplicateMemoTab = function(tabId){
+        const src = (Array.isArray(memoTabs) ? memoTabs : []).find(t => t && t.id === tabId);
+        if (!src) return;
+        const newId = nextMemoTabId++;
+        const copy = {
+            id: newId,
+            name: (src.name || 'メモ') + '（コピー）',
+            content: src.content || '',
+            selected: false
+        };
+        const idx = memoTabs.findIndex(t => t && t.id === tabId);
+        memoTabs.splice(Math.max(0, idx + 1), 0, copy);
+        activeMemoTabId = newId;
+        window.memoTabs = memoTabs;
+
+        const mode = window.__ccGetMemoViewMode ? window.__ccGetMemoViewMode() : 'tabs';
+        if (mode !== 'cards') {
+            const memoAreaEl = document.getElementById('memo-area');
+            if (memoAreaEl) memoAreaEl.value = copy.content || '';
+        }
+
+        try{ renderMemoTabs(); }catch(e){}
+        try{ if (window.__ccIsMemoCardMode && window.__ccIsMemoCardMode()) renderMemoCards(); }catch(e){}
+        try{ saveMemoTabs(); }catch(e){}
+        try{ window.updateMemoCharCount && window.updateMemoCharCount(); }catch(e){}
+        try{ if (window.__ccIsMemoCardMode && window.__ccIsMemoCardMode()) syncActiveMemoCardUI(true); }catch(e){}
+    };
+
+    window.deleteSelectedMemoTabs = function(){
+        const selected = (Array.isArray(memoTabs) ? memoTabs : []).filter(t => t && t.selected);
+        if (selected.length === 0) { alert('選択されたメモがありません。'); return; }
+        if (!confirm(`${selected.length}件のメモを削除しますか？`)) return;
+
+        memoTabs = memoTabs.filter(t => !t.selected);
+        if (!memoTabs.length) {
+            memoTabs = [{ id: 1, name: 'メモ1', content: '', selected:false }];
+            activeMemoTabId = 1;
+            nextMemoTabId = 2;
+        } else {
+            if (!memoTabs.some(t => t.id === activeMemoTabId)) {
+                activeMemoTabId = memoTabs[0].id;
+            }
+            nextMemoTabId = Math.max(...memoTabs.map(t => t.id)) + 1;
+        }
+        window.memoTabs = memoTabs;
+
+        const mode = window.__ccGetMemoViewMode ? window.__ccGetMemoViewMode() : 'tabs';
+        if (mode !== 'cards') {
+            const memoAreaEl = document.getElementById('memo-area');
+            const active = memoTabs.find(t => t.id === activeMemoTabId);
+            if (memoAreaEl) memoAreaEl.value = active ? (active.content || '') : '';
+        }
+
+        try{ renderMemoTabs(); }catch(e){}
+        try{ if (window.__ccIsMemoCardMode && window.__ccIsMemoCardMode()) renderMemoCards(); }catch(e){}
+        try{ saveMemoTabs(); }catch(e){}
+        try{ window.updateMemoCharCount && window.updateMemoCharCount(); }catch(e){}
+        try{ if (window.__ccIsMemoCardMode && window.__ccIsMemoCardMode()) syncActiveMemoCardUI(false); }catch(e){}
+    };
+
+    // ===== Memo edit modal (driven by existing modal styles) =====
+    window.openMemoEditModal = function(tabId, fullscreen){
+        const tab = (Array.isArray(memoTabs) ? memoTabs : []).find(t => t && t.id === Number(tabId));
+        if (!tab) return;
+
+        activeMemoTabId = tab.id;
+        try{ renderMemoTabs(); }catch(e){}
+
+        const modal = document.getElementById('memo-edit-modal');
+        const titleEl = document.getElementById('memo-edit-title');
+        const contentEl = document.getElementById('memo-edit-content');
+        if (!modal || !titleEl || !contentEl) return;
+
+        modal.dataset.tabId = String(tab.id);
+        titleEl.value = tab.name || '';
+        contentEl.value = tab.content || '';
+
+        modal.classList.toggle('fullscreen', !!fullscreen);
+        modal.classList.add('show');
+
+        // focus
+        setTimeout(() => {
+            try{ contentEl.focus(); }catch(e){}
+        }, 0);
+    };
+
+    window.closeMemoEditModal = function(){
+        const modal = document.getElementById('memo-edit-modal');
+        if (!modal) return;
+        modal.classList.remove('show');
+        modal.classList.remove('fullscreen');
+    };
+
+    window.saveMemoEditModal = function(){
+        const modal = document.getElementById('memo-edit-modal');
+        const titleEl = document.getElementById('memo-edit-title');
+        const contentEl = document.getElementById('memo-edit-content');
+        if (!modal || !titleEl || !contentEl) return;
+
+        const tabId = Number(modal.dataset.tabId || 0);
+        const tab = (Array.isArray(memoTabs) ? memoTabs : []).find(t => t && t.id === tabId);
+        if (!tab) { window.closeMemoEditModal(); return; }
+
+        tab.name = (titleEl.value || '').trim() || '（無題）';
+        tab.content = contentEl.value || '';
+
+        // sync textarea if tab-mode
+        const mode = window.__ccGetMemoViewMode ? window.__ccGetMemoViewMode() : 'tabs';
+        if (mode !== 'cards') {
+            const memoAreaEl = document.getElementById('memo-area');
+            if (memoAreaEl && tab.id === activeMemoTabId) memoAreaEl.value = tab.content || '';
+        }
+
+        try{ saveMemoTabs(); }catch(e){}
+        try{ renderMemoTabs(); }catch(e){}
+        try{ if (window.__ccIsMemoCardMode && window.__ccIsMemoCardMode()) renderMemoCards(); }catch(e){}
+        try{ window.updateMemoCharCount && window.updateMemoCharCount(); }catch(e){}
+        window.closeMemoEditModal();
+    };
+
+    window.toggleMemoEditModalFullscreen = function(){
+        const modal = document.getElementById('memo-edit-modal');
+        if (!modal) return;
+        modal.classList.toggle('fullscreen');
+    };
+
+    document.addEventListener('keydown', (ev) => {
+        if (ev.key !== 'Escape') return;
+        const modal = document.getElementById('memo-edit-modal');
+        if (modal && modal.classList.contains('show')) {
+            ev.preventDefault();
+            window.closeMemoEditModal();
+        }
+    });
+
+
+function showMemoSaveDialog() {
         document.getElementById('memo-save-dialog').style.display = 'flex';
     }
     function closeMemoSaveDialog() {
@@ -11925,6 +12379,22 @@ function toggleMemoDock() {
         }
         closeMemoSaveDialog();
     }
+    function deleteAllMemoCards(){
+        if (!Array.isArray(memoTabs)) memoTabs = [];
+        if (!confirm('すべてのメモを削除して初期化しますか？')) return;
+
+        memoTabs = [{ id: 1, name: 'メモ1', content: '', selected: false }];
+        activeMemoTabId = 1;
+        nextMemoTabId = 2;
+        window.memoTabs = memoTabs;
+
+        try{ saveMemoTabs(); }catch(e){}
+        try{ renderMemoCards(); }catch(e){}
+        try{ renderMemoTabs(); }catch(e){}
+        try{ updateMemoCharCount(); }catch(e){}
+    }
+
+
 
     function loadMemoFile(input) {
         const file = input.files[0];
@@ -11998,6 +12468,318 @@ function toggleMemoDock() {
         window.memoTabs = memoTabs;
         renderMemoTabs();
         saveMemoTabs();
+    };
+
+
+    // === Memo view mode (tabs / cards) ===
+    const __CC_MEMO_VIEW_KEY = 'cc_editor_memo_view_mode';
+
+    window.__ccGetMemoViewMode = function(){
+        try{
+            const v = localStorage.getItem(__CC_MEMO_VIEW_KEY);
+            return (v === 'tabs' || v === 'cards') ? v : 'cards';
+        }catch(e){
+            return 'cards';
+        }
+    };
+    window.__ccSetMemoViewMode = function(mode){
+        mode = (mode === 'tabs' || mode === 'cards') ? mode : 'cards';
+        try{ localStorage.setItem(__CC_MEMO_VIEW_KEY, mode); }catch(e){}
+        try{ applyMemoViewMode(); }catch(e){}
+    };
+    window.__ccIsMemoCardMode = function(){
+        return (window.__ccGetMemoViewMode ? window.__ccGetMemoViewMode() : 'cards') === 'cards';
+    };
+
+    window.toggleMemoViewMode = function(){
+        const cur = window.__ccGetMemoViewMode ? window.__ccGetMemoViewMode() : 'cards';
+        // Leaving tabs: persist textarea into active memo
+        if (cur === 'tabs') { try{ window.saveMemoTabs && window.saveMemoTabs(); }catch(e){} }
+        const next = (cur === 'tabs') ? 'cards' : 'tabs';
+        try{ window.__ccSetMemoViewMode && window.__ccSetMemoViewMode(next); }catch(e){}
+        try{ ensureMemoPanelOpenAndFront && ensureMemoPanelOpenAndFront(); }catch(e){}
+        if (next === 'tabs') {
+            setTimeout(()=>{
+                const ta = document.getElementById('memo-area');
+                if (ta) { try{ ta.focus(); }catch(e){} }
+            }, 0);
+        }
+    };
+
+    function ensureMemoPanelOpenAndFront(){
+        const panel = document.getElementById('memo-panel');
+        const checkbox = document.getElementById('check-memo-dock');
+        if (!panel) return;
+        if (!panel.classList.contains('open')) panel.classList.add('open');
+        // bring to front when floating
+        if (checkbox && !checkbox.checked && window.bringPanelToFront) window.bringPanelToFront(panel, false);
+        if (typeof window.updatePanelButtonStates === 'function') window.updatePanelButtonStates();
+    }
+
+    
+function renderMemoCards(){
+        const list = document.getElementById('memo-cards-list');
+        const wrap = document.getElementById('memo-cards-wrap');
+        if (!list || !wrap) return;
+        list.innerHTML = '';
+
+        if (!Array.isArray(memoTabs) || memoTabs.length === 0) return;
+
+        memoTabs.forEach(tab => {
+            const card = document.createElement('div');
+            card.className = 'memo-card card-shell' + (tab.id === activeMemoTabId ? ' active' : '');
+            card.dataset.id = tab.id;
+
+            // ===== Header (match other card panels) =====
+            const head = document.createElement('div');
+            head.className = 'card-header memo-card-header';
+
+            const left = document.createElement('div');
+            left.className = 'card-head-left memo-card-head-left';
+
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.className = 'card-select memo-select';
+            cb.checked = !!tab.selected;
+            cb.onchange = (ev) => {
+                tab.selected = cb.checked;
+                try{ saveMemoTabs(); }catch(e){}
+                ev.stopPropagation();
+            };
+            left.appendChild(cb);
+
+            const moveGroup = document.createElement('div');
+            moveGroup.className = 'card-move-group';
+
+            const moveUp = document.createElement('button');
+            moveUp.className = 'card-move-btn';
+            moveUp.textContent = '↑';
+            moveUp.title = '1つ上へ';
+            moveUp.onclick = (ev) => { ev.stopPropagation(); moveMemoTab(tab.id, -1); };
+
+            const moveDown = document.createElement('button');
+            moveDown.className = 'card-move-btn';
+            moveDown.textContent = '↓';
+            moveDown.title = '1つ下へ';
+            moveDown.onclick = (ev) => { ev.stopPropagation(); moveMemoTab(tab.id, +1); };
+
+            moveGroup.appendChild(moveUp);
+            moveGroup.appendChild(moveDown);
+            left.appendChild(moveGroup);
+
+            const title = document.createElement('input');
+            title.type = 'text';
+            title.className = 'memo-card-title-input';
+            title.value = tab.name || '';
+            title.placeholder = 'タイトル';
+            title.addEventListener('input', () => {
+                tab.name = title.value;
+                try{ renderMemoTabs(); }catch(e){}
+                try{ saveMemoTabs(); }catch(e){}
+            });
+            title.addEventListener('focus', () => {
+                activeMemoTabId = tab.id;
+                try{ renderMemoTabs(); }catch(e){}
+                try{ syncActiveMemoCardUI(false); }catch(e){}
+                try{ window.updateMemoCharCount && window.updateMemoCharCount(); }catch(e){}
+            });
+            left.appendChild(title);
+
+            const right = document.createElement('div');
+            right.className = 'card-head-right memo-card-head-right card-badges';
+            const lenBadge = document.createElement('span');
+            lenBadge.className = 'card-badge';
+            lenBadge.textContent = `${(tab.content || '').length}字`;
+            right.appendChild(lenBadge);
+
+            head.appendChild(left);
+            head.appendChild(right);
+            card.appendChild(head);
+
+            // ===== Body =====
+            const content = document.createElement('textarea');
+            content.className = 'memo-card-content';
+            content.value = tab.content || '';
+            content.placeholder = 'ここに入力...';
+            content.addEventListener('focus', () => {
+                activeMemoTabId = tab.id;
+                try{ renderMemoTabs(); }catch(e){}
+                try{ syncActiveMemoCardUI(false); }catch(e){}
+                try{ window.updateMemoCharCount && window.updateMemoCharCount(); }catch(e){}
+            });
+            content.addEventListener('input', () => {
+                tab.content = content.value;
+                activeMemoTabId = tab.id;
+                lenBadge.textContent = `${(tab.content || '').length}字`;
+                try{ saveMemoTabs(); }catch(e){}
+                try{ window.updateMemoCharCount && window.updateMemoCharCount(); }catch(e){}
+            });
+            card.appendChild(content);
+
+            // ===== Actions =====
+            const actions = document.createElement('div');
+            actions.className = 'card-actions memo-card-actions';
+            actions.innerHTML = `
+                <button onclick="event.stopPropagation(); showMemoCardView(${tab.id})">👁 閲覧</button>
+                <button onclick="event.stopPropagation(); focusMemoCard(${tab.id})">✏️ 編集</button>
+                <button onclick="event.stopPropagation(); duplicateMemoTab(${tab.id})">📋 複製</button>
+                <button onclick="event.stopPropagation(); openMemoEditModal(${tab.id}, true)">⛶ 全画面</button>
+                <button class="btn-delete" onclick="event.stopPropagation(); deleteMemoTab(${tab.id}); try{renderMemoCards();}catch(e){}">🗑 削除</button>
+            `;
+            card.appendChild(actions);
+
+            // Clicking card selects it (タブ/カードの同期)
+            card.addEventListener('click', () => {
+                activeMemoTabId = tab.id;
+                try{ renderMemoTabs(); }catch(e){}
+                try{ syncActiveMemoCardUI(false); }catch(e){}
+                try{ window.updateMemoCharCount && window.updateMemoCharCount(); }catch(e){}
+            });
+
+            list.appendChild(card);
+        });
+
+        try{ syncActiveMemoCardUI(false); }catch(e){}
+    }
+
+    // Active card highlight + optional scroll (tabs ⇄ cards)
+    function syncActiveMemoCardUI(scrollTo){
+        const list = document.getElementById('memo-cards-list');
+        if (!list) return;
+        const cards = list.querySelectorAll('.memo-card');
+        cards.forEach(c => {
+            const id = Number(c.dataset.id);
+            c.classList.toggle('active', id === Number(activeMemoTabId));
+        });
+        if (scrollTo) {
+            const active = list.querySelector(`.memo-card[data-id="${activeMemoTabId}"]`);
+            if (active) {
+                try{ active.scrollIntoView({block:'nearest'}); }catch(e){}
+            }
+        }
+    }
+    window.syncActiveMemoCardUI = syncActiveMemoCardUI;
+
+    // Focus helper for memo card "編集"
+    window.focusMemoCard = function(tabId){
+        try{ toggleMemoPanel && toggleMemoPanel(); }catch(e){}
+        const mode = window.__ccGetMemoViewMode ? window.__ccGetMemoViewMode() : 'tabs';
+        if (mode !== 'cards') {
+            try{ window.__ccSetMemoViewMode && window.__ccSetMemoViewMode('cards'); }catch(e){}
+            try{ applyMemoViewMode(); }catch(e){}
+        }
+        const ta = document.querySelector(`#memo-cards-list .memo-card[data-id="${tabId}"] textarea`);
+        if (ta) {
+            try{ ta.scrollIntoView({block:'center'}); }catch(e){}
+            setTimeout(()=>{ try{ ta.focus(); }catch(e){} }, 0);
+        } else {
+            // fallback: tabs mode focus
+            try{ switchMemoTab && switchMemoTab(tabId); }catch(e){}
+            const memoAreaEl = document.getElementById('memo-area');
+            if (memoAreaEl) setTimeout(()=>{ try{ memoAreaEl.focus(); }catch(e){} }, 0);
+        }
+    };
+
+    // Memo card view (align with other panels' "👁 閲覧")
+    window.showMemoCardView = function(tabId){
+        const tab = (Array.isArray(memoTabs) ? memoTabs : []).find(t => t.id === tabId);
+        if (!tab) return;
+
+        const modal = document.getElementById('card-view-modal');
+        const titleEl = document.getElementById('card-view-title');
+        const body = document.getElementById('card-view-body');
+        if (!modal || !titleEl || !body) return;
+
+        modal.dataset.cardId = String(tabId);
+        modal.dataset.panelType = 'memo';
+        if (typeof window.applyCardViewPanelTheme === 'function') window.applyCardViewPanelTheme('memo');
+        titleEl.textContent = tab.name || '（無題）';
+
+        const safe = (window.escapeHtmlView ? window.escapeHtmlView(tab.content || '') : String(tab.content || '').replace(/[&<>"']/g, s=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[s])));
+        const html = `
+          <div class="card-view-section">
+            <div class="card-view-section-title">本文</div>
+            <div class="card-view-section-content">${safe.replace(/\n/g,'<br>')}</div>
+          </div>
+        `;
+        body.innerHTML = html;
+        modal.classList.add('show');
+    };
+
+function applyMemoViewMode(){
+        const mode = window.__ccGetMemoViewMode ? window.__ccGetMemoViewMode() : 'cards';
+        const tabsWrap = document.getElementById('memo-tabs-wrap');
+        const memoAreaEl = document.getElementById('memo-area');
+        const cardsWrap = document.getElementById('memo-cards-wrap');
+
+        if (mode === 'tabs') {
+            if (tabsWrap) tabsWrap.style.display = 'flex';
+            if (memoAreaEl) memoAreaEl.style.display = 'block';
+            if (cardsWrap) cardsWrap.style.display = 'none';
+
+            try{ renderMemoTabs && renderMemoTabs(); }catch(e){}
+            try{ updateTabScrollButtonsFor && updateTabScrollButtonsFor('memo-tabs-container'); }catch(e){}
+
+            // Hide delete menu (B)
+            const delBtn = document.querySelector('button[data-action="delete-menu"][data-pane-id="memo-panel"]');
+            if (delBtn) delBtn.style.display = 'none';
+
+            // If no memos, show a gentle placeholder
+            if (memoAreaEl && (!Array.isArray(memoTabs) || memoTabs.length === 0)) {
+                memoAreaEl.value = '';
+                memoAreaEl.placeholder = '＋でメモを追加';
+            }
+        } else {
+            if (tabsWrap) tabsWrap.style.display = 'none';
+            if (memoAreaEl) memoAreaEl.style.display = 'none';
+            if (cardsWrap) cardsWrap.style.display = 'block';
+
+            try{ renderMemoCards && renderMemoCards(); }catch(e){}
+
+            // Show delete menu
+            const delBtn = document.querySelector('button[data-action="delete-menu"][data-pane-id="memo-panel"]');
+            if (delBtn) delBtn.style.display = '';
+        }
+
+        // Update toggle label in the "expand-all" slot: cards -> タブ, tabs -> カード
+        const toggleBtn = document.getElementById('btn-memo-view-toggle') || document.querySelector('button[data-action="expand-all"][data-pane-id="memo-panel"]');
+        if (toggleBtn) toggleBtn.textContent = (mode === 'cards') ? 'タブ' : 'カード';
+
+        try{ window.updateMemoCharCount && window.updateMemoCharCount(); }catch(e){}
+    }
+
+    window.applyMemoViewMode = applyMemoViewMode;
+
+    window.toggleMemoViewMode = function(){
+        const cur = (window.__ccGetMemoViewMode ? window.__ccGetMemoViewMode() : 'cards');
+        // Leaving tabs: persist textarea into active memo
+        if (cur === 'tabs') { try{ window.saveMemoTabs && window.saveMemoTabs(); }catch(e){} }
+        const next = (cur === 'tabs') ? 'cards' : 'tabs';
+        try{ window.__ccSetMemoViewMode && window.__ccSetMemoViewMode(next); }catch(e){ console.error(e); }
+        try{ if (typeof ensureMemoPanelOpenAndFront === 'function') ensureMemoPanelOpenAndFront(); }catch(e){}
+        if (next === 'tabs') {
+            setTimeout(()=>{ const ta = document.getElementById('memo-area'); if (ta) { try{ ta.focus(); }catch(e){} } }, 0);
+        }
+    };
+
+    // Memo char count: override to support cards view
+    window.updateMemoCharCount = function(){
+        const countEl = document.getElementById('memo-char-count');
+        if (!countEl) return;
+
+        if (window.__ccIsMemoCardMode && window.__ccIsMemoCardMode()) {
+            const total = memoTabs.reduce((s,t)=> s + ((t && t.content) ? t.content.length : 0), 0);
+            const active = memoTabs.find(t => t && t.id === activeMemoTabId);
+            if (active) {
+                countEl.innerText = `合計:${total}字 / 選択:${(active.content||'').length}字`;
+            } else {
+                countEl.innerText = `合計:${total}字`;
+            }
+            return;
+        }
+
+        const memoArea = document.getElementById('memo-area');
+        if (memoArea) countEl.innerText = memoArea.value.length + '字';
     };
 
     let outlineData = [];
@@ -16085,7 +16867,9 @@ function bulkResetCardsBgColor(paneId){
 
     // Ctrl+Alt+F -> nav search
     document.addEventListener('keydown', (e)=>{
-      if (e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && (e.key==='f' || e.key==='F')){
+      const __api = window.__ccShortcutAPI;
+      const __combo = (__api && __api.getShortcuts ? (__api.getShortcuts().searchPanel) : null) || 'Ctrl+Alt+F';
+      if ((__api && __api.matchesEvent) ? __api.matchesEvent(e, __combo) : (e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && (e.key==='f' || e.key==='F'))){
         e.preventDefault();
         e.stopImmediatePropagation();
         openNavTab('search');
@@ -16567,7 +17351,9 @@ function bulkResetCardsBgColor(paneId){
 
     // Ctrl+Alt+F -> search panel
     document.addEventListener('keydown', (e)=>{
-      if (e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && (e.key==='f' || e.key==='F')){
+      const __api = window.__ccShortcutAPI;
+      const __combo = (__api && __api.getShortcuts ? (__api.getShortcuts().searchPanel) : null) || 'Ctrl+Alt+F';
+      if ((__api && __api.matchesEvent) ? __api.matchesEvent(e, __combo) : (e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && (e.key==='f' || e.key==='F'))){
         e.preventDefault();
         e.stopImmediatePropagation();
         toggleSearchPanel();
@@ -18893,6 +19679,21 @@ function openStructureCardColorPicker(cardId, anchorEl){
       openWorldEditModal(cardId);
     } else if (panelType === 'terms' && typeof window.openTermEditModal === 'function') {
       window.openTermEditModal(cardId);
+    } else if (panelType === 'memo') {
+      try{ toggleMemoPanel && toggleMemoPanel(); }catch(e){}
+      // If memo is in tab-mode, switch tab and focus textarea; if card-mode, focus card textarea
+      setTimeout(() => {
+        const mode = window.__ccGetMemoViewMode ? window.__ccGetMemoViewMode() : 'tabs';
+        if (mode === 'cards') {
+          const ta = document.querySelector(`#memo-cards-list .memo-card[data-id="${cardId}"] textarea`);
+          if (ta) { try{ ta.scrollIntoView({block:'center'}); }catch(e){}; try{ ta.focus(); }catch(e){}; return; }
+          try{ window.focusMemoCard && window.focusMemoCard(cardId); }catch(e){}
+        } else {
+          try{ switchMemoTab && switchMemoTab(cardId); }catch(e){}
+          const memoAreaEl = document.getElementById('memo-area');
+          if (memoAreaEl) { try{ memoAreaEl.focus(); }catch(e){}; }
+        }
+      }, 0);
     }
   };
 
@@ -25479,13 +26280,19 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     'memo-panel': {
       key: 'memo',
-      supportsCards: false,
+      supportsCards: true,
+      actions: {
+        newCard: () => window.addNewMemoCard?.(),
+        deleteSelected: () => window.deleteSelectedMemoCards?.(),
+        deleteAll: () => window.deleteAllMemoCards?.(),
+        fullscreen: () => window.openMemoEditModal?.(window.activeMemoTabId, true),
+      },
       data: {
         get: () => { try{ window.loadMemoTabs?.(); }catch(e){} return window.memoTabs || []; },
         save: () => window.saveMemoTabs?.(),
-        render: () => window.renderMemoTabs?.(),
+        render: () => window.renderMemoCards?.(),
       }
-    },
+},
     'outline-panel': {
       key: 'outline',
       supportsCards: false,
@@ -25549,7 +26356,22 @@ document.addEventListener('DOMContentLoaded', () => {
       for(const spec of STANDARD_TOOLBAR){
         if (spec.action === 'refresh' && paneId !== 'outline-panel') continue; // 更新は目次(=outline)のみ
 
-        {
+        // Memo: replace 「全展開」 with view-mode toggle (タブ/カード)
+        if (paneId === 'memo-panel' && spec.action === 'expand-all') {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = spec.cls || 'btn btn-lite';
+          const mode = (window.__ccGetMemoViewMode ? window.__ccGetMemoViewMode() : 'cards');
+          b.textContent = (mode === 'cards') ? 'タブ' : 'カード';
+          b.dataset.action = 'expand-all';
+          b.dataset.paneId = paneId;
+          b.id = 'btn-memo-view-toggle';
+          b.title = '表示切替（タブ/カード）';
+          bar.appendChild(b);
+          continue;
+        }
+
+{
           const fn = toolbarActionToFn(conf, spec.action);
           if (spec.action === 'delete-menu') {
             if (typeof conf?.actions?.deleteSelected !== 'function' && typeof conf?.actions?.deleteAll !== 'function') continue;
@@ -25765,19 +26587,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function handleToolbarClick(ev){
-    const btn = ev.target.closest('button[data-action][data-pane-id]');
+    const btn = ev.target.closest('.panel-toolbar button[data-action], .panel-toolbar .btn[data-action]');
     if(!btn) return;
     // Important: stop propagation early so global "outside click" closers do not fold panels.
     ev.preventDefault();
     ev.stopPropagation();
-    const paneId = btn.dataset.paneId;
+    let paneId = btn.dataset.paneId;
+    if(!paneId){
+      const p = btn.closest('.control-panel');
+      paneId = p ? p.id : '';
+    }
     const conf = getPaneConf(paneId);
+    // In normal cases toolbar buttons belong to a registered pane.
     if(!conf) return;
 
     const action = btn.dataset.action;
 
     // 「全展開」ボタンは、最大展開ではなく「展開レベル選択メニュー」を開く
     if (action === 'expand-all') {
+      // Memo: no expand/collapse; use this slot as view-mode toggle
+      if (paneId === 'memo-panel') {
+        try{ window.toggleMemoViewMode && window.toggleMemoViewMode(); }catch(e){ console.error(e); }
+        return;
+      }
       showBulkExpandMenu(ev, paneId);
       return;
     }
@@ -25793,6 +26625,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.addEventListener('DOMContentLoaded', ()=>{
     generateToolbars();
+    // Memo: ensure view-mode UI is synced after toolbars are generated
+    setTimeout(()=>{ try{ if (typeof window.__ccSetMemoViewMode === 'function') window.__ccSetMemoViewMode(window.__ccGetMemoViewMode ? window.__ccGetMemoViewMode() : 'cards'); }catch(e){} }, 0);
     // Bind in *window capture* so we can stop propagation before other document-level closers run.
     window.addEventListener('click', handleToolbarClick, true);
     if (typeof window.applyPanelOrderOverrides === 'function') window.applyPanelOrderOverrides();
@@ -27081,5 +27915,707 @@ bindResize('cc-resize-sw', 'sw');
 })();
 </script>
 
+
+<script>
+/* ===== v1.189: App icon from folder + shortcut editor (draggable/resizable) ===== */
+(function(){
+  function $(id){ return document.getElementById(id); }
+
+  // App icon image fallback handling
+  function initAppIconImage(){
+    const btn = $('app-icon');
+    if (!btn) return;
+    const img = btn.querySelector('img.app-icon-img');
+    if (!img) { btn.classList.add('no-img'); return; }
+    // Default: assume image exists; toggle classes after load/error
+    btn.classList.remove('no-img'); btn.classList.remove('has-img');
+    const onLoad = ()=>{ btn.classList.add('has-img'); btn.classList.remove('no-img'); };
+    const onErr = ()=>{ btn.classList.add('no-img'); btn.classList.remove('has-img'); };
+    img.addEventListener('load', onLoad, { once:true });
+    img.addEventListener('error', onErr, { once:true });
+    // If already cached
+    if (img.complete && img.naturalWidth > 0) onLoad();
+    else if (img.complete && img.naturalWidth === 0) onErr();
+  }
+
+  // --- Shortcut manager (customizable via localStorage) ---
+  const SHORTCUTS_KEY = 'cc_editor_shortcuts';
+  const DEFAULT_SHORTCUTS = {
+    searchPanel: 'Ctrl+Alt+F',
+    rubyDialog: 'Ctrl+Alt+R',
+    saveDialog: 'Ctrl+Alt+S',
+    jumpLine: 'Ctrl+Alt+G',
+    newTab: 'Ctrl+Alt+N',
+    newMemoTab: 'Ctrl+Alt+M',
+    syncPreview: 'Ctrl+Alt+Enter',
+    focusToggle: 'Ctrl+Alt+L',
+    readerView: 'Ctrl+Alt+V',
+    analysis: 'Ctrl+Alt+A',
+    helpPanel: 'Ctrl+Alt+H'
+  };
+
+  function normalizeKeyName(k){
+    if (!k) return '';
+    if (k === ' ') return 'Space';
+    if (k.length === 1) return k.toUpperCase();
+    // Normalize common names
+    if (k === 'Esc') return 'Escape';
+    return k[0].toUpperCase() + k.slice(1);
+  }
+
+  function normalizeShortcutString(str){
+    if (!str) return '';
+    const parts = String(str).split('+').map(s=>s.trim()).filter(Boolean);
+    const mods = [];
+    let key = '';
+    for (const p of parts){
+      const up = p.toLowerCase();
+      if (up === 'ctrl' || up === 'control') mods.push('Ctrl');
+      else if (up === 'alt' || up === 'option') mods.push('Alt');
+      else if (up === 'shift') mods.push('Shift');
+      else if (up === 'meta' || up === 'cmd' || up === 'command' || up === 'win') mods.push('Meta');
+      else key = p;
+    }
+    const order = ['Ctrl','Alt','Shift','Meta'];
+    const modsOrdered = order.filter(m=>mods.includes(m));
+    const keyNorm = normalizeKeyName(key);
+    return (modsOrdered.concat(keyNorm ? [keyNorm] : [])).join('+');
+  }
+
+  function getShortcuts(){
+    try{
+      const raw = localStorage.getItem(SHORTCUTS_KEY);
+      const obj = raw ? JSON.parse(raw) : {};
+      // Auto-fix browser-reserved shortcuts for tab creation (Chrome may steal Ctrl+N / Ctrl+Shift+N).
+      try{
+        let changed = false;
+        const nt  = normalizeShortcutString(obj.newTab || '');
+        const nmt = normalizeShortcutString(obj.newMemoTab || '');
+        if (nt === 'Ctrl+N' || nt === 'Ctrl+Shift+N') { obj.newTab = DEFAULT_SHORTCUTS.newTab; changed = true; }
+        if (nmt === 'Ctrl+Shift+N' || nmt === 'Ctrl+N') { obj.newMemoTab = DEFAULT_SHORTCUTS.newMemoTab; changed = true; }
+        if (changed) localStorage.setItem(SHORTCUTS_KEY, JSON.stringify(obj));
+      }catch(e){}
+      return {
+        searchPanel: normalizeShortcutString(obj.searchPanel || DEFAULT_SHORTCUTS.searchPanel),
+        rubyDialog: normalizeShortcutString(obj.rubyDialog || DEFAULT_SHORTCUTS.rubyDialog),
+        saveDialog: normalizeShortcutString(obj.saveDialog || DEFAULT_SHORTCUTS.saveDialog),
+        jumpLine: normalizeShortcutString(obj.jumpLine || DEFAULT_SHORTCUTS.jumpLine),
+        newTab: normalizeShortcutString(obj.newTab || DEFAULT_SHORTCUTS.newTab),
+        newMemoTab: normalizeShortcutString(obj.newMemoTab || DEFAULT_SHORTCUTS.newMemoTab),
+        syncPreview: normalizeShortcutString(obj.syncPreview || DEFAULT_SHORTCUTS.syncPreview),
+        focusToggle: normalizeShortcutString(obj.focusToggle || DEFAULT_SHORTCUTS.focusToggle),
+        readerView: normalizeShortcutString(obj.readerView || DEFAULT_SHORTCUTS.readerView),
+        analysis: normalizeShortcutString(obj.analysis || DEFAULT_SHORTCUTS.analysis),
+        helpPanel: normalizeShortcutString(obj.helpPanel || DEFAULT_SHORTCUTS.helpPanel),
+      };
+    }catch(e){
+      return { ...DEFAULT_SHORTCUTS };
+    }
+  }
+
+  function setShortcuts(next){
+    const payload = {
+      searchPanel: normalizeShortcutString(next.searchPanel || DEFAULT_SHORTCUTS.searchPanel),
+      rubyDialog: normalizeShortcutString(next.rubyDialog || DEFAULT_SHORTCUTS.rubyDialog),
+      saveDialog: normalizeShortcutString(next.saveDialog || DEFAULT_SHORTCUTS.saveDialog),
+      jumpLine: normalizeShortcutString(next.jumpLine || DEFAULT_SHORTCUTS.jumpLine),
+      newTab: normalizeShortcutString(next.newTab || DEFAULT_SHORTCUTS.newTab),
+      newMemoTab: normalizeShortcutString(next.newMemoTab || DEFAULT_SHORTCUTS.newMemoTab),
+      syncPreview: normalizeShortcutString(next.syncPreview || DEFAULT_SHORTCUTS.syncPreview),
+      focusToggle: normalizeShortcutString(next.focusToggle || DEFAULT_SHORTCUTS.focusToggle),
+      readerView: normalizeShortcutString(next.readerView || DEFAULT_SHORTCUTS.readerView),
+      analysis: normalizeShortcutString(next.analysis || DEFAULT_SHORTCUTS.analysis),
+      helpPanel: normalizeShortcutString(next.helpPanel || DEFAULT_SHORTCUTS.helpPanel),
+    };
+    localStorage.setItem(SHORTCUTS_KEY, JSON.stringify(payload));
+    // Update data-shortcut display if present
+    try{
+      const btnRuby = document.querySelector('.qip-ruby-dialog');
+      if (btnRuby) btnRuby.dataset.shortcut = payload.rubyDialog;
+      // Search button lives in ribbon, so leave as-is (display only)
+    }catch(_){}
+  }
+
+  function eventToShortcutString(e){
+    // ignore pure modifier presses
+    if (e.key === 'Control' || e.key === 'Shift' || e.key === 'Alt' || e.key === 'Meta') return '';
+    const parts = [];
+    if (e.ctrlKey) parts.push('Ctrl');
+    if (e.altKey) parts.push('Alt');
+    if (e.shiftKey) parts.push('Shift');
+    if (e.metaKey) parts.push('Meta');
+    parts.push(normalizeKeyName(e.key));
+    return parts.join('+');
+  }
+
+  function matches(e, comboStr){
+    const a = eventToShortcutString(e);
+    if (!a) return false;
+    return a === normalizeShortcutString(comboStr);
+  }
+
+  function anyModalOpen(){
+    const anyModal = document.querySelector('.modal-overlay.show');
+    return !!anyModal;
+  }
+
+  function doSearchPanel(){
+    // Prefer NAV tab mode if available
+    if (typeof window.openNavTab === 'function') window.openNavTab('search');
+    else if (typeof window.toggleSearchPanel === 'function') window.toggleSearchPanel();
+    else if (typeof toggleSearchPanel === 'function') toggleSearchPanel();
+  }
+
+  function doRubyDialog(){
+    if (typeof window.openRubyInsertDialog === 'function') window.openRubyInsertDialog();
+    else if (typeof openRubyInsertDialog === 'function') openRubyInsertDialog();
+  }
+
+  // Capture-phase interceptor:
+  // - If user changed shortcuts, prevent the old default shortcuts from firing (existing hard-coded listeners)
+  // - Fire the new shortcuts
+  function initShortcutInterceptor(){
+    document.addEventListener('keydown', (e)=>{
+      // Don't hijack while typing in shortcut editor capture or other modal
+      if (anyModalOpen() && !document.body.classList.contains('cc-shortcut-capture')) return;
+
+      const sc = getShortcuts();
+
+      // If a shortcut was changed, neutralize the old default combo so it doesn't fire elsewhere.
+      for (const k of Object.keys(DEFAULT_SHORTCUTS)){
+        try{
+          if (sc[k] && sc[k] !== DEFAULT_SHORTCUTS[k] && matches(e, DEFAULT_SHORTCUTS[k])){
+            e.preventDefault(); e.stopImmediatePropagation(); return;
+          }
+        }catch(_){}
+      }
+
+      // --- Actions ---
+      if (matches(e, sc.searchPanel)){
+        e.preventDefault(); e.stopImmediatePropagation();
+        try{ openNavTab('search'); }catch(_){ try{ togglePanel('search-bar'); }catch(__){} }
+        return;
+      }
+
+      if (matches(e, sc.rubyDialog)){
+        const ia = document.getElementById('input-area');
+        const activeEl = document.activeElement;
+        if (activeEl !== ia && !(activeEl && activeEl.closest && activeEl.closest('#pane-input'))) return;
+        e.preventDefault(); e.stopImmediatePropagation();
+        try{ openRubyInsertDialog(); }catch(_){}
+        return;
+      }
+
+      if (matches(e, sc.saveDialog)){
+        e.preventDefault(); e.stopImmediatePropagation();
+        try{ showSaveDialog(); }catch(_){}
+        return;
+      }
+
+      if (matches(e, sc.jumpLine)){
+        e.preventDefault(); e.stopImmediatePropagation();
+        try{ showJumpDialog(); }catch(_){}
+        return;
+      }
+
+      if (matches(e, sc.newTab)){
+        e.preventDefault(); e.stopImmediatePropagation();
+        try{ addNewTab(); }catch(_){}
+        return;
+      }
+
+      if (matches(e, sc.newMemoTab)){
+        e.preventDefault(); e.stopImmediatePropagation();
+        try{ addNewMemoTab(); }catch(_){}
+        return;
+      }
+
+      if (matches(e, sc.syncPreview)){
+        e.preventDefault(); e.stopImmediatePropagation();
+        try{ syncPreviewPosition(); }catch(_){}
+        return;
+      }
+
+      if (matches(e, sc.focusToggle)){
+        e.preventDefault(); e.stopImmediatePropagation();
+        try{ toggleFocusMode(); }catch(_){}
+        return;
+      }
+
+      if (matches(e, sc.readerView)){
+        e.preventDefault(); e.stopImmediatePropagation();
+        try{ openReaderView(); }catch(_){}
+        return;
+      }
+
+      if (matches(e, sc.analysis)){
+        e.preventDefault(); e.stopImmediatePropagation();
+        try{ showAnalysis(); }catch(_){}
+        return;
+      }
+
+      if (matches(e, sc.helpPanel)){
+        e.preventDefault(); e.stopImmediatePropagation();
+        try{ togglePanel('help-bar'); }catch(_){}
+        return;
+      }
+    }, true);
+  }
+
+  // --- Hidden command (裏コマンド) on app icon click ---
+  function openHiddenCommandMenu(){
+    // small modal with 2 actions
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay show';
+    overlay.style.zIndex = 99999;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-content';
+    modal.style.maxWidth = '420px';
+    modal.style.width = 'min(420px, 92vw)';
+    modal.style.padding = '14px 14px 12px';
+
+    const header = document.createElement('div');
+    header.style.display = 'flex';
+    header.style.alignItems = 'center';
+    header.style.justifyContent = 'space-between';
+    header.style.gap = '10px';
+    header.style.marginBottom = '10px';
+
+    const title = document.createElement('div');
+    title.textContent = '裏コマンド';
+    title.style.fontWeight = '700';
+    title.style.fontSize = '15px';
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'icon-btn';
+    closeBtn.textContent = '×';
+    closeBtn.title = '閉じる';
+
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+
+    const body = document.createElement('div');
+    body.style.display = 'grid';
+    body.style.gap = '8px';
+
+    const btnShort = document.createElement('button');
+    btnShort.className = 'btn';
+    btnShort.textContent = '⌨ ショートカット変更';
+    btnShort.onclick = ()=>{ close(); openShortcutEditor(); };
+
+    const btnReset = document.createElement('button');
+    btnReset.className = 'btn';
+    btnReset.textContent = '🧨 全体初期化';
+    btnReset.onclick = ()=>{ close(); if (typeof confirmResetInput === 'function') confirmResetInput(); };
+
+    const hint = document.createElement('div');
+    hint.style.fontSize = '12px';
+    hint.style.color = 'var(--text-muted, #6b7280)';
+    hint.style.marginTop = '4px';
+    hint.textContent = '※誤爆防止のため、ここからしか開きません';
+
+    body.appendChild(btnShort);
+    body.appendChild(btnReset);
+    body.appendChild(hint);
+
+    modal.appendChild(header);
+    modal.appendChild(body);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    function close(){
+      try{
+        document.removeEventListener('keydown', onKey, true);
+        document.removeEventListener('mousedown', onDown, true);
+      }catch(_){}
+      overlay.remove();
+    }
+    function onKey(ev){
+      if (ev.key === 'Escape'){ ev.preventDefault(); ev.stopPropagation(); close(); }
+    }
+    function onDown(ev){
+      if (!modal.contains(ev.target)) close();
+    }
+    closeBtn.onclick = close;
+    document.addEventListener('keydown', onKey, true);
+    setTimeout(()=>document.addEventListener('mousedown', onDown, true), 0);
+  }
+
+  // --- Shortcut editor modal ---
+  function openShortcutEditor(){
+    const current = getShortcuts();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay show';
+    overlay.style.zIndex = 99999;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-content cc-shortcut-editor';
+    modal.style.width = 'min(720px, 92vw)';
+    modal.style.maxWidth = '92vw';
+    modal.style.maxHeight = '90vh';
+    modal.style.padding = '14px 14px 12px';
+    modal.style.resize = 'both';
+    modal.style.overflow = 'auto';
+    modal.style.position = 'fixed';
+    modal.style.left = '50%';
+    modal.style.top = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+
+    const header = document.createElement('div');
+    header.className = 'cc-shortcut-editor-header';
+    header.style.display = 'flex';
+    header.style.alignItems = 'center';
+    header.style.justifyContent = 'space-between';
+    header.style.gap = '12px';
+    header.style.marginBottom = '10px';
+    header.style.cursor = 'move';
+    header.title = 'ドラッグで移動 / 右下でサイズ変更';
+
+    const title = document.createElement('div');
+    title.textContent = 'ショートカット変更（裏）';
+    title.style.fontWeight = '700';
+    title.style.fontSize = '15px';
+
+    const hint = document.createElement('div');
+    hint.textContent = '「変更」→ 次のキー入力を登録（Escでキャンセル）';
+    hint.style.fontSize = '12px';
+    hint.style.color = 'var(--text-muted,#6b7280)';
+    hint.style.marginTop = '2px';
+
+    const titleWrap = document.createElement('div');
+    titleWrap.style.display = 'flex';
+    titleWrap.style.flexDirection = 'column';
+    titleWrap.appendChild(title);
+    titleWrap.appendChild(hint);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'btn';
+    closeBtn.textContent = '✕';
+    closeBtn.style.minWidth = '40px';
+
+    header.appendChild(titleWrap);
+    header.appendChild(closeBtn);
+
+    // Table grid
+    const table = document.createElement('div');
+    table.style.display = 'grid';
+    table.style.gridTemplateColumns = '1.35fr 1fr auto auto';
+    table.style.columnGap = '10px';
+    table.style.rowGap = '8px';
+    table.style.alignItems = 'center';
+    table.style.margin = '10px 0 12px';
+
+    function addRow(label, keyName, value){
+      const l = document.createElement('div'); l.textContent = label;
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.value = value || '';
+      inp.readOnly = true;
+      inp.style.padding = '7px 10px';
+      inp.style.border = '1px solid rgba(0,0,0,0.15)';
+      inp.style.borderRadius = '8px';
+      inp.style.background = 'rgba(255,255,255,0.6)';
+      inp.style.fontSize = '13px';
+
+      const btnChange = document.createElement('button');
+      btnChange.className = 'btn';
+      btnChange.textContent = '変更';
+
+      const btnReset = document.createElement('button');
+      btnReset.className = 'btn';
+      btnReset.textContent = 'リセット';
+
+      btnChange.onclick = ()=> captureShortcut(keyName, inp);
+      btnReset.onclick = ()=>{ inp.value = DEFAULT_SHORTCUTS[keyName] || ''; };
+
+      table.appendChild(l);
+      table.appendChild(inp);
+      table.appendChild(btnChange);
+      table.appendChild(btnReset);
+
+      return inp;
+    }
+
+    // header row labels
+    const h1=document.createElement('div'); h1.textContent='機能'; h1.style.fontSize='12px'; h1.style.color='var(--text-muted,#6b7280)';
+    const h2=document.createElement('div'); h2.textContent='キー'; h2.style.fontSize='12px'; h2.style.color='var(--text-muted,#6b7280)';
+    const h3=document.createElement('div'); h3.textContent=''; const h4=document.createElement('div'); h4.textContent='';
+    table.appendChild(h1); table.appendChild(h2); table.appendChild(h3); table.appendChild(h4);
+
+    const defs = [
+      { label:'検索（NAV/検索）', key:'searchPanel' },
+      { label:'ルビ入力（ダイアログ）', key:'rubyDialog' },
+      { label:'保存（保存形式ダイアログ）', key:'saveDialog' },
+      { label:'行番号ジャンプ', key:'jumpLine' },
+      { label:'新規本文タブ', key:'newTab' },
+      { label:'新規メモタブ', key:'newMemoTab' },
+      { label:'同期（入力→プレビュー）', key:'syncPreview' },
+      { label:'集中モード切替', key:'focusToggle' },
+      { label:'閲覧（全タブ）', key:'readerView' },
+      { label:'分析', key:'analysis' },
+      { label:'使い方パネル', key:'helpPanel' },
+    ];
+
+    const inputs = {};
+    defs.forEach(d=>{
+      inputs[d.key] = addRow(d.label, d.key, current[d.key] || DEFAULT_SHORTCUTS[d.key] || '');
+    });
+
+    const footer = document.createElement('div');
+    footer.style.display = 'flex';
+    footer.style.justifyContent = 'space-between';
+    footer.style.alignItems = 'center';
+    footer.style.gap = '10px';
+    footer.style.marginTop = '8px';
+
+    const left = document.createElement('div');
+    const btnClose = document.createElement('button');
+    btnClose.className = 'btn';
+    btnClose.textContent = '閉じる';
+    left.appendChild(btnClose);
+
+    const right = document.createElement('div');
+    right.style.display = 'flex';
+    right.style.gap = '10px';
+
+    const btnAllReset = document.createElement('button');
+    btnAllReset.className = 'btn';
+    btnAllReset.textContent = '全て初期化';
+    btnAllReset.onclick = ()=>{
+      defs.forEach(d=>{
+        if (inputs[d.key]) inputs[d.key].value = DEFAULT_SHORTCUTS[d.key] || '';
+      });
+    };
+
+    const btnSave = document.createElement('button');
+    btnSave.className = 'btn';
+    btnSave.textContent = '保存';
+    btnSave.onclick = ()=>{
+      const next = {};
+      defs.forEach(d=>{
+        next[d.key] = normalizeShortcutString((inputs[d.key] && inputs[d.key].value) || DEFAULT_SHORTCUTS[d.key] || '');
+      });
+      setShortcuts(next);
+      close();
+    };
+
+    right.appendChild(btnAllReset);
+    right.appendChild(btnSave);
+    footer.appendChild(left);
+    footer.appendChild(right);
+
+    modal.appendChild(header);
+    modal.appendChild(table);
+    modal.appendChild(footer);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Enable dragging by header
+    (function enableDrag(){
+      let dragging = false;
+      let sx = 0, sy = 0, ox = 0, oy = 0;
+
+      function clamp(val, min, max){ return Math.max(min, Math.min(max, val)); }
+
+      function onMove(ev){
+        if (!dragging) return;
+        const dx = ev.clientX - sx;
+        const dy = ev.clientY - sy;
+        const rect = modal.getBoundingClientRect();
+        const nw = rect.width;
+        const nh = rect.height;
+        const left = clamp(ox + dx, 8, window.innerWidth - nw - 8);
+        const top  = clamp(oy + dy, 8, window.innerHeight - nh - 8);
+        modal.style.left = `${left}px`;
+        modal.style.top  = `${top}px`;
+      }
+
+      function stop(){
+        dragging = false;
+        modal.classList.remove('cc-dragging');
+        document.removeEventListener('mousemove', onMove, true);
+      }
+
+      header.addEventListener('mousedown', (ev)=>{
+        if (ev.button !== 0) return;
+        if (ev.target.closest('button') || ev.target.closest('input') || ev.target.closest('select') || ev.target.closest('textarea')) return;
+
+        const rect = modal.getBoundingClientRect();
+        // Convert from center-transform to pixel positioning
+        modal.style.transform = 'none';
+        modal.style.left = `${rect.left}px`;
+        modal.style.top = `${rect.top}px`;
+
+        sx = ev.clientX; sy = ev.clientY;
+        ox = rect.left;  oy = rect.top;
+        dragging = true;
+        modal.classList.add('cc-dragging');
+
+        document.addEventListener('mousemove', onMove, true);
+        document.addEventListener('mouseup', ()=>{
+          stop();
+        }, { once:true, capture:true });
+
+        ev.preventDefault();
+        ev.stopPropagation();
+      }, true);
+    })();
+
+    function close(){
+      try{
+        document.removeEventListener('keydown', onKey, true);
+        document.removeEventListener('mousedown', onDown, true);
+      }catch(_){}
+      document.body.classList.remove('cc-shortcut-capture');
+      overlay.remove();
+    }
+
+    function onKey(ev){
+      if (ev.key === 'Escape'){ ev.preventDefault(); ev.stopPropagation(); close(); }
+    }
+    function onDown(ev){
+      if (!modal.contains(ev.target)) close();
+    }
+    closeBtn.onclick = close;
+    btnClose.onclick = close;
+    document.addEventListener('keydown', onKey, true);
+    setTimeout(()=>document.addEventListener('mousedown', onDown, true), 0);
+
+    function captureShortcut(keyName, inputEl){
+      // Capture next key press
+      inputEl.value = '（入力待ち…）';
+      document.body.classList.add('cc-shortcut-capture');
+
+      const handler = (ev)=>{
+        if (ev.key === 'Escape'){
+          ev.preventDefault(); ev.stopPropagation();
+          inputEl.value = getShortcuts()[keyName] || DEFAULT_SHORTCUTS[keyName] || '';
+          document.body.classList.remove('cc-shortcut-capture');
+          document.removeEventListener('keydown', handler, true);
+          return;
+        }
+        const combo = eventToShortcutString(ev);
+        if (!combo) return;
+        ev.preventDefault(); ev.stopPropagation();
+        inputEl.value = combo;
+        document.body.classList.remove('cc-shortcut-capture');
+        document.removeEventListener('keydown', handler, true);
+      };
+      document.addEventListener('keydown', handler, true);
+    }
+  }
+
+
+
+  function __ccRunActionSafe(fn){
+    try{ if (typeof fn === 'function') fn(); }catch(e){}
+  }
+
+  function installShortcutBindings(){
+    if (window.__ccInstalledShortcutBindings) return;
+    window.__ccInstalledShortcutBindings = true;
+
+    document.addEventListener('keydown', function(e){
+      if (document.body.classList.contains('cc-shortcut-capture')) return;
+
+      const __api = window.__ccShortcutAPI;
+      if (!__api || !__api.getShortcuts || !__api.matchesEvent) return;
+
+      const sc = __api.getShortcuts();
+
+      const actions = [
+        { key:'searchPanel', run: ()=>{
+            if (typeof window.openNavTab === 'function') window.openNavTab('search');
+            else if (typeof window.toggleSearchPanel === 'function') window.toggleSearchPanel();
+            else {
+              const btn = document.getElementById('btn-toggle-search');
+              if (btn) btn.click();
+            }
+          }
+        },
+        { key:'rubyDialog', run: ()=> __ccRunActionSafe(window.openRubyInsertDialog) },
+        { key:'saveDialog', run: ()=> __ccRunActionSafe(window.showSaveDialog) },
+        { key:'jumpLine', run: ()=> __ccRunActionSafe(window.showJumpDialog) },
+        { key:'newTab', run: ()=> __ccRunActionSafe(window.addNewTab) },
+        { key:'newMemoTab', run: ()=> __ccRunActionSafe(window.addNewMemoTab) },
+        { key:'syncPreview', run: ()=> __ccRunActionSafe(window.syncPreviewPosition) },
+        { key:'focusToggle', run: ()=> __ccRunActionSafe(window.toggleFocusMode) },
+        { key:'readerView', run: ()=> __ccRunActionSafe(window.openReaderView) },
+        { key:'analysis', run: ()=> __ccRunActionSafe(window.showAnalysis) },
+        { key:'helpPanel', run: ()=>{
+            if (typeof window.togglePanel === 'function') window.togglePanel('help-bar');
+            else {
+              const btn = document.getElementById('btn-toggle-help');
+              if (btn) btn.click();
+            }
+          }
+        },
+      ];
+
+      // 1) Run configured shortcut
+      for (const a of actions){
+        const combo = sc[a.key];
+        if (combo && __api.matchesEvent(e, combo)){
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          e.stopPropagation();
+          a.run();
+          return;
+        }
+      }
+
+      // 2) Suppress old defaults if user changed away (prevents legacy fixed handlers from firing)
+      for (const a of actions){
+        const def = DEFAULT_SHORTCUTS[a.key];
+        if (!def) continue;
+        const cur = sc[a.key] || def;
+        if (__api.normalize(cur) !== __api.normalize(def) && __api.matchesEvent(e, def)){
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          e.stopPropagation();
+          return;
+        }
+      }
+    }, true);
+  }
+
+  // Expose minimal API for existing key handlers (so we can remap without editing many places)
+  window.__ccShortcutAPI = {
+    getShortcuts: getShortcuts,
+    setShortcuts: setShortcuts,
+    defaults: DEFAULT_SHORTCUTS,
+    normalize: normalizeShortcutString,
+    eventToString: eventToShortcutString,
+    matchesEvent: function(e, combo){ return eventToShortcutString(e) === normalizeShortcutString(combo); }
+  };
+
+
+  try{ initShortcutInterceptor(); }catch(e){}
+
+
+  // Expose shortcut editor for app menu
+  window.__ccOpenShortcutEditor = openShortcutEditor;
+
+  function initHiddenCommandHook(){
+    // v1.189: app icon click opens the standard app-context-menu.
+    // Keep this hook as a no-op to avoid double menus.
+  }
+
+  // Init after DOM is ready (file is large, be safe)
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ()=>{
+      initAppIconImage();
+      initHiddenCommandHook();
+      installShortcutBindings();
+    });
+  } else {
+    initAppIconImage();
+    initHiddenCommandHook();
+    installShortcutBindings();
+  }
+})();
+</script>
 </body>
 </html>
