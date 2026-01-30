@@ -3,10 +3,10 @@
 <head>
 <script>(function(){try{document.documentElement.classList.add('cc-boot');}catch(e){}})();</script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.11</title>
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ⓒエディタ v1.16</title>
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
@@ -1140,6 +1140,19 @@ background: transparent;
     .selection-tool-window.icon-only .selection-tool-body button .btn-icon{
         line-height: 1;
     }
+    /* Footer embed: make icon-only selection tool compact so footer heights match */
+    .selection-tool-window.icon-only.in-footer .selection-tool-body{
+        gap: 2px;
+        padding: 0;
+    }
+    .selection-tool-window.icon-only.in-footer .selection-tool-body button{
+        width: 18px;
+        height: 18px;
+        padding: 0;
+        font-size: 0.6rem;
+        border-radius: 4px;
+    }
+
     .selection-tool-body button:disabled{
         opacity: 0.5;
         cursor: not-allowed;
@@ -5527,9 +5540,9 @@ body.theme-dark{
     <div class="ribbon-row">
         <div class="ribbon-left">
             <button class="app-icon" id="app-icon" title="アプリメニュー">
-                <img src="icons/favicon-32.png" alt="アプリアイコン">
+                <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.11</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.16</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -5647,17 +5660,18 @@ body.theme-dark{
             <button class="btn panel-toggle" id="btn-toggle-settings" onclick="togglePanel('settings-bar')" data-label="⚙️ 設定">
                 <span class="panel-label">⚙️ 設定</span><span class="panel-state-icon">▾</span>
             </button>
-            <div class="ribbon-settings-select">
-                <label for="settings-panel-selector">表示</label>
-                <select id="settings-panel-selector" aria-label="設定パネルを選択">
-                    <option value="display" selected>表示・外観</option>
-                    <option value="writing">執筆支援</option>
-                    <option value="layout">レイアウト</option>
-                    <option value="storage">保存・読込</option>
-                </select>
+            <span class="ribbon-separator">|</span>
+            <div class="ribbon-subgroup ribbon-tools-settingscats">
+                <span class="ribbon-group-label">設定</span>
+                <button class="btn btn-settings-cat" data-cat="font" onclick="openSettingsCategory('font')" title="入力/プレビューの文字・書字方向">フォント</button>
+                <button class="btn btn-settings-cat" data-cat="support" onclick="openSettingsCategory('support')" title="表示オプション / 執筆支援 / 目標・統計">支援</button>
+                <button class="btn btn-settings-cat" data-cat="paper" onclick="openSettingsCategory('paper')" title="用紙設定 / ペイン幅 / 縦並び高さ">用紙</button>
+                <button class="btn btn-settings-cat" data-cat="color" onclick="openSettingsCategory('color')" title="ペイン色（背景/ヘッダー）">カラー</button>
+                <button class="btn btn-settings-cat" data-cat="save" onclick="openSettingsCategory('save')" title="自動保存 / 読み込み / 設定移行">保存</button>
             </div>
         </div>
     </div>
+
     <div class="ribbon-section ribbon-extensions" data-section="extensions">
         <span class="ribbon-menu-item">🚧 開発中</span>
     </div>
@@ -5770,7 +5784,7 @@ body.theme-dark{
         <details class="settings-section is-active" data-panel="display" open>
             <summary>表示・外観</summary>
             <div class="settings-section-body">
-                <div class="setting-group">
+                <div class="setting-group" data-settings-cat="font">
                     <div class="setting-title">入力エリア <button class="btn btn-apply" onclick="applyInputSettings()">適用</button></div>
                     <div class="setting-row vertical">
                         <label>文字: <input type="number" id="st-in-size" value="17" min="10" max="60"></label>
@@ -5788,7 +5802,7 @@ body.theme-dark{
                     </div>
                 </div>
 
-                <div class="setting-group">
+                <div class="setting-group" data-settings-cat="font">
                     <div class="setting-title">プレビュー <button class="btn btn-apply" onclick="applyPreviewSettings()">適用</button></div>
                     <div class="setting-row vertical">
                         <label>文字: <input type="number" id="st-pv-size" value="17" min="10" max="60"></label>
@@ -5806,7 +5820,7 @@ body.theme-dark{
                     </div>
                 </div>
 
-                <div class="setting-group">
+                <div class="setting-group" data-settings-cat="support">
                     <div class="setting-title">表示オプション <button class="btn btn-apply" onclick="applyDisplaySettings()">適用</button></div>
                     <div class="setting-row">
                         <label><input type="checkbox" id="st-show-space" checked> スペース可視化</label>
@@ -5824,7 +5838,7 @@ body.theme-dark{
                     </div>
                 </div>
 
-                <div class="setting-group">
+                <div class="setting-group" data-settings-cat="paper">
                     <div class="setting-title">用紙設定 <button class="btn btn-apply" onclick="applyPaperSettings()">適用</button></div>
                     <div class="setting-row vertical">
                         <div>行: <input type="number" id="st-manuscript-rows" value="34" min="1" max="100" style="width:50px;"> ×文字: <input type="number" id="st-manuscript-cols" value="42" min="1" max="100" style="width:50px;"></div>
@@ -5867,7 +5881,7 @@ body.theme-dark{
         <details class="settings-section" data-panel="writing">
             <summary>執筆支援</summary>
             <div class="settings-section-body">
-                <div class="setting-group">
+                <div class="setting-group" data-settings-cat="support">
                     <div class="setting-title">執筆支援 <button class="btn btn-apply" onclick="applyWritingSettings()">適用</button></div>
                     <div class="setting-row vertical">
                         <label><input type="checkbox" id="st-typewriter-mode"> タイプライター</label>
@@ -5876,7 +5890,7 @@ body.theme-dark{
                     <div class="setting-row" id="writing-time-display" style="color: #8b5cf6; font-weight: bold;">執筆時間: 00:00:00</div>
                 </div>
 
-                <div class="setting-group">
+                <div class="setting-group" data-settings-cat="support">
                     <div class="setting-title">目標・統計 <button class="btn btn-apply" onclick="applyGoalSettings()">適用</button></div>
                     <div class="setting-row">
                         <label>全体目標: <input type="number" id="st-goal-chars" value="150000" min="0" max="999999" style="width:70px;"> 字</label>
@@ -5927,7 +5941,7 @@ body.theme-dark{
         <details class="settings-section" data-panel="layout">
             <summary>レイアウト</summary>
             <div class="settings-section-body">
-                <div class="setting-group">
+                <div class="setting-group" data-settings-cat="paper">
                     <div class="setting-title">ペイン幅 <button class="btn btn-apply" onclick="applyPaneWidthSettings()">適用</button></div>
                     <div class="setting-row vertical">
                         <label>入力: <input type="number" id="st-pane-input-width" value="520" min="120" max="3000" style="width:70px;">px</label>
@@ -5948,7 +5962,7 @@ body.theme-dark{
                         </div>
                 </div>
 
-                <div class="setting-group">
+                <div class="setting-group" data-settings-cat="paper">
                     <div class="setting-title">縦並び高さ <button class="btn btn-apply" onclick="applyPaneHeightSettings()">適用</button></div>
                     <div class="setting-row vertical">
                         <label>入力: <input type="number" id="st-pane-input-height" value="520" min="160" max="2000" style="width:70px;">px</label>
@@ -5964,7 +5978,7 @@ body.theme-dark{
         <details class="settings-section" data-panel="storage">
             <summary>保存・読込</summary>
             <div class="settings-section-body">
-                <div class="setting-group">
+                <div class="setting-group" data-settings-cat="save">
                     <div class="setting-title">開く <button class="btn btn-apply" onclick="applyOpenSettingsAndSave()">適用</button></div>
                     <div class="setting-row vertical">
                         <label><input type="radio" name="st-open-mode" value="current" checked > 現在のタブに開く</label>
@@ -5974,7 +5988,7 @@ body.theme-dark{
 
                 <!-- 目次抽出ルールは目次パネルの⚙ボタンから設定可能 -->
 
-                <div class="setting-group">
+                <div class="setting-group" data-settings-cat="save">
                     <div class="setting-title">保存 <button class="btn btn-apply" onclick="applyAutoSaveSettings()">適用</button></div>
                     <div class="setting-row vertical">
                         <label><input type="checkbox" id="st-autosave-enabled" onchange="applyAutoSaveSettings()"> 自動保存を有効にする</label>
@@ -5984,7 +5998,7 @@ body.theme-dark{
 
             </div>
         </details>
-        <div class="settings-actions">
+        <div class="settings-actions" data-settings-cat="save">
             <div class="settings-actions-row">
                 <div class="dropdown settings-dropdown">
                     <button class="btn settings-action-btn dropdown-btn" onclick="toggleDropdown('settings-transfer-dropdown')">📦 設定の移行</button>
@@ -6037,6 +6051,9 @@ body.theme-dark{
                             <span id="selection-tool-info" class="selection-tool-info">選択なし</span>
                         </div>
                         <div class="selection-tool-body">
+                            <button class="qip-ruby-dialog" data-requires-selection="false" onclick="openRubyInsertDialog()" aria-label="ルビ入力" data-desc="ルビ入力" data-shortcut="Ctrl+Alt+R">
+                                <span class="btn-icon" aria-hidden="true">✍</span><span class="btn-label">ルビ入力</span>
+                            </button>
                             <button class="qip-ruby" data-requires-selection="true" onclick="quickInsertRuby()" aria-label="ルビ">
                                 <span class="btn-icon" aria-hidden="true">🔤</span><span class="btn-label">ルビ</span>
                             </button>
@@ -7233,7 +7250,56 @@ initTabScrollers();
         if (typeof updatePanelButtonStates === 'function') updatePanelButtonStates();
     }
 
-    function initSettingsPanelSelector() {
+    
+// ===== 設定カテゴリ（ツールリボン） =====
+function filterSettingsBarByCategory(cat){
+    const bar = document.getElementById('settings-bar');
+    if (!bar) return;
+
+    // pane color block is injected by patches; make sure it has category tag
+    const paneColors = document.getElementById('cc-pane-colors-block');
+    if (paneColors && !paneColors.getAttribute('data-settings-cat')) paneColors.setAttribute('data-settings-cat', 'color');
+
+    // show/hide groups & blocks
+    const nodes = bar.querySelectorAll('.setting-group[data-settings-cat], .setting-block[data-settings-cat], .settings-actions[data-settings-cat]');
+    nodes.forEach(el => {
+        const c = el.getAttribute('data-settings-cat');
+        el.style.display = (c === cat) ? '' : 'none';
+    });
+
+    // sections: hide if empty
+    bar.querySelectorAll('.settings-section').forEach(sec => {
+        const hasVisible = Array.from(sec.querySelectorAll('.setting-group, .setting-block, .settings-actions'))
+            .some(el => el.style.display !== 'none');
+        sec.style.display = hasVisible ? '' : 'none';
+        if (hasVisible) sec.setAttribute('open','');
+    });
+
+    // scroll to top for clarity
+    try { bar.scrollTop = 0; } catch(e){}
+}
+
+function openSettingsCategory(cat){
+    // open settings panel without toggling pin state
+    if (typeof ensureSettingsPanelOpen === 'function') ensureSettingsPanelOpen();
+    const bar = document.getElementById('settings-bar');
+    if (!bar) return;
+
+    // If user opens カラー, ensure the block exists (it is usually injected at init, but safe)
+    if (cat === 'color') {
+        try { if (typeof buildPaneColorSettingsUI === 'function') buildPaneColorSettingsUI(); } catch(e){}
+        try { if (typeof bindPaneColorsApply === 'function') bindPaneColorsApply(); } catch(e){}
+    }
+
+    filterSettingsBarByCategory(cat);
+
+    // active state on ribbon buttons
+    document.querySelectorAll('.btn-settings-cat').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.cat === cat);
+    });
+}
+
+function initSettingsPanelSelector() {
         const selector = document.getElementById('settings-panel-selector');
         if (selector) {
             const selectorWrap = selector.closest('.ribbon-settings-select');
@@ -7884,7 +7950,7 @@ function addNewTab() {
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-        const defaultText = `　ⓒエディタ（使い方） v1.11
+        const defaultText = `　ⓒエディタ（使い方） v1.16
 
 ■ はじめに（最短で使い始める）
 
@@ -8763,6 +8829,209 @@ popupTop = Math.min(Math.max(popupTop, minTop), maxTop);
         if (selectionCountEl) selectionCountEl.textContent = infoText;
         selectionToolButtons.forEach(btn => { btn.disabled = !hasSelection; });
     }
+
+// ---------- Ruby Insert Dialog (cursor insert) ----------
+let __rubyInsertDialog = null;
+
+function closeRubyInsertDialog() {
+    if (!__rubyInsertDialog) return;
+    try { __rubyInsertDialog.overlay.remove(); } catch(e) {}
+    document.removeEventListener('keydown', __rubyInsertDialog.onKeyDown, true);
+    document.removeEventListener('mousedown', __rubyInsertDialog.onDocDown, true);
+    __rubyInsertDialog = null;
+}
+
+function insertRubyMarkupAtCursor(baseText, rubyText) {
+    const ia = window.inputArea || document.getElementById('input-area');
+    if (!ia) return;
+    const base = String(baseText || '');
+    const ruby = String(rubyText || '');
+    if (!base) return;
+
+    const start = ia.selectionStart ?? 0;
+    const end = ia.selectionEnd ?? start;
+    const before = ia.value.slice(0, start);
+    const after = ia.value.slice(end);
+
+    // Keep existing editor syntax: ｜本文《ルビ》
+    const markup = `｜${base}《${ruby}》`;
+    ia.value = before + markup + after;
+
+    const caret = before.length + markup.length;
+    ia.focus();
+    ia.setSelectionRange(caret, caret);
+
+    // Trigger the editor's normal update flow
+    try { ia.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {}
+    try { if (typeof updatePreview === 'function') updatePreview(); } catch(e) {}
+    try { if (typeof updateInputStats === 'function') updateInputStats(); } catch(e) {}
+}
+
+function openRubyInsertDialog() {
+    const ia = window.inputArea || document.getElementById('input-area');
+    if (!ia) return;
+
+    // If already open, just focus
+    if (__rubyInsertDialog && __rubyInsertDialog.baseInput) {
+        __rubyInsertDialog.baseInput.focus();
+        return;
+    }
+
+    const selStart = ia.selectionStart ?? 0;
+    const selEnd = ia.selectionEnd ?? selStart;
+    const selectedText = (selStart !== selEnd) ? ia.value.slice(selStart, selEnd) : '';
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay show';
+    overlay.style.zIndex = 99999;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-content';
+    modal.style.maxWidth = '520px';
+    modal.style.width = 'min(520px, 92vw)';
+    modal.style.padding = '16px 16px 14px';
+
+    const header = document.createElement('div');
+    header.style.display = 'flex';
+    header.style.alignItems = 'center';
+    header.style.justifyContent = 'space-between';
+    header.style.gap = '12px';
+    header.style.marginBottom = '10px';
+
+    const hTitle = document.createElement('div');
+    hTitle.textContent = 'ルビ入力';
+    hTitle.style.fontWeight = '700';
+    hTitle.style.fontSize = '16px';
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'icon-btn';
+    closeBtn.textContent = '×';
+    closeBtn.title = '閉じる';
+    closeBtn.onclick = closeRubyInsertDialog;
+
+    header.appendChild(hTitle);
+    header.appendChild(closeBtn);
+
+    const makeRow = (labelText) => {
+        const row = document.createElement('div');
+        row.style.display = 'grid';
+        row.style.gridTemplateColumns = '72px 1fr';
+        row.style.alignItems = 'center';
+        row.style.gap = '10px';
+        row.style.marginBottom = '10px';
+
+        const label = document.createElement('div');
+        label.textContent = labelText;
+        label.style.fontSize = '13px';
+        label.style.color = 'var(--text-muted, #6b7280)';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.style.width = '100%';
+        input.style.padding = '8px 10px';
+        input.style.border = '1px solid #e5e7eb';
+        input.style.borderRadius = '8px';
+
+        row.appendChild(label);
+        row.appendChild(input);
+        return { row, input };
+    };
+
+    // Order requested: ルビ → 文字
+    const rubyRow = makeRow('ルビ');
+    rubyRow.input.placeholder = '例：よみ';
+    const baseRow = makeRow('文字');
+    baseRow.input.placeholder = '例：漢字';
+    if (selectedText) baseRow.input.value = selectedText;
+
+    const hint = document.createElement('div');
+    hint.style.fontSize = '12px';
+    hint.style.color = 'var(--text-muted, #6b7280)';
+    hint.style.margin = '2px 0 12px';
+    hint.textContent = '挿入形式：｜文字《ルビ》  （選択中の文字があれば置換します）';
+
+    const footer = document.createElement('div');
+    footer.style.display = 'flex';
+    footer.style.justifyContent = 'flex-end';
+    footer.style.gap = '8px';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn';
+    cancelBtn.textContent = 'キャンセル';
+    cancelBtn.onclick = closeRubyInsertDialog;
+
+    const insertBtn = document.createElement('button');
+    insertBtn.className = 'btn';
+    insertBtn.textContent = '挿入';
+    insertBtn.onclick = () => {
+        const base = baseRow.input.value.trim();
+        const ruby = rubyRow.input.value.trim();
+        if (!base) {
+            alert('「文字」を入力してください。');
+            baseRow.input.focus();
+            return;
+        }
+        insertRubyMarkupAtCursor(base, ruby);
+        closeRubyInsertDialog();
+    };
+
+    footer.appendChild(cancelBtn);
+    footer.appendChild(insertBtn);
+
+    modal.appendChild(header);
+    modal.appendChild(rubyRow.row);
+    modal.appendChild(baseRow.row);
+    modal.appendChild(hint);
+    modal.appendChild(footer);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    const onKeyDown = (ev) => {
+        if (ev.key === 'Escape') {
+            ev.preventDefault();
+            ev.stopPropagation();
+            closeRubyInsertDialog();
+            return;
+        }
+        if (ev.key === 'Enter') {
+            // Avoid interfering with other Enter handlers
+            ev.preventDefault();
+            ev.stopPropagation();
+            insertBtn.click();
+        }
+    };
+    const onDocDown = (ev) => {
+        if (!modal.contains(ev.target)) closeRubyInsertDialog();
+    };
+    document.addEventListener('keydown', onKeyDown, true);
+    setTimeout(() => document.addEventListener('mousedown', onDocDown, true), 0);
+
+    __rubyInsertDialog = { overlay, modal, onKeyDown, onDocDown, baseInput: baseRow.input };
+
+    // Focus order: ruby first
+    rubyRow.input.focus();
+    if (selectedText) baseRow.input.select();
+}
+
+window.openRubyInsertDialog = openRubyInsertDialog;
+
+// Global shortcut: Ctrl+Alt+R (only in input pane)
+document.addEventListener('keydown', function(e) {
+    const isRubyShortcut = e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && (e.key === 'r' || e.key === 'R');
+    if (!isRubyShortcut) return;
+
+    const ia = document.getElementById('input-area');
+    const activeEl = document.activeElement;
+    if (activeEl !== ia && !(activeEl && activeEl.closest && activeEl.closest('#pane-input'))) return;
+
+    // If any modal overlay is already open, don't hijack
+    const anyModal = document.querySelector('.modal-overlay.show');
+    if (anyModal && !__rubyInsertDialog) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    openRubyInsertDialog();
+}, true);
 
     function quickInsertRuby() {
         const s = lastSelectionRange.start, e = lastSelectionRange.end;
@@ -13920,15 +14189,6 @@ function setupMemoInteractionGuard() {
   const escapeHtml = window.escapeHtml || ((s)=>String(s).replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])));
 
   // -----------------------------
-  // 1) Disable focus-mode overlay shortcuts (user request)
-  // -----------------------------
-  try {
-    // If function exists globally, make it no-op to avoid shortcut-triggered overlay.
-    if (typeof window.openFocusOverlay === 'function') {
-      window.openFocusOverlay = function(){ /* disabled */ };
-    }
-  } catch(e){}
-
   // -----------------------------
   // 2) "Open" behavior: remove dependency on Settings > Open
   //    - Always ask in modal
@@ -14352,7 +14612,8 @@ function applyPaneColors(colors){
 
     const block = document.createElement('div');
     block.className='setting-block';
-    block.id='cc-pane-colors-block';
+    block.setAttribute('data-settings-cat','color');
+      block.id='cc-pane-colors-block';
     block.innerHTML = `
       <div class="setting-title">ペイン色（背景/ヘッダー）
         <button class="btn btn-apply" id="cc-pane-colors-apply">適用</button>
@@ -15335,7 +15596,8 @@ function applyPaneColors(colors){
           // create block
           const block = document.createElement('div');
           block.className='setting-block';
-          block.id='cc-pane-colors-block';
+          block.setAttribute('data-settings-cat','color');
+      block.id='cc-pane-colors-block';
           block.innerHTML = `
             <div class="setting-title">ペイン色（背景/ヘッダー）
               <button class="btn btn-apply" id="cc-pane-colors-apply">適用</button>
