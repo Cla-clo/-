@@ -1615,22 +1615,8 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
         gap: 10px;
     }
 
-    #card-view-modal .cc-resize-se::after{
-        content: '';
-        position: absolute;
-        right: 6px;
-        bottom: 6px;
-        width: 10px;
-        height: 10px;
-        border-right: 2px solid rgba(107,114,128,0.55);
-        border-bottom: 2px solid rgba(107,114,128,0.55);
-        border-radius: 0 0 4px 0;
-        pointer-events: none;
-    }
-    body.theme-dark #card-view-modal .cc-resize-se::after{
-        border-right-color: rgba(156,163,175,0.55);
-        border-bottom-color: rgba(156,163,175,0.55);
-    }
+    /* resize grip indicator hidden for clean rounded corners */
+    #card-view-modal .cc-resize-se::after{ display: none; }
 
     /* While dragging/resizing: prevent text selection */
     html.cc-window-dragging, html.cc-window-resizing{
@@ -2507,7 +2493,7 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
         padding: 10px;
         font-size: 0.85rem;
     }
-    .terms-edit-field textarea{ resize: vertical; }
+    .terms-edit-field textarea{ resize: none; }
     .terms-edit-hint{ font-size: 0.7rem; color: var(--text-muted); }
     .terms-edit-actions{ padding: 12px 14px; display:flex; justify-content:flex-end; gap: 8px; border-top: 1px solid var(--border-color); background: var(--pane-header-bg); }
 body.theme-dark .structure-content {
@@ -3216,7 +3202,7 @@ body.theme-dark .structure-content {
         border-radius: 6px; background: var(--pane-header-bg);
         color: var(--text-color); font-size: 0.85rem;
     }
-    .structure-edit-field textarea { min-height: 80px; resize: vertical; }
+    .structure-edit-field textarea { min-height: 80px; resize: none; }
     .structure-edit-field input:focus,
     .structure-edit-field textarea:focus,
     .structure-edit-field select:focus {
@@ -3471,7 +3457,7 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
     .character-edit-field { margin-bottom: 12px; }
     .character-edit-field label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: var(--text-color); }
     .character-edit-field input, .character-edit-field textarea, .character-edit-field select { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--pane-header-bg); color: var(--text-color); font-size: 0.85rem; box-sizing: border-box; }
-    .character-edit-field textarea { min-height: 80px; resize: vertical; }
+    .character-edit-field textarea { min-height: 80px; resize: none; }
     .character-edit-field input:focus, .character-edit-field textarea:focus, .character-edit-field select:focus { outline: none; border-color: #ec4899; }
     .character-edit-hint { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
     .character-edit-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
@@ -3610,7 +3596,7 @@ body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
     .world-edit-field { margin-bottom: 12px; }
     .world-edit-field label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: var(--text-color); }
     .world-edit-field input, .world-edit-field textarea, .world-edit-field select { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--pane-header-bg); color: var(--text-color); font-size: 0.85rem; box-sizing: border-box; }
-    .world-edit-field textarea { min-height: 80px; resize: vertical; }
+    .world-edit-field textarea { min-height: 80px; resize: none; }
     .world-edit-field input:focus, .world-edit-field textarea:focus, .world-edit-field select:focus { outline: none; border-color: #10b981; }
     .world-edit-hint { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
     .world-edit-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
