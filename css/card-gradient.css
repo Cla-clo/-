@@ -1,0 +1,68 @@
+/* === Card background: transparent left→right gradient (bulk dye removed) === */
+/* === v11 tweaks: remove structure "dangling" guide lines === */
+#structure-panel .structure-card::before,
+#structure-panel .structure-card::after{
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  border: none !important;
+}
+
+
+/* ===== v12: Prettier "paper + tint" gradient (Option A) ===== */
+/* Keep per-panel card classes from enforcing opaque backgrounds */
+.structure-card,
+.character-card,
+.world-card,
+.terms-card{
+  background-color: transparent !important;
+}
+
+:root{
+  /* "paper" overlay to smooth banding and keep readability while staying semi-transparent */
+  --cc-card-paper-top: rgba(255,255,255,0.65);
+  --cc-card-paper-bottom: rgba(255,255,255,0.50);
+
+  /* neutral shade (used when no per-card custom color) */
+  --cc-card-shade-rgb: 0 0 0;
+  --cc-card-shade-a1: 0.04;
+  --cc-card-shade-a2: 0.02;
+  --cc-card-shade-a3: 0.01;
+}
+body.theme-dark{
+  --cc-card-paper-top: rgba(0,0,0,0.26);
+  --cc-card-paper-bottom: rgba(0,0,0,0.18);
+
+  --cc-card-shade-rgb: 255 255 255;
+  --cc-card-shade-a1: 0.06;
+  --cc-card-shade-a2: 0.035;
+  --cc-card-shade-a3: 0.018;
+}
+
+/* Applies to all card shells + terms cards */
+.card-shell,
+.terms-card{
+  background:
+    linear-gradient(180deg, var(--cc-card-paper-top) 0%, var(--cc-card-paper-bottom) 100%),
+    linear-gradient(90deg,
+      rgb(var(--cc-card-shade-rgb) / var(--cc-card-shade-a1)) 0%,
+      rgb(var(--cc-card-shade-rgb) / var(--cc-card-shade-a2)) 22%,
+      rgb(var(--cc-card-shade-rgb) / var(--cc-card-shade-a3)) 45%,
+      rgb(var(--cc-card-shade-rgb) / 0) 78%) !important;
+  background-color: transparent !important;
+  background-clip: padding-box;
+}
+
+/* When the card has a custom color: use tint-rgb + multi-stop fade */
+.card-shell.has-custom-color,
+.terms-card.has-custom-color{
+  background:
+    linear-gradient(180deg, var(--cc-card-paper-top) 0%, var(--cc-card-paper-bottom) 100%),
+    linear-gradient(90deg,
+      rgb(var(--cc-card-tint-rgb) / 0.12) 0%,
+      rgb(var(--cc-card-tint-rgb) / 0.06) 22%,
+      rgb(var(--cc-card-tint-rgb) / 0.03) 45%,
+      rgb(var(--cc-card-tint-rgb) / 0) 78%) !important;
+  background-color: transparent !important;
+  background-clip: padding-box;
+}
