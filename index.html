@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.221</title>
+<title>ⓒエディタ v1.222</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -1628,22 +1628,8 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
         gap: 10px;
     }
 
-    #card-view-modal .cc-resize-se::after{
-        content: '';
-        position: absolute;
-        right: 6px;
-        bottom: 6px;
-        width: 10px;
-        height: 10px;
-        border-right: 2px solid rgba(107,114,128,0.55);
-        border-bottom: 2px solid rgba(107,114,128,0.55);
-        border-radius: 0 0 4px 0;
-        pointer-events: none;
-    }
-    body.theme-dark #card-view-modal .cc-resize-se::after{
-        border-right-color: rgba(156,163,175,0.55);
-        border-bottom-color: rgba(156,163,175,0.55);
-    }
+    /* resize grip indicator hidden for clean rounded corners */
+    #card-view-modal .cc-resize-se::after{ display: none; }
 
     /* While dragging/resizing: prevent text selection */
     html.cc-window-dragging, html.cc-window-resizing{
@@ -4137,23 +4123,8 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
 .cc-window-box .cc-resize-ne{ right: calc(-1 * var(--cc-win-hit-offset)); top:    calc(-1 * var(--cc-win-hit-offset)); width: var(--cc-win-corner); height: var(--cc-win-corner); cursor: nesw-resize; }
 .cc-window-box .cc-resize-sw{ left:  calc(-1 * var(--cc-win-hit-offset)); bottom: calc(-1 * var(--cc-win-hit-offset)); width: var(--cc-win-corner); height: var(--cc-win-corner); cursor: nesw-resize; }
 
-/* optional resize grip indicator (bottom-right) */
-.cc-window-box .cc-resize-se::after{
-  content: '';
-  position: absolute;
-  right: 2px;
-  bottom: 2px;
-  width: 10px;
-  height: 10px;
-  border-right: 2px solid rgba(107,114,128,0.55);
-  border-bottom: 2px solid rgba(107,114,128,0.55);
-  border-radius: 0 0 4px 0;
-  pointer-events: none;
-}
-body.theme-dark .cc-window-box .cc-resize-se::after{
-  border-right-color: rgba(156,163,175,0.55);
-  border-bottom-color: rgba(156,163,175,0.55);
-}
+/* resize grip indicator hidden for clean rounded corners */
+.cc-window-box .cc-resize-se::after{ display: none; }
 
 /* ===== v1.1 UX Enhancements ===== */
 
@@ -5672,7 +5643,7 @@ body.theme-dark{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.221</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.222</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -12662,7 +12633,6 @@ function renderMemoCards(){
             actions.className = 'card-actions memo-card-actions';
             actions.innerHTML = `
                 <button onclick="event.stopPropagation(); showMemoCardView(${tab.id})">👁 閲覧</button>
-                <button onclick="event.stopPropagation(); focusMemoCard(${tab.id})">✏️ 編集</button>
                 <button onclick="event.stopPropagation(); duplicateMemoTab(${tab.id})">📋 複製</button>
                 <button class="btn-delete" onclick="event.stopPropagation(); deleteMemoTab(${tab.id}); try{renderMemoCards();}catch(e){}">🗑 削除</button>
             `;
