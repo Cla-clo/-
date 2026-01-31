@@ -1,11 +1,15 @@
-const CACHE_NAME = 'c-editor-v1';
+const CACHE_NAME = 'c-editor-v2';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
   './sw.js',
   './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon-512.png',
+  './css/styles.css',
+  './css/hotfix.css',
+  './css/header-override.css',
+  './css/card-gradient.css'
 ];
 
 self.addEventListener('install', (event) => {

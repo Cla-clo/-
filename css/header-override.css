@@ -1,0 +1,44 @@
+  /* Ensure ALL panel headers share identical metrics (padding/height/wrapping).
+     Keep per-panel colors via existing CSS variables/classes. */
+  .pane-header,
+  .panel-header,
+  .panel-header,
+  .panel-header,
+  .panel-header,
+  .panel-header,
+  .panel-header{
+    padding: 8px 10px !important;
+    min-height: 44px !important;
+    box-sizing: border-box !important;
+    line-height: 1 !important;
+    font-size: 0.85rem !important;
+    font-weight: bold !important;
+    display:flex !important;
+    justify-content: space-between !important;
+    align-items:center !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+  }
+  .pane-header > span,
+  .panel-header > span,
+  .panel-header > span,
+  .panel-header > span,
+  .panel-header > span,
+  .panel-header > span,
+  .panel-header > span{
+    display:inline-flex !important;
+    align-items:center !important;
+    gap:6px !important;
+    line-height:1 !important;
+  }
+  .panel-controls,
+  .panel-controls,
+  .panel-controls,
+  .panel-controls,
+  .panel-controls,
+  .panel-controls{
+    display:flex !important;
+    align-items:center !important;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+  }

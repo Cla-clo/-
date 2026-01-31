@@ -1,0 +1,129 @@
+  /* アクティブタブ色を入力/プレビュー/メモで統一（設定色を反映） */
+  .memo-tab.active,
+  .preview-tab.active,
+  .pv-tab.active {
+    background: var(--active-tab-bg) !important;
+    color: var(--active-tab-text) !important;
+    font-weight: bold !important;
+    border-top: 2px solid var(--active-tab-border) !important;
+  }
+
+  /* タブの字数表示 */
+  .tab-meta {
+    margin-left: 8px;
+    font-size: 0.75rem;
+    opacity: 0.85;
+    white-space: nowrap;
+  }
+  .tab-meta .today {
+    margin-left: 6px;
+    font-weight: 600;
+  }
+
+  /* 集中モードの一時表示（オーバーレイ） */
+  #focus-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  #focus-overlay.show { display: flex; }
+  #focus-overlay .fo-box {
+    width: min(1100px, calc(100vw - 24px));
+    height: min(85vh, calc(100vh - 24px));
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    display: flex;
+    flex-direction: column;
+  }
+  #focus-overlay .fo-head {
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--border-color);
+    gap: 10px;
+  }
+  #focus-overlay .fo-title { font-weight: 700; }
+  #focus-overlay .fo-body {
+    flex: 1;
+    overflow: auto;
+    padding: 12px;
+    background: var(--panel-bg);
+    color: var(--text-color);
+  }
+  #focus-overlay .fo-body.vertical-mode { writing-mode: vertical-rl; }
+  #focus-overlay pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+    font: inherit;
+  }
+
+  /* 閲覧検索ハイライト */
+  mark.reader-hit {
+    padding: 0 2px;
+    border-radius: 4px;
+    background: rgba(255, 230, 0, 0.55);
+  }
+  mark.reader-hit.active {
+    outline: 2px solid rgba(255, 140, 0, 0.9);
+    background: rgba(255, 200, 0, 0.85);
+  }
+
+  /* Context menu styles */
+.context-menu {
+  position: fixed;
+  min-width: 200px;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  z-index: 2000;
+  display: none;
+  padding: 6px 0;
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.context-menu.context-submenu {
+  z-index: 2001;
+  min-width: 180px;
+}
+.context-menu.show { display: block; }
+.context-menu-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.context-menu-item.has-submenu {
+  position: relative;
+  padding-right: 30px;
+}
+.context-menu-item.has-submenu::after {
+  content: "▸";
+  position: absolute;
+  right: 12px;
+  opacity: 0.6;
+}
+.context-menu-item:hover {
+  background: var(--pane-header-bg, #f3f4f6);
+}
+body.theme-dark .context-menu-item:hover {
+  background: #4b5563;
+}
+/* Floating panel styles */
+  .floating-panel {
+    font-family: inherit;
+  }
+  .floating-panel-header {
+    user-select: none;
+  }
