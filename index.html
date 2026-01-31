@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.222</title>
+<title>ⓒエディタ v1.223</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -2506,7 +2506,7 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
         padding: 10px;
         font-size: 0.85rem;
     }
-    .terms-edit-field textarea{ resize: vertical; }
+    .terms-edit-field textarea{ resize: none; }
     .terms-edit-hint{ font-size: 0.7rem; color: var(--text-muted); }
     .terms-edit-actions{ padding: 12px 14px; display:flex; justify-content:flex-end; gap: 8px; border-top: 1px solid var(--border-color); background: var(--pane-header-bg); }
 body.theme-dark .structure-content {
@@ -3215,7 +3215,7 @@ body.theme-dark .structure-content {
         border-radius: 6px; background: var(--pane-header-bg);
         color: var(--text-color); font-size: 0.85rem;
     }
-    .structure-edit-field textarea { min-height: 80px; resize: vertical; }
+    .structure-edit-field textarea { min-height: 80px; resize: none; }
     .structure-edit-field input:focus,
     .structure-edit-field textarea:focus,
     .structure-edit-field select:focus {
@@ -3470,7 +3470,7 @@ body.theme-dark .character-content { flex: 1; overflow: auto; padding: 10px; }
     .character-edit-field { margin-bottom: 12px; }
     .character-edit-field label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: var(--text-color); }
     .character-edit-field input, .character-edit-field textarea, .character-edit-field select { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--pane-header-bg); color: var(--text-color); font-size: 0.85rem; box-sizing: border-box; }
-    .character-edit-field textarea { min-height: 80px; resize: vertical; }
+    .character-edit-field textarea { min-height: 80px; resize: none; }
     .character-edit-field input:focus, .character-edit-field textarea:focus, .character-edit-field select:focus { outline: none; border-color: #ec4899; }
     .character-edit-hint { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
     .character-edit-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
@@ -3609,7 +3609,7 @@ body.theme-dark .world-content { flex: 1; overflow: auto; padding: 10px; }
     .world-edit-field { margin-bottom: 12px; }
     .world-edit-field label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: var(--text-color); }
     .world-edit-field input, .world-edit-field textarea, .world-edit-field select { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--pane-header-bg); color: var(--text-color); font-size: 0.85rem; box-sizing: border-box; }
-    .world-edit-field textarea { min-height: 80px; resize: vertical; }
+    .world-edit-field textarea { min-height: 80px; resize: none; }
     .world-edit-field input:focus, .world-edit-field textarea:focus, .world-edit-field select:focus { outline: none; border-color: #10b981; }
     .world-edit-hint { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
     .world-edit-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
@@ -5643,7 +5643,7 @@ body.theme-dark{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.222</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.223</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -25447,10 +25447,12 @@ function updateTermsButtonState() {
   const isOpen = panel.classList.contains('open');
   const isDocked = cb.checked;
   const isPinned = isDocked;
+  const isFront = (!isPinned && isOpen && window.__ccFrontPanelId === 'terms-panel');
 
-  btn.classList.toggle('active', isOpen && !isPinned);
+  btn.classList.toggle('is-open', isOpen);
   btn.classList.toggle('docked', isDocked);
   btn.classList.toggle('is-pinned', isPinned);
+  btn.classList.toggle('is-front', isFront);
 
   const icon = btn.querySelector('.panel-state-icon');
   if (icon) {
