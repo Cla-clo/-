@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.2.1</title>
+<title>ⓒエディタ v1.22</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5672,7 +5672,7 @@ body.theme-dark{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.194</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.22</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -27386,7 +27386,11 @@ bindResize('cc-resize-sw', 'sw');
     function captureState(){
       if (isMobile()) return;
       const r = win.getBoundingClientRect();
-      states[cfg.id] = { left: r.left, top: r.top, width: r.width, height: r.height };
+      // Only save state if dimensions are valid (not collapsed by display:none)
+      const { minW, minH } = getMinMax();
+      if (r.width >= minW && r.height >= minH) {
+        states[cfg.id] = { left: r.left, top: r.top, width: r.width, height: r.height };
+      }
     }
 
     function applyStateOrCenter(){

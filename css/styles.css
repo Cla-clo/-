@@ -4124,23 +4124,8 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
 .cc-window-box .cc-resize-ne{ right: calc(-1 * var(--cc-win-hit-offset)); top:    calc(-1 * var(--cc-win-hit-offset)); width: var(--cc-win-corner); height: var(--cc-win-corner); cursor: nesw-resize; }
 .cc-window-box .cc-resize-sw{ left:  calc(-1 * var(--cc-win-hit-offset)); bottom: calc(-1 * var(--cc-win-hit-offset)); width: var(--cc-win-corner); height: var(--cc-win-corner); cursor: nesw-resize; }
 
-/* optional resize grip indicator (bottom-right) */
-.cc-window-box .cc-resize-se::after{
-  content: '';
-  position: absolute;
-  right: 2px;
-  bottom: 2px;
-  width: 10px;
-  height: 10px;
-  border-right: 2px solid rgba(107,114,128,0.55);
-  border-bottom: 2px solid rgba(107,114,128,0.55);
-  border-radius: 0 0 4px 0;
-  pointer-events: none;
-}
-body.theme-dark .cc-window-box .cc-resize-se::after{
-  border-right-color: rgba(156,163,175,0.55);
-  border-bottom-color: rgba(156,163,175,0.55);
-}
+/* resize grip indicator hidden for clean rounded corners */
+.cc-window-box .cc-resize-se::after{ display: none; }
 
 /* ===== v1.1 UX Enhancements ===== */
 
