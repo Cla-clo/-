@@ -13566,9 +13566,9 @@ if (typeof applyPaneHeightSettings === 'function') {
                 if (s.autoSave !== undefined) localStorage.setItem('cc_autosave_enabled', s.autoSave);
                 if (s.autoSaveInterval) localStorage.setItem('cc_autosave_interval', s.autoSaveInterval);
                 const __atc = (s.activeTabColor || s.active_tab_color || s.tabColor || s.activeColor);
-                if (__atc) localStorage.setItem(ACTIVE_TAB_COLOR_KEY, __atc);
+                if (__atc) localStorage.setItem('cc_active_tab_color', __atc);
                 const __ds = (s.dayStart || s.day_start || (s.goal && s.goal.dayStart));
-                if (__ds) localStorage.setItem(DAY_START_LS_KEY, __ds);
+                if (__ds) localStorage.setItem('cc_day_start_hhmm', __ds);
 
             }
 
@@ -13686,8 +13686,8 @@ if (typeof applyPaneHeightSettings === 'function') {
                 theme: localStorage.getItem('cc_theme'),
                 autoSave: localStorage.getItem('cc_autosave_enabled'),
                 autoSaveInterval: localStorage.getItem('cc_autosave_interval'),
-                activeTabColor: localStorage.getItem(ACTIVE_TAB_COLOR_KEY),
-                dayStart: localStorage.getItem(DAY_START_LS_KEY)
+                activeTabColor: localStorage.getItem('cc_active_tab_color'),
+                dayStart: localStorage.getItem('cc_day_start_hhmm')
             };
         }
 
