@@ -1,4 +1,4 @@
-const CACHE_NAME = 'c-editor-v3';
+const CACHE_NAME = 'c-editor-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -10,7 +10,8 @@ const ASSETS = [
   './css/hotfix.css',
   './css/header-override.css',
   './css/card-gradient.css',
-  './js/core/utils.js'
+  './js/core/utils.js',
+  './js/features/shortcuts.js'
 ];
 
 self.addEventListener('install', (event) => {
