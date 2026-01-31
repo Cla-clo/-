@@ -4113,6 +4113,19 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
 /* resize grip indicator hidden for clean rounded corners */
 .cc-window-box .cc-resize-se::after{ display: none; }
 
+/* Hide native browser resize grip on textareas in edit modals */
+.structure-edit-field textarea::-webkit-resizer,
+.character-edit-field textarea::-webkit-resizer,
+.world-edit-field textarea::-webkit-resizer,
+.terms-edit-field textarea::-webkit-resizer,
+.cc-window-box textarea::-webkit-resizer { display: none !important; }
+
+.structure-edit-field textarea,
+.character-edit-field textarea,
+.world-edit-field textarea,
+.terms-edit-field textarea,
+.cc-window-box textarea { resize: none !important; }
+
 /* ===== v1.1 UX Enhancements ===== */
 
 /* --- Reader mode page separator --- */
