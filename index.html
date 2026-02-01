@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.223</title>
+<title>ⓒエディタ v1.225</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -1541,9 +1541,15 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     #card-view-modal .card-view-body{
         padding: 10px 0;
         flex: 1 1 auto;
-        overflow: auto;
+        overflow-y: auto;
+        overflow-x: hidden;
         max-height: none;
+        background: var(--panel-bg);
     }
+    /* Chrome/Safari: fill the scrollbar corner (prevents L-shaped artifact) */
+    #card-view-modal .card-view-body::-webkit-scrollbar-corner{ background: var(--panel-bg); }
+    #card-view-modal .card-view-body::-webkit-resizer{ display:none; }
+
     #card-view-modal .modal-header{
         flex: 0 0 auto;
         cursor: move;
@@ -4055,6 +4061,8 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
 /* ===== Card Edit Modals: window-like draggable + resizable (all edges/corners) ===== */
 /* Make the *outer frame* the thing you drag/resize, and put scrolling inside .cc-window-body */
 .cc-window-box{
+  background: var(--panel-bg) !important;
+  border-radius: 12px !important; /* keep rounded corners clear */
   position: fixed !important;
   resize: none !important;
   box-sizing: border-box !important;
@@ -4065,7 +4073,9 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
 
   /* critical: padding/overflow moved to inner body so resize handles align to outer border */
   padding: 0 !important;
-  overflow: visible !important;
+  overflow: hidden !important;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
   display: flex !important;
   flex-direction: column !important;
 }
@@ -4080,9 +4090,14 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
 
 .cc-window-body{
   flex: 1 1 auto;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden; /* prevent horizontal scrollbar corner "L" */
   padding: 12px 16px 16px;
+  background: var(--panel-bg); /* fill scrollbar corner area */
 }
+/* Chrome/Safari: fill the scrollbar corner so background behind never peeks through */
+.cc-window-body::-webkit-scrollbar-corner{ background: var(--panel-bg); }
+.cc-window-body::-webkit-resizer{ display:none; }
 
 /* footer (actions area) — keep visible while body scrolls */
 .cc-window-box .structure-edit-actions,
@@ -4107,7 +4122,7 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
    Slight negative offset helps grab the border without interfering with inner scrollbars. */
 :root{
   --cc-win-hit: 10px;
-  --cc-win-hit-offset: 2px;
+  --cc-win-hit-offset: 0px;
   --cc-win-corner: 14px;
 }
 
@@ -5643,7 +5658,7 @@ body.theme-dark{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.223</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.225</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
