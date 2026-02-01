@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.225</title>
+<title>ⓒエディタ v1.226</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5658,7 +5658,7 @@ body.theme-dark{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.225</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.226</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -7334,6 +7334,24 @@ initTabScrollers();
     const inputMirror = document.getElementById('input-mirror-container');
     const previewContent = document.getElementById('preview-content');
     const previewScroll = document.getElementById('preview-scroll');
+
+    // NOTE: #preview-scroll has CSS `scroll-behavior: smooth;`.
+    // When we update scrollLeft programmatically on wheel, that smooth animation can feel sluggish.
+    // In vertical writing mode, switch to `auto` for snappy wheel scrolling.
+    if (previewScroll) {
+      const applyPreviewScrollBehavior = () => {
+        if (previewScroll.classList.contains('vertical-mode')) {
+          previewScroll.style.scrollBehavior = 'auto';
+        } else {
+          previewScroll.style.scrollBehavior = '';
+        }
+      };
+      applyPreviewScrollBehavior();
+      try {
+        new MutationObserver(applyPreviewScrollBehavior)
+          .observe(previewScroll, { attributes: true, attributeFilter: ['class','style'] });
+      } catch (e) {}
+    }
     const inputPosBar = document.getElementById('input-pos-bar');
     const previewPosBar = document.getElementById('preview-pos-bar');
     const charCountEl = document.getElementById('char-count');
@@ -27122,7 +27140,7 @@ patchViewRibbon();
       requestAnimationFrame(applyStateOrCenter);
     }
   });
-  mo.observe(modal, { attributes: true, attributeFilter: ['class'] });
+  mo.observe(modal, { attributes: true, attributeFilter: ['class','style'] });
 
   // Re-clamp on viewport resize
   window.addEventListener('resize', () => {
@@ -28656,5 +28674,121 @@ bindResize('cc-resize-sw', 'sw');
   }
 })();
 </script>
+
+<script>
+/* Vertical writing mode: wheel-only horizontal scroll (no Shift).
+   Direction: INVERT=true => wheel down moves LEFT, wheel up moves RIGHT.
+   Performance: capture-phase + stopImmediatePropagation + rAF throttling.
+*/
+(function(){
+  const INVERT = true;
+
+  function getNormalizedDelta(e, el){
+    // Pick dominant axis (trackpads may use deltaX)
+    const raw = (Math.abs(e.deltaY) >= Math.abs(e.deltaX)) ? e.deltaY : e.deltaX;
+    if (!raw) return 0;
+
+    // Normalize deltaMode: 0=pixel, 1=line, 2=page
+    const scale = (e.deltaMode === 1) ? 16 : (e.deltaMode === 2 ? el.clientWidth : 1);
+    return raw * scale;
+  }
+
+  function bindWheel(el, isVerticalFn){
+    if (!el) return;
+    if (el.dataset.ccWheelHBound === '1') return;
+    el.dataset.ccWheelHBound = '1';
+
+    let pending = 0;
+    let rafId = 0;
+
+    const onWheel = function(e){
+      // Only active during vertical writing mode
+      if (isVerticalFn && !isVerticalFn()) return;
+
+      // "Wheel only": don't hijack Shift+wheel (leave native behavior)
+      if (e.shiftKey) return;
+
+      // Don't interfere with zoom gestures
+      if (e.ctrlKey || e.metaKey) return;
+
+      // Ensure preview doesn't silently revert to smooth (some actions reset inline styles)
+      if (el.style && el.style.scrollBehavior !== 'auto') {
+        el.style.scrollBehavior = 'auto';
+      }
+
+      const delta = getNormalizedDelta(e, el);
+      if (!delta) return;
+
+      // Prevent page scroll and other wheel handlers from doing extra work (esp. after re-inits)
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+
+      pending += (INVERT ? -delta : delta);
+
+      if (!rafId){
+        rafId = requestAnimationFrame(() => {
+          try{
+            el.scrollLeft += pending;
+          } finally {
+            pending = 0;
+            rafId = 0;
+          }
+        });
+      }
+    };
+
+    // Capture phase so we run before bubble listeners and can suppress them when needed.
+    el.addEventListener('wheel', onWheel, { passive: false, capture: true });
+  }
+
+  function enforceScrollBehaviorAutoWhenVertical(el, isVerticalFn){
+    if (!el) return;
+    if (el.dataset.ccScrollBehaviorEnforced === '1') return;
+    el.dataset.ccScrollBehaviorEnforced = '1';
+
+    const apply = () => {
+      try{
+        if (isVerticalFn && isVerticalFn()){
+          if (el.style.scrollBehavior !== 'auto') el.style.scrollBehavior = 'auto';
+        } else {
+          // restore to stylesheet default when leaving vertical mode
+          if (el.style.scrollBehavior === 'auto') el.style.scrollBehavior = '';
+        }
+      } catch(_){}
+    };
+
+    apply();
+    try{
+      new MutationObserver(apply).observe(el, { attributes: true, attributeFilter: ['class','style'] });
+    } catch(_){}
+  }
+
+  function init(){
+    const inputArea = document.getElementById('input-area');
+    const previewScroll = document.getElementById('preview-scroll');
+    const readerScroll = document.getElementById('reader-scroll');
+
+    const isInputVertical = () => !!(inputArea && inputArea.parentElement && inputArea.parentElement.classList.contains('vertical-mode'));
+    const isPreviewVertical = () => !!(previewScroll && previewScroll.classList.contains('vertical-mode'));
+    const isReaderVertical = () => !!(readerScroll && readerScroll.classList.contains('vertical-mode'));
+
+    bindWheel(inputArea, isInputVertical);
+    bindWheel(previewScroll, isPreviewVertical);
+    bindWheel(readerScroll, isReaderVertical);
+
+    // Enforce "auto" behavior (preview originally has smooth; some actions may reset inline style)
+    enforceScrollBehaviorAutoWhenVertical(previewScroll, isPreviewVertical);
+    enforceScrollBehaviorAutoWhenVertical(readerScroll, isReaderVertical);
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
+})();
+</script>
+
 </body>
 </html>
