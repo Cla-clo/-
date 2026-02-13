@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.227</title>
+<title>ⓒエディタ v1.228</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5658,7 +5658,7 @@ body.theme-dark{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.227</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.228</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -7811,6 +7811,44 @@ function addNewTab() {
   saveTabsToStorage();
 }
 
+function renameTab(tabId = activeTabId) {
+  startEditTabName(tabId);
+}
+
+function renameActiveTab() {
+  renameTab(activeTabId);
+}
+
+function duplicateTab(tabId = activeTabId) {
+  const source = inputTabs.find(t => t.id === tabId);
+  if (!source) return;
+  const currentTab = inputTabs.find(t => t.id === activeTabId);
+  if (currentTab) currentTab.content = inputArea.value;
+
+  const copiedTab = {
+    id: nextTabId++,
+    name: `${source.name || 'タブ'}（複製）`,
+    content: source.content || ''
+  };
+  const sourceIndex = inputTabs.findIndex(t => t.id === tabId);
+  inputTabs.splice(sourceIndex + 1, 0, copiedTab);
+  activeTabId = copiedTab.id;
+  inputArea.value = copiedTab.content;
+
+  renderInputTabs();
+  updateInputStats();
+  saveTabsToStorage();
+}
+
+function closeActiveTab(tabId = activeTabId) {
+  deleteTab(tabId);
+}
+
+window.renameTab = renameTab;
+window.renameActiveTab = renameActiveTab;
+window.duplicateTab = duplicateTab;
+window.closeActiveTab = closeActiveTab;
+
 
     function deleteTab(tabId) {
         if (inputTabs.length <= 1) return;
@@ -7829,7 +7867,7 @@ function addNewTab() {
 
     function startEditTabName(tabId) {
         const container = document.getElementById('input-tabs-container');
-        const tabEl = container.querySelector(`.input-tab.active .tab-name`) || container.querySelector(`.input-tab:nth-child(${inputTabs.findIndex(t => t.id === tabId) + 1}) .tab-name`);
+        const tabEl = container.querySelector(`.input-tab[data-tab-id="${tabId}"] .tab-name`);
         const tab = inputTabs.find(t => t.id === tabId);
         if (!tabEl || !tab) return;
         const input = document.createElement('input');
@@ -8883,9 +8921,16 @@ function addNewTab() {
     function updateInputStats() {
         
         const t = inputArea.value;
-        const tl = t.replace(/[\n\r]/g, '').length;
-        const nl = computeNetLength(t);
-        const ll = t.split('\n').length;
+        const isFocusMode = document.body.classList.contains('focus-mode');
+        let statsSourceText = t;
+        if (isFocusMode) {
+            const currentTab = inputTabs.find(tab => tab.id === activeTabId);
+            if (currentTab) currentTab.content = t;
+            statsSourceText = inputTabs.map(tab => tab.content || '').join('\n');
+        }
+        const tl = statsSourceText.replace(/[\n\r]/g, '').length;
+        const nl = computeNetLength(statsSourceText);
+        const ll = statsSourceText.split('\n').length;
         if (charCountEl) charCountEl.innerText = `全体: ${tl}`;
         if (inputNetCountEl) inputNetCountEl.innerText = `実質: ${nl}`;
         if (lineCountEl) lineCountEl.innerText = `${ll} 行`;
@@ -17760,8 +17805,11 @@ panel.style.width = '320px';
   }
 
   let contextMenuClickHandler = null;
+  let contextMenuTabId = null;
 
   function showTabContextMenu(e, tab){
+    contextMenuTabId = parseInt(tab?.dataset?.tabId || '', 10);
+    if (Number.isNaN(contextMenuTabId)) contextMenuTabId = window.activeTabId;
     if (window.hideContextMenusOnly) window.hideContextMenusOnly();
     let menu = document.getElementById('tab-context-menu');
     if (!menu) {
@@ -17789,11 +17837,11 @@ panel.style.width = '320px';
       item.onclick = (ev) => {
         ev.stopPropagation();
         const action = item.dataset.action;
-        if (action === 'rename') { renameActiveTab(); if (window.hideContextMenusOnly) window.hideContextMenusOnly(); }
-        else if (action === 'duplicate') { duplicateTab(); if (window.hideContextMenusOnly) window.hideContextMenusOnly(); }
+        if (action === 'rename') { renameTab(contextMenuTabId); if (window.hideContextMenusOnly) window.hideContextMenusOnly(); }
+        else if (action === 'duplicate') { duplicateTab(contextMenuTabId); if (window.hideContextMenusOnly) window.hideContextMenusOnly(); }
         else if (action === 'new') { addNewTab(); if (window.hideContextMenusOnly) window.hideContextMenusOnly(); }
         else if (action === 'color') { showTabColorPicker(); }
-        else if (action === 'close') { closeActiveTab(); if (window.hideContextMenusOnly) window.hideContextMenusOnly(); }
+        else if (action === 'close') { closeActiveTab(contextMenuTabId); if (window.hideContextMenusOnly) window.hideContextMenusOnly(); }
       };
     });
 
