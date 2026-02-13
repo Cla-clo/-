@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.228</title>
+<title>ⓒエディタ v1.229</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5658,7 +5658,7 @@ body.theme-dark{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.228</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.229</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -5778,7 +5778,6 @@ body.theme-dark{
             </button>
             <span class="ribbon-separator">|</span>
             <div class="ribbon-subgroup ribbon-tools-settingscats">
-                <span class="ribbon-group-label">設定</span>
                 <button class="btn btn-settings-cat" data-cat="font" onclick="openSettingsCategory('font')" title="入力/プレビューの文字・書字方向">フォント</button>
                 <button class="btn btn-settings-cat" data-cat="support" onclick="openSettingsCategory('support')" title="表示オプション / 執筆支援 / 目標・統計">支援</button>
                 <button class="btn btn-settings-cat" data-cat="paper" onclick="openSettingsCategory('paper')" title="用紙設定 / ペイン幅 / 縦並び高さ">用紙</button>
@@ -17460,6 +17459,12 @@ function bulkResetCardsBgColor(paneId){
 
   // Toggle search panel (click cycle: closed -> open floating -> docked -> closed)
   // Same behavior as memo panel
+  function focusSearchInput(){
+    const input = document.getElementById('search-input');
+    if (!input) return;
+    setTimeout(()=> input.focus(), 0);
+  }
+
   function toggleSearchPanel() {
     const panel = document.getElementById('search-panel');
     const checkbox = document.getElementById('check-search-dock');
@@ -17475,15 +17480,16 @@ function bulkResetCardsBgColor(paneId){
       panel.style.display = 'flex';
       if (checkbox.checked) { checkbox.checked = false; toggleSearchDock(); }
       if (window.bringPanelToFront) window.bringPanelToFront(panel, false);
-      const input = document.getElementById('search-input');
-      if (input) setTimeout(()=> input.focus(), 0);
+      focusSearchInput();
     } else if (!isDocked) {
       if (!isFront) {
         if (window.bringPanelToFront) window.bringPanelToFront(panel, false);
+        focusSearchInput();
         if (typeof window.updatePanelButtonStates === 'function') window.updatePanelButtonStates();
         return;
       }
       if (typeof window.__ccRequestDockWithLimit === 'function') { window.__ccRequestDockWithLimit('search'); } else { checkbox.checked = true; toggleSearchDock(); panel.classList.add('open'); }
+      focusSearchInput();
 } else {
       checkbox.checked = false;
       toggleSearchDock();
