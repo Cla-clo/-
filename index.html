@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.228</title>
+<title>ⓒエディタ v1.229</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5658,7 +5658,7 @@ body.theme-dark{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.228</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.229</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -5773,12 +5773,7 @@ body.theme-dark{
     </div>
 <div class="ribbon-section ribbon-tools" data-section="tools">
         <div class="ribbon-group">
-            <button class="btn panel-toggle" id="btn-toggle-settings" onclick="togglePanel('settings-bar')" data-label="⚙️ 設定">
-                <span class="panel-label">⚙️ 設定</span><span class="panel-state-icon">▾</span>
-            </button>
-            <span class="ribbon-separator">|</span>
             <div class="ribbon-subgroup ribbon-tools-settingscats">
-                <span class="ribbon-group-label">設定</span>
                 <button class="btn btn-settings-cat" data-cat="font" onclick="openSettingsCategory('font')" title="入力/プレビューの文字・書字方向">フォント</button>
                 <button class="btn btn-settings-cat" data-cat="support" onclick="openSettingsCategory('support')" title="表示オプション / 執筆支援 / 目標・統計">支援</button>
                 <button class="btn btn-settings-cat" data-cat="paper" onclick="openSettingsCategory('paper')" title="用紙設定 / ペイン幅 / 縦並び高さ">用紙</button>
@@ -7404,10 +7399,20 @@ initTabScrollers();
         const selector = document.getElementById('settings-panel-selector');
         const sections = document.querySelectorAll('#settings-bar .settings-section');
         if (!sections.length) return;
-        sections.forEach(section => {
-            section.classList.remove('is-active');
-            section.setAttribute('open', '');
+
+        let matched = false;
+        sections.forEach((section, index) => {
+            const isTarget = section.dataset.panel === panelId;
+            section.classList.toggle('is-active', isTarget);
+            if (isTarget) {
+                section.setAttribute('open', '');
+                matched = true;
+            } else {
+                section.removeAttribute('open');
+            }
+            if (!matched && index === 0) section.setAttribute('open', '');
         });
+
         if (selector) selector.value = panelId;
         if (save) {
             try { localStorage.setItem(SETTINGS_PANEL_KEY, panelId); } catch (e) {}
@@ -7452,11 +7457,37 @@ function filterSettingsBarByCategory(cat){
     try { bar.scrollTop = 0; } catch(e){}
 }
 
-function openSettingsCategory(cat){
-    // open settings panel without toggling pin state
-    if (typeof ensureSettingsPanelOpen === 'function') ensureSettingsPanelOpen();
+function clearSettingsCategoryFilter(){
     const bar = document.getElementById('settings-bar');
     if (!bar) return;
+
+    bar.querySelectorAll('.setting-group[data-settings-cat], .setting-block[data-settings-cat], .settings-actions[data-settings-cat]')
+        .forEach(el => { el.style.display = ''; });
+
+    const sections = bar.querySelectorAll('.settings-section');
+    sections.forEach((sec, index) => {
+        sec.style.display = '';
+        if (index === 0) sec.setAttribute('open','');
+        else sec.removeAttribute('open');
+    });
+
+    delete bar.dataset.activeSettingsCat;
+    document.querySelectorAll('.btn-settings-cat').forEach(btn => btn.classList.remove('active'));
+}
+
+function openSettingsCategory(cat){
+    const bar = document.getElementById('settings-bar');
+    if (!bar) return;
+
+    const sameActive = (bar.dataset.activeSettingsCat === cat) && bar.classList.contains('open');
+    if (sameActive) {
+        clearSettingsCategoryFilter();
+        if (typeof closeControlPanel === 'function') closeControlPanel('settings-bar');
+        return;
+    }
+
+    // open settings panel without toggling pin state
+    if (typeof ensureSettingsPanelOpen === 'function') ensureSettingsPanelOpen();
 
     // If user opens カラー, ensure the block exists (it is usually injected at init, but safe)
     if (cat === 'color') {
@@ -7465,6 +7496,7 @@ function openSettingsCategory(cat){
     }
 
     filterSettingsBarByCategory(cat);
+    bar.dataset.activeSettingsCat = cat;
 
     // active state on ribbon buttons
     document.querySelectorAll('.btn-settings-cat').forEach(btn => {
@@ -16913,7 +16945,8 @@ function bulkResetCardsBgColor(paneId){
   // Open NAV + focus
   window.openNavTab = function(which){
     if (which === 'search') {
-      if (typeof window.toggleSearchPanel === 'function') window.toggleSearchPanel();
+      if (typeof window.ensureSearchPanelVisible === 'function') window.ensureSearchPanelVisible();
+      else if (typeof window.toggleSearchPanel === 'function') window.toggleSearchPanel();
       return;
     }
     if (which === 'memo') {
@@ -17453,13 +17486,39 @@ function bulkResetCardsBgColor(paneId){
       if ((__api && __api.matchesEvent) ? __api.matchesEvent(e, __combo) : (e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && (e.key==='f' || e.key==='F'))){
         e.preventDefault();
         e.stopImmediatePropagation();
-        toggleSearchPanel();
+        ensureSearchPanelVisible();
       }
     }, true);
   }
 
   // Toggle search panel (click cycle: closed -> open floating -> docked -> closed)
   // Same behavior as memo panel
+  function focusSearchInput(){
+    const input = document.getElementById('search-input');
+    if (!input) return;
+    setTimeout(()=> input.focus(), 0);
+  }
+
+  function ensureSearchPanelVisible(){
+    const panel = document.getElementById('search-panel');
+    const checkbox = document.getElementById('check-search-dock');
+    if (!panel || !checkbox) return;
+
+    if (!panel.classList.contains('open')) {
+      panel.classList.add('open');
+      panel.style.display = 'flex';
+      if (checkbox.checked) { checkbox.checked = false; toggleSearchDock(); }
+    }
+
+    if (window.bringPanelToFront) window.bringPanelToFront(panel, checkbox.checked);
+    focusSearchInput();
+
+    try{ if (typeof window.applyPaneWidthSettings==='function') window.applyPaneWidthSettings(); }catch(e){}
+    try{ if (typeof window.updatePanelButtonStates==='function') window.updatePanelButtonStates(); }catch(e){}
+    try{ if (typeof window.updateDockSplitState==='function') window.updateDockSplitState(); }catch(e){}
+    try{ if (typeof window.updateDockTopOffset==='function') window.updateDockTopOffset(); }catch(e){}
+  }
+
   function toggleSearchPanel() {
     const panel = document.getElementById('search-panel');
     const checkbox = document.getElementById('check-search-dock');
@@ -17475,15 +17534,16 @@ function bulkResetCardsBgColor(paneId){
       panel.style.display = 'flex';
       if (checkbox.checked) { checkbox.checked = false; toggleSearchDock(); }
       if (window.bringPanelToFront) window.bringPanelToFront(panel, false);
-      const input = document.getElementById('search-input');
-      if (input) setTimeout(()=> input.focus(), 0);
+      focusSearchInput();
     } else if (!isDocked) {
       if (!isFront) {
         if (window.bringPanelToFront) window.bringPanelToFront(panel, false);
+        focusSearchInput();
         if (typeof window.updatePanelButtonStates === 'function') window.updatePanelButtonStates();
         return;
       }
       if (typeof window.__ccRequestDockWithLimit === 'function') { window.__ccRequestDockWithLimit('search'); } else { checkbox.checked = true; toggleSearchDock(); panel.classList.add('open'); }
+      focusSearchInput();
 } else {
       checkbox.checked = false;
       toggleSearchDock();
@@ -17505,6 +17565,7 @@ function bulkResetCardsBgColor(paneId){
     try{ if (typeof window.updateDockSplitState==='function') window.updateDockSplitState(); }catch(e){}
     try{ if (typeof window.updateDockTopOffset==='function') window.updateDockTopOffset(); }catch(e){}
 }
+  window.ensureSearchPanelVisible = ensureSearchPanelVisible;
   window.toggleSearchPanel = toggleSearchPanel;
 
   // Toggle outline panel (click cycle: closed -> open floating -> docked -> closed)
@@ -28199,7 +28260,7 @@ bindResize('cc-resize-sw', 'sw');
       // --- Actions ---
       if (matches(e, sc.searchPanel)){
         e.preventDefault(); e.stopImmediatePropagation();
-        try{ openNavTab('search'); }catch(_){ try{ togglePanel('search-bar'); }catch(__){} }
+        try{ doSearchPanel(); }catch(_){ try{ togglePanel('search-bar'); }catch(__){} }
         return;
       }
 
