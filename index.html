@@ -1798,27 +1798,6 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     .save-dialog-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
     .save-dialog-buttons button { padding: 10px 20px; font-size: 1rem; display: inline-flex; align-items: center; justify-content: center; }
 
-    .autosave-toast {
-        position: fixed; top: 16px; right: 16px; z-index: 1200;
-        background: #fef9c3; color: #92400e; border: 1px solid #fcd34d;
-        padding: 8px 14px; border-radius: 12px; font-weight: bold;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.15); display: none;
-    }
-    .autosave-toast.show { display: block; }
-    .autosave-error-overlay {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.35);
-        display: none; align-items: center; justify-content: center; z-index: 1300;
-    }
-    .autosave-error-overlay.show { display: flex; }
-    .autosave-error {
-        background: var(--panel-bg); border: 2px solid #fca5a5;
-        padding: 20px 26px; border-radius: 14px; text-align: center;
-        font-weight: bold; color: #b91c1c; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-    }
-    .autosave-error button {
-        margin-top: 12px; background: #fee2e2; border: 1px solid #fecaca;
-        color: #991b1b; padding: 6px 14px; border-radius: 8px; cursor: pointer;
-    }
 
     
 
@@ -5833,6 +5812,12 @@ body.theme-dark{
                 ・<b>Ctrl+Alt+V</b>：閲覧モード<br>
                 ・<b>Ctrl+Alt+A</b>：分析<br>
                 ・<b>Ctrl+Alt+H</b>：使い方パネル<br>
+                ・<b>Ctrl+Alt+R</b>：ルビ入力ダイアログ<br>
+                ・<b>Ctrl+Alt+B</b>：傍点<br>
+                ・<b>Ctrl+Alt+K</b>：「」鉤括弧<br>
+                ・<b>Ctrl+Alt+Shift+K</b>：『』二重鉤括弧<br>
+                ・<b>Ctrl+Alt+P</b>：（）括弧<br>
+                ・<b>Ctrl+Alt+Shift+B</b>：しおりを追加<br>
                 ・<b>Ctrl+Shift+F</b>：振り仮名（ルビ）<br>
                 ・<b>Ctrl+Shift+B</b>：傍点<br>
                 ・<b>Ctrl+Shift+1</b>：構成パネル<br>
@@ -6111,13 +6096,6 @@ body.theme-dark{
 
                 <!-- 目次抽出ルールは目次パネルの⚙ボタンから設定可能 -->
 
-                <div class="setting-group" data-settings-cat="save">
-                    <div class="setting-title">保存 <button class="btn btn-apply" onclick="applyAutoSaveSettings()">適用</button></div>
-                    <div class="setting-row vertical">
-                        <label><input type="checkbox" id="st-autosave-enabled" onchange="applyAutoSaveSettings()"> 自動保存を有効にする</label>
-                        <label>自動保存間隔: <input type="number" id="st-autosave-interval" value="60" min="5" max="600" style="width:70px;" onchange="applyAutoSaveSettings()"> 秒</label>
-                    </div>
-                </div>
 
             </div>
         </details>
@@ -6174,25 +6152,25 @@ body.theme-dark{
                             <span id="selection-tool-info" class="selection-tool-info">選択なし</span>
                         </div>
                         <div class="selection-tool-body">
-                            <button class="qip-ruby-dialog" data-requires-selection="false" onclick="openRubyInsertDialog()" aria-label="ルビ入力" data-desc="ルビ入力" data-shortcut="Ctrl+Alt+R">
+                            <button class="qip-ruby-dialog" data-requires-selection="false" onclick="openRubyInsertDialog()" aria-label="ルビ入力" data-desc="ルビ入力" data-shortcut="Ctrl+Alt+R" title="ルビ入力ダイアログ (Ctrl+Alt+R)">
                                 <span class="btn-icon" aria-hidden="true">✍</span><span class="btn-label">ルビ入力</span>
                             </button>
-                            <button class="qip-ruby" data-requires-selection="true" onclick="quickInsertRuby()" aria-label="ルビ">
+                            <button class="qip-ruby" data-requires-selection="true" onclick="quickInsertRuby()" aria-label="ルビ" title="選択文字にルビ記法を挿入">
                                 <span class="btn-icon" aria-hidden="true">🔤</span><span class="btn-label">ルビ</span>
                             </button>
-                            <button class="qip-bouten" data-requires-selection="true" onclick="quickInsertBouten()" aria-label="傍点">
+                            <button class="qip-bouten" data-requires-selection="true" onclick="quickInsertBouten()" aria-label="傍点" title="選択文字に傍点 (Ctrl+Alt+B)" data-shortcut="Ctrl+Alt+B">
                                 <span class="btn-icon" aria-hidden="true">⚫</span><span class="btn-label">傍点</span>
                             </button>
-                            <button data-requires-selection="true" onclick="quickWrapSelection('「', '」')" aria-label="鉤括弧">
+                            <button data-requires-selection="true" onclick="quickWrapSelection('「', '」')" aria-label="鉤括弧" title="鉤括弧で囲む (Ctrl+Alt+K)" data-shortcut="Ctrl+Alt+K">
                                 <span class="btn-icon" aria-hidden="true">「」</span><span class="btn-label">「」</span>
                             </button>
-                            <button data-requires-selection="true" onclick="quickWrapSelection('『', '』')" aria-label="二重鉤括弧">
+                            <button data-requires-selection="true" onclick="quickWrapSelection('『', '』')" aria-label="二重鉤括弧" title="二重鉤括弧で囲む (Ctrl+Alt+Shift+K)" data-shortcut="Ctrl+Alt+Shift+K">
                                 <span class="btn-icon" aria-hidden="true">『』</span><span class="btn-label">『』</span>
                             </button>
-                            <button data-requires-selection="true" onclick="quickWrapSelection('（', '）')" aria-label="括弧">
+                            <button data-requires-selection="true" onclick="quickWrapSelection('（', '）')" aria-label="括弧" title="括弧で囲む (Ctrl+Alt+P)" data-shortcut="Ctrl+Alt+P">
                                 <span class="btn-icon" aria-hidden="true">（）</span><span class="btn-label">（）</span>
                             </button>
-                            <button style="color:#d97706;" data-requires-selection="true" onclick="quickAddBookmark()" aria-label="しおり">
+                            <button style="color:#d97706;" data-requires-selection="true" onclick="quickAddBookmark()" aria-label="しおり" title="しおりを追加 (Ctrl+Alt+Shift+B)" data-shortcut="Ctrl+Alt+Shift+B">
                                 <span class="btn-icon" aria-hidden="true">🔖</span><span class="btn-label">しおり</span>
                             </button>
                         </div>
@@ -6535,12 +6513,12 @@ body.theme-dark{
 </div>
 
 <div id="quick-insert-popup" class="quick-insert-popup">
-    <button class="qip-ruby" onclick="quickInsertRuby()">🔤ルビ</button>
-    <button class="qip-bouten" onclick="quickInsertBouten()">⚫傍点</button>
-    <button onclick="quickWrapSelection('「', '」')">「」</button>
-    <button onclick="quickWrapSelection('『', '』')">『』</button>
-    <button onclick="quickWrapSelection('（', '）')">（）</button>
-    <button style="color:#d97706;" onclick="quickAddBookmark()">🔖しおり</button>
+    <button class="qip-ruby" onclick="quickInsertRuby()" title="選択文字にルビ記法を挿入">🔤ルビ</button>
+    <button class="qip-bouten" onclick="quickInsertBouten()" title="選択文字に傍点 (Ctrl+Alt+B)">⚫傍点</button>
+    <button onclick="quickWrapSelection('「', '」')" title="鉤括弧で囲む (Ctrl+Alt+K)">「」</button>
+    <button onclick="quickWrapSelection('『', '』')" title="二重鉤括弧で囲む (Ctrl+Alt+Shift+K)">『』</button>
+    <button onclick="quickWrapSelection('（', '）')" title="括弧で囲む (Ctrl+Alt+P)">（）</button>
+    <button style="color:#d97706;" onclick="quickAddBookmark()" title="しおりを追加 (Ctrl+Alt+Shift+B)">🔖しおり</button>
 </div>
 
 <div id="save-dialog-overlay" class="save-dialog-overlay" style="display:none;">
@@ -6688,13 +6666,6 @@ body.theme-dark{
     </div>
 </div>
 
-<div id="autosave-toast" class="autosave-toast">自動保存しました♪</div>
-<div id="autosave-error" class="autosave-error-overlay">
-    <div class="autosave-error">
-        自動保存できませんでした😢　自動保存をオフにします
-        <div><button onclick="closeAutoSaveError()">OK</button></div>
-    </div>
-</div>
 
 <div id="analysis-modal" class="modal-overlay">
     <div class="modal-content">
@@ -7392,7 +7363,7 @@ initTabScrollers();
         typewriterMode: false, writingTracker: true, defaultPreviewHidden: false,
         showProgressBar: true, progressBarTarget: 'today', progressBarDisplay: 'detail',
         showSelectionToolWindow: true,
-        celebrateGoal: true, openMode: 'current', autosaveInterval: 60, autosaveEnabled: false, maxPinnedPanels: 4,
+        celebrateGoal: true, openMode: 'current', maxPinnedPanels: 4,
         panelSideMap: { memo:'left', outline:'left', search:'left', structure:'left', character:'left', world:'left', terms:'left' }
     };
     let goalAchieved = { today: false, total: false };
@@ -7519,7 +7490,7 @@ memo: 'cc_memo_width_px',
     let lastTextSaveHandle = null;
     let lastHtmlSaveHandle = null;
     let lastMemoSaveHandle = null;
-    let autoSaveTarget = { handle: null, type: null };
+
 
     // Utility function - must be defined before use in renderInputTabs
     function escapeHtml(s) {
@@ -7986,10 +7957,28 @@ window.closeActiveTab = closeActiveTab;
         document.getElementById('writing-time-display').textContent = `執筆時間: ${t}`;
         inputWritingTimeEl.textContent = settingsCache.writingTracker ? `⏱${t}` : '';
     }
+    let lastTickTime = Date.now();
     function startWritingTimer() {
         if (writingTimerInterval) return;
-        writingTimerInterval = setInterval(() => { if (Date.now() - lastInputTime < 5000) { writingSeconds++; updateWritingTimeDisplay(); if (writingSeconds % 30 === 0) saveWritingTime(); } }, 1000);
+        lastTickTime = Date.now();
+        writingTimerInterval = setInterval(() => {
+            const now = Date.now();
+            const elapsed = Math.min(now - lastTickTime, 5000);
+            lastTickTime = now;
+            if (now - lastInputTime < 5000) {
+                writingSeconds += Math.round(elapsed / 1000);
+                updateWritingTimeDisplay();
+                if (writingSeconds % 30 < Math.round(elapsed / 1000)) saveWritingTime();
+            }
+        }, 1000);
     }
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            saveWritingTime();
+        } else {
+            lastTickTime = Date.now();
+        }
+    });
 
     function loadBookmarks() { const s = localStorage.getItem(BOOKMARKS_KEY); if (s) { try { bookmarks = JSON.parse(s); } catch (e) { bookmarks = []; } } renderBookmarks(); }
     function saveBookmarks() { localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarks)); }
@@ -8000,18 +7989,48 @@ window.closeActiveTab = closeActiveTab;
         const preview = lineText.substring(0, 30) + (lineText.length > 30 ? '...' : '');
         const lineNum = (text.substring(0, pos).match(/\n/g) || []).length + 1;
         const currentTab = inputTabs.find(t => t.id === activeTabId);
-        bookmarks.push({ pos, lineNum, preview, created: Date.now(), tabId: activeTabId, tabName: currentTab?.name || '' });
+        const anchor = text.substring(Math.max(0, pos - 40), pos + 40);
+        bookmarks.push({ pos, lineNum, preview, anchor, created: Date.now(), tabId: activeTabId, tabName: currentTab?.name || '' });
         saveBookmarks();
         renderBookmarks();
     }
     function deleteBookmark(i) { bookmarks.splice(i, 1); saveBookmarks(); renderBookmarks(); }
-    function jumpToBookmark(pos, tabId) {
-        if (tabId && tabId !== activeTabId) {
-            switchTab(tabId);
+    function resolveBookmarkPos(bm, content) {
+        // 1. Check if stored pos still matches anchor context
+        const start = Math.max(0, bm.pos - 40);
+        const slice = content.substring(start, bm.pos + 40);
+        if (bm.anchor && slice === bm.anchor) return bm.pos;
+        // 2. Search for anchor text in content
+        if (bm.anchor) {
+            const idx = content.indexOf(bm.anchor);
+            if (idx !== -1) { bm.pos = idx + 40; return bm.pos; }
         }
+        // 3. Fallback: search for preview text
+        const clean = (bm.preview || '').replace(/\.\.\.$/,'');
+        if (clean.length > 3) {
+            const pIdx = content.indexOf(clean);
+            if (pIdx !== -1) return pIdx;
+        }
+        // 4. Last resort: clamp to content length
+        return Math.min(bm.pos, content.length);
+    }
+    function jumpToBookmark(indexOrPos, tabId) {
+        let bm;
+        if (tabId === undefined && typeof indexOrPos === 'number' && indexOrPos < bookmarks.length) {
+            // Called with index
+            bm = bookmarks[indexOrPos];
+        } else {
+            // Legacy call with (pos, tabId)
+            bm = bookmarks.find(b => b.pos === indexOrPos && b.tabId === tabId) || { pos: indexOrPos, preview: '' };
+        }
+        if (bm.tabId && bm.tabId !== activeTabId) {
+            switchTab(bm.tabId);
+        }
+        const resolvedPos = resolveBookmarkPos(bm, inputArea.value);
+        saveBookmarks();
         inputArea.focus();
-        inputArea.setSelectionRange(pos, pos);
-        setTimeout(() => scrollToCursorPosition(pos), 100);
+        inputArea.setSelectionRange(resolvedPos, resolvedPos);
+        setTimeout(() => scrollToCursorPosition(resolvedPos), 100);
         updateCursorLineDisplay();
     }
     function toggleAllBookmarks() {
@@ -8037,7 +8056,7 @@ window.closeActiveTab = closeActiveTab;
             const tabLabel = tabName ? `【${escapeHtml(tabName)}】` : '';
             const d = document.createElement('div');
             d.className = 'bookmark-item';
-            d.innerHTML = `<input type="checkbox" class="bookmark-checkbox" data-index="${i}" style="margin-right:6px;"><span class="bookmark-text" onclick="jumpToBookmark(${b.pos}, ${b.tabId || activeTabId})">📍 ${tabLabel}${b.lineNum}行目: ${escapeHtml(b.preview)}</span><span class="bookmark-delete" onclick="deleteBookmark(${i})">✕</span>`;
+            d.innerHTML = `<input type="checkbox" class="bookmark-checkbox" data-index="${i}" style="margin-right:6px;"><span class="bookmark-text" onclick="jumpToBookmark(${i})">📍 ${tabLabel}${b.lineNum}行目: ${escapeHtml(b.preview)}</span><span class="bookmark-delete" onclick="deleteBookmark(${i})">✕</span>`;
             l.appendChild(d);
         });
     }
@@ -8062,7 +8081,6 @@ window.closeActiveTab = closeActiveTab;
             },
             manuscript: { rows: document.getElementById('st-manuscript-rows').value, cols: document.getElementById('st-manuscript-cols').value, show: document.getElementById('st-show-manuscript').checked },
             open: { mode: document.querySelector('input[name="st-open-mode"]:checked')?.value || 'current' },
-            autosave: { interval: document.getElementById('st-autosave-interval').value, enabled: document.getElementById('st-autosave-enabled').checked },
             theme: document.getElementById('st-theme-preset').value,
             textColor: document.getElementById('st-text-color-text').value,
             activeTabColor: (localStorage.getItem('cc_active_tab_color') || document.getElementById('st-active-tab-color')?.value || ''),
@@ -8129,7 +8147,6 @@ window.closeActiveTab = closeActiveTab;
             const r = document.querySelector(`input[name="st-open-mode"][value="${v}"]`);
             if (r) r.checked = true;
         }
-        if (s.autosave) { document.getElementById('st-autosave-interval').value = s.autosave.interval || 30; document.getElementById('st-autosave-enabled').checked = s.autosave.enabled !== false; }
         if (s.theme) { document.getElementById('st-theme-preset').value = s.theme; }
         if (s.textColor) { document.getElementById('st-text-color-text').value = s.textColor; document.getElementById('st-text-color').value = s.textColor; }
 
@@ -8461,14 +8478,6 @@ window.closeActiveTab = closeActiveTab;
             const openCurrent = document.querySelector('input[name="st-open-mode"][value="current"]');
             if (openCurrent) openCurrent.checked = true;
 
-            // オートセーブ
-            document.getElementById('st-autosave-interval').value = 60;
-            document.getElementById('st-autosave-enabled').checked = false;
-            settingsCache.autosaveInterval = 60;
-            settingsCache.autosaveEnabled = false;
-            autoSaveTarget = { handle: null, type: null, scope: 'current' };
-            setAutoSaveEnabled(false);
-
             // テーマ/色
             document.getElementById('st-theme-preset').value = '';
             document.getElementById('st-text-color-text').value = '';
@@ -8587,9 +8596,6 @@ window.closeActiveTab = closeActiveTab;
         nextMemoTabId = 2;
         memoArea.value = '';
         setNovelTitle(DEFAULT_NOVEL_TITLE);
-        autoSaveTarget = { handle: null, type: null, scope: 'current' };
-        settingsCache.autosaveInterval = 60;
-        setAutoSaveEnabled(false);
 
         // 設定のリセット（すべての設定を初期値に）
         document.getElementById('st-in-size').value = 17;
@@ -8619,8 +8625,6 @@ window.closeActiveTab = closeActiveTab;
         document.getElementById('st-manuscript-cols').value = 42;
         document.getElementById('st-show-manuscript').checked = true;
         document.querySelector('input[name="st-open-mode"][value="current"]').checked = true;
-        document.getElementById('st-autosave-interval').value = 60;
-        document.getElementById('st-autosave-enabled').checked = false;
         document.getElementById('st-theme-preset').value = '';
         document.getElementById('st-text-color-text').value = '';
         document.getElementById('st-text-color').value = '#1f2937';
@@ -8639,7 +8643,6 @@ window.closeActiveTab = closeActiveTab;
 
         // localStorage をクリア
         localStorage.removeItem(TABS_KEY);
-        localStorage.removeItem(AUTOSAVE_KEY);
         localStorage.removeItem(TODAY_START_KEY);
         localStorage.removeItem(BOOKMARKS_KEY);
         localStorage.removeItem(MEMO_KEY);
@@ -8720,36 +8723,7 @@ window.closeActiveTab = closeActiveTab;
         });
     }
 
-    const AUTOSAVE_KEY = 'cc_editor_autosave';
-    let autosaveTimerId = null;
     function persistLocalState() { saveTabsToStorage(); saveSettingsToStorage(); }
-    function showAutoSaveToast() {
-        const toast = document.getElementById('autosave-toast');
-        if (!toast) return;
-        toast.classList.add('show');
-        clearTimeout(showAutoSaveToast._timer);
-        showAutoSaveToast._timer = setTimeout(() => toast.classList.remove('show'), 1500);
-    }
-    function closeAutoSaveError() {
-        const overlay = document.getElementById('autosave-error');
-        if (overlay) overlay.classList.remove('show');
-    }
-    function showAutoSaveError() {
-        const overlay = document.getElementById('autosave-error');
-        if (overlay) overlay.classList.add('show');
-    }
-    function setAutoSaveEnabled(enabled) {
-        settingsCache.autosaveEnabled = enabled;
-        const checkbox = document.getElementById('st-autosave-enabled');
-        if (checkbox) checkbox.checked = enabled;
-        // Update save button icon based on autosave state
-        const saveBtn = document.querySelector('.btn-save');
-        if (saveBtn) {
-            saveBtn.innerHTML = enabled ? '🔄 保存' : '💾 保存';
-            saveBtn.title = enabled ? '自動保存オン' : '保存';
-        }
-        startAutoSaveTimer();
-    }
     function buildHtmlExport(scope) {
         const v = document.getElementById('st-pv-v').checked;
         const fk = document.getElementById('st-pv-font').value;
@@ -8778,62 +8752,6 @@ window.closeActiveTab = closeActiveTab;
 
 </body></html>`;
     }
-    function getAutoSavePayload() {
-        if (!autoSaveTarget.handle || !autoSaveTarget.type) return null;
-        const scope = autoSaveTarget.scope || 'current';
-        if (autoSaveTarget.type === 'html') {
-            return { blob: new Blob([buildHtmlExport(scope)], { type: 'text/html' }) };
-        }
-        return { blob: new Blob([scope === 'all' ? getAllTabsContent() : getCurrentTabContent()], { type: 'text/plain' }) };
-    }
-    async function autoSave() {
-        if (!settingsCache.autosaveEnabled) return;
-        persistLocalState();
-        if (!autoSaveTarget.handle) {
-            showAutoSaveError();
-            setAutoSaveEnabled(false);
-            return;
-        }
-        const payload = getAutoSavePayload();
-        if (!payload) return;
-        const handled = await saveWithHandle(autoSaveTarget.handle, payload.blob);
-        if (handled) {
-            showAutoSaveToast();
-            recordLastSave('自動保存');
-            return;
-        }
-        showAutoSaveError();
-        setAutoSaveEnabled(false);
-    }
-    function startAutoSaveTimer() {
-        if (autosaveTimerId) clearInterval(autosaveTimerId);
-        if (!settingsCache.autosaveEnabled) return;
-        const seconds = settingsCache.autosaveInterval || 60;
-        autosaveTimerId = setInterval(autoSave, seconds * 1000);
-    }
-    function loadAutoSave() {
-        // Try to load tabs first (new format)
-        if (loadTabsFromStorage()) {
-            renderInputTabs();
-            return;
-        }
-        // Fallback: try old single-content format
-        const s = localStorage.getItem(AUTOSAVE_KEY);
-        if (s && s.length > 0 && s !== defaultText) {
-            if (confirm('前回の自動保存データがあります。復元しますか？')) {
-                inputTabs[0].content = s;
-                inputArea.value = s;
-            } else {
-                inputArea.value = defaultText;
-                inputTabs[0].content = defaultText;
-            }
-        } else {
-            inputArea.value = defaultText;
-            inputTabs[0].content = defaultText;
-        }
-        renderInputTabs();
-    }
-    startAutoSaveTimer();
     let __ccSkipBeforeUnloadSave = false;
     window.addEventListener('beforeunload', e => { if (!__ccSkipBeforeUnloadSave) { persistLocalState(); saveWritingTime(); } e.preventDefault(); e.returnValue = ''; });
 
@@ -9265,6 +9183,8 @@ function openRubyInsertDialog() {
 }
 
 window.openRubyInsertDialog = openRubyInsertDialog;
+window.quickInsertBouten = quickInsertBouten;
+window.quickAddBookmark = quickAddBookmark;
 
 // Global shortcut: Ctrl+Alt+R (only in input pane)
 document.addEventListener('keydown', function(e) {
@@ -10085,25 +10005,6 @@ function applyPreviewSettings() {
         document.getElementById('st-divider-width').value = 2;
         applyDividerSettings();
     }
-    function applyAutoSaveSettings(skipConfirm = false) {
-        const input = document.getElementById('st-autosave-interval');
-        const checkbox = document.getElementById('st-autosave-enabled');
-        if (!input || !checkbox) return;
-        const secondsRaw = parseInt(input.value, 10);
-        const seconds = clampValue(secondsRaw || 60, 5, 600);
-        input.value = seconds;
-        settingsCache.autosaveInterval = seconds;
-        const enableAutoSave = checkbox.checked;
-        if (enableAutoSave && !settingsCache.autosaveEnabled && !skipConfirm) {
-            const confirmed = confirm('自動保存をオンにすると、指定したフォルダーに保存が続きますがよろしいですか？');
-            if (!confirmed) {
-                checkbox.checked = false;
-                settingsCache.autosaveEnabled = false;
-                return;
-            }
-        }
-        setAutoSaveEnabled(enableAutoSave);
-    }
     function applyPaperSettings() { applyManuscriptSettings(); applyThemeSettings(); applyPinnedLimitSettings(); }
     // 固定パネル上限（2～7）: 入力/プレビュー + ドック固定パネル（メモ/目次/検索/構成/登場人物/世界観）
     window.__ccPinnableDefs = {
@@ -10621,7 +10522,7 @@ window.__ccGetMaxPinnedPanels = function() {
     }
 
     function applyAllSettings() { applyInputSettings(); applyPreviewSettings(); applyDisplaySettings(); applyWritingSettings(); applyGoalSettings();
-        updateWritingModeButtonLabels(); applyManuscriptSettings(); applyThemeSettings(); applyOpenSettings(); applyPaneWidthSettings(); applyPaneHeightSettings(); applyDividerSettings(); applyAutoSaveSettings(true); applyTextColorSettings(); applyPinnedLimitSettings(); }
+        updateWritingModeButtonLabels(); applyManuscriptSettings(); applyThemeSettings(); applyOpenSettings(); applyPaneWidthSettings(); applyPaneHeightSettings(); applyDividerSettings(); applyTextColorSettings(); applyPinnedLimitSettings(); }
 
     function resetAllSettings() {
         if (!confirm('全ての設定を初期状態に戻しますか？')) return;
@@ -10649,8 +10550,6 @@ window.__ccGetMaxPinnedPanels = function() {
         document.getElementById('st-manuscript-cols').value = 42;
         document.getElementById('st-show-manuscript').checked = true;
         document.querySelector('input[name="st-open-mode"][value="current"]').checked = true;
-        document.getElementById('st-autosave-interval').value = 60;
-        document.getElementById('st-autosave-enabled').checked = false;
         document.getElementById('st-theme-preset').value = '';
         document.getElementById('st-text-color-text').value = '';
         document.getElementById('st-text-color').value = '#1f2937';
@@ -10672,8 +10571,6 @@ window.__ccGetMaxPinnedPanels = function() {
         localStorage.removeItem(TEXT_COLOR_KEY);
 
         applyAllSettings();
-        autoSaveTarget = { handle: null, type: null, scope: 'current' };
-        setAutoSaveEnabled(false);
         resetPaneWidths();
         resetPaneHeights();
 
@@ -11562,6 +11459,7 @@ if (typeof adjustPaneHeightsOnVisibility === 'function') {
         updateInputStats();
         hideQuickInsertPopup();
     }
+    window.quickWrapSelection = quickWrapSelection;
 
     let scrollToCursorTimeout = null;
     let cachedInputStyle = null;
@@ -13611,8 +13509,6 @@ if (typeof applyPaneHeightSettings === 'function') {
                     });
                 }
                 if (s.theme) localStorage.setItem('cc_theme', s.theme);
-                if (s.autoSave !== undefined) localStorage.setItem('cc_autosave_enabled', s.autoSave);
-                if (s.autoSaveInterval) localStorage.setItem('cc_autosave_interval', s.autoSaveInterval);
                 const __atc = (s.activeTabColor || s.active_tab_color || s.tabColor || s.activeColor);
                 if (__atc) localStorage.setItem('cc_active_tab_color', __atc);
                 const __ds = (s.dayStart || s.day_start || (s.goal && s.goal.dayStart));
@@ -13732,8 +13628,6 @@ if (typeof applyPaneHeightSettings === 'function') {
                     terms: localStorage.getItem('cc_terms_width_px')
                 },
                 theme: localStorage.getItem('cc_theme'),
-                autoSave: localStorage.getItem('cc_autosave_enabled'),
-                autoSaveInterval: localStorage.getItem('cc_autosave_interval'),
                 activeTabColor: localStorage.getItem('cc_active_tab_color'),
                 dayStart: localStorage.getItem('cc_day_start_hhmm')
             };
@@ -13938,8 +13832,6 @@ if (typeof applyPaneHeightSettings === 'function') {
                         });
                     }
                     if (s.theme) localStorage.setItem('cc_theme', s.theme);
-                    if (s.autoSave) localStorage.setItem('cc_autosave_enabled', s.autoSave);
-                    if (s.autoSaveInterval) localStorage.setItem('cc_autosave_interval', s.autoSaveInterval);
                 }
 
                 closeProjectSaveDialog();
@@ -14002,18 +13894,6 @@ if (typeof applyPaneHeightSettings === 'function') {
     }
     function getSaveScope() { return document.querySelector('input[name="save-scope"]:checked')?.value || 'current'; }
     function getContentToSave(scope = getSaveScope()) { return scope === 'all' ? getAllTabsContent() : getCurrentTabContent(); }
-    function setAutoSaveTarget(handle, type, scope) {
-        autoSaveTarget = { handle, type, scope };
-    }
-    function maybePromptEnableAutoSave() {
-        if (settingsCache.autosaveEnabled) return;
-        if (!autoSaveTarget.handle) return;
-        const enable = confirm('自動保存をオンにすると、指定したフォルダーに保存が続きますがよろしいですか？');
-        if (enable) {
-            document.getElementById('st-autosave-enabled').checked = true;
-            applyAutoSaveSettings(true);
-        }
-    }
     async function saveAsText() {
         const scope = getSaveScope();
         const content = getContentToSave(scope);
@@ -14028,10 +13908,6 @@ if (typeof applyPaneHeightSettings === 'function') {
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-        }
-        if (result.handle) {
-            setAutoSaveTarget(result.handle, 'text', scope);
-            maybePromptEnableAutoSave();
         }
         recordLastSave('保存');
         closeSaveDialog();
@@ -14050,10 +13926,6 @@ if (typeof applyPaneHeightSettings === 'function') {
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-        }
-        if (result.handle) {
-            setAutoSaveTarget(result.handle, 'html', scope);
-            maybePromptEnableAutoSave();
         }
         recordLastSave('保存');
         closeSaveDialog();
@@ -14773,7 +14645,11 @@ outline.classList.add('open');
 function updateActiveTabTitle() {}
 
 // 初期化
-    loadAutoSave();
+    if (!loadTabsFromStorage()) {
+        inputArea.value = defaultText;
+        inputTabs[0].content = defaultText;
+    }
+    renderInputTabs();
     loadTodayStart();
     loadWritingTime();
     loadBookmarks();
@@ -28063,7 +27939,12 @@ bindResize('cc-resize-sw', 'sw');
     focusToggle: 'Ctrl+Alt+L',
     readerView: 'Ctrl+Alt+V',
     analysis: 'Ctrl+Alt+A',
-    helpPanel: 'Ctrl+Alt+H'
+    helpPanel: 'Ctrl+Alt+H',
+    bouten: 'Ctrl+Alt+B',
+    wrapKagi: 'Ctrl+Alt+K',
+    wrapNijuKagi: 'Ctrl+Alt+Shift+K',
+    wrapParen: 'Ctrl+Alt+P',
+    quickBookmark: 'Ctrl+Alt+Shift+B'
   };
 
   function normalizeKeyName(k){
@@ -28119,6 +28000,11 @@ bindResize('cc-resize-sw', 'sw');
         readerView: normalizeShortcutString(obj.readerView || DEFAULT_SHORTCUTS.readerView),
         analysis: normalizeShortcutString(obj.analysis || DEFAULT_SHORTCUTS.analysis),
         helpPanel: normalizeShortcutString(obj.helpPanel || DEFAULT_SHORTCUTS.helpPanel),
+        bouten: normalizeShortcutString(obj.bouten || DEFAULT_SHORTCUTS.bouten),
+        wrapKagi: normalizeShortcutString(obj.wrapKagi || DEFAULT_SHORTCUTS.wrapKagi),
+        wrapNijuKagi: normalizeShortcutString(obj.wrapNijuKagi || DEFAULT_SHORTCUTS.wrapNijuKagi),
+        wrapParen: normalizeShortcutString(obj.wrapParen || DEFAULT_SHORTCUTS.wrapParen),
+        quickBookmark: normalizeShortcutString(obj.quickBookmark || DEFAULT_SHORTCUTS.quickBookmark),
       };
     }catch(e){
       return { ...DEFAULT_SHORTCUTS };
@@ -28138,6 +28024,11 @@ bindResize('cc-resize-sw', 'sw');
       readerView: normalizeShortcutString(next.readerView || DEFAULT_SHORTCUTS.readerView),
       analysis: normalizeShortcutString(next.analysis || DEFAULT_SHORTCUTS.analysis),
       helpPanel: normalizeShortcutString(next.helpPanel || DEFAULT_SHORTCUTS.helpPanel),
+      bouten: normalizeShortcutString(next.bouten || DEFAULT_SHORTCUTS.bouten),
+      wrapKagi: normalizeShortcutString(next.wrapKagi || DEFAULT_SHORTCUTS.wrapKagi),
+      wrapNijuKagi: normalizeShortcutString(next.wrapNijuKagi || DEFAULT_SHORTCUTS.wrapNijuKagi),
+      wrapParen: normalizeShortcutString(next.wrapParen || DEFAULT_SHORTCUTS.wrapParen),
+      quickBookmark: normalizeShortcutString(next.quickBookmark || DEFAULT_SHORTCUTS.quickBookmark),
     };
     localStorage.setItem(SHORTCUTS_KEY, JSON.stringify(payload));
     // Update data-shortcut display if present
@@ -28664,6 +28555,11 @@ bindResize('cc-resize-sw', 'sw');
             }
           }
         },
+        { key:'bouten', run: ()=> __ccRunActionSafe(window.quickInsertBouten) },
+        { key:'wrapKagi', run: ()=> __ccRunActionSafe(()=> window.quickWrapSelection('「', '」')) },
+        { key:'wrapNijuKagi', run: ()=> __ccRunActionSafe(()=> window.quickWrapSelection('『', '』')) },
+        { key:'wrapParen', run: ()=> __ccRunActionSafe(()=> window.quickWrapSelection('（', '）')) },
+        { key:'quickBookmark', run: ()=> __ccRunActionSafe(window.quickAddBookmark) },
       ];
 
       // 1) Run configured shortcut

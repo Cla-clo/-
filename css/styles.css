@@ -1779,27 +1779,6 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     .save-dialog-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
     .save-dialog-buttons button { padding: 10px 20px; font-size: 1rem; display: inline-flex; align-items: center; justify-content: center; }
 
-    .autosave-toast {
-        position: fixed; top: 16px; right: 16px; z-index: 1200;
-        background: #fef9c3; color: #92400e; border: 1px solid #fcd34d;
-        padding: 8px 14px; border-radius: 12px; font-weight: bold;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.15); display: none;
-    }
-    .autosave-toast.show { display: block; }
-    .autosave-error-overlay {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.35);
-        display: none; align-items: center; justify-content: center; z-index: 1300;
-    }
-    .autosave-error-overlay.show { display: flex; }
-    .autosave-error {
-        background: var(--panel-bg); border: 2px solid #fca5a5;
-        padding: 20px 26px; border-radius: 14px; text-align: center;
-        font-weight: bold; color: #b91c1c; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-    }
-    .autosave-error button {
-        margin-top: 12px; background: #fee2e2; border: 1px solid #fecaca;
-        color: #991b1b; padding: 6px 14px; border-radius: 8px; cursor: pointer;
-    }
 
     
 
