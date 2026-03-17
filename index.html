@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.230</title>
+<title>ⓒエディタ v1.231</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5882,7 +5882,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.230</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.231</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -6030,7 +6030,7 @@ body.theme-dark .card-shell:hover{
     <div id="help-bar" class="control-panel">
         <div class="panel-action-buttons">
             <button class="btn panel-icon-btn panel-pin-btn" onclick="togglePanelPin('help-bar')" title="固定">📌</button>
-            <button class="btn panel-icon-btn panel-close-btn" onclick="closeControlPanel('help-bar')">✕</button>
+            <button class="btn panel-icon-btn panel-close-btn" onclick="closeControlPanel('help-bar')" title="使い方を閉じる">✕</button>
         </div>
         <div style="display: flex; flex-wrap: wrap; gap: 16px;">
             <div class="help-section" style="flex: 1; min-width: 180px;">
@@ -6125,7 +6125,7 @@ body.theme-dark .card-shell:hover{
     <div id="settings-bar" class="control-panel">
         <div class="panel-action-buttons">
             <button class="btn panel-icon-btn panel-pin-btn" onclick="togglePanelPin('settings-bar')" title="固定">📌</button>
-            <button class="btn panel-icon-btn panel-close-btn" onclick="closeControlPanel('settings-bar')">✕</button>
+            <button class="btn panel-icon-btn panel-close-btn" onclick="closeControlPanel('settings-bar')" title="設定を閉じる">✕</button>
         </div>
         <details class="settings-section is-active" data-panel="display" open>
             <summary>表示・外観</summary>
@@ -6373,15 +6373,15 @@ body.theme-dark .card-shell:hover{
                     <button class="pane-zoom-btn" id="btn-input-zoom-out" onclick="zoomInput(-1)" title="縮小" data-shortcut="Alt+Shift+-">🔍−</button>
                     <button class="pane-zoom-btn" id="btn-input-zoom-in" onclick="zoomInput(1)" title="拡大" data-shortcut="Alt+Shift+=">🔍+</button>
                     <button class="pane-layout-btn" id="btn-input-writing-mode" onclick="toggleInputWritingMode()" title="書字方向切替">横書きへ</button>
-                    <button class="pane-close-btn" onclick="hidePane('input')">✕</button>
+                    <button class="pane-close-btn" onclick="hidePane('input')" title="入力パネルを閉じる">✕</button>
                 </div>
             </div>
             <div class="tabs-scroll-wrap" id="input-tabs-wrap">
-                <button class="tab-scroll-btn left" type="button" aria-label="タブを左へ" data-target="input-tabs-container">◀</button>
+                <button class="tab-scroll-btn left" type="button" aria-label="タブを左へ" title="タブを左へ" data-target="input-tabs-container">◀</button>
                 <div class="input-tabs-container" id="input-tabs-container">
                     <!-- Tabs will be dynamically generated -->
                 </div>
-                <button class="tab-scroll-btn right" type="button" aria-label="タブを右へ" data-target="input-tabs-container">▶</button>
+                <button class="tab-scroll-btn right" type="button" aria-label="タブを右へ" title="タブを右へ" data-target="input-tabs-container">▶</button>
             </div>
             <div class="pane-subheader" id="input-pos-bar">現在: 1 行目</div>
             <div class="pane-body">
@@ -6455,15 +6455,15 @@ body.theme-dark .card-shell:hover{
                     <button class="pane-zoom-btn" id="btn-preview-zoom-out" onclick="zoomPreview(-1)" title="縮小">🔍−</button>
                     <button class="pane-zoom-btn" id="btn-preview-zoom-in" onclick="zoomPreview(1)" title="拡大">🔍+</button>
                     <button class="pane-layout-btn" id="btn-preview-writing-mode" onclick="togglePreviewWritingMode()" title="書字方向切替">横書きへ</button>
-                    <button class="pane-close-btn" onclick="hidePane('preview')">✕</button>
+                    <button class="pane-close-btn" onclick="hidePane('preview')" title="プレビューパネルを閉じる">✕</button>
                 </div>
             </div>
             <div class="tabs-scroll-wrap" id="preview-tabs-wrap">
-                <button class="tab-scroll-btn left" type="button" aria-label="タブを左へ" data-target="preview-tabs-container">◀</button>
+                <button class="tab-scroll-btn left" type="button" aria-label="タブを左へ" title="タブを左へ" data-target="preview-tabs-container">◀</button>
                 <div class="preview-tabs-container" id="preview-tabs-container">
                     <!-- Preview tabs will be dynamically generated -->
                 </div>
-                <button class="tab-scroll-btn right" type="button" aria-label="タブを右へ" data-target="preview-tabs-container">▶</button>
+                <button class="tab-scroll-btn right" type="button" aria-label="タブを右へ" title="タブを右へ" data-target="preview-tabs-container">▶</button>
             </div>
             <div class="pane-subheader" id="preview-pos-bar">位置: 0%</div>
             <div class="pane-body">
@@ -6497,7 +6497,7 @@ body.theme-dark .card-shell:hover{
       <button id="btn-search-swap" class="btn panel-swap-btn" onclick="swapSearchSide()">左右入替</button>
       <button class="btn panel-icon-btn panel-pin-btn" id="btn-search-pin" onclick="toggleSearchDockPin()" title="固定/浮動切り替え">📌</button>
       <input type="checkbox" id="check-search-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="search">
-      <button class="btn panel-icon-btn panel-close-btn" onclick="closeSearchPanel()">✖</button>
+      <button class="btn panel-icon-btn panel-close-btn" onclick="closeSearchPanel()" title="検索を閉じる">✖</button>
     </div>
   </div>
   <div class="panel-toolbar search-toolbar">
@@ -6536,7 +6536,7 @@ body.theme-dark .card-shell:hover{
       <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-right" data-pane="memo" title="右のパネルと入替" aria-label="右のパネルと入替">▶</button>
 <button class="btn panel-icon-btn panel-pin-btn" id="btn-memo-pin" data-action="toggle-pin" data-pane="memo" title="固定/浮動切り替え">📌</button>
 <input type="checkbox" id="check-memo-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="memo">
-<button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="memo" data-args="true">✕</button>
+<button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="memo" data-args="true" title="メモを閉じる">✕</button>
     </div>
   </div>
 
@@ -6546,9 +6546,9 @@ body.theme-dark .card-shell:hover{
 <div class="panel-toolbar"></div>
 <div class="panel-body memo-body">
   <div class="tabs-scroll-wrap memo-tabs-wrap" id="memo-tabs-wrap" style="display:none;">
-    <button class="tab-scroll-btn left" type="button" aria-label="タブを左へ" data-target="memo-tabs-container">◀</button>
+    <button class="tab-scroll-btn left" type="button" aria-label="タブを左へ" title="タブを左へ" data-target="memo-tabs-container">◀</button>
     <div class="memo-tabs" id="memo-tabs-container"></div>
-    <button class="tab-scroll-btn right" type="button" aria-label="タブを右へ" data-target="memo-tabs-container">▶</button>
+    <button class="tab-scroll-btn right" type="button" aria-label="タブを右へ" title="タブを右へ" data-target="memo-tabs-container">▶</button>
   </div>
   <textarea id="memo-area" placeholder="ここに入力..." style="display:none;"></textarea>
   <div id="memo-cards-wrap" class="memo-cards-wrap" style="display:block; padding:8px; box-sizing:border-box;">
@@ -6575,7 +6575,7 @@ body.theme-dark .card-shell:hover{
             <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-right" data-pane="structure" title="右のパネルと入替" aria-label="右のパネルと入替">▶</button>
             <button class="btn panel-icon-btn panel-pin-btn" id="btn-structure-pin" data-action="toggle-pin" data-pane="structure" title="固定/浮動切り替え">📌</button>
             <input type="checkbox" id="check-structure-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="structure">
-            <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="structure" data-args="true">✕</button>
+            <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="structure" data-args="true" title="構成を閉じる">✕</button>
         </div>
     </div>
     <div class="panel-toolbar">
@@ -6603,7 +6603,7 @@ body.theme-dark .card-shell:hover{
             <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-right" data-pane="character" title="右のパネルと入替" aria-label="右のパネルと入替">▶</button>
             <button class="btn panel-icon-btn panel-pin-btn" id="btn-character-pin" data-action="toggle-pin" data-pane="character" title="固定/浮動切り替え">📌</button>
             <input type="checkbox" id="check-character-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="character">
-            <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="character" data-args="true">✕</button>
+            <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="character" data-args="true" title="人物を閉じる">✕</button>
         </div>
     </div>
     <div class="panel-toolbar">
@@ -6631,7 +6631,7 @@ body.theme-dark .card-shell:hover{
             <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-right" data-pane="world" title="右のパネルと入替" aria-label="右のパネルと入替">▶</button>
             <button class="btn panel-icon-btn panel-pin-btn" id="btn-world-pin" data-action="toggle-pin" data-pane="world" title="固定/浮動切り替え">📌</button>
             <input type="checkbox" id="check-world-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="world">
-            <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="world" data-args="true">✕</button>
+            <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="world" data-args="true" title="世界観を閉じる">✕</button>
         </div>
     </div>
     <div class="panel-toolbar">
@@ -6659,7 +6659,7 @@ body.theme-dark .card-shell:hover{
             <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-right" data-pane="terms" title="右のパネルと入替" aria-label="右のパネルと入替">▶</button>
             <button class="btn panel-icon-btn panel-pin-btn" id="btn-terms-pin" data-action="toggle-pin" data-pane="terms" title="固定/浮動切り替え">📌</button>
             <input type="checkbox" id="check-terms-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="terms">
-            <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="terms" data-args="true">✕</button>
+            <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="terms" data-args="true" title="用語を閉じる">✕</button>
         </div>
     </div>
     <div class="panel-toolbar">
@@ -6690,7 +6690,7 @@ body.theme-dark .card-shell:hover{
                 <button class="btn panel-icon-btn panel-neighbor-swap-btn" data-action="swap-neighbor-right" data-pane="outline" title="右のパネルと入替" aria-label="右のパネルと入替">▶</button>
                 <button class="btn panel-icon-btn panel-pin-btn" id="btn-outline-pin" data-action="toggle-pin" data-pane="outline" title="固定/浮動切り替え">📌</button>
                 <input type="checkbox" id="check-outline-dock" class="dock-pin-checkbox" data-action="dock-checkbox" data-pane="outline">
-                <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="outline" data-args="true">✕</button>
+                <button class="btn panel-icon-btn panel-close-btn" data-action="close-panel" data-pane="outline" data-args="true" title="目次を閉じる">✕</button>
             </div>
         </div>
         <div class="panel-toolbar outline-toolbar">
@@ -6912,22 +6912,22 @@ body.theme-dark .card-shell:hover{
 </div>
 
 
-<div id="analysis-modal" class="modal-overlay">
+<div id="analysis-modal" class="modal-overlay" aria-modal="true" role="dialog">
     <div class="modal-content">
-        <div class="modal-header"><h3>📊 テキスト分析</h3><button class="modal-close" onclick="closeAnalysis()">✕</button></div>
+        <div class="modal-header"><h3>📊 テキスト分析</h3><button class="modal-close" onclick="closeAnalysis()" title="閉じる">✕</button></div>
         <div id="analysis-results"></div>
     </div>
 </div>
 
 <!-- カード閲覧モーダル -->
-<div id="card-view-modal" class="modal-overlay" data-card-id="" data-panel-type="">
+<div id="card-view-modal" class="modal-overlay" data-card-id="" data-panel-type="" aria-modal="true" role="dialog">
     <div class="modal-content card-view-modal-content">
         <div class="modal-header card-view-titlebar">
             <div class="card-view-titlewrap">
                 <span id="card-view-panel-badge" class="card-view-panel-badge">📌 パネル</span>
                 <h3 id="card-view-title">カード詳細</h3>
             </div>
-            <button class="modal-close" onclick="window.closeCardViewModal()">&times;</button>
+            <button class="modal-close" onclick="window.closeCardViewModal()" title="閉じる">&times;</button>
         </div>
         <div id="card-view-body" class="card-view-body"></div>
         <div class="card-view-footer">
@@ -6941,7 +6941,7 @@ body.theme-dark .card-shell:hover{
     <div class="structure-edit-box">
         <div class="structure-edit-header">
             <h3 id="structure-edit-title">構成カードを編集</h3>
-            <button class="structure-edit-close" onclick="closeStructureEditModal()">✕</button>
+            <button class="structure-edit-close" onclick="closeStructureEditModal()" title="閉じる">✕</button>
         </div>
         <div class="structure-edit-field">
             <label for="structure-edit-name">タイトル</label>
@@ -7016,13 +7016,13 @@ body.theme-dark .card-shell:hover{
 
 
 <!-- メモ編集モーダル -->
-<div id="memo-edit-modal" class="modal-overlay" data-tab-id="">
+<div id="memo-edit-modal" class="modal-overlay" data-tab-id="" aria-modal="true" role="dialog">
   <div class="modal-content memo-edit-modal-content">
     <div class="modal-header">
       <h3>📝 メモを編集</h3>
       <div style="display:flex; gap:6px; align-items:center;">
         <button class="btn" type="button" onclick="toggleMemoEditModalFullscreen()" title="全画面切替">⛶</button>
-        <button class="modal-close" type="button" onclick="closeMemoEditModal()">✕</button>
+        <button class="modal-close" type="button" onclick="closeMemoEditModal()" title="閉じる">✕</button>
       </div>
     </div>
     <div class="memo-edit-fields">
@@ -7048,7 +7048,7 @@ body.theme-dark .card-shell:hover{
     <div class="character-edit-box">
         <div class="character-edit-header">
             <h3 id="character-edit-title">キャラクターを編集</h3>
-            <button class="character-edit-close" onclick="closeCharacterEditModal()">✕</button>
+            <button class="character-edit-close" onclick="closeCharacterEditModal()" title="閉じる">✕</button>
         </div>
         <div class="character-edit-field">
             <label for="character-edit-name">名前</label>
@@ -7166,7 +7166,7 @@ body.theme-dark .card-shell:hover{
     <div class="world-edit-box">
         <div class="world-edit-header">
             <h3 id="world-edit-title">項目を編集</h3>
-            <button class="world-edit-close" onclick="closeWorldEditModal()">✕</button>
+            <button class="world-edit-close" onclick="closeWorldEditModal()" title="閉じる">✕</button>
         </div>
         <div class="world-edit-field">
             <label for="world-edit-name">名前</label>
@@ -7245,7 +7245,7 @@ body.theme-dark .card-shell:hover{
   <div class="structure-edit-box">
     <div class="structure-edit-header">
       <h3 id="terms-edit-title">用語を編集</h3>
-      <button class="structure-edit-close" onclick="closeTermEditModal()">✕</button>
+      <button class="structure-edit-close" onclick="closeTermEditModal()" title="閉じる">✕</button>
     </div>
     <div class="structure-edit-field">
       <label for="terms-edit-name">用語名</label>
@@ -7304,11 +7304,11 @@ body.theme-dark .card-shell:hover{
 </div>
 
 <!-- 開く（読み込み）時の選択ダイアログ：現在タブ or 新規タブ -->
-<div id="open-choice-modal" class="modal-overlay" aria-hidden="true">
+<div id="open-choice-modal" class="modal-overlay" aria-hidden="true" aria-modal="true" role="dialog">
     <div class="modal-content" style="max-width: 420px;">
         <div class="modal-header">
             <h3>📂 開く</h3>
-            <button class="modal-close" onclick="closeOpenChoiceModal()">✕</button>
+            <button class="modal-close" onclick="closeOpenChoiceModal()" title="閉じる">✕</button>
         </div>
         <div style="font-size:0.9rem; line-height:1.6; margin-bottom: 12px;">
             読み込んだテキストを、どこに開きますか？
@@ -28983,6 +28983,246 @@ bindResize('cc-resize-sw', 'sw');
   } else {
     init();
   }
+})();
+</script>
+
+<!-- ===== v1.231 UI/UX enhancements (accessibility, keyboard nav, toast, search UX) ===== -->
+<style id="cc-ux-v1231">
+/* Toast notification system */
+#cc-toast-container{
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  pointer-events: none;
+}
+.cc-toast{
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: #fff;
+  background: rgba(31,41,55,0.92);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  pointer-events: auto;
+  animation: cc-toast-in 0.25s ease-out;
+  max-width: min(400px, 90vw);
+  text-align: center;
+  line-height: 1.4;
+}
+body.theme-dark .cc-toast{
+  background: rgba(255,255,255,0.92);
+  color: #1f2937;
+}
+.cc-toast.cc-toast-error{
+  background: rgba(185,28,28,0.92);
+}
+body.theme-dark .cc-toast.cc-toast-error{
+  background: rgba(254,202,202,0.95);
+  color: #991b1b;
+}
+.cc-toast.cc-toast-out{
+  animation: cc-toast-out 0.2s ease-in forwards;
+}
+@keyframes cc-toast-in{
+  from{ opacity: 0; transform: translateY(12px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+@keyframes cc-toast-out{
+  from{ opacity: 1; transform: translateY(0); }
+  to{ opacity: 0; transform: translateY(12px); }
+}
+
+/* Search panel: no-results state */
+#search-hits:empty::after{
+  content: '検索結果がここに表示されます';
+  display: block;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  padding: 24px 0;
+}
+#search-hits.no-results::after{
+  content: '一致する結果がありません';
+  display: block;
+  text-align: center;
+  color: #dc2626;
+  font-size: 0.85rem;
+  padding: 24px 0;
+  font-weight: 600;
+}
+
+/* Search clear button */
+.search-input-wrap{
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 120px;
+}
+.search-input-wrap input{
+  flex: 1;
+  padding-right: 28px !important;
+}
+.search-clear-btn{
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  line-height: 1;
+  display: none;
+}
+.search-clear-btn:hover{
+  color: #dc2626;
+  background: rgba(220,38,38,0.08);
+}
+.search-input-wrap input:not(:placeholder-shown) ~ .search-clear-btn{
+  display: block;
+}
+</style>
+
+<script>
+// ===== v1.231 UX enhancements =====
+(function(){
+  'use strict';
+
+  // --- 1. aria-pressed for all panel toggle buttons ---
+  function updateToggleAria(){
+    document.querySelectorAll('.btn.panel-toggle').forEach(function(btn){
+      var isOpen = btn.classList.contains('is-open');
+      btn.setAttribute('aria-pressed', isOpen ? 'true' : 'false');
+    });
+  }
+  // Run on load
+  updateToggleAria();
+  // Observe class changes via MutationObserver
+  var toggleBtns = document.querySelectorAll('.btn.panel-toggle');
+  if (toggleBtns.length) {
+    var obs = new MutationObserver(function(){ updateToggleAria(); });
+    toggleBtns.forEach(function(btn){
+      obs.observe(btn, { attributes: true, attributeFilter: ['class'] });
+    });
+  }
+
+  // --- 2. Ribbon menu keyboard navigation (Left/Right arrows) ---
+  var ribbonMenu = document.querySelector('.ribbon-menu');
+  if (ribbonMenu) {
+    ribbonMenu.setAttribute('role', 'menubar');
+    var menuBtns = ribbonMenu.querySelectorAll('.ribbon-menu-btn');
+    menuBtns.forEach(function(btn){ btn.setAttribute('role', 'menuitem'); });
+
+    ribbonMenu.addEventListener('keydown', function(e){
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      var btns = Array.from(ribbonMenu.querySelectorAll('.ribbon-menu-btn'));
+      var idx = btns.indexOf(document.activeElement);
+      if (idx < 0) return;
+      e.preventDefault();
+      var next = e.key === 'ArrowRight' ? (idx + 1) % btns.length : (idx - 1 + btns.length) % btns.length;
+      btns[next].focus();
+      btns[next].click();
+    });
+  }
+
+  // --- 3. Toast notification system ---
+  var toastContainer = document.createElement('div');
+  toastContainer.id = 'cc-toast-container';
+  document.body.appendChild(toastContainer);
+
+  window.ccToast = function(msg, opts){
+    opts = opts || {};
+    var el = document.createElement('div');
+    el.className = 'cc-toast' + (opts.error ? ' cc-toast-error' : '');
+    el.textContent = msg;
+    toastContainer.appendChild(el);
+    var dur = opts.duration || 2500;
+    setTimeout(function(){
+      el.classList.add('cc-toast-out');
+      el.addEventListener('animationend', function(){ el.remove(); });
+    }, dur);
+    return el;
+  };
+
+  // Override alert for common patterns (wrap original)
+  var _origAlert = window.alert;
+  window.alert = function(msg){
+    if (typeof msg === 'string' && msg.length < 120) {
+      var isErr = /失敗|エラー|できません/.test(msg);
+      window.ccToast(msg, { error: isErr, duration: isErr ? 3500 : 2500 });
+    } else {
+      _origAlert.call(window, msg);
+    }
+  };
+
+  // --- 4. Search panel UX improvements ---
+  // Wrap search input with clear button
+  var searchInput = document.getElementById('search-input');
+  if (searchInput && searchInput.parentNode) {
+    var wrap = document.createElement('div');
+    wrap.className = 'search-input-wrap';
+    searchInput.parentNode.insertBefore(wrap, searchInput);
+    wrap.appendChild(searchInput);
+
+    var clearBtn = document.createElement('button');
+    clearBtn.className = 'search-clear-btn';
+    clearBtn.type = 'button';
+    clearBtn.textContent = '✕';
+    clearBtn.title = '検索をクリア';
+    clearBtn.addEventListener('click', function(){
+      searchInput.value = '';
+      searchInput.focus();
+      if (typeof resetSearchPanel === 'function') resetSearchPanel();
+    });
+    wrap.appendChild(clearBtn);
+  }
+
+  // Add no-results class to search hits when empty after search
+  var _origDoSearch = window.doSearch;
+  if (typeof _origDoSearch === 'function') {
+    window.doSearch = function(){
+      _origDoSearch.apply(this, arguments);
+      setTimeout(function(){
+        var hits = document.getElementById('search-hits');
+        var info = document.getElementById('search-match-info');
+        if (hits && info) {
+          var text = info.textContent || '';
+          if (text.trim() === '0 / 0' && searchInput && searchInput.value.trim()) {
+            hits.classList.add('no-results');
+          } else {
+            hits.classList.remove('no-results');
+          }
+        }
+      }, 50);
+    };
+  }
+
+  // --- 5. aria-expanded for collapsible outline items ---
+  function updateAriaExpanded(){
+    document.querySelectorAll('.outline-toggle, .structure-toggle, .card-toggle').forEach(function(el){
+      var parent = el.closest('[class*="-item"], [class*="-card"]');
+      if (!parent) return;
+      var isOpen = parent.classList.contains('open') || parent.classList.contains('expanded') || el.textContent.trim() === '▾';
+      el.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+  }
+  updateAriaExpanded();
+  // Re-run periodically on toggle clicks
+  document.addEventListener('click', function(e){
+    if (e.target.closest('.outline-toggle, .structure-toggle, .card-toggle')) {
+      setTimeout(updateAriaExpanded, 50);
+    }
+  });
+
 })();
 </script>
 
