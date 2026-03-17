@@ -1,4 +1,4 @@
-const CACHE_NAME = 'c-editor-v3';
+const CACHE_NAME = 'c-editor-v4';
 const ASSETS = [
   './',
   './index.html',
