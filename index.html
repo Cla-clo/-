@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.234</title>
+<title>ⓒエディタ v1.235</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5880,7 +5880,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.231</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.235</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -6479,6 +6479,7 @@ body.theme-dark .card-shell:hover{
                     <span id="ref-char-count">0 字</span>
                 </div>
                 <div class="footer-right">
+                    <span id="ref-line-count">0 行</span>
                     <span id="ref-zoom-display" class="zoom-display" title="拡大率">100%</span>
                 </div>
             </div>
@@ -18075,9 +18076,9 @@ panel.style.width = '320px';
       menu.className = 'context-menu';
       menu.style.cssText = 'position:fixed; background:var(--panel-bg); border:1px solid var(--border-color); border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:10000; padding:4px 0; min-width:160px;';
       document.body.appendChild(menu);
-      // Prevent this menu from triggering "outside click" panel closers
-      menu.addEventListener('mousedown', (e)=>{ e.stopPropagation(); }, true);
-      menu.addEventListener('click', (e)=>{ e.stopPropagation(); }, true);
+      // Prevent this menu from triggering "outside click" panel closers (bubble phase)
+      menu.addEventListener('mousedown', (e)=>{ e.stopPropagation(); });
+      menu.addEventListener('click', (e)=>{ e.stopPropagation(); });
     }
 
     let html = `
@@ -30193,6 +30194,12 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     if (!area || !span) return;
     const len = area.value.replace(/[\n\r\s　]/g, '').length;
     span.textContent = len.toLocaleString() + ' 字';
+    // v1.235: 行数表示
+    const lineSpan = document.getElementById('ref-line-count');
+    if (lineSpan) {
+      const lines = area.value === '' ? 0 : area.value.split('\n').length;
+      lineSpan.textContent = lines + ' 行';
+    }
   }
 
   // ========================================
@@ -30348,8 +30355,8 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
       menu.className = 'context-menu';
       menu.style.cssText = 'position:fixed; background:var(--panel-bg); border:1px solid var(--border-color); border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:10000; padding:4px 0; min-width:140px;';
       document.body.appendChild(menu);
-      menu.addEventListener('mousedown', (e) => e.stopPropagation(), true);
-      menu.addEventListener('click', (e) => e.stopPropagation(), true);
+      menu.addEventListener('mousedown', (e) => e.stopPropagation());
+      menu.addEventListener('click', (e) => e.stopPropagation());
     }
 
     menu.innerHTML = `
