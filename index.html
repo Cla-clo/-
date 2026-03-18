@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.232</title>
+<title>ⓒエディタ v1.234</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -4867,8 +4867,7 @@ function contrastRatioRgb(bg, fg){
       const id = parseInt(tabEl.dataset.tabId, 10);
       if (Number.isNaN(id)) return;
       e.preventDefault();
-      e.stopPropagation();
-      showCtx(id, e.clientX, e.clientY);
+      // v1.233: stopPropagation を削除 — document-level の showTabContextMenu を実行させる
     }, true);
   }
 
@@ -4923,8 +4922,7 @@ function contrastRatioRgb(bg, fg){
           if (!Number.isNaN(id)) {
             tabEl.addEventListener('contextmenu', (e) => {
               e.preventDefault();
-              e.stopPropagation();
-              showCtx(id, e.clientX, e.clientY);
+              // v1.233: stopPropagation を削除 — document-level の showTabContextMenu を実行させる
             });
           }
         });
@@ -5992,6 +5990,9 @@ body.theme-dark .card-shell:hover{
                 <button class="btn btn-analysis" onclick="showAnalysis()" data-desc="分析を開く" data-shortcut="Ctrl+Alt+A">📊 分析</button>
                 <button class="btn btn-focus" id="btn-focus" onclick="toggleFocusMode()" data-desc="集中モードを切替" data-shortcut="Ctrl+Alt+L">🧘 集中</button>
                 <button class="btn btn-sync" id="btn-sync" onclick="syncPreviewPosition()" data-desc="プレビューを同期" data-shortcut="Ctrl+Alt+Enter">📲 同期</button>
+                <span class="ribbon-separator">|</span>
+                <button class="btn" id="btn-toggle-preview" onclick="document.getElementById('check-show-preview').click()" data-desc="プレビュー表示切替" data-shortcut="Ctrl+Alt+Shift+P">📄 プレビュー</button>
+                <button class="btn" id="btn-toggle-reference" onclick="toggleReferencePaneVis()" data-desc="参照ペイン表示切替" data-shortcut="Ctrl+Alt+Shift+R">📑 参照</button>
             </div>
         </div>
     </div>
@@ -6310,6 +6311,7 @@ body.theme-dark .card-shell:hover{
                         <label class="st-hide-pane-width">登場人物: <input type="number" id="st-pane-character-width" value="300" min="160" max="1200" style="width:70px;">px</label>
                         <label class="st-hide-pane-width">世界観: <input type="number" id="st-pane-world-width" value="300" min="160" max="1200" style="width:70px;">px</label>
                         <label class="st-hide-pane-width">用語: <input type="number" id="st-pane-terms-width" value="300" min="160" max="1200" style="width:70px;">px</label>
+                        <label>参照: <input type="number" id="st-pane-reference-width" value="300" min="120" max="1200" style="width:70px;">px</label>
                         <label>仕切り幅: <input type="number" id="st-divider-width" value="2" min="1" max="12" style="width:70px;" onchange="applyDividerSettings()">px</label>
                     </div>
                     <div class="setting-row">
@@ -6453,7 +6455,7 @@ body.theme-dark .card-shell:hover{
             <div class="pane-header">
                 <div class="pane-title">
                     <h2>参照</h2>
-                    <span class="pane-total-stats" id="ref-total-stats">全タブ: 0字</span>
+                    <span class="pane-total-stats" id="ref-total-stats">全タブ: 0字 / 0行</span>
                 </div>
                 <div class="pane-actions">
                     <button class="pane-zoom-btn" id="btn-ref-zoom-out" onclick="zoomReference(-1)" title="縮小">🔍−</button>
@@ -7752,6 +7754,7 @@ memo: 'cc_memo_width_px',
         character: 'cc_character_width_px',
         world: 'cc_world_width_px',
         terms: 'cc_terms_width_px',
+        reference: 'cc_pane_reference_width_px',
         legacyInput: 'cc_pane_input_width',
         legacyPreview: 'cc_pane_preview_width'
     };
@@ -8381,7 +8384,8 @@ window.closeActiveTab = closeActiveTab;
                 search: document.getElementById('st-pane-search-width').value,
                 character: document.getElementById('st-pane-character-width')?.value,
                 world: document.getElementById('st-pane-world-width')?.value,
-                terms: document.getElementById('st-pane-terms-width')?.value
+                terms: document.getElementById('st-pane-terms-width')?.value,
+                reference: document.getElementById('st-pane-reference-width')?.value
             },
             paneHeights: {
                 input: document.getElementById('st-pane-input-height').value,
@@ -8472,6 +8476,9 @@ window.closeActiveTab = closeActiveTab;
             if (cEl && s.paneWidths.character != null) { cEl.value = s.paneWidths.character; try { localStorage.setItem('cc_character_width_px', String(s.paneWidths.character)); } catch(e) {} }
             if (wEl && s.paneWidths.world != null) { wEl.value = s.paneWidths.world; try { localStorage.setItem('cc_world_width_px', String(s.paneWidths.world)); } catch(e) {} }
             if (tEl && s.paneWidths.terms != null) { tEl.value = s.paneWidths.terms; try { localStorage.setItem('cc_terms_width_px', String(s.paneWidths.terms)); } catch(e) {} }
+            // v1.234: 参照ペイン幅
+            const rEl = document.getElementById('st-pane-reference-width');
+            if (rEl && s.paneWidths.reference != null) { rEl.value = s.paneWidths.reference; try { localStorage.setItem(PANE_WIDTH_KEYS.reference, String(s.paneWidths.reference)); } catch(e) {} }
         }
 
         if (s.paneHeights) {
@@ -10980,6 +10987,19 @@ window.__ccGetMaxPinnedPanels = function() {
 
         localStorage.setItem(PANE_WIDTH_KEYS.input, inputWidth);
         localStorage.setItem(PANE_WIDTH_KEYS.preview, previewWidth);
+
+        // v1.234: 参照ペイン幅
+        const refWidthEl = document.getElementById('st-pane-reference-width');
+        if (refWidthEl) {
+            const refWidth = clampValue(parseInt(refWidthEl.value, 10) || 300, 120, 1200);
+            refWidthEl.value = refWidth;
+            localStorage.setItem(PANE_WIDTH_KEYS.reference, refWidth);
+            const refPane = document.getElementById('pane-reference');
+            if (refPane && refPane.style.display !== 'none') {
+                refPane.style.flex = `0 0 ${refWidth}px`;
+                refPane.style.width = `${refWidth}px`;
+            }
+        }
 
         applyDockedPanelWidths(true);
         adjustPaneWidthsOnVisibility();
@@ -14509,23 +14529,52 @@ if (typeof applyPaneHeightSettings === 'function') {
                 const minPaneWidth = 120;
                 const inputRect = inputPane.getBoundingClientRect();
                 const previewRect = previewPane.getBoundingClientRect();
-                const totalWidth = inputRect.width + previewRect.width;
-                if (totalWidth <= minPaneWidth * 2) return;
+                // v1.234: 参照ペイン表示中は input⇔reference のリサイズに切替
+                const refPane = document.getElementById('pane-reference');
+                const refVisible = refPane && refPane.style.display !== 'none';
 
-                if (paneStack.classList.contains('reverse-row')) {
-                    const newPreviewWidth = clampValue(e.clientX - previewRect.left, minPaneWidth, totalWidth - minPaneWidth);
-                    const newInputWidth = totalWidth - newPreviewWidth;
-                    previewPane.style.flex = `1 1 ${newPreviewWidth}px`;
-                    inputPane.style.flex = `1 1 ${newInputWidth}px`;
-                    previewPane.style.width = `${newPreviewWidth}px`;
-                    inputPane.style.width = `${newInputWidth}px`;
+                if (refVisible) {
+                    const refRect = refPane.getBoundingClientRect();
+                    if (paneStack.classList.contains('reverse-row')) {
+                        // reverse: preview | resizer | reference | ...
+                        const totalWidth = previewRect.width + refRect.width;
+                        if (totalWidth <= minPaneWidth * 2) return;
+                        const newPreviewWidth = clampValue(e.clientX - previewRect.left, minPaneWidth, totalWidth - minPaneWidth);
+                        const newRefWidth = totalWidth - newPreviewWidth;
+                        previewPane.style.flex = `1 1 ${newPreviewWidth}px`;
+                        previewPane.style.width = `${newPreviewWidth}px`;
+                        refPane.style.flex = `0 0 ${newRefWidth}px`;
+                        refPane.style.width = `${newRefWidth}px`;
+                    } else {
+                        // normal: input | resizer | reference | ...
+                        const totalWidth = inputRect.width + refRect.width;
+                        if (totalWidth <= minPaneWidth * 2) return;
+                        const newInputWidth = clampValue(e.clientX - inputRect.left, minPaneWidth, totalWidth - minPaneWidth);
+                        const newRefWidth = totalWidth - newInputWidth;
+                        inputPane.style.flex = `1 1 ${newInputWidth}px`;
+                        inputPane.style.width = `${newInputWidth}px`;
+                        refPane.style.flex = `0 0 ${newRefWidth}px`;
+                        refPane.style.width = `${newRefWidth}px`;
+                    }
                 } else {
-                    const newInputWidth = clampValue(e.clientX - inputRect.left, minPaneWidth, totalWidth - minPaneWidth);
-                    const newPreviewWidth = totalWidth - newInputWidth;
-                    inputPane.style.flex = `1 1 ${newInputWidth}px`;
-                    previewPane.style.flex = `1 1 ${newPreviewWidth}px`;
-                    inputPane.style.width = `${newInputWidth}px`;
-                    previewPane.style.width = `${newPreviewWidth}px`;
+                    const totalWidth = inputRect.width + previewRect.width;
+                    if (totalWidth <= minPaneWidth * 2) return;
+
+                    if (paneStack.classList.contains('reverse-row')) {
+                        const newPreviewWidth = clampValue(e.clientX - previewRect.left, minPaneWidth, totalWidth - minPaneWidth);
+                        const newInputWidth = totalWidth - newPreviewWidth;
+                        previewPane.style.flex = `1 1 ${newPreviewWidth}px`;
+                        inputPane.style.flex = `1 1 ${newInputWidth}px`;
+                        previewPane.style.width = `${newPreviewWidth}px`;
+                        inputPane.style.width = `${newInputWidth}px`;
+                    } else {
+                        const newInputWidth = clampValue(e.clientX - inputRect.left, minPaneWidth, totalWidth - minPaneWidth);
+                        const newPreviewWidth = totalWidth - newInputWidth;
+                        inputPane.style.flex = `1 1 ${newInputWidth}px`;
+                        previewPane.style.flex = `1 1 ${newPreviewWidth}px`;
+                        inputPane.style.width = `${newInputWidth}px`;
+                        previewPane.style.width = `${newPreviewWidth}px`;
+                    }
                 }
             }
         });
@@ -14555,6 +14604,15 @@ if (typeof applyPaneHeightSettings === 'function') {
                     document.getElementById('st-pane-preview-width').value = previewWidth;
                     localStorage.setItem(PANE_WIDTH_KEYS.input, inputWidth);
                     localStorage.setItem(PANE_WIDTH_KEYS.preview, previewWidth);
+                    // v1.234: 参照ペイン幅も保存
+                    const refPane = document.getElementById('pane-reference');
+                    if (refPane && refPane.style.display !== 'none') {
+                        const refWidth = Math.round(refPane.getBoundingClientRect().width);
+                        const refEl = document.getElementById('st-pane-reference-width');
+                        if (refEl) refEl.value = refWidth;
+                        localStorage.setItem(PANE_WIDTH_KEYS.reference, refWidth);
+                        if (typeof saveReferenceState === 'function') saveReferenceState();
+                    }
                 }
             }
         });
@@ -15436,6 +15494,7 @@ function setupMemoInteractionGuard() {
     character: { bg: null, head: null },
     world: { bg: null, head: null },
     terms: { bg: null, head: null },
+    reference: { bg: null, head: null },
   };
 
   function getDefaultComputedColors(){
@@ -15455,6 +15514,7 @@ function setupMemoInteractionGuard() {
       character: { bg: '#fdf2f8', head: '#fdf2f8' },
       world: { bg: '#ecfdf5', head: '#d1fae5' },
       terms: { bg: '#fff9db', head: '#ffecb5' },
+      reference: { bg: panelBg, head: headerBg },
     };
   }
 
@@ -15462,7 +15522,7 @@ function setupMemoInteractionGuard() {
     const saved = lsGet(PANE_COLOR_KEY, null);
     if (!saved) return null;
     const out = JSON.parse(JSON.stringify(DEFAULT_PANE_COLORS));
-    for (const k of ['input','preview','memo','outline','search','structure','character','world','terms']){
+    for (const k of ['input','preview','reference','memo','outline','search','structure','character','world','terms']){
       if (saved[k]){
         out[k].bg = saved[k].bg || null;
         out[k].head = saved[k].head || null;
@@ -15483,7 +15543,7 @@ window.hideAllContextMenus = window.hideAllContextMenus || function(){
   [
     'tab-context-menu', 'header-context-menu', 'color-picker-popup',
     'structure-context-menu','character-context-menu','world-context-menu','terms-context-menu',
-    'memo-context-menu','outline-context-menu','search-context-menu'
+    'memo-context-menu','outline-context-menu','search-context-menu','ref-tab-context-menu'
   ].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display='none';
   });
@@ -15500,6 +15560,7 @@ function paneIdToPaneKey(paneId){
       'character-panel': 'character',
       'world-panel': 'world',
       'terms-panel': 'terms',
+      'pane-reference': 'reference',
     };
     return map[paneId] || '';
   }
@@ -15579,6 +15640,7 @@ function applyPaneColors(colors){
     const map = {
       input: ['--pane-input-bg','--pane-input-head'],
       preview: ['--pane-preview-bg','--pane-preview-head'],
+      reference: ['--pane-reference-bg','--pane-reference-head'],
       memo: ['--pane-memo-bg','--pane-memo-head'],
       outline: ['--pane-outline-bg','--pane-outline-head'],
       search: ['--pane-search-bg','--pane-search-head'],
@@ -15617,6 +15679,11 @@ function applyPaneColors(colors){
 #pane-preview .pane-subheader,
 #pane-preview .tabs-scroll-wrap { background: var(--pane-preview-head, var(--pane-header-bg)); }
 #pane-preview .pane-body { background-color: var(--pane-preview-bg, var(--preview-bg-color)); }
+
+#pane-reference { background: var(--pane-reference-bg, var(--panel-bg)); }
+#pane-reference .pane-header,
+#pane-reference .pane-subheader,
+#pane-reference .tabs-scroll-wrap { background: var(--pane-reference-head, var(--pane-header-bg)); }
 
 #memo-panel { background: var(--pane-memo-bg, var(--panel-bg)); }
 #memo-panel .panel-header,
@@ -15682,8 +15749,8 @@ function applyPaneColors(colors){
         <button class="btn" id="cc-pane-colors-reset">リセット</button>
       </div>
       <div class="setting-row" style="flex-direction:column; gap:10px; align-items:stretch;">
-        ${['input','preview','memo','outline','structure','character','world','terms'].map(k=>{
-          const label = ({input:'入力',preview:'プレビュー',memo:'メモ',outline:'目次',structure:'構成',character:'登場人物',world:'世界観',terms:'用語'})[k];
+        ${['input','preview','reference','memo','outline','structure','character','world','terms'].map(k=>{
+          const label = ({input:'入力',preview:'プレビュー',reference:'参照',memo:'メモ',outline:'目次',structure:'構成',character:'登場人物',world:'世界観',terms:'用語'})[k];
           return `
           <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
             <div style="min-width:64px; font-weight:700;">${label}</div>
@@ -16666,8 +16733,8 @@ function applyPaneColors(colors){
               <button class="btn" id="cc-pane-colors-reset">リセット</button>
             </div>
             <div class="setting-row" style="flex-direction:column; gap:10px; align-items:stretch;">
-              ${['input','preview','memo','outline','structure','character','world','terms'].map(k=>{
-                const label = ({input:'入力',preview:'プレビュー',memo:'メモ',outline:'目次',structure:'構成',character:'登場人物',world:'世界観',terms:'用語'})[k];
+              ${['input','preview','reference','memo','outline','structure','character','world','terms'].map(k=>{
+                const label = ({input:'入力',preview:'プレビュー',reference:'参照',memo:'メモ',outline:'目次',structure:'構成',character:'登場人物',world:'世界観',terms:'用語'})[k];
                 return `
                 <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
                   <div style="min-width:64px; font-weight:700;">${label}</div>
@@ -28252,7 +28319,9 @@ bindResize('cc-resize-sw', 'sw');
     wrapKagi: 'Ctrl+Alt+K',
     wrapNijuKagi: 'Ctrl+Alt+Shift+K',
     wrapParen: 'Ctrl+Alt+P',
-    quickBookmark: 'Ctrl+Alt+Shift+B'
+    quickBookmark: 'Ctrl+Alt+Shift+B',
+    togglePreview: 'Ctrl+Alt+Shift+P',
+    toggleReference: 'Ctrl+Alt+Shift+R'
   };
 
   function normalizeKeyName(k){
@@ -28313,6 +28382,8 @@ bindResize('cc-resize-sw', 'sw');
         wrapNijuKagi: normalizeShortcutString(obj.wrapNijuKagi || DEFAULT_SHORTCUTS.wrapNijuKagi),
         wrapParen: normalizeShortcutString(obj.wrapParen || DEFAULT_SHORTCUTS.wrapParen),
         quickBookmark: normalizeShortcutString(obj.quickBookmark || DEFAULT_SHORTCUTS.quickBookmark),
+        togglePreview: normalizeShortcutString(obj.togglePreview || DEFAULT_SHORTCUTS.togglePreview),
+        toggleReference: normalizeShortcutString(obj.toggleReference || DEFAULT_SHORTCUTS.toggleReference),
       };
     }catch(e){
       return { ...DEFAULT_SHORTCUTS };
@@ -28337,6 +28408,8 @@ bindResize('cc-resize-sw', 'sw');
       wrapNijuKagi: normalizeShortcutString(next.wrapNijuKagi || DEFAULT_SHORTCUTS.wrapNijuKagi),
       wrapParen: normalizeShortcutString(next.wrapParen || DEFAULT_SHORTCUTS.wrapParen),
       quickBookmark: normalizeShortcutString(next.quickBookmark || DEFAULT_SHORTCUTS.quickBookmark),
+      togglePreview: normalizeShortcutString(next.togglePreview || DEFAULT_SHORTCUTS.togglePreview),
+      toggleReference: normalizeShortcutString(next.toggleReference || DEFAULT_SHORTCUTS.toggleReference),
     };
     localStorage.setItem(SHORTCUTS_KEY, JSON.stringify(payload));
     // Update data-shortcut display if present
@@ -28468,6 +28541,18 @@ bindResize('cc-resize-sw', 'sw');
       if (matches(e, sc.helpPanel)){
         e.preventDefault(); e.stopImmediatePropagation();
         try{ togglePanel('help-bar'); }catch(_){}
+        return;
+      }
+
+      if (matches(e, sc.togglePreview)){
+        e.preventDefault(); e.stopImmediatePropagation();
+        try{ const cb = document.getElementById('check-show-preview'); if(cb) cb.click(); }catch(_){}
+        return;
+      }
+
+      if (matches(e, sc.toggleReference)){
+        e.preventDefault(); e.stopImmediatePropagation();
+        try{ if(typeof toggleReferencePaneVis==='function') toggleReferencePaneVis(); }catch(_){}
         return;
       }
     }, true);
@@ -29888,6 +29973,15 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     saveReferenceState();
   };
 
+  window.toggleReferencePaneVis = function() {
+    const pane = document.getElementById('pane-reference');
+    if (pane && pane.style.display !== 'none') {
+      window.hideReferencePane();
+    } else {
+      window.showReferencePane();
+    }
+  };
+
   // --- 参照タブ機能 ---
   function renderRefTabs() {
     const container = document.getElementById('ref-tabs-container');
@@ -30015,9 +30109,15 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     const curTab = refTabs.find(t => t.id === refActiveTabId);
     if (curTab && area) curTab.content = area.value;
 
-    let total = 0;
-    refTabs.forEach(t => { total += (t.content || '').replace(/[\n\r\s　]/g, '').length; });
-    span.textContent = `全タブ: ${total.toLocaleString()}字`;
+    let totalChars = 0;
+    let totalLines = 0;
+    refTabs.forEach(t => {
+      const c = t.content || '';
+      totalChars += c.replace(/[\n\r\s　]/g, '').length;
+      totalLines += c === '' ? 0 : c.split('\n').length;
+    });
+    span.textContent = `全タブ: ${totalChars}字 / ${totalLines}行`;
+    span.title = `全タブ: ${totalChars}字 / ${totalLines}行`;
   }
 
   // --- 参照ペインのリサイザー（位置計算修正） ---
@@ -30030,12 +30130,18 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     let startX = 0;
     let startWidth = 0;
 
+    let neighborStartWidth = 0;
     resizer.addEventListener('mousedown', (e) => {
       e.preventDefault();
       dragging = true;
       startX = e.clientX;
       const pane = document.getElementById('pane-reference');
       startWidth = pane ? pane.getBoundingClientRect().width : 300;
+      // v1.234: 隣接ペイン（プレビューまたは入力）の幅も記録
+      const paneStack = document.querySelector('.pane-stack');
+      const isReverse = paneStack && paneStack.classList.contains('reverse-row');
+      const neighborPane = document.getElementById(isReverse ? 'pane-input' : 'pane-preview');
+      neighborStartWidth = neighborPane ? neighborPane.getBoundingClientRect().width : 300;
       document.body.style.cursor = 'col-resize';
       document.body.style.userSelect = 'none';
     });
@@ -30043,17 +30149,40 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
       if (!dragging) return;
       const pane = document.getElementById('pane-reference');
       if (!pane) return;
-      // リサイザーは参照ペインの左側にあるので、左にドラッグ=幅拡大
-      const delta = startX - e.clientX;
-      const newWidth = Math.max(120, Math.min(window.innerWidth * 0.5, startWidth + delta));
-      pane.style.flex = `0 0 ${newWidth}px`;
-      pane.style.width = `${newWidth}px`;
+      const paneStack = document.querySelector('.pane-stack');
+      const isReverse = paneStack && paneStack.classList.contains('reverse-row');
+      const neighborPane = document.getElementById(isReverse ? 'pane-input' : 'pane-preview');
+      // v1.234: 参照⇔隣接ペインの合計幅内でリサイズ
+      const totalWidth = startWidth + neighborStartWidth;
+      const minW = 120;
+      // リサイザーは参照ペインの右側: reference | resizer | neighbor
+      const refRect = pane.getBoundingClientRect();
+      const newRefWidth = Math.max(minW, Math.min(totalWidth - minW, e.clientX - refRect.left));
+      const newNeighborWidth = totalWidth - newRefWidth;
+      pane.style.flex = `0 0 ${newRefWidth}px`;
+      pane.style.width = `${newRefWidth}px`;
+      if (neighborPane) {
+        neighborPane.style.flex = `1 1 ${newNeighborWidth}px`;
+        neighborPane.style.width = `${newNeighborWidth}px`;
+      }
     });
     document.addEventListener('mouseup', () => {
       if (!dragging) return;
       dragging = false;
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
+      // v1.234: 両方の幅を保存
+      const paneStack = document.querySelector('.pane-stack');
+      const isReverse = paneStack && paneStack.classList.contains('reverse-row');
+      const neighborId = isReverse ? 'pane-input' : 'pane-preview';
+      const neighborPane = document.getElementById(neighborId);
+      if (neighborPane) {
+        const nw = Math.round(neighborPane.getBoundingClientRect().width);
+        const key = isReverse ? 'input' : 'preview';
+        const el = document.getElementById('st-pane-' + key + '-width');
+        if (el) el.value = nw;
+        try { localStorage.setItem(PANE_WIDTH_KEYS[key], nw); } catch(e) {}
+      }
       saveReferenceState();
     });
   }
