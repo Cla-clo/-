@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.231</title>
+<title>ⓒエディタ v1.232</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -6177,6 +6177,9 @@ body.theme-dark .card-shell:hover{
                         <label><input type="checkbox" id="check-show-preview" checked> プレビュー表示</label>
                     </div>
                     <div class="setting-row">
+                        <label><input type="checkbox" id="check-show-reference"> 参照ペイン表示</label>
+                    </div>
+                    <div class="setting-row">
                         <label><input type="checkbox" id="st-default-preview-hidden"> 起動時プレビュー非表示</label>
                     </div>
                     <div class="setting-row">
@@ -6444,6 +6447,33 @@ body.theme-dark .card-shell:hover{
         </div>
 
         <div class="pane-resizer" id="resizer-input-preview"></div>
+
+        <!-- 参照ペイン (v1.232) -->
+        <div class="pane" id="pane-reference" style="display:none; order:2;">
+            <div class="pane-header">
+                <div class="pane-title">
+                    <h2>参照</h2>
+                </div>
+                <div class="pane-actions">
+                    <button class="pane-zoom-btn" id="btn-ref-zoom-out" onclick="zoomReference(-1)" title="縮小">🔍−</button>
+                    <button class="pane-zoom-btn" id="btn-ref-zoom-in" onclick="zoomReference(1)" title="拡大">🔍+</button>
+                    <button class="pane-layout-btn" id="btn-ref-writing-mode" onclick="toggleReferenceWritingMode()" title="書字方向切替">横書きへ</button>
+                    <button class="pane-close-btn" onclick="hideReferencePane()" title="参照パネルを閉じる">✕</button>
+                </div>
+            </div>
+            <div class="pane-body">
+                <textarea id="reference-area" spellcheck="false" placeholder="ここに参照テキストを貼り付けてください…"></textarea>
+            </div>
+            <div class="pane-footer">
+                <div class="footer-left">
+                    <span id="ref-char-count">0 字</span>
+                </div>
+                <div class="footer-right">
+                    <span id="ref-zoom-display" class="zoom-display" title="拡大率">100%</span>
+                </div>
+            </div>
+        </div>
+        <div class="pane-resizer" id="resizer-reference" style="display:none; order:2;"></div>
 
         <div class="pane" id="pane-preview">
             <div class="pane-header">
@@ -6847,6 +6877,7 @@ body.theme-dark .card-shell:hover{
             <label style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-character" checked> 登場人物</label>
             <label style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-world" checked> 世界観</label>
             <label style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-terms" checked> 用語</label>
+            <label style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-reference" checked> 参照テキスト</label>
             <label id="proj-save-bookmarks-row" style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-bookmarks" checked> しおり</label>
             <label id="proj-save-settings-row" style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-settings" checked> 設定（ペイン幅・色など）</label>
         </div>
@@ -13613,10 +13644,11 @@ if (typeof applyPaneHeightSettings === 'function') {
                 world: __ccPickFirst(project, ['world', 'worlds', 'setting', 'settings_world']),
                 terms: __ccPickFirst(project, ['terms', 'term', 'glossary', 'words']),
                 bookmarks: __ccPickFirst(project, ['bookmarks', 'bookmark']),
+                reference: __ccPickFirst(project, ['reference']),
                 settings: __ccPickFirst(project, ['settings', 'config'])
             };
 
-            const seemsProject = !!(sections.tabs || sections.memoTabs || sections.structure || sections.character || sections.world || sections.terms || sections.bookmarks || sections.settings);
+            const seemsProject = !!(sections.tabs || sections.memoTabs || sections.structure || sections.character || sections.world || sections.terms || sections.bookmarks || sections.reference || sections.settings);
             if (!project.version && !seemsProject) throw new Error('Invalid project file');
 
             openProjectLoadDialog(project, sections, file?.name || '（無名ファイル）');
@@ -13644,6 +13676,7 @@ if (typeof applyPaneHeightSettings === 'function') {
             { id: 'proj-load-world', key: 'world', label: '世界観' },
             { id: 'proj-load-terms', key: 'terms', label: '用語' },
             { id: 'proj-load-bookmarks', key: 'bookmarks', label: 'しおり' },
+            { id: 'proj-load-reference', key: 'reference', label: '参照テキスト' },
             { id: 'proj-load-settings', key: 'settings', label: '設定（ペイン幅・色など）' }
         ];
 
@@ -13744,6 +13777,18 @@ if (typeof applyPaneHeightSettings === 'function') {
             if (should('proj-load-bookmarks') && sections.bookmarks !== undefined) {
                 localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(sections.bookmarks));
             }
+
+            // v1.232: 参照テキスト
+            if (should('proj-load-reference') && sections.reference !== undefined) {
+                localStorage.setItem('cc_reference_state', JSON.stringify(sections.reference));
+            }
+
+            // v1.232: 分割表示状態
+            try {
+                if (project.splitView) {
+                    localStorage.setItem('cc_split_state', JSON.stringify(project.splitView));
+                }
+            } catch(e) {}
 
             // 設定
             if (should('proj-load-settings') && sections.settings !== undefined) {
@@ -13858,6 +13903,16 @@ if (typeof applyPaneHeightSettings === 'function') {
         if (document.getElementById('proj-save-bookmarks').checked) {
             project.bookmarks = JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || '[]');
         }
+        // v1.232: 参照テキスト
+        if (document.getElementById('proj-save-reference') && document.getElementById('proj-save-reference').checked) {
+            project.reference = JSON.parse(localStorage.getItem('cc_reference_state') || '{}');
+        }
+        // v1.232: 分割表示状態 (設定に含める)
+        try {
+            const splitState = JSON.parse(localStorage.getItem('cc_split_state') || '{}');
+            if (splitState.active) project.splitView = splitState;
+        } catch(e) {}
+
         if (document.getElementById('proj-save-settings').checked) {
             project.settings = {
                 paneWidths: {
@@ -29222,6 +29277,776 @@ body.theme-dark .cc-toast.cc-toast-error{
       setTimeout(updateAriaExpanded, 50);
     }
   });
+
+})();
+</script>
+
+<!-- ===== v1.232 Split View + Reference Pane ===== -->
+<style>
+/* --- Split view --- */
+#pane-input.split-active .pane-body {
+  display: flex;
+  gap: 0;
+}
+#pane-input.split-active .pane-body #input-mirror-container,
+#pane-input.split-active .pane-body #input-sel-overlay { /* keep existing behavior */ }
+#split-editor-container {
+  display: none;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  border-left: 2px solid var(--border-color);
+}
+#pane-input.split-active #split-editor-container { display: flex; flex-direction: column; }
+#split-editor-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 4px 6px 0;
+  background: var(--pane-header-bg, #f9fafb);
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+body.theme-dark #split-editor-tabs { background: var(--pane-header-bg, #1f2937); }
+.split-tab {
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  border-radius: 6px 6px 0 0;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  color: var(--text-color);
+  background: transparent;
+}
+.split-tab:hover { background: rgba(0,0,0,0.04); }
+body.theme-dark .split-tab:hover { background: rgba(255,255,255,0.06); }
+.split-tab.active {
+  background: var(--panel-bg);
+  border-color: var(--border-color);
+  border-bottom-color: var(--panel-bg);
+  font-weight: 600;
+}
+#split-textarea {
+  flex: 1;
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 12px;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  background: transparent;
+  color: var(--text-color);
+  min-height: 0;
+}
+#split-resizer {
+  display: none;
+  width: 5px;
+  cursor: col-resize;
+  background: var(--border-color);
+  flex-shrink: 0;
+  position: relative;
+}
+#split-resizer::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 30px;
+  border-radius: 2px;
+  background: var(--text-muted);
+  opacity: 0.4;
+}
+#split-resizer:hover::before { opacity: 0.8; background: #3b82f6; }
+#pane-input.split-active #split-resizer { display: block; }
+
+/* --- Tab side-picker popup --- */
+#split-side-picker {
+  position: fixed;
+  z-index: 10001;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 4px 0;
+  min-width: 150px;
+  display: none;
+}
+body.theme-dark #split-side-picker { box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+.split-side-item {
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  color: var(--text-color);
+}
+.split-side-item:hover { background: var(--pane-header-bg, #f3f4f6); }
+body.theme-dark .split-side-item:hover { background: #4b5563; }
+
+/* --- Reference pane --- */
+#pane-reference { min-width: 120px; }
+#pane-reference .pane-body { display: flex; flex-direction: column; }
+#reference-area {
+  flex: 1;
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 17px;
+  line-height: 1.7;
+  background: transparent;
+  color: var(--text-color);
+  min-height: 0;
+}
+#pane-reference.vertical #reference-area {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+#resizer-reference {
+  width: 5px;
+  cursor: col-resize;
+  background: var(--border-color);
+  flex-shrink: 0;
+  position: relative;
+}
+#resizer-reference::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 30px;
+  border-radius: 2px;
+  background: var(--text-muted);
+  opacity: 0.4;
+}
+#resizer-reference:hover::before { opacity: 0.8; background: #3b82f6; }
+</style>
+
+<script>
+// ===== v1.232 Split View + Reference Pane =====
+(function(){
+  'use strict';
+
+  // ========================================
+  // 1) Split View: 入力ペイン内の左右分割
+  // ========================================
+  let splitActive = false;
+  let splitTabId = null;       // 分割側に表示中のタブID
+  let splitRatio = 0.5;        // 左側の比率
+
+  // DOM挿入: pane-body内にsplit用コンテナを追加
+  function initSplitDOM() {
+    const paneBody = document.querySelector('#pane-input .pane-body');
+    if (!paneBody || document.getElementById('split-resizer')) return;
+
+    // 分割リサイザー
+    const resizer = document.createElement('div');
+    resizer.id = 'split-resizer';
+    paneBody.appendChild(resizer);
+
+    // 分割エディターコンテナ
+    const container = document.createElement('div');
+    container.id = 'split-editor-container';
+    container.innerHTML = `
+      <div id="split-editor-tabs"></div>
+      <textarea id="split-textarea" spellcheck="false"></textarea>
+    `;
+    paneBody.appendChild(container);
+
+    // リサイザーD&D
+    let dragging = false;
+    resizer.addEventListener('mousedown', (e) => {
+      if (!splitActive) return;
+      e.preventDefault();
+      dragging = true;
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const paneRect = paneBody.getBoundingClientRect();
+      const ratio = (e.clientX - paneRect.left) / paneRect.width;
+      splitRatio = Math.max(0.2, Math.min(0.8, ratio));
+      applySplitLayout();
+    });
+    document.addEventListener('mouseup', () => {
+      if (!dragging) return;
+      dragging = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      saveSplitState();
+    });
+
+    // 分割側テキストの変更をタブに反映
+    document.getElementById('split-textarea').addEventListener('input', () => {
+      if (!splitActive || splitTabId == null) return;
+      const tab = window.inputTabs.find(t => t.id === splitTabId);
+      if (tab) {
+        tab.content = document.getElementById('split-textarea').value;
+        if (typeof window.saveTabsToStorage === 'function') window.saveTabsToStorage();
+      }
+    });
+  }
+
+  function activateSplit(tabId) {
+    const paneInput = document.getElementById('pane-input');
+    if (!paneInput) return;
+
+    // 現在のアクティブタブの内容を保存
+    const curTab = window.inputTabs.find(t => t.id === window.activeTabId);
+    const inputArea = document.getElementById('input-area');
+    if (curTab && inputArea) curTab.content = inputArea.value;
+
+    splitActive = true;
+    splitTabId = tabId;
+    paneInput.classList.add('split-active');
+
+    // 分割側にタブの内容をロード
+    const tab = window.inputTabs.find(t => t.id === tabId);
+    const splitTA = document.getElementById('split-textarea');
+    if (tab && splitTA) splitTA.value = tab.content || '';
+
+    // 分割側のスタイルをメイン入力に合わせる
+    syncSplitStyle();
+
+    renderSplitTabs();
+    applySplitLayout();
+    saveSplitState();
+  }
+
+  function deactivateSplit() {
+    const paneInput = document.getElementById('pane-input');
+    if (!paneInput) return;
+    splitActive = false;
+    splitTabId = null;
+    paneInput.classList.remove('split-active');
+
+    // メイン入力エリアを100%に戻す
+    const inputArea = document.getElementById('input-area');
+    const mirror = document.getElementById('input-mirror-container');
+    const overlay = document.getElementById('input-sel-overlay');
+    if (inputArea) inputArea.style.width = '';
+    if (mirror) mirror.style.width = '';
+    if (overlay) overlay.style.width = '';
+
+    saveSplitState();
+  }
+
+  function swapSplitSides() {
+    if (!splitActive || splitTabId == null) return;
+    const inputArea = document.getElementById('input-area');
+    const splitTA = document.getElementById('split-textarea');
+    if (!inputArea || !splitTA) return;
+
+    // 現在のメイン側タブを保存
+    const curTab = window.inputTabs.find(t => t.id === window.activeTabId);
+    if (curTab) curTab.content = inputArea.value;
+
+    // 分割側タブを保存
+    const splitTab = window.inputTabs.find(t => t.id === splitTabId);
+    if (splitTab) splitTab.content = splitTA.value;
+
+    // ID入れ替え
+    const oldActive = window.activeTabId;
+    const oldSplit = splitTabId;
+
+    // メイン側を旧分割タブに
+    if (typeof window.switchTab === 'function') window.switchTab(oldSplit);
+    // 分割側を旧メインタブに
+    splitTabId = oldActive;
+    const newSplitTab = window.inputTabs.find(t => t.id === splitTabId);
+    if (newSplitTab && splitTA) splitTA.value = newSplitTab.content || '';
+
+    renderSplitTabs();
+    saveSplitState();
+  }
+
+  function applySplitLayout() {
+    if (!splitActive) return;
+    const paneBody = document.querySelector('#pane-input .pane-body');
+    if (!paneBody) return;
+
+    const inputArea = document.getElementById('input-area');
+    const mirror = document.getElementById('input-mirror-container');
+    const overlay = document.getElementById('input-sel-overlay');
+    const splitContainer = document.getElementById('split-editor-container');
+    const resizer = document.getElementById('split-resizer');
+
+    const leftPct = (splitRatio * 100).toFixed(1) + '%';
+    const rightPct = ((1 - splitRatio) * 100 - 1).toFixed(1) + '%';  // -1% for resizer
+
+    // inputArea and mirror share the left side
+    [inputArea, mirror, overlay].forEach(el => {
+      if (el) {
+        el.style.width = leftPct;
+        el.style.flex = `0 0 ${leftPct}`;
+      }
+    });
+    if (splitContainer) {
+      splitContainer.style.flex = `1 1 ${rightPct}`;
+    }
+  }
+
+  function renderSplitTabs() {
+    const container = document.getElementById('split-editor-tabs');
+    if (!container) return;
+    container.innerHTML = '';
+    window.inputTabs.forEach(tab => {
+      const el = document.createElement('div');
+      el.className = 'split-tab' + (tab.id === splitTabId ? ' active' : '');
+      el.textContent = tab.name || 'タブ';
+      el.onclick = () => switchSplitTab(tab.id);
+      container.appendChild(el);
+    });
+  }
+
+  function switchSplitTab(tabId) {
+    if (!splitActive) return;
+    // 現在の分割タブの内容を保存
+    const curSplit = window.inputTabs.find(t => t.id === splitTabId);
+    const splitTA = document.getElementById('split-textarea');
+    if (curSplit && splitTA) curSplit.content = splitTA.value;
+
+    splitTabId = tabId;
+    const newTab = window.inputTabs.find(t => t.id === tabId);
+    if (newTab && splitTA) splitTA.value = newTab.content || '';
+
+    renderSplitTabs();
+    saveSplitState();
+    if (typeof window.saveTabsToStorage === 'function') window.saveTabsToStorage();
+  }
+
+  function syncSplitStyle() {
+    const inputArea = document.getElementById('input-area');
+    const splitTA = document.getElementById('split-textarea');
+    if (!inputArea || !splitTA) return;
+    const cs = getComputedStyle(inputArea);
+    splitTA.style.fontSize = cs.fontSize;
+    splitTA.style.lineHeight = cs.lineHeight;
+    splitTA.style.fontFamily = cs.fontFamily;
+    // 縦書き同期
+    if (inputArea.style.writingMode) {
+      splitTA.style.writingMode = inputArea.style.writingMode;
+      splitTA.style.textOrientation = inputArea.style.textOrientation || '';
+    } else {
+      splitTA.style.writingMode = '';
+      splitTA.style.textOrientation = '';
+    }
+  }
+
+  // ========================================
+  // 2) Tab click popup (分割表示中)
+  // ========================================
+  let sidePickerTabId = null;
+
+  function createSidePicker() {
+    if (document.getElementById('split-side-picker')) return;
+    const picker = document.createElement('div');
+    picker.id = 'split-side-picker';
+    picker.innerHTML = `
+      <div class="split-side-item" data-side="left">◀ 左側（メイン）に表示</div>
+      <div class="split-side-item" data-side="right">右側（分割）に表示 ▶</div>
+    `;
+    document.body.appendChild(picker);
+
+    picker.addEventListener('click', (e) => {
+      const item = e.target.closest('.split-side-item');
+      if (!item) return;
+      const side = item.dataset.side;
+      if (side === 'left') {
+        // メイン側に切り替え
+        if (typeof window.switchTab === 'function') window.switchTab(sidePickerTabId);
+      } else if (side === 'right') {
+        // 分割側に切り替え
+        switchSplitTab(sidePickerTabId);
+      }
+      hideSidePicker();
+    });
+
+    // 外側クリックで閉じる
+    document.addEventListener('pointerdown', (e) => {
+      const p = document.getElementById('split-side-picker');
+      if (!p || p.style.display !== 'block') return;
+      if (p.contains(e.target)) return;
+      hideSidePicker();
+    });
+  }
+
+  function showSidePicker(tabId, x, y) {
+    createSidePicker();
+    sidePickerTabId = tabId;
+    const picker = document.getElementById('split-side-picker');
+    picker.style.display = 'block';
+    // Position
+    const w = picker.offsetWidth || 180;
+    const h = picker.offsetHeight || 80;
+    picker.style.left = Math.min(x, window.innerWidth - w - 8) + 'px';
+    picker.style.top = Math.min(y, window.innerHeight - h - 8) + 'px';
+  }
+
+  function hideSidePicker() {
+    const picker = document.getElementById('split-side-picker');
+    if (picker) picker.style.display = 'none';
+    sidePickerTabId = null;
+  }
+
+  // switchTab を分割表示中はポップアップに差し替え
+  function wrapSwitchTabForSplit() {
+    if (typeof window.switchTab !== 'function' || window.switchTab.__splitWrapped) return;
+    const original = window.switchTab;
+    const wrapped = function(tabId) {
+      if (splitActive) {
+        // 分割表示中: ポップアップで左右選択
+        // ただしイベント座標が必要なので、直近のクリック座標を使う
+        showSidePicker(tabId, _lastTabClickX, _lastTabClickY);
+        return;
+      }
+      return original.apply(this, arguments);
+    };
+    wrapped.__splitWrapped = true;
+    // プロパティ保持
+    Object.keys(original).forEach(k => { wrapped[k] = original[k]; });
+    window.switchTab = wrapped;
+  }
+
+  // タブクリックの座標を記録
+  let _lastTabClickX = 200, _lastTabClickY = 100;
+  document.addEventListener('click', (e) => {
+    const tab = e.target.closest('.input-tab');
+    if (tab) {
+      _lastTabClickX = e.clientX;
+      _lastTabClickY = e.clientY + 20;  // タブの少し下
+    }
+  }, true);
+
+  // ========================================
+  // 3) Context Menu: 分割表示で開く
+  // ========================================
+  function wrapShowTabContextMenu() {
+    // showTabContextMenuをラップして項目追加
+    if (typeof window.showTabContextMenu !== 'function') return;
+    const _origShow = window.showTabContextMenu;
+    if (_origShow.__splitCtxWrapped) return;
+
+    window.showTabContextMenu = function(e, tab) {
+      _origShow.call(this, e, tab);
+
+      // メニューに分割表示の項目を追加
+      const menu = document.getElementById('tab-context-menu');
+      if (!menu) return;
+
+      // 既にv1.232追加分があれば削除
+      menu.querySelectorAll('[data-split-action]').forEach(el => el.remove());
+      menu.querySelectorAll('.split-menu-sep').forEach(el => el.remove());
+
+      const sep = document.createElement('div');
+      sep.className = 'split-menu-sep';
+      sep.style.cssText = 'height:1px; background:var(--border-color); margin:4px 0;';
+
+      if (!splitActive) {
+        // 「分割表示で開く」
+        const item = document.createElement('div');
+        item.className = 'context-menu-item';
+        item.dataset.splitAction = 'open-split';
+        item.textContent = '📐 分割表示で開く';
+        item.onclick = (ev) => {
+          ev.stopPropagation();
+          const tabId = parseInt(tab?.dataset?.tabId || '', 10) || window.activeTabId;
+          activateSplit(tabId);
+          if (window.hideAllContextMenus) window.hideAllContextMenus();
+        };
+        // 閉じるの前にセパレータ + 項目を挿入
+        const closeItem = menu.querySelector('[data-action="close"]');
+        if (closeItem) {
+          menu.insertBefore(sep, closeItem);
+          menu.insertBefore(item, closeItem);
+        } else {
+          menu.appendChild(sep);
+          menu.appendChild(item);
+        }
+      } else {
+        // 分割中: 「左右入替」「分割を閉じる」
+        const swapItem = document.createElement('div');
+        swapItem.className = 'context-menu-item';
+        swapItem.dataset.splitAction = 'swap';
+        swapItem.textContent = '🔄 左右入替';
+        swapItem.onclick = (ev) => {
+          ev.stopPropagation();
+          swapSplitSides();
+          if (window.hideAllContextMenus) window.hideAllContextMenus();
+        };
+
+        const closeItem2 = document.createElement('div');
+        closeItem2.className = 'context-menu-item';
+        closeItem2.dataset.splitAction = 'close-split';
+        closeItem2.textContent = '✕ 分割を閉じる';
+        closeItem2.onclick = (ev) => {
+          ev.stopPropagation();
+          deactivateSplit();
+          if (window.hideAllContextMenus) window.hideAllContextMenus();
+        };
+
+        const origClose = menu.querySelector('[data-action="close"]');
+        if (origClose) {
+          menu.insertBefore(sep, origClose);
+          menu.insertBefore(swapItem, origClose);
+          menu.insertBefore(closeItem2, origClose);
+        } else {
+          menu.appendChild(sep);
+          menu.appendChild(swapItem);
+          menu.appendChild(closeItem2);
+        }
+      }
+    };
+    window.showTabContextMenu.__splitCtxWrapped = true;
+  }
+
+  // ========================================
+  // 4) Reference Pane
+  // ========================================
+  let referenceZoom = 100;
+  let referenceVertical = false;
+
+  window.zoomReference = function(dir) {
+    referenceZoom = Math.max(50, Math.min(200, referenceZoom + dir * 10));
+    const area = document.getElementById('reference-area');
+    if (area) area.style.fontSize = (17 * referenceZoom / 100) + 'px';
+    const disp = document.getElementById('ref-zoom-display');
+    if (disp) disp.textContent = referenceZoom + '%';
+    saveReferenceState();
+  };
+
+  window.toggleReferenceWritingMode = function() {
+    referenceVertical = !referenceVertical;
+    const pane = document.getElementById('pane-reference');
+    const btn = document.getElementById('btn-ref-writing-mode');
+    if (referenceVertical) {
+      pane?.classList.add('vertical');
+      if (btn) btn.textContent = '縦書きへ';
+    } else {
+      pane?.classList.remove('vertical');
+      if (btn) btn.textContent = '横書きへ';
+    }
+    saveReferenceState();
+  };
+
+  window.showReferencePane = function() {
+    const pane = document.getElementById('pane-reference');
+    const resizer = document.getElementById('resizer-reference');
+    if (pane) pane.style.display = '';
+    if (resizer) resizer.style.display = '';
+    const cb = document.getElementById('check-show-reference');
+    if (cb) cb.checked = true;
+    if (typeof adjustPaneWidthsOnVisibility === 'function') adjustPaneWidthsOnVisibility();
+    saveReferenceState();
+  };
+
+  window.hideReferencePane = function() {
+    const pane = document.getElementById('pane-reference');
+    const resizer = document.getElementById('resizer-reference');
+    if (pane) pane.style.display = 'none';
+    if (resizer) resizer.style.display = 'none';
+    const cb = document.getElementById('check-show-reference');
+    if (cb) cb.checked = false;
+    if (typeof adjustPaneWidthsOnVisibility === 'function') adjustPaneWidthsOnVisibility();
+    saveReferenceState();
+  };
+
+  // 参照ペインのリサイザー
+  function initReferenceResizer() {
+    const resizer = document.getElementById('resizer-reference');
+    if (!resizer || resizer.__bound) return;
+    resizer.__bound = true;
+
+    let dragging = false;
+    resizer.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      dragging = true;
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const pane = document.getElementById('pane-reference');
+      const paneStack = document.getElementById('pane-stack');
+      if (!pane || !paneStack) return;
+      const stackRect = paneStack.getBoundingClientRect();
+      const newWidth = Math.max(120, Math.min(stackRect.width * 0.5, stackRect.right - e.clientX));
+      pane.style.flex = `0 0 ${newWidth}px`;
+      pane.style.width = `${newWidth}px`;
+    });
+    document.addEventListener('mouseup', () => {
+      if (!dragging) return;
+      dragging = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      saveReferenceState();
+    });
+  }
+
+  // 参照ペインの文字数表示
+  function updateRefCharCount() {
+    const area = document.getElementById('reference-area');
+    const span = document.getElementById('ref-char-count');
+    if (!area || !span) return;
+    const len = area.value.replace(/[\n\r\s　]/g, '').length;
+    span.textContent = len.toLocaleString() + ' 字';
+  }
+
+  // ========================================
+  // 5) Save/Load Integration
+  // ========================================
+  const SPLIT_STATE_KEY = 'cc_split_state';
+  const REF_STATE_KEY = 'cc_reference_state';
+
+  function saveSplitState() {
+    try {
+      localStorage.setItem(SPLIT_STATE_KEY, JSON.stringify({
+        active: splitActive,
+        tabId: splitTabId,
+        ratio: splitRatio
+      }));
+    } catch(e) {}
+  }
+
+  function loadSplitState() {
+    try {
+      const data = JSON.parse(localStorage.getItem(SPLIT_STATE_KEY) || '{}');
+      if (data.active && data.tabId != null) {
+        splitRatio = data.ratio || 0.5;
+        // タブが存在するか確認
+        const tab = window.inputTabs.find(t => t.id === data.tabId);
+        if (tab) {
+          activateSplit(data.tabId);
+        }
+      }
+    } catch(e) {}
+  }
+
+  function saveReferenceState() {
+    try {
+      const area = document.getElementById('reference-area');
+      const pane = document.getElementById('pane-reference');
+      const visible = pane && pane.style.display !== 'none';
+      localStorage.setItem(REF_STATE_KEY, JSON.stringify({
+        visible: visible,
+        content: area?.value || '',
+        zoom: referenceZoom,
+        vertical: referenceVertical,
+        width: pane?.style.width || ''
+      }));
+    } catch(e) {}
+  }
+
+  function loadReferenceState() {
+    try {
+      const data = JSON.parse(localStorage.getItem(REF_STATE_KEY) || '{}');
+      if (data.content) {
+        const area = document.getElementById('reference-area');
+        if (area) area.value = data.content;
+      }
+      if (data.zoom) {
+        referenceZoom = data.zoom;
+        const area = document.getElementById('reference-area');
+        if (area) area.style.fontSize = (17 * referenceZoom / 100) + 'px';
+        const disp = document.getElementById('ref-zoom-display');
+        if (disp) disp.textContent = referenceZoom + '%';
+      }
+      if (data.vertical) {
+        referenceVertical = true;
+        document.getElementById('pane-reference')?.classList.add('vertical');
+        const btn = document.getElementById('btn-ref-writing-mode');
+        if (btn) btn.textContent = '縦書きへ';
+      }
+      if (data.width) {
+        const pane = document.getElementById('pane-reference');
+        if (pane) {
+          pane.style.flex = `0 0 ${data.width}`;
+          pane.style.width = data.width;
+        }
+      }
+      if (data.visible) {
+        window.showReferencePane();
+      }
+    } catch(e) {}
+  }
+
+  // Project save hook: 保存前にlocalStorageを最新化
+  function hookProjectSave() {
+    if (typeof window.executeProjectSaveAsCcproj !== 'function') return;
+    if (window.executeProjectSaveAsCcproj.__refHooked) return;
+    const orig = window.executeProjectSaveAsCcproj;
+    window.executeProjectSaveAsCcproj = function() {
+      saveReferenceState();
+      saveSplitState();
+      return orig.apply(this, arguments);
+    };
+    window.executeProjectSaveAsCcproj.__refHooked = true;
+  }
+
+  // Check-show-reference checkbox handler
+  function initReferenceCheckbox() {
+    const cb = document.getElementById('check-show-reference');
+    if (!cb || cb.__refBound) return;
+    cb.__refBound = true;
+    cb.addEventListener('change', () => {
+      if (cb.checked) {
+        window.showReferencePane();
+      } else {
+        window.hideReferencePane();
+      }
+    });
+  }
+
+  // Reference area input handler for char count
+  function initReferenceAreaHandlers() {
+    const area = document.getElementById('reference-area');
+    if (!area || area.__refBound) return;
+    area.__refBound = true;
+    area.addEventListener('input', () => {
+      updateRefCharCount();
+      saveReferenceState();
+    });
+  }
+
+  // (保存/読込は本体のexecuteProjectSaveAsCcproj / applyProjectLoadSelectionに直接統合済み)
+
+  // ========================================
+  // 初期化
+  // ========================================
+  function init() {
+    initSplitDOM();
+    initReferenceResizer();
+    initReferenceCheckbox();
+    initReferenceAreaHandlers();
+    wrapSwitchTabForSplit();
+    wrapShowTabContextMenu();
+    loadReferenceState();
+    loadSplitState();
+    updateRefCharCount();
+  }
+
+  // DOMReady or immediate
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(init, 200));
+  } else {
+    setTimeout(init, 200);
+  }
+
+  // Expose for external use
+  window.activateSplit = activateSplit;
+  window.deactivateSplit = deactivateSplit;
+  window.swapSplitSides = swapSplitSides;
+  window.isSplitActive = function() { return splitActive; };
+  window.getSplitTabId = function() { return splitTabId; };
 
 })();
 </script>
