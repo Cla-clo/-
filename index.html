@@ -10188,6 +10188,8 @@ const fontMap = { 'font-gothic': '"Noto Sans JP", sans-serif', 'font-mincho': '"
 
     if (typeof invalidateInputStyleCache === 'function') invalidateInputStyleCache();
     updateWritingModeButtonLabels();
+    // v1.238: 分割表示中はスタイルを同期（縦書き切替対応）
+    if (typeof syncSplitStyle === 'function') syncSplitStyle();
 }
 
 function applyPreviewSettings() {
@@ -14573,25 +14575,31 @@ if (typeof applyPaneHeightSettings === 'function') {
                 if (refVisible) {
                     const refRect = refPane.getBoundingClientRect();
                     if (paneStack.classList.contains('reverse-row')) {
-                        // reverse: preview | resizer | reference | ...
+                        // reverse: preview | resizer | reference | ... | input
                         const totalWidth = previewRect.width + refRect.width;
                         if (totalWidth <= minPaneWidth * 2) return;
                         const newPreviewWidth = clampValue(e.clientX - previewRect.left, minPaneWidth, totalWidth - minPaneWidth);
                         const newRefWidth = totalWidth - newPreviewWidth;
-                        previewPane.style.flex = `1 1 ${newPreviewWidth}px`;
+                        previewPane.style.flex = `0 0 ${newPreviewWidth}px`;
                         previewPane.style.width = `${newPreviewWidth}px`;
                         refPane.style.flex = `0 0 ${newRefWidth}px`;
                         refPane.style.width = `${newRefWidth}px`;
+                        // v1.238: 第3ペインをflexibleにして残りスペースを吸収
+                        inputPane.style.flex = `1 1 auto`;
+                        inputPane.style.width = '';
                     } else {
-                        // normal: input | resizer | reference | ...
+                        // normal: input | resizer | reference | ... | preview
                         const totalWidth = inputRect.width + refRect.width;
                         if (totalWidth <= minPaneWidth * 2) return;
                         const newInputWidth = clampValue(e.clientX - inputRect.left, minPaneWidth, totalWidth - minPaneWidth);
                         const newRefWidth = totalWidth - newInputWidth;
-                        inputPane.style.flex = `1 1 ${newInputWidth}px`;
+                        inputPane.style.flex = `0 0 ${newInputWidth}px`;
                         inputPane.style.width = `${newInputWidth}px`;
                         refPane.style.flex = `0 0 ${newRefWidth}px`;
                         refPane.style.width = `${newRefWidth}px`;
+                        // v1.238: 第3ペインをflexibleにして残りスペースを吸収
+                        previewPane.style.flex = `1 1 auto`;
+                        previewPane.style.width = '';
                     }
                 } else {
                     const totalWidth = inputRect.width + previewRect.width;
@@ -14637,19 +14645,26 @@ if (typeof applyPaneHeightSettings === 'function') {
                     const previewRect = previewPane.getBoundingClientRect();
                     const inputWidth = Math.round(inputRect.width);
                     const previewWidth = Math.round(previewRect.width);
-                    document.getElementById('st-pane-input-width').value = inputWidth;
-                    document.getElementById('st-pane-preview-width').value = previewWidth;
-                    localStorage.setItem(PANE_WIDTH_KEYS.input, inputWidth);
-                    localStorage.setItem(PANE_WIDTH_KEYS.preview, previewWidth);
-                    // v1.234: 参照ペイン幅も保存
+                    // v1.238: 参照ペイン表示中は全ペインを固定flexに揃える
                     const refPane = document.getElementById('pane-reference');
-                    if (refPane && refPane.style.display !== 'none') {
+                    const refVisible = refPane && refPane.style.display !== 'none';
+                    if (refVisible) {
                         const refWidth = Math.round(refPane.getBoundingClientRect().width);
+                        inputPane.style.flex = `0 0 ${inputWidth}px`;
+                        inputPane.style.width = `${inputWidth}px`;
+                        refPane.style.flex = `0 0 ${refWidth}px`;
+                        refPane.style.width = `${refWidth}px`;
+                        previewPane.style.flex = `1 1 ${previewWidth}px`;
+                        previewPane.style.width = `${previewWidth}px`;
                         const refEl = document.getElementById('st-pane-reference-width');
                         if (refEl) refEl.value = refWidth;
                         localStorage.setItem(PANE_WIDTH_KEYS.reference, refWidth);
                         if (typeof saveReferenceState === 'function') saveReferenceState();
                     }
+                    document.getElementById('st-pane-input-width').value = inputWidth;
+                    document.getElementById('st-pane-preview-width').value = previewWidth;
+                    localStorage.setItem(PANE_WIDTH_KEYS.input, inputWidth);
+                    localStorage.setItem(PANE_WIDTH_KEYS.preview, previewWidth);
                 }
             }
         });
@@ -29912,17 +29927,21 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     const leftTA = document.getElementById('split-left-textarea');
     const rightTA = document.getElementById('split-right-textarea');
     if (!inputArea) return;
-    const cs = getComputedStyle(inputArea);
+    // v1.238: split-active時は.pane-bodyがdisplay:none→computedStyleが不正確
+    // インラインスタイルから直接取得し、縦書きは設定チェックボックスから判定
+    const s = inputArea.style;
+    const fontSize = s.fontSize || '';
+    const lineHeight = s.lineHeight || '';
+    const fontFamily = s.fontFamily || '';
+    const isVertical = document.getElementById('st-in-v')?.checked || false;
     [leftTA, rightTA].forEach(ta => {
       if (!ta) return;
-      ta.style.fontSize = cs.fontSize;
-      ta.style.lineHeight = cs.lineHeight;
-      ta.style.fontFamily = cs.fontFamily;
-      // v1.237: computedStyleから縦書き判定（CSSクラスによる適用に対応）
-      const wm = cs.writingMode;
-      if (wm && wm.indexOf('vertical') >= 0) {
-        ta.style.writingMode = wm;
-        ta.style.textOrientation = cs.textOrientation || 'upright';
+      if (fontSize) ta.style.fontSize = fontSize;
+      if (lineHeight) ta.style.lineHeight = lineHeight;
+      if (fontFamily) ta.style.fontFamily = fontFamily;
+      if (isVertical) {
+        ta.style.writingMode = 'vertical-rl';
+        ta.style.textOrientation = 'upright';
       } else {
         ta.style.writingMode = '';
         ta.style.textOrientation = '';
@@ -30345,8 +30364,15 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
       pane.style.flex = `0 0 ${newRefWidth}px`;
       pane.style.width = `${newRefWidth}px`;
       if (neighborPane) {
-        neighborPane.style.flex = `1 1 ${newNeighborWidth}px`;
+        neighborPane.style.flex = `0 0 ${newNeighborWidth}px`;
         neighborPane.style.width = `${newNeighborWidth}px`;
+      }
+      // v1.238: 第3ペイン（input or preview）をflexibleにして残りスペースを吸収
+      const otherPaneId = isReverse ? 'pane-preview' : 'pane-input';
+      const otherPane = document.getElementById(otherPaneId);
+      if (otherPane) {
+        otherPane.style.flex = `1 1 auto`;
+        otherPane.style.width = '';
       }
     });
     document.addEventListener('mouseup', () => {
@@ -30354,17 +30380,39 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
       dragging = false;
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
-      // v1.234: 両方の幅を保存
+      // v1.238: 全ペインの実測幅を保存し、flexを固定値に安定化
       const paneStack = document.querySelector('.pane-stack');
       const isReverse = paneStack && paneStack.classList.contains('reverse-row');
+      const refPane = document.getElementById('pane-reference');
       const neighborId = isReverse ? 'pane-input' : 'pane-preview';
+      const otherPaneId = isReverse ? 'pane-preview' : 'pane-input';
       const neighborPane = document.getElementById(neighborId);
+      const otherPane = document.getElementById(otherPaneId);
+      // 参照ペインの幅を保存
+      if (refPane) {
+        const rw = Math.round(refPane.getBoundingClientRect().width);
+        refPane.style.flex = `0 0 ${rw}px`;
+        refPane.style.width = `${rw}px`;
+      }
+      // 隣接ペインの幅を保存
       if (neighborPane) {
         const nw = Math.round(neighborPane.getBoundingClientRect().width);
+        neighborPane.style.flex = `0 0 ${nw}px`;
+        neighborPane.style.width = `${nw}px`;
         const key = isReverse ? 'input' : 'preview';
         const el = document.getElementById('st-pane-' + key + '-width');
         if (el) el.value = nw;
         try { localStorage.setItem(PANE_WIDTH_KEYS[key], nw); } catch(e) {}
+      }
+      // 第3ペインはflexibleのまま（残り吸収）+ 幅を保存
+      if (otherPane) {
+        const ow = Math.round(otherPane.getBoundingClientRect().width);
+        otherPane.style.flex = `1 1 ${ow}px`;
+        otherPane.style.width = `${ow}px`;
+        const otherKey = isReverse ? 'preview' : 'input';
+        const otherEl = document.getElementById('st-pane-' + otherKey + '-width');
+        if (otherEl) otherEl.value = ow;
+        try { localStorage.setItem(PANE_WIDTH_KEYS[otherKey], ow); } catch(e) {}
       }
       saveReferenceState();
     });
