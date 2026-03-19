@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.235</title>
+<title>ⓒエディタ v1.236</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5880,7 +5880,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.235</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.236</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -6471,6 +6471,7 @@ body.theme-dark .card-shell:hover{
                 </div>
                 <button class="tab-scroll-btn right" type="button" aria-label="タブを右へ" title="タブを右へ" data-target="ref-tabs-container">▶</button>
             </div>
+            <div class="pane-subheader" id="ref-pos-bar">現在: 1 行目</div>
             <div class="pane-body">
                 <textarea id="reference-area" spellcheck="false" placeholder="ここに参照テキストを貼り付けてください…"></textarea>
             </div>
@@ -18674,7 +18675,7 @@ function hideColorPicker(){
   const ids = ['color-picker-popup','bg-color-picker-popup','preset-panel-color-picker','structure-card-color-picker','terms-card-color-picker','bulk-card-color-picker'];
   ids.forEach(id=>{
     const el = document.getElementById(id);
-    if(el) el.classList.remove('show');
+    if(el) { el.classList.remove('show'); el.style.display = 'none'; }
   });
 }
 
@@ -29388,13 +29389,54 @@ body.theme-dark .cc-toast.cc-toast-error{
   min-width: 0;
   min-height: 0;
   position: relative;
-  border-left: 2px solid var(--border-color);
+  border-left: none;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 0 6px 6px 0;
+  margin: -1px 0 -1px 0;
+  overflow: hidden;
 }
 #pane-input.split-active #split-editor-container { display: flex; flex-direction: column; }
+#split-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 10px;
+  background: var(--pane-header-bg, #f9fafb);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  min-height: 28px;
+}
+body.theme-dark #split-editor-header { background: var(--pane-header-bg, #1f2937); }
+#split-editor-header .split-header-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-color);
+}
+#split-editor-header .split-header-actions {
+  display: flex;
+  gap: 4px;
+}
+#split-editor-header .split-header-actions button {
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--text-muted);
+}
+#split-editor-header .split-header-actions button:hover {
+  background: rgba(0,0,0,0.06);
+  border-color: var(--border-color);
+}
+body.theme-dark #split-editor-header .split-header-actions button:hover {
+  background: rgba(255,255,255,0.08);
+}
 #split-editor-tabs {
   display: flex;
   gap: 2px;
-  padding: 4px 6px 0;
+  padding: 4px 8px 0;
   background: var(--pane-header-bg, #f9fafb);
   border-bottom: 1px solid var(--border-color);
   overflow-x: auto;
@@ -29402,8 +29444,8 @@ body.theme-dark .cc-toast.cc-toast-error{
 }
 body.theme-dark #split-editor-tabs { background: var(--pane-header-bg, #1f2937); }
 .split-tab {
-  padding: 4px 10px;
-  font-size: 0.78rem;
+  padding: 5px 12px;
+  font-size: 0.82rem;
   cursor: pointer;
   border-radius: 6px 6px 0 0;
   border: 1px solid transparent;
@@ -29435,11 +29477,13 @@ body.theme-dark .split-tab:hover { background: rgba(255,255,255,0.06); }
 }
 #split-resizer {
   display: none;
-  width: 5px;
+  width: 6px;
   cursor: col-resize;
   background: var(--border-color);
   flex-shrink: 0;
   position: relative;
+  margin: 0 -1px;
+  z-index: 1;
 }
 #split-resizer::before {
   content: '';
@@ -29481,7 +29525,8 @@ body.theme-dark .split-side-item:hover { background: #4b5563; }
 
 /* --- Reference pane --- */
 #pane-reference { min-width: 120px; }
-#pane-reference .pane-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+#pane-reference .pane-body { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+#pane-reference .pane-footer { flex-shrink: 0; }
 #reference-area {
   flex: 1;
   width: 100%;
@@ -29577,6 +29622,13 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     const container = document.createElement('div');
     container.id = 'split-editor-container';
     container.innerHTML = `
+      <div id="split-editor-header">
+        <span class="split-header-title">分割表示</span>
+        <span class="split-header-actions">
+          <button onclick="if(typeof swapSplitSides==='function')swapSplitSides()" title="左右入替">⇄ 入替</button>
+          <button onclick="if(typeof deactivateSplit==='function')deactivateSplit()" title="分割を閉じる">✕</button>
+        </span>
+      </div>
       <div id="split-editor-tabs"></div>
       <textarea id="split-textarea" spellcheck="false"></textarea>
     `;
@@ -30201,6 +30253,25 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
       lineSpan.textContent = lines + ' 行';
     }
   }
+
+  // v1.236: 参照ペインのカーソル行表示
+  function updateRefCursorLine() {
+    const area = document.getElementById('reference-area');
+    const bar = document.getElementById('ref-pos-bar');
+    if (!area || !bar) return;
+    const pos = area.selectionStart;
+    const line = (area.value.substring(0, pos).match(/\n/g) || []).length + 1;
+    bar.innerText = `現在: ${line} 行目`;
+  }
+  // テキストエリアのイベントにフック
+  setTimeout(() => {
+    const area = document.getElementById('reference-area');
+    if (area) {
+      area.addEventListener('click', updateRefCursorLine);
+      area.addEventListener('keyup', updateRefCursorLine);
+      area.addEventListener('input', () => { updateRefCharCount(); updateRefCursorLine(); });
+    }
+  }, 100);
 
   // ========================================
   // 5) Save/Load Integration
