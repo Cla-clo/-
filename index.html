@@ -29726,6 +29726,13 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
         const tab = window.inputTabs.find(t => t.id === window.activeTabId);
         if (tab) { tab.content = leftTA.value; if (typeof window.saveTabsToStorage === 'function') window.saveTabsToStorage(); }
         updateSplitStats('left', leftTA);
+        // v1.238: 同じタブを左右で表示中なら右にも同期
+        if (splitTabId === window.activeTabId && rightTA) {
+          const ss = rightTA.selectionStart, se = rightTA.selectionEnd;
+          rightTA.value = leftTA.value;
+          rightTA.setSelectionRange(ss, se);
+          updateSplitStats('right', rightTA);
+        }
       });
       leftTA.addEventListener('click', () => updateSplitCursorLine('left', leftTA));
       leftTA.addEventListener('keyup', () => updateSplitCursorLine('left', leftTA));
@@ -29736,6 +29743,13 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
         const tab = window.inputTabs.find(t => t.id === splitTabId);
         if (tab) { tab.content = rightTA.value; if (typeof window.saveTabsToStorage === 'function') window.saveTabsToStorage(); }
         updateSplitStats('right', rightTA);
+        // v1.238: 同じタブを左右で表示中なら左にも同期
+        if (splitTabId === window.activeTabId && leftTA) {
+          const ss = leftTA.selectionStart, se = leftTA.selectionEnd;
+          leftTA.value = rightTA.value;
+          leftTA.setSelectionRange(ss, se);
+          updateSplitStats('left', leftTA);
+        }
       });
       rightTA.addEventListener('click', () => updateSplitCursorLine('right', rightTA));
       rightTA.addEventListener('keyup', () => updateSplitCursorLine('right', rightTA));
@@ -29790,15 +29804,20 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     const paneInput = document.getElementById('pane-input');
     if (!paneInput) return;
 
-    // 左テキストエリアの内容をアクティブタブに保存
     const leftTA = document.getElementById('split-left-textarea');
-    const curTab = window.inputTabs.find(t => t.id === window.activeTabId);
-    if (curTab && leftTA) curTab.content = leftTA.value;
-
-    // 右テキストエリアの内容を分割タブに保存
     const rightTA = document.getElementById('split-right-textarea');
-    const splitTab = window.inputTabs.find(t => t.id === splitTabId);
-    if (splitTab && rightTA) splitTab.content = rightTA.value;
+    const curTab = window.inputTabs.find(t => t.id === window.activeTabId);
+
+    // v1.238: 同じタブが左右にある場合、二重上書きを防止
+    if (splitTabId === window.activeTabId) {
+      // 同一タブ: 左の値をタブに保存（左がメイン表示になるため）
+      if (curTab && leftTA) curTab.content = leftTA.value;
+    } else {
+      // 異なるタブ: それぞれ保存
+      if (curTab && leftTA) curTab.content = leftTA.value;
+      const splitTab = window.inputTabs.find(t => t.id === splitTabId);
+      if (splitTab && rightTA) splitTab.content = rightTA.value;
+    }
 
     // 入力エリアに反映
     const inputArea = document.getElementById('input-area');
@@ -29886,10 +29905,18 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
 
   function switchSplitLeftTab(tabId) {
     if (!splitActive) return;
-    // 現在の左タブ内容を保存
     const leftTA = document.getElementById('split-left-textarea');
+    const rightTA = document.getElementById('split-right-textarea');
+    // v1.238: 同じタブが右にも表示中なら、右の最新値をタブデータに使う（左の古い値で上書きしない）
     const curTab = window.inputTabs.find(t => t.id === window.activeTabId);
-    if (curTab && leftTA) curTab.content = leftTA.value;
+    if (curTab && leftTA) {
+      if (window.activeTabId === splitTabId && rightTA) {
+        // 同タブ: 右の値が最新なら右を採用（直近の入力側を保存）
+        curTab.content = rightTA.value;
+      } else {
+        curTab.content = leftTA.value;
+      }
+    }
 
     // switchTabでメインを切替（ポップアップ回避）
     splitActive = false;
@@ -29907,10 +29934,17 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
 
   function switchSplitRightTab(tabId) {
     if (!splitActive) return;
-    // 現在の右タブ内容を保存
+    const leftTA = document.getElementById('split-left-textarea');
     const rightTA = document.getElementById('split-right-textarea');
+    // v1.238: 同じタブが左にも表示中なら、左の最新値をタブデータに使う
     const curSplit = window.inputTabs.find(t => t.id === splitTabId);
-    if (curSplit && rightTA) curSplit.content = rightTA.value;
+    if (curSplit && rightTA) {
+      if (splitTabId === window.activeTabId && leftTA) {
+        curSplit.content = leftTA.value;
+      } else {
+        curSplit.content = rightTA.value;
+      }
+    }
 
     splitTabId = tabId;
     const newTab = window.inputTabs.find(t => t.id === tabId);
