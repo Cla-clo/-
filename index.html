@@ -6511,7 +6511,7 @@ body.theme-dark .card-shell:hover{
                 </div>
                 <div class="footer-right">
                     <span id="ref-line-count">0 行</span>
-                    <span id="ref-zoom-display" class="zoom-display" title="拡大率">100%</span>
+                    <span id="ref-zoom-display" class="zoom-display" ondblclick="startEditRefZoom()" title="ダブルクリックで拡大率を入力">100%</span>
                 </div>
             </div>
         </div>
@@ -30178,6 +30178,44 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     if (disp) disp.textContent = referenceZoom + '%';
     saveReferenceState();
   };
+
+  window.startEditRefZoom = function() {
+    const display = document.getElementById('ref-zoom-display');
+    if (!display || display.tagName === 'INPUT') return;
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.className = 'zoom-input';
+    input.id = 'ref-zoom-display';
+    input.value = referenceZoom;
+    input.min = 10;
+    input.max = 500;
+    input.onblur = () => finishEditRefZoom(input.value);
+    input.onkeydown = e => {
+      if (e.key === 'Enter') input.blur();
+      if (e.key === 'Escape') { input.value = referenceZoom; input.blur(); }
+    };
+    display.replaceWith(input);
+    input.focus();
+    input.select();
+  };
+
+  function finishEditRefZoom(value) {
+    const zoomPercent = Math.max(10, Math.min(500, parseInt(value, 10) || 100));
+    referenceZoom = zoomPercent;
+    const area = document.getElementById('reference-area');
+    if (area) area.style.fontSize = (17 * zoomPercent / 100) + 'px';
+    saveReferenceState();
+    const input = document.querySelector('#ref-zoom-display');
+    if (input) {
+      const span = document.createElement('span');
+      span.id = 'ref-zoom-display';
+      span.className = 'zoom-display';
+      span.title = 'ダブルクリックで拡大率を入力';
+      span.ondblclick = startEditRefZoom;
+      span.textContent = zoomPercent + '%';
+      input.replaceWith(span);
+    }
+  }
 
   window.toggleReferenceWritingMode = function() {
     referenceVertical = !referenceVertical;
