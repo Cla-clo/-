@@ -29164,18 +29164,25 @@ bindResize('cc-resize-sw', 'sw');
     const inputArea = document.getElementById('input-area');
     const previewScroll = document.getElementById('preview-scroll');
     const readerScroll = document.getElementById('reader-scroll');
+    const referenceArea = document.getElementById('reference-area');
 
     const isInputVertical = () => !!(inputArea && inputArea.parentElement && inputArea.parentElement.classList.contains('vertical-mode'));
     const isPreviewVertical = () => !!(previewScroll && previewScroll.classList.contains('vertical-mode'));
     const isReaderVertical = () => !!(readerScroll && readerScroll.classList.contains('vertical-mode'));
+    const isRefVertical = () => {
+      const p = document.getElementById('pane-reference');
+      return !!(p && p.classList.contains('vertical'));
+    };
 
     bindWheel(inputArea, isInputVertical);
     bindWheel(previewScroll, isPreviewVertical);
     bindWheel(readerScroll, isReaderVertical);
+    bindWheel(referenceArea, isRefVertical);
 
     // Enforce "auto" behavior (preview originally has smooth; some actions may reset inline style)
     enforceScrollBehaviorAutoWhenVertical(previewScroll, isPreviewVertical);
     enforceScrollBehaviorAutoWhenVertical(readerScroll, isReaderVertical);
+    enforceScrollBehaviorAutoWhenVertical(referenceArea, isRefVertical);
   }
 
   if (document.readyState === 'loading'){
@@ -29619,6 +29626,8 @@ body.theme-dark .split-side-item:hover { background: #4b5563; }
 #pane-reference.vertical #reference-area {
   writing-mode: vertical-rl;
   text-orientation: mixed;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 /* Reference pane tabs - reuse input-tab styling */
