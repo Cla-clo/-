@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.237</title>
+<title>ⓒエディタ v1.238</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5880,7 +5880,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.237</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.238</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -10215,7 +10215,7 @@ function applyPreviewSettings() {
         const si = document.getElementById('check-show-input').checked, sp = document.getElementById('check-show-preview').checked;
         if (si) document.getElementById('pane-input').classList.remove('hidden'); else document.getElementById('pane-input').classList.add('hidden');
         if (sp) document.getElementById('pane-preview').classList.remove('hidden'); else document.getElementById('pane-preview').classList.add('hidden');
-        adjustPaneWidthsOnVisibility();
+        adjustPaneWidthsOnVisibility(true);
         updatePreview();
         updateSelectionToolWindowVisibility();
     }
@@ -11034,7 +11034,7 @@ window.__ccGetMaxPinnedPanels = function() {
         }
 
         applyDockedPanelWidths(true);
-        adjustPaneWidthsOnVisibility();
+        adjustPaneWidthsOnVisibility(true);
         updateDockSplitState();
     }
 
@@ -11672,7 +11672,7 @@ document.addEventListener('DOMContentLoaded', () => {
         adjustPaneWidthsOnVisibility();
     }
 
-    function adjustPaneWidthsOnVisibility() {
+    function adjustPaneWidthsOnVisibility(forceReset) {
         const inputPane = document.getElementById('pane-input');
         const previewPane = document.getElementById('pane-preview');
         if (document.body.classList.contains('scroll-mode')) {
@@ -11695,6 +11695,11 @@ if (typeof adjustPaneHeightsOnVisibility === 'function') {
             inputPane.style.flex = '1 1 auto';
             inputPane.style.width = '100%';
         } else if (!inputHidden && !previewHidden) {
+            // v1.237: 既にインライン幅がセットされている場合、forceReset以外はリセットしない
+            if (!forceReset && inputPane.style.width && previewPane.style.width &&
+                inputPane.style.width !== '100%' && previewPane.style.width !== '100%') {
+                return;
+            }
             const savedInput = parseInt(localStorage.getItem(PANE_WIDTH_KEYS.input)) || parseInt(document.getElementById('st-pane-input-width').value) || 520;
             const savedPreview = parseInt(localStorage.getItem(PANE_WIDTH_KEYS.preview)) || parseInt(document.getElementById('st-pane-preview-width').value) || 520;
             inputPane.style.flex = `1 1 ${savedInput}px`;
@@ -29409,10 +29414,6 @@ body.theme-dark .cc-toast.cc-toast-error{
 <!-- ===== v1.232 Split View + Reference Pane ===== -->
 <style>
 /* --- Split view --- */
-#pane-input.split-active .pane-body {
-  display: flex;
-  gap: 0;
-}
 /* v1.237: 分割ラッパー — ペインヘッダー直下で左右に分ける */
 #split-wrapper {
   display: none;
@@ -29917,9 +29918,11 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
       ta.style.fontSize = cs.fontSize;
       ta.style.lineHeight = cs.lineHeight;
       ta.style.fontFamily = cs.fontFamily;
-      if (inputArea.style.writingMode) {
-        ta.style.writingMode = inputArea.style.writingMode;
-        ta.style.textOrientation = inputArea.style.textOrientation || '';
+      // v1.237: computedStyleから縦書き判定（CSSクラスによる適用に対応）
+      const wm = cs.writingMode;
+      if (wm && wm.indexOf('vertical') >= 0) {
+        ta.style.writingMode = wm;
+        ta.style.textOrientation = cs.textOrientation || 'upright';
       } else {
         ta.style.writingMode = '';
         ta.style.textOrientation = '';
