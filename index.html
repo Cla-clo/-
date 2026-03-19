@@ -10192,6 +10192,10 @@ const fontMap = { 'font-gothic': '"Noto Sans JP", sans-serif', 'font-mincho': '"
     inputMirror.style.lineHeight = l;
     inputMirror.style.fontFamily = f;
 
+    // 参照ペインにも同じフォントを適用（ダッシュ・三点リーダー等の表記統一）
+    const refArea = document.getElementById('reference-area');
+    if (refArea) refArea.style.fontFamily = f;
+
     if (v) inputArea.parentElement.classList.add('vertical-mode');
     else inputArea.parentElement.classList.remove('vertical-mode');
 
@@ -29643,7 +29647,7 @@ body.theme-dark .split-side-item:hover { background: #4b5563; }
   outline: none;
   resize: none;
   padding: 12px;
-  font-family: inherit;
+  font-family: "Shippori Mincho", serif;
   font-size: 17px;
   line-height: 1.7;
   background: transparent;
