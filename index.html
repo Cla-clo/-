@@ -9967,10 +9967,19 @@ function syncPreviewPositionCore() {
         updateInputZoomDisplay();
     }
 
+    function getPreviewBaseSize() {
+        return parseInt(document.getElementById('st-pv-size')?.value) || 17;
+    }
+    function getPreviewZoomPercent() {
+        const custom = localStorage.getItem('cc_preview_zoom_custom');
+        return custom !== null ? parseInt(custom, 10) : ZOOM_LEVELS[previewZoomIndex];
+    }
     function applyPreviewZoom() {
-        const zoomPercent = ZOOM_LEVELS[previewZoomIndex];
+        const zoomPercent = getPreviewZoomPercent();
+        const base = getPreviewBaseSize();
+        const zoomed = (base * zoomPercent / 100);
         const previewContent = document.getElementById('preview-content');
-        if (previewContent) previewContent.style.fontSize = `${zoomPercent}%`;
+        if (previewContent) previewContent.style.fontSize = `${zoomed}px`;
         updatePreviewZoomDisplay();
     }
 
@@ -9984,7 +9993,7 @@ function syncPreviewPositionCore() {
     function updatePreviewZoomDisplay() {
         const display = document.getElementById('preview-zoom-display');
         if (display && display.tagName === 'SPAN') {
-            display.textContent = `${ZOOM_LEVELS[previewZoomIndex]}%`;
+            display.textContent = `${getPreviewZoomPercent()}%`;
         }
     }
 
@@ -10056,11 +10065,10 @@ function syncPreviewPositionCore() {
         const zoomPercent = Math.max(10, Math.min(500, parseInt(value, 10) || 100));
         const closestIndex = ZOOM_LEVELS.reduce((prev, curr, idx) =>
             Math.abs(curr - zoomPercent) < Math.abs(ZOOM_LEVELS[prev] - zoomPercent) ? idx : prev, 0);
-        const previewContent = document.getElementById('preview-content');
-        if (previewContent) previewContent.style.fontSize = `${zoomPercent}%`;
         previewZoomIndex = closestIndex;
         localStorage.setItem('cc_preview_zoom_custom', zoomPercent);
         saveZoomToStorage();
+        applyPreviewZoom();
         // spanに戻す
         const input = document.querySelector('#preview-zoom-display');
         if (input) {
@@ -10069,7 +10077,7 @@ function syncPreviewPositionCore() {
             span.className = 'zoom-display';
             span.title = 'ダブルクリックで拡大率を入力';
             span.ondblclick = startEditPreviewZoom;
-            span.textContent = `${zoomPercent}%`;
+            span.textContent = `${getPreviewZoomPercent()}%`;
             input.replaceWith(span);
         }
     }
@@ -10089,17 +10097,9 @@ function syncPreviewPositionCore() {
         // 範囲外の値を修正
         inputZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, inputZoomIndex));
         previewZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, previewZoomIndex));
-        // v1.238: カスタム/通常どちらもapplyInputZoomで統一適用（px値ベース）
+        // v1.238: カスタム/通常どちらもapplyZoomで統一適用（px値ベース）
         applyInputZoom();
-        if (customPreviewZoom !== null) {
-            const zoomPercent = parseInt(customPreviewZoom, 10);
-            const previewContent = document.getElementById('preview-content');
-            if (previewContent) previewContent.style.fontSize = `${zoomPercent}%`;
-            const display = document.getElementById('preview-zoom-display');
-            if (display) display.textContent = `${zoomPercent}%`;
-        } else {
-            applyPreviewZoom();
-        }
+        applyPreviewZoom();
     }
 
     // ===== 閲覧（全タブをまとめて全画面表示） =====
@@ -10210,17 +10210,24 @@ const fontMap = { 'font-gothic': '"Noto Sans JP", sans-serif', 'font-mincho': '"
 }
 
 function applyPreviewSettings() {
-    const s = document.getElementById('st-pv-size').value + 'px';
     const l = document.getElementById('st-pv-line').value;
     const f = fontMap[document.getElementById('st-pv-font').value];
     const v = document.getElementById('st-pv-v').checked;
 
-    previewContent.style.fontSize = s;
+    // v1.238: fontSizeはズームと統合してapplyPreviewZoomで適用
     previewContent.style.lineHeight = l;
     previewContent.style.fontFamily = f;
 
     if (v) previewScroll.classList.add('vertical-mode');
     else previewScroll.classList.remove('vertical-mode');
+
+    // ズーム倍率を加味したフォントサイズを適用
+    if (typeof applyPreviewZoom === 'function') {
+        applyPreviewZoom();
+    } else {
+        const s = document.getElementById('st-pv-size').value + 'px';
+        previewContent.style.fontSize = s;
+    }
 
     updateWritingModeButtonLabels();
     updatePreview();
@@ -15091,8 +15098,8 @@ function updateActiveTabTitle() {}
     loadMemoTabs();
     loadLayoutSettings();
         if (typeof updateWritingModeButtonLabels === 'function') updateWritingModeButtonLabels();
-    loadSettingsFromStorage();
     loadZoomFromStorage();
+    loadSettingsFromStorage();
     initTextColorSettings();
 	applyDefaultStartupPrefsOnce();
     loadPaneWidthSettings();
@@ -15101,6 +15108,9 @@ function updateActiveTabTitle() {}
     loadNovelTitle();
     startWritingTimer();
     applyAllSettings();
+    // v1.238: ズーム倍率を最後に再適用（設定適用によるfontSize上書きを防止）
+    if (typeof applyInputZoom === 'function') applyInputZoom();
+    if (typeof applyPreviewZoom === 'function') applyPreviewZoom();
 	applyDefaultDockLayoutOnce();
     updateDockTopOffset();
     updateDockSplitState();
