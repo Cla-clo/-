@@ -9947,12 +9947,23 @@ function syncPreviewPositionCore() {
         saveZoomToStorage();
     }
 
+    // v1.238: ズームは設定のベースフォントサイズに対する倍率としてpx値で適用
+    function getInputBaseSize() {
+        return parseInt(document.getElementById('st-in-size')?.value) || 17;
+    }
+    function getInputZoomPercent() {
+        const custom = localStorage.getItem('cc_input_zoom_custom');
+        return custom !== null ? parseInt(custom, 10) : ZOOM_LEVELS[inputZoomIndex];
+    }
+
     function applyInputZoom() {
-        const zoomPercent = ZOOM_LEVELS[inputZoomIndex];
+        const zoomPercent = getInputZoomPercent();
+        const base = getInputBaseSize();
+        const zoomed = (base * zoomPercent / 100);
         const inputArea = document.getElementById('input-area');
         const mirrorContainer = document.getElementById('input-mirror-container');
-        if (inputArea) inputArea.style.fontSize = `${zoomPercent}%`;
-        if (mirrorContainer) mirrorContainer.style.fontSize = `${zoomPercent}%`;
+        if (inputArea) inputArea.style.fontSize = `${zoomed}px`;
+        if (mirrorContainer) mirrorContainer.style.fontSize = `${zoomed}px`;
         updateInputZoomDisplay();
     }
 
@@ -9966,7 +9977,7 @@ function syncPreviewPositionCore() {
     function updateInputZoomDisplay() {
         const display = document.getElementById('input-zoom-display');
         if (display && display.tagName === 'SPAN') {
-            display.textContent = `${ZOOM_LEVELS[inputZoomIndex]}%`;
+            display.textContent = `${getInputZoomPercent()}%`;
         }
     }
 
@@ -10000,17 +10011,13 @@ function syncPreviewPositionCore() {
 
     function finishEditInputZoom(value) {
         const zoomPercent = Math.max(10, Math.min(500, parseInt(value, 10) || 100));
-        // 最も近いズームレベルを探すか、カスタム値を適用
         const closestIndex = ZOOM_LEVELS.reduce((prev, curr, idx) =>
             Math.abs(curr - zoomPercent) < Math.abs(ZOOM_LEVELS[prev] - zoomPercent) ? idx : prev, 0);
-        // カスタム値の場合は直接適用
-        const inputArea = document.getElementById('input-area');
-        const mirrorContainer = document.getElementById('input-mirror-container');
-        if (inputArea) inputArea.style.fontSize = `${zoomPercent}%`;
-        if (mirrorContainer) mirrorContainer.style.fontSize = `${zoomPercent}%`;
         inputZoomIndex = closestIndex;
         localStorage.setItem('cc_input_zoom_custom', zoomPercent);
         saveZoomToStorage();
+        // v1.238: px値で適用（設定ベースサイズ × ズーム倍率）
+        applyInputZoom();
         // spanに戻す
         const input = document.querySelector('#input-zoom-display');
         if (input) {
@@ -10082,18 +10089,8 @@ function syncPreviewPositionCore() {
         // 範囲外の値を修正
         inputZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, inputZoomIndex));
         previewZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, previewZoomIndex));
-        // カスタム値がある場合は直接適用
-        if (customInputZoom !== null) {
-            const zoomPercent = parseInt(customInputZoom, 10);
-            const inputArea = document.getElementById('input-area');
-            const mirrorContainer = document.getElementById('input-mirror-container');
-            if (inputArea) inputArea.style.fontSize = `${zoomPercent}%`;
-            if (mirrorContainer) mirrorContainer.style.fontSize = `${zoomPercent}%`;
-            const display = document.getElementById('input-zoom-display');
-            if (display) display.textContent = `${zoomPercent}%`;
-        } else {
-            applyInputZoom();
-        }
+        // v1.238: カスタム/通常どちらもapplyInputZoomで統一適用（px値ベース）
+        applyInputZoom();
         if (customPreviewZoom !== null) {
             const zoomPercent = parseInt(customPreviewZoom, 10);
             const previewContent = document.getElementById('preview-content');
@@ -10188,15 +10185,23 @@ const fontMap = { 'font-gothic': '"Noto Sans JP", sans-serif', 'font-mincho': '"
     const f = fontMap[document.getElementById('st-in-font').value];
     const v = document.getElementById('st-in-v').checked;
 
-    inputArea.style.fontSize = s;
+    // v1.238: ベースフォントサイズはlineHeight/fontFamilyのみ直接適用
+    // fontSizeはズームと統合してapplyInputZoomで適用
     inputArea.style.lineHeight = l;
     inputArea.style.fontFamily = f;
-    inputMirror.style.fontSize = s;
     inputMirror.style.lineHeight = l;
     inputMirror.style.fontFamily = f;
 
     if (v) inputArea.parentElement.classList.add('vertical-mode');
     else inputArea.parentElement.classList.remove('vertical-mode');
+
+    // ズーム倍率を加味したフォントサイズを適用
+    if (typeof applyInputZoom === 'function') {
+        applyInputZoom();
+    } else {
+        inputArea.style.fontSize = s;
+        inputMirror.style.fontSize = s;
+    }
 
     if (typeof invalidateInputStyleCache === 'function') invalidateInputStyleCache();
     updateWritingModeButtonLabels();
