@@ -257,6 +257,18 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
         justify-content: center;
     }
     body.focus-mode #pane-input .pane-footer span { color: white; }
+    /* v1.238: 選択ツールボタンは集中モード用のスタイルで上書き（白on白を防止） */
+    body.focus-mode #pane-input .pane-footer .selection-tool-body button {
+        background: rgba(255,255,255,0.12);
+        border-color: rgba(255,255,255,0.25);
+        color: rgba(255,255,255,0.95);
+    }
+    body.focus-mode #pane-input .pane-footer .selection-tool-body button:disabled {
+        background: rgba(255,255,255,0.05);
+        border-color: rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.3);
+        opacity: 1;
+    }
     body.focus-mode #pane-preview .pane-footer { display: none !important; }
     .focus-exit-hint {
         position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%);
@@ -264,7 +276,7 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
         border-radius: 20px; font-size: 0.8rem; z-index: 9999; display: none;
         opacity: 1; transition: opacity 0.5s ease-out;
     }
-    .focus-exit-hint.fade-out { opacity: 0; }
+    .focus-exit-hint.fade-out { opacity: 0; pointer-events: none; }
     body.focus-mode .focus-exit-hint { display: block; }
     .focus-exit-btn {
         position: fixed;
