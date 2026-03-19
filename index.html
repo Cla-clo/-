@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.236</title>
+<title>ⓒエディタ v1.237</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5880,7 +5880,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.236</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.237</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -6379,6 +6379,10 @@ body.theme-dark .card-shell:hover{
                     <button class="pane-zoom-btn" id="btn-input-zoom-in" onclick="zoomInput(1)" title="拡大" data-shortcut="Alt+Shift+=">🔍+</button>
                     <button class="pane-layout-btn" id="btn-input-writing-mode" onclick="toggleInputWritingMode()" title="書字方向切替">横書きへ</button>
                     <button class="pane-close-btn" onclick="hidePane('input')" title="入力パネルを閉じる">✕</button>
+                    <span id="split-header-actions">
+                        <button onclick="if(typeof swapSplitSides==='function')swapSplitSides()" title="左右入替">⇄ 入替</button>
+                        <button onclick="if(typeof deactivateSplit==='function')deactivateSplit()" title="分割を閉じる">✕ 分割解除</button>
+                    </span>
                 </div>
             </div>
             <div class="tabs-scroll-wrap" id="input-tabs-wrap">
@@ -6444,6 +6448,32 @@ body.theme-dark .card-shell:hover{
                     <span id="input-manuscript" class="manuscript-pages"></span>
                     <span id="input-last-save" class="save-timestamp"></span>
                     <span id="input-zoom-display" class="zoom-display" ondblclick="startEditInputZoom()" title="ダブルクリックで拡大率を入力">100%</span>
+                </div>
+            </div>
+            <!-- v1.237: 分割ラッパー（split-active時に左右カラムを表示） -->
+            <div id="split-wrapper">
+                <div class="split-column" id="split-col-left">
+                    <div class="split-col-tabs" id="split-left-tabs"></div>
+                    <div class="split-col-subheader" id="split-left-pos">現在: 1 行目</div>
+                    <div class="split-col-body">
+                        <textarea id="split-left-textarea" spellcheck="false"></textarea>
+                    </div>
+                    <div class="split-col-footer">
+                        <span id="split-left-chars">0 字</span>
+                        <span id="split-left-lines">0 行</span>
+                    </div>
+                </div>
+                <div id="split-resizer"></div>
+                <div class="split-column" id="split-col-right">
+                    <div class="split-col-tabs" id="split-right-tabs"></div>
+                    <div class="split-col-subheader" id="split-right-pos">現在: 1 行目</div>
+                    <div class="split-col-body">
+                        <textarea id="split-right-textarea" spellcheck="false"></textarea>
+                    </div>
+                    <div class="split-col-footer">
+                        <span id="split-right-chars">0 字</span>
+                        <span id="split-right-lines">0 行</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -29383,57 +29413,32 @@ body.theme-dark .cc-toast.cc-toast-error{
   display: flex;
   gap: 0;
 }
-#split-editor-container {
+/* v1.237: 分割ラッパー — ペインヘッダー直下で左右に分ける */
+#split-wrapper {
   display: none;
   flex: 1;
-  min-width: 0;
+  flex-direction: row;
   min-height: 0;
-  position: relative;
-  border-left: none;
-  background: var(--panel-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 0 6px 6px 0;
-  margin: -1px 0 -1px 0;
   overflow: hidden;
 }
-#pane-input.split-active #split-editor-container { display: flex; flex-direction: column; }
-#split-editor-header {
+#pane-input.split-active #split-wrapper { display: flex; }
+/* 分割時に元の要素を隠す */
+#pane-input.split-active > .tabs-scroll-wrap,
+#pane-input.split-active > .pane-subheader,
+#pane-input.split-active > .pane-body,
+#pane-input.split-active > .pane-footer {
+  display: none !important;
+}
+/* 左右の各カラム */
+.split-column {
+  flex: 1;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 10px;
-  background: var(--pane-header-bg, #f9fafb);
-  border-bottom: 1px solid var(--border-color);
-  flex-shrink: 0;
-  min-height: 28px;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
-body.theme-dark #split-editor-header { background: var(--pane-header-bg, #1f2937); }
-#split-editor-header .split-header-title {
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: var(--text-color);
-}
-#split-editor-header .split-header-actions {
-  display: flex;
-  gap: 4px;
-}
-#split-editor-header .split-header-actions button {
-  background: none;
-  border: 1px solid transparent;
-  cursor: pointer;
-  font-size: 0.75rem;
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: var(--text-muted);
-}
-#split-editor-header .split-header-actions button:hover {
-  background: rgba(0,0,0,0.06);
-  border-color: var(--border-color);
-}
-body.theme-dark #split-editor-header .split-header-actions button:hover {
-  background: rgba(255,255,255,0.08);
-}
-#split-editor-tabs {
+.split-column .split-col-tabs {
   display: flex;
   gap: 2px;
   padding: 4px 8px 0;
@@ -29442,28 +29447,25 @@ body.theme-dark #split-editor-header .split-header-actions button:hover {
   overflow-x: auto;
   flex-shrink: 0;
 }
-body.theme-dark #split-editor-tabs { background: var(--pane-header-bg, #1f2937); }
-.split-tab {
-  padding: 5px 12px;
-  font-size: 0.82rem;
-  cursor: pointer;
-  border-radius: 6px 6px 0 0;
-  border: 1px solid transparent;
-  white-space: nowrap;
-  color: var(--text-color);
-  background: transparent;
-}
-.split-tab:hover { background: rgba(0,0,0,0.04); }
-body.theme-dark .split-tab:hover { background: rgba(255,255,255,0.06); }
-.split-tab.active {
+body.theme-dark .split-column .split-col-tabs { background: var(--pane-header-bg, #1f2937); }
+.split-column .split-col-subheader {
+  padding: 2px 12px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: right;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
   background: var(--panel-bg);
-  border-color: var(--border-color);
-  border-bottom-color: var(--panel-bg);
-  font-weight: 600;
 }
-#split-textarea {
+.split-column .split-col-body {
   flex: 1;
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+.split-column .split-col-body textarea {
   width: 100%;
+  height: 100%;
   border: none;
   outline: none;
   resize: none;
@@ -29473,8 +29475,43 @@ body.theme-dark .split-tab:hover { background: rgba(255,255,255,0.06); }
   line-height: inherit;
   background: transparent;
   color: var(--text-color);
-  min-height: 0;
+  box-sizing: border-box;
 }
+.split-column .split-col-footer {
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-color);
+  background: var(--panel-bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  min-height: 22px;
+}
+.split-col-tab {
+  padding: 5px 12px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  border-radius: 6px 6px 0 0;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  color: var(--text-color);
+  background: transparent;
+}
+.split-col-tab:hover { background: rgba(0,0,0,0.04); }
+body.theme-dark .split-col-tab:hover { background: rgba(255,255,255,0.06); }
+.split-col-tab.active {
+  background: var(--panel-bg);
+  border-color: var(--border-color);
+  border-bottom-color: var(--panel-bg);
+  font-weight: 600;
+}
+/* 右カラムの左ボーダー */
+#split-col-right {
+  border-left: 1px solid var(--border-color);
+}
+/* リサイザー */
 #split-resizer {
   display: none;
   width: 6px;
@@ -29482,7 +29519,6 @@ body.theme-dark .split-tab:hover { background: rgba(255,255,255,0.06); }
   background: var(--border-color);
   flex-shrink: 0;
   position: relative;
-  margin: 0 -1px;
   z-index: 1;
 }
 #split-resizer::before {
@@ -29499,6 +29535,29 @@ body.theme-dark .split-tab:hover { background: rgba(255,255,255,0.06); }
 }
 #split-resizer:hover::before { opacity: 0.8; background: #3b82f6; }
 #pane-input.split-active #split-resizer { display: block; }
+/* 分割時、ペインヘッダーに操作ボタン追加用 */
+#split-header-actions {
+  display: none;
+  gap: 6px;
+  margin-left: 8px;
+}
+#pane-input.split-active #split-header-actions { display: inline-flex; }
+#split-header-actions button {
+  background: none;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: var(--text-muted);
+}
+#split-header-actions button:hover {
+  background: rgba(0,0,0,0.06);
+  color: var(--text-color);
+}
+body.theme-dark #split-header-actions button:hover {
+  background: rgba(255,255,255,0.08);
+}
 
 /* --- Tab side-picker popup --- */
 #split-side-picker {
@@ -29611,28 +29670,11 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   let splitTabId = null;
   let splitRatio = 0.5;
 
+  // v1.237: 分割ビューを完全リデザイン — ペインレベルで左右分割
   function initSplitDOM() {
-    const paneBody = document.querySelector('#pane-input .pane-body');
-    if (!paneBody || document.getElementById('split-resizer')) return;
-
-    const resizer = document.createElement('div');
-    resizer.id = 'split-resizer';
-    paneBody.appendChild(resizer);
-
-    const container = document.createElement('div');
-    container.id = 'split-editor-container';
-    container.innerHTML = `
-      <div id="split-editor-header">
-        <span class="split-header-title">分割表示</span>
-        <span class="split-header-actions">
-          <button onclick="if(typeof swapSplitSides==='function')swapSplitSides()" title="左右入替">⇄ 入替</button>
-          <button onclick="if(typeof deactivateSplit==='function')deactivateSplit()" title="分割を閉じる">✕</button>
-        </span>
-      </div>
-      <div id="split-editor-tabs"></div>
-      <textarea id="split-textarea" spellcheck="false"></textarea>
-    `;
-    paneBody.appendChild(container);
+    const resizer = document.getElementById('split-resizer');
+    if (!resizer || resizer.__bound) return;
+    resizer.__bound = true;
 
     let dragging = false;
     resizer.addEventListener('mousedown', (e) => {
@@ -29644,8 +29686,10 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     });
     document.addEventListener('mousemove', (e) => {
       if (!dragging) return;
-      const paneRect = paneBody.getBoundingClientRect();
-      const ratio = (e.clientX - paneRect.left) / paneRect.width;
+      const wrapper = document.getElementById('split-wrapper');
+      if (!wrapper) return;
+      const rect = wrapper.getBoundingClientRect();
+      const ratio = (e.clientX - rect.left) / rect.width;
       splitRatio = Math.max(0.2, Math.min(0.8, ratio));
       applySplitLayout();
     });
@@ -29657,19 +29701,50 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
       saveSplitState();
     });
 
-    document.getElementById('split-textarea').addEventListener('input', () => {
-      if (!splitActive || splitTabId == null) return;
-      const tab = window.inputTabs.find(t => t.id === splitTabId);
-      if (tab) {
-        tab.content = document.getElementById('split-textarea').value;
-        if (typeof window.saveTabsToStorage === 'function') window.saveTabsToStorage();
-      }
-    });
+    // 左右テキストエリアのinputイベント
+    const leftTA = document.getElementById('split-left-textarea');
+    const rightTA = document.getElementById('split-right-textarea');
+    if (leftTA) {
+      leftTA.addEventListener('input', () => {
+        if (!splitActive) return;
+        const tab = window.inputTabs.find(t => t.id === window.activeTabId);
+        if (tab) { tab.content = leftTA.value; if (typeof window.saveTabsToStorage === 'function') window.saveTabsToStorage(); }
+        updateSplitStats('left', leftTA);
+      });
+      leftTA.addEventListener('click', () => updateSplitCursorLine('left', leftTA));
+      leftTA.addEventListener('keyup', () => updateSplitCursorLine('left', leftTA));
+    }
+    if (rightTA) {
+      rightTA.addEventListener('input', () => {
+        if (!splitActive || splitTabId == null) return;
+        const tab = window.inputTabs.find(t => t.id === splitTabId);
+        if (tab) { tab.content = rightTA.value; if (typeof window.saveTabsToStorage === 'function') window.saveTabsToStorage(); }
+        updateSplitStats('right', rightTA);
+      });
+      rightTA.addEventListener('click', () => updateSplitCursorLine('right', rightTA));
+      rightTA.addEventListener('keyup', () => updateSplitCursorLine('right', rightTA));
+    }
+  }
+
+  function updateSplitStats(side, ta) {
+    const chars = document.getElementById('split-' + side + '-chars');
+    const lines = document.getElementById('split-' + side + '-lines');
+    if (chars) chars.textContent = ta.value.replace(/[\n\r\s　]/g, '').length + ' 字';
+    if (lines) lines.textContent = (ta.value === '' ? 0 : ta.value.split('\n').length) + ' 行';
+  }
+
+  function updateSplitCursorLine(side, ta) {
+    const bar = document.getElementById('split-' + side + '-pos');
+    if (!bar) return;
+    const pos = ta.selectionStart;
+    const line = (ta.value.substring(0, pos).match(/\n/g) || []).length + 1;
+    bar.textContent = `現在: ${line} 行目`;
   }
 
   function activateSplit(tabId) {
     const paneInput = document.getElementById('pane-input');
     if (!paneInput) return;
+    // 現在のタブ内容を保存
     const curTab = window.inputTabs.find(t => t.id === window.activeTabId);
     const inputArea = document.getElementById('input-area');
     if (curTab && inputArea) curTab.content = inputArea.value;
@@ -29678,122 +29753,178 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     splitTabId = tabId;
     paneInput.classList.add('split-active');
 
-    const tab = window.inputTabs.find(t => t.id === tabId);
-    const splitTA = document.getElementById('split-textarea');
-    if (tab && splitTA) splitTA.value = tab.content || '';
+    // 左テキストエリアにアクティブタブの内容をロード
+    const leftTA = document.getElementById('split-left-textarea');
+    if (curTab && leftTA) leftTA.value = curTab.content || '';
+
+    // 右テキストエリアに分割タブの内容をロード
+    const rightTab = window.inputTabs.find(t => t.id === tabId);
+    const rightTA = document.getElementById('split-right-textarea');
+    if (rightTab && rightTA) rightTA.value = rightTab.content || '';
 
     syncSplitStyle();
     renderSplitTabs();
     applySplitLayout();
+    updateSplitStats('left', leftTA);
+    updateSplitStats('right', rightTA);
     saveSplitState();
   }
 
   function deactivateSplit() {
     const paneInput = document.getElementById('pane-input');
     if (!paneInput) return;
+
+    // 左テキストエリアの内容をアクティブタブに保存
+    const leftTA = document.getElementById('split-left-textarea');
+    const curTab = window.inputTabs.find(t => t.id === window.activeTabId);
+    if (curTab && leftTA) curTab.content = leftTA.value;
+
+    // 右テキストエリアの内容を分割タブに保存
+    const rightTA = document.getElementById('split-right-textarea');
+    const splitTab = window.inputTabs.find(t => t.id === splitTabId);
+    if (splitTab && rightTA) splitTab.content = rightTA.value;
+
+    // 入力エリアに反映
+    const inputArea = document.getElementById('input-area');
+    if (curTab && inputArea) inputArea.value = curTab.content || '';
+
     splitActive = false;
     splitTabId = null;
     paneInput.classList.remove('split-active');
 
-    const inputArea = document.getElementById('input-area');
-    const mirror = document.getElementById('input-mirror-container');
-    const overlay = document.getElementById('input-sel-overlay');
-    [inputArea, mirror, overlay].forEach(el => {
-      if (el) { el.style.width = ''; el.style.flex = ''; }
-    });
+    if (typeof window.saveTabsToStorage === 'function') window.saveTabsToStorage();
     saveSplitState();
   }
 
   function swapSplitSides() {
     if (!splitActive || splitTabId == null) return;
-    const inputArea = document.getElementById('input-area');
-    const splitTA = document.getElementById('split-textarea');
-    if (!inputArea || !splitTA) return;
+    const leftTA = document.getElementById('split-left-textarea');
+    const rightTA = document.getElementById('split-right-textarea');
+    if (!leftTA || !rightTA) return;
 
+    // 両方のテキストエリアの内容を保存
     const curTab = window.inputTabs.find(t => t.id === window.activeTabId);
-    if (curTab) curTab.content = inputArea.value;
+    if (curTab) curTab.content = leftTA.value;
     const splitTab = window.inputTabs.find(t => t.id === splitTabId);
-    if (splitTab) splitTab.content = splitTA.value;
+    if (splitTab) splitTab.content = rightTA.value;
 
     const oldActive = window.activeTabId;
     const oldSplit = splitTabId;
 
-    // 一時的にsplitActiveを無効にしてswitchTabのポップアップ回避
+    // switchTab でメインタブを切替（ポップアップ回避）
     splitActive = false;
     if (typeof window.switchTab === 'function') window.switchTab(oldSplit);
     splitActive = true;
 
     splitTabId = oldActive;
-    const newSplitTab = window.inputTabs.find(t => t.id === splitTabId);
-    if (newSplitTab && splitTA) splitTA.value = newSplitTab.content || '';
+
+    // テキストエリアの内容を入れ替え
+    const newLeftTab = window.inputTabs.find(t => t.id === window.activeTabId);
+    const newRightTab = window.inputTabs.find(t => t.id === splitTabId);
+    if (newLeftTab && leftTA) leftTA.value = newLeftTab.content || '';
+    if (newRightTab && rightTA) rightTA.value = newRightTab.content || '';
 
     renderSplitTabs();
+    updateSplitStats('left', leftTA);
+    updateSplitStats('right', rightTA);
     saveSplitState();
   }
 
   function applySplitLayout() {
     if (!splitActive) return;
-    const inputArea = document.getElementById('input-area');
-    const mirror = document.getElementById('input-mirror-container');
-    const overlay = document.getElementById('input-sel-overlay');
-    const splitContainer = document.getElementById('split-editor-container');
+    const leftCol = document.getElementById('split-col-left');
+    const rightCol = document.getElementById('split-col-right');
+    if (!leftCol || !rightCol) return;
 
     const leftPct = (splitRatio * 100).toFixed(1) + '%';
-
-    [inputArea, mirror, overlay].forEach(el => {
-      if (el) {
-        el.style.width = leftPct;
-        el.style.flex = `0 0 ${leftPct}`;
-      }
-    });
-    if (splitContainer) {
-      splitContainer.style.flex = '1 1 0%';
-    }
+    const rightPct = ((1 - splitRatio) * 100).toFixed(1) + '%';
+    leftCol.style.flex = `0 0 ${leftPct}`;
+    rightCol.style.flex = `0 0 ${rightPct}`;
   }
 
   function renderSplitTabs() {
-    const container = document.getElementById('split-editor-tabs');
-    if (!container) return;
-    container.innerHTML = '';
+    const leftContainer = document.getElementById('split-left-tabs');
+    const rightContainer = document.getElementById('split-right-tabs');
+    if (!leftContainer || !rightContainer) return;
+
+    // 左側タブ（メインタブと同じセット、activeTabIdがアクティブ）
+    leftContainer.innerHTML = '';
     window.inputTabs.forEach(tab => {
       const el = document.createElement('div');
-      el.className = 'split-tab' + (tab.id === splitTabId ? ' active' : '');
+      el.className = 'split-col-tab' + (tab.id === window.activeTabId ? ' active' : '');
       el.textContent = tab.name || 'タブ';
-      el.onclick = () => switchSplitTab(tab.id);
-      container.appendChild(el);
+      el.onclick = () => switchSplitLeftTab(tab.id);
+      leftContainer.appendChild(el);
+    });
+
+    // 右側タブ（同じセット、splitTabIdがアクティブ）
+    rightContainer.innerHTML = '';
+    window.inputTabs.forEach(tab => {
+      const el = document.createElement('div');
+      el.className = 'split-col-tab' + (tab.id === splitTabId ? ' active' : '');
+      el.textContent = tab.name || 'タブ';
+      el.onclick = () => switchSplitRightTab(tab.id);
+      rightContainer.appendChild(el);
     });
   }
 
-  function switchSplitTab(tabId) {
+  function switchSplitLeftTab(tabId) {
     if (!splitActive) return;
+    // 現在の左タブ内容を保存
+    const leftTA = document.getElementById('split-left-textarea');
+    const curTab = window.inputTabs.find(t => t.id === window.activeTabId);
+    if (curTab && leftTA) curTab.content = leftTA.value;
+
+    // switchTabでメインを切替（ポップアップ回避）
+    splitActive = false;
+    if (typeof window.switchTab === 'function') window.switchTab(tabId);
+    splitActive = true;
+
+    // 新しいタブの内容をロード
+    const newTab = window.inputTabs.find(t => t.id === tabId);
+    if (newTab && leftTA) leftTA.value = newTab.content || '';
+
+    renderSplitTabs();
+    updateSplitStats('left', leftTA);
+    saveSplitState();
+  }
+
+  function switchSplitRightTab(tabId) {
+    if (!splitActive) return;
+    // 現在の右タブ内容を保存
+    const rightTA = document.getElementById('split-right-textarea');
     const curSplit = window.inputTabs.find(t => t.id === splitTabId);
-    const splitTA = document.getElementById('split-textarea');
-    if (curSplit && splitTA) curSplit.content = splitTA.value;
+    if (curSplit && rightTA) curSplit.content = rightTA.value;
 
     splitTabId = tabId;
     const newTab = window.inputTabs.find(t => t.id === tabId);
-    if (newTab && splitTA) splitTA.value = newTab.content || '';
+    if (newTab && rightTA) rightTA.value = newTab.content || '';
 
     renderSplitTabs();
+    updateSplitStats('right', rightTA);
     saveSplitState();
     if (typeof window.saveTabsToStorage === 'function') window.saveTabsToStorage();
   }
 
   function syncSplitStyle() {
     const inputArea = document.getElementById('input-area');
-    const splitTA = document.getElementById('split-textarea');
-    if (!inputArea || !splitTA) return;
+    const leftTA = document.getElementById('split-left-textarea');
+    const rightTA = document.getElementById('split-right-textarea');
+    if (!inputArea) return;
     const cs = getComputedStyle(inputArea);
-    splitTA.style.fontSize = cs.fontSize;
-    splitTA.style.lineHeight = cs.lineHeight;
-    splitTA.style.fontFamily = cs.fontFamily;
-    if (inputArea.style.writingMode) {
-      splitTA.style.writingMode = inputArea.style.writingMode;
-      splitTA.style.textOrientation = inputArea.style.textOrientation || '';
-    } else {
-      splitTA.style.writingMode = '';
-      splitTA.style.textOrientation = '';
-    }
+    [leftTA, rightTA].forEach(ta => {
+      if (!ta) return;
+      ta.style.fontSize = cs.fontSize;
+      ta.style.lineHeight = cs.lineHeight;
+      ta.style.fontFamily = cs.fontFamily;
+      if (inputArea.style.writingMode) {
+        ta.style.writingMode = inputArea.style.writingMode;
+        ta.style.textOrientation = inputArea.style.textOrientation || '';
+      } else {
+        ta.style.writingMode = '';
+        ta.style.textOrientation = '';
+      }
+    });
   }
 
   // ========================================
@@ -29817,13 +29948,9 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
       const side = item.dataset.side;
       hideSidePicker();
       if (side === 'left') {
-        // メイン側はsplitActive=falseにして切り替え、再度有効化
-        const curSplitId = splitTabId;
-        splitActive = false;
-        if (typeof window.switchTab === 'function') window.switchTab(sidePickerTabId);
-        splitActive = true;
+        switchSplitLeftTab(sidePickerTabId);
       } else if (side === 'right') {
-        switchSplitTab(sidePickerTabId);
+        switchSplitRightTab(sidePickerTabId);
       }
     });
 
