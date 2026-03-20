@@ -31426,94 +31426,92 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     setTimeout(() => document.addEventListener('click', closer), 0);
   }
 
-  // Extend showTabContextMenu to add group options
-  function patchTabContextMenuForGroups(){
-    const origShow = window.showTabContextMenu;
-    // We patch the menu content after it's shown by observing its construction
-    // Instead, we add items to the menu via MutationObserver on the menu element
-    // Simpler approach: patch after menu is displayed
+  // contextmenuイベントでタブIDを記録し、rAFでメニューにグループ項目を追加
+  let _groupCtxTabId = null;
 
-    const observer = new MutationObserver(() => {
-      const menu = document.getElementById('tab-context-menu');
-      if (!menu || menu.style.display !== 'block') return;
-      if (menu.__groupItemsAdded) return;
-      menu.__groupItemsAdded = true;
+  function addGroupItemsToMenu(){
+    const menu = document.getElementById('tab-context-menu');
+    if (!menu || menu.style.display !== 'block') return;
+    // 既にグループ項目があれば何もしない
+    if (menu.querySelector('[data-group-action]')) return;
 
-      // Find the target tab ID from the menu items / contextMenuTabId
-      const tabId = window.contextMenuTabId;
-      if (!tabId) return;
+    const tabId = _groupCtxTabId || window.activeTabId;
+    if (!tabId) return;
 
-      const currentGroup = getGroupForTab(tabId);
-      const sep = document.createElement('div');
-      sep.className = 'context-menu-sep';
-      menu.appendChild(sep);
+    const currentGroup = getGroupForTab(tabId);
+    const sep = document.createElement('div');
+    sep.className = 'context-menu-sep';
+    sep.dataset.groupAction = 'sep';
+    menu.appendChild(sep);
 
-      if (currentGroup) {
-        const removeItem = document.createElement('div');
-        removeItem.className = 'context-menu-item';
-        removeItem.textContent = '🔓 グループから外す';
-        removeItem.onclick = () => {
-          removeTabFromGroup(tabId);
-          if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
-          menu.style.display = 'none';
-        };
-        menu.appendChild(removeItem);
+    if (currentGroup) {
+      const removeItem = document.createElement('div');
+      removeItem.className = 'context-menu-item';
+      removeItem.dataset.groupAction = 'remove';
+      removeItem.textContent = '🔓 グループから外す';
+      removeItem.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        removeTabFromGroup(tabId);
+        if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
+        if (window.hideAllContextMenus) window.hideAllContextMenus();
+      });
+      menu.appendChild(removeItem);
+    }
+
+    // 新しいグループを作成
+    const newGroupItem = document.createElement('div');
+    newGroupItem.className = 'context-menu-item';
+    newGroupItem.dataset.groupAction = 'new';
+    newGroupItem.textContent = '📁 新しいグループを作成';
+    newGroupItem.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const name = prompt('グループ名を入力:', 'グループ');
+      if (name !== null) {
+        createGroup([tabId], name.trim() || 'グループ');
       }
-
-      // "New group from this tab"
-      const newGroupItem = document.createElement('div');
-      newGroupItem.className = 'context-menu-item';
-      newGroupItem.textContent = '📁 新しいグループを作成';
-      newGroupItem.onclick = () => {
-        const name = prompt('グループ名を入力:', 'グループ');
-        if (name !== null) {
-          createGroup([tabId], name.trim() || 'グループ');
-        }
-        menu.style.display = 'none';
-      };
-      menu.appendChild(newGroupItem);
-
-      // Add to existing group submenu
-      const groupIds = Object.keys(tabGroups);
-      if (groupIds.length > 0) {
-        for (const gid of groupIds) {
-          if (getGroupForTab(tabId) === gid) continue;
-          const g = tabGroups[gid];
-          const addItem = document.createElement('div');
-          addItem.className = 'context-menu-item';
-          addItem.innerHTML = `<span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:${g.color}; margin-right:6px;"></span>「${window.escapeHtml ? window.escapeHtml(g.name) : g.name}」に追加`;
-          addItem.onclick = () => {
-            addTabToGroup(tabId, gid);
-            if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
-            menu.style.display = 'none';
-          };
-          menu.appendChild(addItem);
-        }
-      }
+      if (window.hideAllContextMenus) window.hideAllContextMenus();
     });
+    menu.appendChild(newGroupItem);
 
-    // Watch for menu display changes
-    const menuCheck = setInterval(() => {
-      const menu = document.getElementById('tab-context-menu');
-      if (menu) {
-        clearInterval(menuCheck);
-        observer.observe(menu, { attributes: true, attributeFilter: ['style'] });
-        // Reset flag when menu is hidden
-        const hideObserver = new MutationObserver(() => {
-          if (menu.style.display === 'none' || menu.style.display === '') {
-            menu.__groupItemsAdded = false;
-          }
-        });
-        hideObserver.observe(menu, { attributes: true, attributeFilter: ['style'] });
+    // 既存グループに追加
+    const groupIds = Object.keys(tabGroups);
+    for (const gid of groupIds) {
+      if (getGroupForTab(tabId) === gid) continue;
+      const g = tabGroups[gid];
+      const addItem = document.createElement('div');
+      addItem.className = 'context-menu-item';
+      addItem.dataset.groupAction = 'add-' + gid;
+      addItem.innerHTML = `<span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:${g.color}; margin-right:6px;"></span>「${window.escapeHtml ? window.escapeHtml(g.name) : g.name}」に追加`;
+      addItem.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        addTabToGroup(tabId, gid);
+        if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
+        if (window.hideAllContextMenus) window.hideAllContextMenus();
+      });
+      menu.appendChild(addItem);
+    }
+  }
+
+  function initGroupContextMenu(){
+    document.addEventListener('contextmenu', (e) => {
+      const tabEl = e.target.closest('.input-tab');
+      if (!tabEl) return;
+      const id = parseInt(tabEl.dataset.tabId, 10);
+      if (!Number.isNaN(id)) {
+        _groupCtxTabId = id;
       }
-    }, 500);
+      // 本体のcontextmenuハンドラがメニューを構築した後に追加
+      requestAnimationFrame(() => {
+        addGroupItemsToMenu();
+      });
+    });
   }
 
   loadTabGroups();
 
   function init(){
     patchRenderWithGroups();
-    patchTabContextMenuForGroups();
+    initGroupContextMenu();
   }
 
   if (document.readyState === 'loading') {
