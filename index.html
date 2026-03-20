@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.240</title>
+<title>ⓒエディタ v1.241</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -11892,13 +11892,28 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function applyShortcutTooltips() {
+    const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform || '') || (navigator.userAgentData && navigator.userAgentData.platform === 'macOS');
+    function toMacSymbols(s) {
+        if (!isMac) return s;
+        return s.replace(/Ctrl\+/g, '⌘').replace(/Alt\+/g, '⌥').replace(/Shift\+/g, '⇧');
+    }
     document.querySelectorAll('[data-shortcut]').forEach((el) => {
         const shortcut = el.getAttribute('data-shortcut');
         if (!shortcut) return;
         const desc = el.getAttribute('data-desc') || el.getAttribute('aria-label') || el.getAttribute('title') || '';
-        const label = desc ? `${desc}（${shortcut}）` : `ショートカット：${shortcut}`;
+        const display = toMacSymbols(shortcut);
+        const label = desc ? `${desc}（${display}）` : `ショートカット：${display}`;
         el.setAttribute('title', label);
     });
+    // Also convert hardcoded title attributes containing shortcut notation
+    if (isMac) {
+        document.querySelectorAll('#quick-insert-popup button[title], .selection-tool-body button[title]').forEach((el) => {
+            const t = el.getAttribute('title');
+            if (t && /Ctrl|Alt|Shift/.test(t)) {
+                el.setAttribute('title', toMacSymbols(t));
+            }
+        });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -14961,7 +14976,7 @@ if (typeof applyPaneHeightSettings === 'function') {
                 return;
             }
             if (k === 'g') { e.preventDefault(); e.stopPropagation(); showJumpDialog(); }
-            if (k === 'f' && e.shiftKey) { e.preventDefault(); e.stopPropagation(); insertRubyToSelection(); }
+            if (k === 'f' && e.shiftKey) { e.preventDefault(); e.stopPropagation(); if (__macCtrl && e.metaKey) { openRubyInsertDialog(); } else { insertRubyToSelection(); } }
             if (k === 'f' && !e.shiftKey) {
                 e.preventDefault();
                 e.stopPropagation();
