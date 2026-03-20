@@ -8193,10 +8193,12 @@ window.closeActiveTab = closeActiveTab;
         if (inputTabs.length <= 1) return;
         if (!confirm('このタブを削除しますか？')) return;
         const idx = inputTabs.findIndex(t => t.id === tabId);
+        if (idx < 0) return;
         inputTabs.splice(idx, 1);
         if (activeTabId === tabId) {
-            activeTabId = inputTabs[Math.max(0, idx - 1)].id;
-            inputArea.value = inputTabs.find(t => t.id === activeTabId).content;
+            const newIdx = Math.min(idx, inputTabs.length - 1);
+            activeTabId = inputTabs[newIdx].id;
+            inputArea.value = inputTabs[newIdx].content;
         }
         renderInputTabs();
         updateInputStats();
@@ -17520,16 +17522,7 @@ function bulkResetCardsBgColor(paneId){
     const btnSearch = document.getElementById('btn-toggle-search');
     if (btnSearch) btnSearch.onclick = ()=> openNavTab('search');
 
-    // Ctrl+Alt+F -> nav search
-    document.addEventListener('keydown', (e)=>{
-      const __api = window.__ccShortcutAPI;
-      const __combo = (__api && __api.getShortcuts ? (__api.getShortcuts().searchPanel) : null) || 'Ctrl+Alt+F';
-      if ((__api && __api.matchesEvent) ? __api.matchesEvent(e, __combo) : (e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && (e.key==='f' || e.key==='F'))){
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        openNavTab('search');
-      }
-    }, true);
+    // Ctrl+Alt+F -> search panel（toggleSearchPanel 側で統一登録のためここでは省略）
   }
 
   // Alt shortcuts
