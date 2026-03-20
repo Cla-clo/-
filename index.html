@@ -7425,6 +7425,9 @@ body.theme-dark .card-shell:hover{
             <button class="btn" onclick="readerFindNext()">▼</button>
             <span id="reader-search-info" style="min-width:52px; display:inline-block; text-align:right;">0/0</span>
             <button class="btn" id="btn-reader-writing-mode" onclick="toggleReaderWritingMode()" title="書字方向切替">縦書きへ</button>
+            <button class="btn" onclick="zoomReader(-1)" title="縮小">🔍−</button>
+            <span id="reader-zoom-display" class="zoom-display" ondblclick="startEditReaderZoom()" title="ダブルクリックで拡大率を入力" style="cursor:pointer; min-width:40px; text-align:center;">100%</span>
+            <button class="btn" onclick="zoomReader(1)" title="拡大">🔍+</button>
             <button class="btn btn-sync" onclick="closeReaderView()" title="元の画面に戻る（Esc）">↩ 元の画面に戻る</button>
             <button class="btn" onclick="closeReaderView()" title="閉じる">✕</button>
         </div>
@@ -10103,16 +10106,73 @@ function syncPreviewPositionCore() {
     function loadZoomFromStorage() {
         const savedInputZoom = localStorage.getItem('cc_input_zoom_index');
         const savedPreviewZoom = localStorage.getItem('cc_preview_zoom_index');
+        const savedReaderZoom = localStorage.getItem('cc_reader_zoom_index');
         const customInputZoom = localStorage.getItem('cc_input_zoom_custom');
         const customPreviewZoom = localStorage.getItem('cc_preview_zoom_custom');
         if (savedInputZoom !== null) inputZoomIndex = parseInt(savedInputZoom, 10);
         if (savedPreviewZoom !== null) previewZoomIndex = parseInt(savedPreviewZoom, 10);
+        if (savedReaderZoom !== null) readerZoomIndex = parseInt(savedReaderZoom, 10);
         // 範囲外の値を修正
         inputZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, inputZoomIndex));
         previewZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, previewZoomIndex));
+        readerZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, readerZoomIndex));
         // v1.238: カスタム/通常どちらもapplyZoomで統一適用（px値ベース）
         applyInputZoom();
         applyPreviewZoom();
+    }
+
+    // ===== 閲覧ズーム =====
+    let readerZoomIndex = DEFAULT_ZOOM_INDEX;
+
+    function getReaderZoomPercent() {
+        const custom = localStorage.getItem('cc_reader_zoom_custom');
+        return custom !== null ? parseInt(custom, 10) : ZOOM_LEVELS[readerZoomIndex];
+    }
+
+    function applyReaderZoom() {
+        const zoomPercent = getReaderZoomPercent();
+        const contentEl = document.getElementById('reader-content');
+        if (contentEl) contentEl.style.fontSize = `${16 * zoomPercent / 100}px`;
+        const display = document.getElementById('reader-zoom-display');
+        if (display && display.tagName === 'SPAN') display.textContent = `${zoomPercent}%`;
+    }
+
+    function zoomReader(delta) {
+        readerZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, readerZoomIndex + delta));
+        localStorage.removeItem('cc_reader_zoom_custom');
+        localStorage.setItem('cc_reader_zoom_index', String(readerZoomIndex));
+        applyReaderZoom();
+    }
+
+    function startEditReaderZoom() {
+        const display = document.getElementById('reader-zoom-display');
+        if (!display) return;
+        const currentZoom = getReaderZoomPercent();
+        const input = document.createElement('input');
+        input.type = 'number'; input.className = 'zoom-input'; input.id = 'reader-zoom-display';
+        input.value = currentZoom; input.min = 10; input.max = 500;
+        input.onblur = () => finishEditReaderZoom(input.value);
+        input.onkeydown = e => { if (e.key === 'Enter') input.blur(); if (e.key === 'Escape') { input.value = currentZoom; input.blur(); } };
+        display.replaceWith(input); input.focus(); input.select();
+    }
+
+    function finishEditReaderZoom(value) {
+        const zoomPercent = Math.max(10, Math.min(500, parseInt(value, 10) || 100));
+        const closestIndex = ZOOM_LEVELS.reduce((prev, curr, idx) =>
+            Math.abs(curr - zoomPercent) < Math.abs(ZOOM_LEVELS[prev] - zoomPercent) ? idx : prev, 0);
+        readerZoomIndex = closestIndex;
+        localStorage.setItem('cc_reader_zoom_custom', String(zoomPercent));
+        localStorage.setItem('cc_reader_zoom_index', String(readerZoomIndex));
+        applyReaderZoom();
+        const input = document.querySelector('#reader-zoom-display');
+        if (input && input.tagName === 'INPUT') {
+            const span = document.createElement('span');
+            span.id = 'reader-zoom-display'; span.className = 'zoom-display';
+            span.title = 'ダブルクリックで拡大率を入力'; span.ondblclick = startEditReaderZoom;
+            span.style.cssText = 'cursor:pointer; min-width:40px; text-align:center;';
+            span.textContent = `${zoomPercent}%`;
+            input.replaceWith(span);
+        }
     }
 
     // ===== 閲覧（全タブをまとめて全画面表示） =====
@@ -10177,6 +10237,7 @@ function syncPreviewPositionCore() {
 
         renderReaderContent();
         updateReaderWritingModeButtonLabel();
+        applyReaderZoom();
 
         overlay.classList.add('show');
         overlay.setAttribute('aria-hidden', 'false');
@@ -14503,6 +14564,16 @@ if (typeof applyPaneHeightSettings === 'function') {
         if (!document.body.contains(e.target)) return;
         if (document.getElementById('reader-overlay')?.classList.contains('show')) {
             if (e.key === 'Escape') { e.preventDefault(); closeReaderView(); return; }
+            // 閲覧モード中のズーム（Alt+Shift+=/- or Ctrl+=/−）
+            if (e.altKey && e.shiftKey && !e.ctrlKey && !e.metaKey) {
+                const key = e.key || '';
+                if (key === '+' || key === '=' || e.code === 'Equal' || e.code === 'NumpadAdd') {
+                    e.preventDefault(); zoomReader(1); return;
+                }
+                if (key === '-' || key === '_' || e.code === 'Minus' || e.code === 'NumpadSubtract') {
+                    e.preventDefault(); zoomReader(-1); return;
+                }
+            }
         }
 
         if (e.key === 'Escape') { if (document.body.classList.contains('focus-mode')) toggleFocusMode(); closeJumpDialog(); closeAnalysis(); closeMemoSaveDialog(); }
