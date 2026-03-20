@@ -5893,7 +5893,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.238</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.239</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -8102,6 +8102,10 @@ function cc_applyHeaderBadgePriority(_root){ /* no-op: handled by CSS */ }
                 const [moved] = inputTabs.splice(fromIndex, 1);
                 const adjIndex = fromIndex < targetIndex ? targetIndex - 1 : targetIndex;
                 inputTabs.splice(adjIndex, 0, moved);
+                // ドロップ先タブがグループに属していれば自動的にそのグループに追加
+                if (typeof window.__autoJoinGroupOnDrop === 'function') {
+                    window.__autoJoinGroupOnDrop(draggingInputTabId, tab.id);
+                }
                 renderInputTabs();
                 saveTabsToStorage();
             });
@@ -8333,10 +8337,32 @@ window.closeActiveTab = closeActiveTab;
         const currentTab = inputTabs.find(t => t.id === activeTabId);
         if (currentTab) currentTab.content = inputArea.value;
         let combined = '';
+        // v1.239: グループ構造を含めてテキスト出力
+        const groups = typeof window.getTabGroups === 'function' ? window.getTabGroups() : {};
+        const getGroupForTab = (tabId) => {
+            for (const [gid, g] of Object.entries(groups)) {
+                if (g.tabIds && g.tabIds.includes(tabId)) return gid;
+            }
+            return null;
+        };
+        let currentGroupId = null;
         inputTabs.forEach((tab, idx) => {
+            const gid = getGroupForTab(tab.id);
+            // グループ開始マーカー
+            if (gid && gid !== currentGroupId) {
+                if (currentGroupId) combined += '\n\n◆◆\n'; // 前のグループを閉じる
+                if (idx > 0) combined += '\n';
+                const g = groups[gid];
+                combined += `◆◆ ${g.name}${g.color ? ' [color=' + g.color + ']' : ''}\n`;
+                currentGroupId = gid;
+            } else if (!gid && currentGroupId) {
+                combined += '\n\n◆◆\n'; // グループ終了
+                currentGroupId = null;
+            }
             if (idx > 0) combined += '\n\n';
             combined += `◆ ${tab.name}\n\n${tab.content}`;
         });
+        if (currentGroupId) combined += '\n\n◆◆\n'; // 最後のグループを閉じる
         return combined;
     }
 
@@ -13973,6 +13999,7 @@ if (typeof applyPaneHeightSettings === 'function') {
             const project = raw || {};
             const sections = {
                 tabs: __ccPickFirst(project, ['tabs', 'textTabs', 'text', 'editorTabs']),
+                tabGroups: __ccPickFirst(project, ['tabGroups', 'tab_groups']),
                 memoTabs: __ccPickFirst(project, ['memoTabs', 'memos', 'memo', 'memo_tabs']),
                 structure: __ccPickFirst(project, ['structure', 'outline', 'plot']),
                 character: __ccPickFirst(project, ['character', 'characters', 'person', 'people']),
@@ -14080,6 +14107,11 @@ if (typeof applyPaneHeightSettings === 'function') {
             if (should('proj-load-text') && sections.tabs !== undefined) {
                 const payload = __ccGetTabsPayload(sections.tabs, project);
                 localStorage.setItem(TABS_KEY, JSON.stringify(payload));
+                // v1.239: タブグループも復元
+                if (sections.tabGroups) {
+                    localStorage.setItem('cc_tab_groups_v1', JSON.stringify(sections.tabGroups));
+                    if (typeof window.setTabGroups === 'function') window.setTabGroups(sections.tabGroups);
+                }
             }
 
             // メモ
@@ -14215,6 +14247,11 @@ if (typeof applyPaneHeightSettings === 'function') {
             project.tabs = Array.isArray(tabState.tabs) ? tabState.tabs : [];
             project.currentTabId = tabState.activeTabId || (project.tabs[0]?.id ?? 1);
             project.nextTabId = tabState.nextTabId || (Math.max(0, ...project.tabs.map(t => t.id||0)) + 1);
+            // v1.239: タブグループ情報も保存
+            try {
+                const tg = JSON.parse(localStorage.getItem('cc_tab_groups_v1') || '{}');
+                if (tg.groups && Object.keys(tg.groups).length > 0) project.tabGroups = tg;
+            } catch(e) {}
         }
         if (document.getElementById('proj-save-memo').checked) {
             // memoTabs は cc_editor_memo_tabs に {tabs, activeId, nextId} で保存されている
@@ -14434,6 +14471,11 @@ if (typeof applyPaneHeightSettings === 'function') {
                     const nextTabId = project.nextTabId || project.tabs.nextTabId || (Math.max(0, ...tabs.map(t => t.id||0)) + 1);
                     localStorage.setItem(TABS_KEY, JSON.stringify({ tabs, activeTabId, nextTabId }));
                     if (typeof loadTabsFromStorage === 'function') loadTabsFromStorage();
+                    // v1.239: タブグループ復元
+                    if (project.tabGroups) {
+                        localStorage.setItem('cc_tab_groups_v1', JSON.stringify(project.tabGroups));
+                        if (typeof window.setTabGroups === 'function') window.setTabGroups(project.tabGroups);
+                    }
                 }
                 if (project.memoTabs) {
                     const tabs = Array.isArray(project.memoTabs) ? project.memoTabs : (project.memoTabs.tabs || []);
@@ -14580,11 +14622,48 @@ if (typeof applyPaneHeightSettings === 'function') {
     }
     function parseStructuredTabs(text, marker) {
         const lines = text.split(/\r?\n/);
-        const rx = new RegExp(`^\\${marker}\\s*(.*)$`);
+        const rxTab = new RegExp(`^\\${marker}(?!\\${marker})\\s*(.*)$`);
+        // v1.239: グループマーカー ◆◆ groupName [color=#xxx]  /  ◆◆ (閉じ)
+        const rxGroupOpen = new RegExp(`^\\${marker}\\${marker}\\s+(.+)$`);
+        const rxGroupClose = new RegExp(`^\\${marker}\\${marker}\\s*$`);
         const tabs = [];
         let current = null;
+        let currentGroupName = null;
+        let currentGroupColor = null;
+        const parsedGroups = []; // [{name, color, startIdx, endIdx}]
+        let groupStartIdx = -1;
+
         lines.forEach(line => {
-            const m = line.match(rx);
+            // グループ開始
+            const gOpen = line.match(rxGroupOpen);
+            if (gOpen) {
+                if (current) { tabs.push(current); current = null; }
+                // 前のグループが閉じられていなければ閉じる
+                if (currentGroupName && groupStartIdx >= 0) {
+                    parsedGroups.push({ name: currentGroupName, color: currentGroupColor, startIdx: groupStartIdx, endIdx: tabs.length - 1 });
+                }
+                let rawGroup = gOpen[1].trim();
+                // [color=#xxx] を抽出
+                const colorMatch = rawGroup.match(/\[color=([^\]]+)\]/);
+                currentGroupColor = colorMatch ? colorMatch[1] : null;
+                currentGroupName = rawGroup.replace(/\s*\[color=[^\]]+\]\s*/, '').trim();
+                groupStartIdx = tabs.length;
+                return;
+            }
+            // グループ閉じ
+            const gClose = line.match(rxGroupClose);
+            if (gClose) {
+                if (current) { tabs.push(current); current = null; }
+                if (currentGroupName && groupStartIdx >= 0) {
+                    parsedGroups.push({ name: currentGroupName, color: currentGroupColor, startIdx: groupStartIdx, endIdx: tabs.length - 1 });
+                }
+                currentGroupName = null;
+                currentGroupColor = null;
+                groupStartIdx = -1;
+                return;
+            }
+            // 通常タブマーカー
+            const m = line.match(rxTab);
             if (m) {
                 if (current) tabs.push(current);
                 current = { name: m[1].trim() || '', content: '' };
@@ -14593,6 +14672,12 @@ if (typeof applyPaneHeightSettings === 'function') {
             }
         });
         if (current) tabs.push(current);
+        // 閉じられていないグループを閉じる
+        if (currentGroupName && groupStartIdx >= 0) {
+            parsedGroups.push({ name: currentGroupName, color: currentGroupColor, startIdx: groupStartIdx, endIdx: tabs.length - 1 });
+        }
+        // グループ情報をtabsに付加
+        tabs.__parsedGroups = parsedGroups;
         return tabs;
     }
 
@@ -14714,6 +14799,32 @@ if (typeof applyPaneHeightSettings === 'function') {
                     inputTabs.push({ id: nextTabId++, name, content });
                     activeTabId = inputTabs[inputTabs.length - 1].id;
                     inputArea.value = content;
+                }
+            }
+
+            // v1.239: テキストファイルからグループ構造を復元
+            if (parsedTabs.__parsedGroups && parsedTabs.__parsedGroups.length > 0 && typeof window.tabGroupCreate === 'function') {
+                // overwrite_allの場合はグループもリセット
+                if (openMode === 'overwrite_all' && typeof window.setTabGroups === 'function') {
+                    window.setTabGroups({ groups: {}, nextId: 1 });
+                }
+                // parsedTabsのインデックス→実際のタブIDのマッピング
+                // overwrite_allの場合: inputTabs[i].id が parsedTabs[i] に対応
+                // current/newの場合: 最初のタブ(current時)or追加タブのIDを使う
+                const baseOffset = openMode === 'overwrite_all' ? 0 :
+                                   openMode === 'current' ? 0 :
+                                   inputTabs.length - parsedTabs.length;
+                for (const pg of parsedTabs.__parsedGroups) {
+                    const tabIds = [];
+                    for (let i = pg.startIdx; i <= pg.endIdx && i < parsedTabs.length; i++) {
+                        const realIdx = baseOffset + i;
+                        if (realIdx >= 0 && realIdx < inputTabs.length) {
+                            tabIds.push(inputTabs[realIdx].id);
+                        }
+                    }
+                    if (tabIds.length > 0) {
+                        window.tabGroupCreate(tabIds, pg.name, pg.color || '#4285f4');
+                    }
                 }
             }
 
@@ -31670,11 +31781,30 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   }
   window.__dropGroupAtIndex = dropGroupAtIndex;
 
+  // ドロップ先タブがグループに属していれば、ドラッグしたタブもそのグループに自動追加
+  function autoJoinGroupOnDrop(draggedTabId, targetTabId) {
+    const targetGroupId = getGroupForTab(targetTabId);
+    if (!targetGroupId) return; // ドロップ先がグループに属していなければ何もしない
+    const draggedGroupId = getGroupForTab(draggedTabId);
+    if (draggedGroupId === targetGroupId) return; // 同じグループ内なら何もしない
+    // 他グループにいた場合は外す
+    if (draggedGroupId) removeTabFromGroup(draggedTabId);
+    // ドロップ先グループに追加
+    addTabToGroup(draggedTabId, targetGroupId);
+  }
+  window.__autoJoinGroupOnDrop = autoJoinGroupOnDrop;
+
   // Expose for external use
   window.tabGroupCreate = createGroup;
   window.tabGroupRemoveTab = removeTabFromGroup;
   window.tabGroupAddTab = addTabToGroup;
   window.getTabGroups = function(){ return tabGroups; };
+  window.setTabGroups = function(data){
+    if (!data) return;
+    tabGroups = data.groups || {};
+    nextGroupId = data.nextId || 1;
+    saveTabGroups();
+  };
 })();
 </script>
 
