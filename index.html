@@ -6372,6 +6372,7 @@ body.theme-dark .card-shell:hover{
                     <div class="setting-row vertical">
                         <label><input type="radio" name="st-open-mode" value="current" checked > 現在のタブに開く</label>
                         <label><input type="radio" name="st-open-mode" value="new" > 新しいタブに開く</label>
+                        <label><input type="radio" name="st-open-mode" value="overwrite_all" > 全タブを上書き</label>
                     </div>
                 </div>
 
@@ -7428,6 +7429,7 @@ body.theme-dark .card-shell:hover{
         <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
             <button class="btn" id="btn-open-choice-current" onclick="chooseOpenModeAndPickFile('current')">現在のタブに開く</button>
             <button class="btn btn-apply-all" id="btn-open-choice-new" onclick="chooseOpenModeAndPickFile('new')">新しいタブに開く</button>
+            <button class="btn" id="btn-open-choice-overwrite-all" onclick="chooseOpenModeAndPickFile('overwrite_all')" title="既存タブを全て削除し、ファイルの内容で置換します">全タブ上書き</button>
             <button class="btn" onclick="closeOpenChoiceModal()">キャンセル</button>
         </div>
     </div>
@@ -14571,9 +14573,11 @@ if (typeof applyPaneHeightSettings === 'function') {
         const defaultMode = (settingsCache && settingsCache.openMode) ? settingsCache.openMode : 'current';
         const btnCur = document.getElementById('btn-open-choice-current');
         const btnNew = document.getElementById('btn-open-choice-new');
+        const btnOvr = document.getElementById('btn-open-choice-overwrite-all');
         if (btnCur && btnNew) {
             btnCur.classList.toggle('active', defaultMode === 'current');
             btnNew.classList.toggle('active', defaultMode === 'new');
+            if (btnOvr) btnOvr.classList.toggle('active', defaultMode === 'overwrite_all');
         }
 
         modal.classList.add('show');
@@ -14615,8 +14619,21 @@ if (typeof applyPaneHeightSettings === 'function') {
             const openMode = pendingOpenMode || ((settingsCache && settingsCache.openMode) ? settingsCache.openMode : 'current');
             const parsedTabs = parseStructuredTabs(content, '◆');
 
-            // 開くモード: current = 現在タブへ上書き / new = 新規タブへ追加
-            if (openMode === 'current') {
+            // 開くモード: current = 現在タブへ上書き / new = 新規タブへ追加 / overwrite_all = 全タブ上書き
+            if (openMode === 'overwrite_all') {
+                // 全既存タブを削除し、インポート内容で完全置換
+                inputTabs.length = 0;
+                if (parsedTabs.length > 0) {
+                    for (const tab of parsedTabs) {
+                        const name = tab.name || `タブ${inputTabs.length + 1}`;
+                        inputTabs.push({ id: nextTabId++, name, content: tab.content });
+                    }
+                } else {
+                    inputTabs.push({ id: nextTabId++, name: 'タブ1', content });
+                }
+                activeTabId = inputTabs[0].id;
+                inputArea.value = inputTabs[0].content || '';
+            } else if (openMode === 'current') {
                 if (!currentTab) {
                     // 念のため（通常は必ずある）
                     inputTabs.push({ id: nextTabId++, name: `タブ${inputTabs.length + 1}`, content: '' });
@@ -17546,6 +17563,12 @@ function bulkResetCardsBgColor(paneId){
       ['memo_current','メモ(このタブ)'],
       ['memo_all','メモ(全タブ)'],
       ['both_all','本文+メモ(全て)'],
+      ['structure_all','構成(全カード)'],
+      ['character_all','キャラクター(全カード)'],
+      ['world_all','世界観(全カード)'],
+      ['terms_all','用語(全カード)'],
+      ['cards_all','全カード(構成+キャラ+世界+用語)'],
+      ['everything','全て(本文+メモ+カード)'],
     ];
     for (const [v,lab] of opts){
       const o=document.createElement('option');
@@ -17599,37 +17622,93 @@ function bulkResetCardsBgColor(paneId){
           const pos = m.index;
           const li = calcLineInfo(text, pos);
           res.push({
-            kind: meta.kind, // 'input'|'memo'
+            kind: meta.kind, // 'input'|'memo'|'card'
             tabId: meta.tabId,
             tabName: meta.tabName,
             start: pos,
             end: pos + m[0].length,
             lineNum: li.lineNum,
             preview: li.lineText.slice(0,80),
-            memoTabId: meta.memoTabId
+            memoTabId: meta.memoTabId,
+            cardPanel: meta.cardPanel,
+            cardId: meta.cardId,
+            cardName: meta.cardName,
+            fieldName: meta.fieldName
           });
           if (m[0].length===0) rx.lastIndex++;
         }
       }
 
+      // Helper: scan card data for a panel
+      function scanCards(panelKey){
+        const getters = {
+          structure: window.getStructureData,
+          character: window.getCharacterData,
+          world: window.getWorldData,
+          terms: window.getTermsData
+        };
+        const panelLabels = { structure:'構成', character:'キャラクター', world:'世界観', terms:'用語' };
+        const getter = getters[panelKey];
+        if (typeof getter !== 'function') return;
+        const cards = getter() || [];
+        const fieldMap = {
+          structure: [{key:'name',label:'名前'},{key:'summary',label:'要約'}],
+          character: [{key:'name',label:'名前'},{key:'description',label:'説明'},{key:'details',label:'詳細'}],
+          world: [{key:'name',label:'名前'},{key:'description',label:'説明'},{key:'details',label:'詳細'}],
+          terms: [{key:'name',label:'名前'},{key:'reading',label:'読み'},{key:'description',label:'説明'},{key:'details',label:'詳細'}]
+        };
+        const fields = fieldMap[panelKey] || [{key:'name',label:'名前'}];
+        for (const card of cards){
+          for (const f of fields){
+            const text = card[f.key];
+            if (!text) continue;
+            scan(text, {
+              kind: 'card',
+              tabId: 0,
+              tabName: `${panelLabels[panelKey]}: ${card.name||'無題'}`,
+              cardPanel: panelKey,
+              cardId: card.id,
+              cardName: card.name||'無題',
+              fieldName: f.label
+            });
+          }
+        }
+      }
+
+      function scanInputAll(){ for (const t of inputTabs) scan(getInputTextForTab(t), {kind:'input', tabId: t.id, tabName: t.name||''}); }
+      function scanMemoAll(){ for (const mt of memoTabs) scan(getMemoTextForTab(mt), {kind:'memo', tabId: window.activeTabId, tabName: (inputTabs.find(x=>x.id===window.activeTabId)?.name)||'', memoTabId: mt.id}); }
+      function scanAllCards(){ ['structure','character','world','terms'].forEach(scanCards); }
+
       if (scope==='input_current'){
         const t = inputTabs.find(t=>t.id===window.activeTabId);
         scan(getInputTextForTab(t), {kind:'input', tabId: t?.id, tabName: t?.name||''});
       } else if (scope==='input_all'){
-        for (const t of inputTabs) scan(getInputTextForTab(t), {kind:'input', tabId: t.id, tabName: t.name||''});
+        scanInputAll();
       } else if (scope==='memo_current'){
         const t = memoTabs.find(t=>t.id===window.activeMemoTabId);
         scan(getMemoTextForTab(t), {kind:'memo', tabId: window.activeTabId, tabName: (inputTabs.find(x=>x.id===window.activeTabId)?.name)||'', memoTabId: t?.id});
       } else if (scope==='memo_all'){
-        for (const mt of memoTabs){
-          scan(getMemoTextForTab(mt), {kind:'memo', tabId: window.activeTabId, tabName: (inputTabs.find(x=>x.id===window.activeTabId)?.name)||'', memoTabId: mt.id});
-        }
+        scanMemoAll();
       } else if (scope==='both_all'){
-        for (const t of inputTabs) scan(getInputTextForTab(t), {kind:'input', tabId: t.id, tabName: t.name||''});
-        for (const mt of memoTabs) scan(getMemoTextForTab(mt), {kind:'memo', tabId: window.activeTabId, tabName: (inputTabs.find(x=>x.id===window.activeTabId)?.name)||'', memoTabId: mt.id});
+        scanInputAll();
+        scanMemoAll();
+      } else if (scope==='structure_all'){
+        scanCards('structure');
+      } else if (scope==='character_all'){
+        scanCards('character');
+      } else if (scope==='world_all'){
+        scanCards('world');
+      } else if (scope==='terms_all'){
+        scanCards('terms');
+      } else if (scope==='cards_all'){
+        scanAllCards();
+      } else if (scope==='everything'){
+        scanInputAll();
+        scanMemoAll();
+        scanAllCards();
       }
 
-      return res.filter(m=>m.tabId!=null);
+      return res.filter(m=>m.tabId!=null || m.kind==='card');
     }
 
     function updateInfo(){
@@ -17649,6 +17728,24 @@ function bulkResetCardsBgColor(paneId){
           ta.setSelectionRange(m.start, m.end);
           if (typeof window.scrollToCursorPosition==='function') setTimeout(()=>window.scrollToCursorPosition(m.start), 60);
           if (typeof window.updateCursorLineDisplay==='function') window.updateCursorLineDisplay();
+        } else if (m.kind==='card'){
+          // Open card panel and try to show the card view
+          const panelMap = { structure:'structure-panel', character:'character-panel', world:'world-panel', terms:'terms-panel' };
+          const toggleMap = { structure:'toggleStructurePanel', character:'toggleCharacterPanel', world:'toggleWorldPanel', terms:'toggleTermsPanel' };
+          const panelId = panelMap[m.cardPanel];
+          if (panelId) {
+            const panel = document.getElementById(panelId);
+            if (panel && panel.style.display === 'none') {
+              const toggler = window[toggleMap[m.cardPanel]];
+              if (typeof toggler === 'function') toggler();
+            }
+          }
+          // Try to open the card view modal
+          const viewFnMap = { structure:'showStructureCardView', character:'showCharacterCardView', world:'showWorldCardView', terms:'showTermCardView' };
+          const viewFn = window[viewFnMap[m.cardPanel]];
+          if (typeof viewFn === 'function' && m.cardId) {
+            setTimeout(()=> viewFn(m.cardId), 100);
+          }
         } else {
           // memo
           openNavTab('memo');
@@ -17658,7 +17755,7 @@ function bulkResetCardsBgColor(paneId){
           ta.focus();
           try{ ta.setSelectionRange(m.start, m.end); }catch(e){}
         }
-        idx = matches.findIndex(x=>x.kind===m.kind && x.tabId===m.tabId && x.start===m.start && x.end===m.end && x.memoTabId===m.memoTabId);
+        idx = matches.findIndex(x=>x.kind===m.kind && x.tabId===m.tabId && x.start===m.start && x.end===m.end && x.memoTabId===m.memoTabId && x.cardId===m.cardId);
         updateInfo();
       } finally {
         suppressSearchRefresh = false;
@@ -17682,8 +17779,17 @@ function bulkResetCardsBgColor(paneId){
       const slice = matches.slice(0, maxShow);
       const grouped = {};
       for (const m of slice){
-        const key = m.kind==='memo' ? `memo-${m.memoTabId||0}` : `input-${m.tabId}`;
-        const name = m.kind==='memo' ? `メモ${m.memoTabId||''}` : (m.tabName||('タブ'+m.tabId));
+        let key, name;
+        if (m.kind==='card'){
+          key = `card-${m.cardPanel}-${m.cardId}`;
+          name = m.tabName || `${m.cardPanel}: ${m.cardName||'無題'}`;
+        } else if (m.kind==='memo'){
+          key = `memo-${m.memoTabId||0}`;
+          name = `メモ${m.memoTabId||''}`;
+        } else {
+          key = `input-${m.tabId}`;
+          name = m.tabName||('タブ'+m.tabId);
+        }
         (grouped[key] ||= {name, kind:m.kind, items:[]}).items.push(m);
       }
 
@@ -17697,8 +17803,13 @@ function bulkResetCardsBgColor(paneId){
           const div = document.createElement('div');
           div.className = 'bookmark-item';
           div.style.cursor='pointer';
-          const prefix = (m.kind==='memo') ? '📝' : '🔎';
-          div.innerHTML = `${prefix} ${m.lineNum}行: ${escapeHtml(m.preview)}`;
+          const prefixMap = {memo:'📝', card:'🃏', input:'🔎'};
+          const prefix = prefixMap[m.kind] || '🔎';
+          if (m.kind==='card'){
+            div.innerHTML = `${prefix} [${escapeHtml(m.fieldName||'')}] ${escapeHtml(m.preview)}`;
+          } else {
+            div.innerHTML = `${prefix} ${m.lineNum}行: ${escapeHtml(m.preview)}`;
+          }
           div.addEventListener('click', ()=> jumpTo(m));
           div.addEventListener('contextmenu', (ev)=>{
             ev.preventDefault();
@@ -20654,6 +20765,7 @@ function toggleStructureTermLink(termId){
     if (charContainer) {
       const selectedChars = charContainer.querySelectorAll('.link-tag-item.selected');
       card.linkedCharacters = Array.from(selectedChars).map(el => parseInt(el.dataset.id));
+      if (typeof window.__ccSyncBidirectionalLinks === 'function') window.__ccSyncBidirectionalLinks('structure', card.id, 'character', card.linkedCharacters);
     }
 
     // リンクされた世界観を取得（タグクリック形式）
@@ -20661,6 +20773,7 @@ function toggleStructureTermLink(termId){
     if (worldContainer) {
       const selectedWorlds = worldContainer.querySelectorAll('.link-tag-item.selected');
       card.linkedWorlds = Array.from(selectedWorlds).map(el => parseInt(el.dataset.id));
+      if (typeof window.__ccSyncBidirectionalLinks === 'function') window.__ccSyncBidirectionalLinks('structure', card.id, 'world', card.linkedWorlds);
 
 // 関連する用語を取得（タグクリック形式）
 const termContainer = document.getElementById('structure-edit-terms');
@@ -21085,6 +21198,63 @@ function __ccSyncTermsLinks(entityType, entityId, newTermIds){
   if (typeof window.renderTermsList === 'function') window.renderTermsList();
 }
 window.__ccSyncTermsLinks = __ccSyncTermsLinks;
+
+// ========== 双方向パネルリンク同期 ==========
+// sourcePanel: 'structure'|'character'|'world'
+// sourceId: the card ID being edited
+// targetPanel: 'structure'|'character'|'world'
+// newTargetIds: array of target card IDs that source now links to
+function __ccSyncBidirectionalLinks(sourcePanel, sourceId, targetPanel, newTargetIds) {
+  const getterMap = {
+    structure: window.getStructureData,
+    character: window.getCharacterData,
+    world: window.getWorldData
+  };
+  // Which property on target cards stores links back to source panel
+  const reverseKeyMap = {
+    'structure->character': 'linkedStructures',
+    'structure->world': 'linkedStructures',
+    'character->structure': 'linkedCharacters',
+    'character->world': 'linkedCharacters',
+    'world->structure': 'linkedWorlds',
+    'world->character': 'linkedWorlds'
+  };
+  const saveMap = {
+    structure: window.saveStructureData,
+    character: window.saveCharacterData,
+    world: window.saveWorldData
+  };
+  const renderMap = {
+    structure: window.renderStructureList,
+    character: window.renderCharacterList,
+    world: window.renderWorldList
+  };
+
+  const getter = getterMap[targetPanel];
+  if (typeof getter !== 'function') return;
+  const targetCards = getter();
+  if (!Array.isArray(targetCards)) return;
+
+  const linkKey = reverseKeyMap[`${sourcePanel}->${targetPanel}`];
+  if (!linkKey) return;
+
+  let changed = false;
+  for (const tc of targetCards) {
+    if (!Array.isArray(tc[linkKey])) tc[linkKey] = [];
+    const has = tc[linkKey].includes(sourceId);
+    const should = newTargetIds.includes(tc.id);
+    if (has && !should) { tc[linkKey] = tc[linkKey].filter(x => x !== sourceId); changed = true; }
+    if (!has && should) { tc[linkKey].push(sourceId); changed = true; }
+  }
+
+  if (changed) {
+    const saver = saveMap[targetPanel];
+    if (typeof saver === 'function') saver();
+    const renderer = renderMap[targetPanel];
+    if (typeof renderer === 'function') renderer();
+  }
+}
+window.__ccSyncBidirectionalLinks = __ccSyncBidirectionalLinks;
 
 
 
@@ -22135,6 +22305,7 @@ function toggleCharacterTermLink(termId){
     if (structContainer) {
       const selectedStructs = structContainer.querySelectorAll('.link-tag-item.selected');
       card.linkedStructures = Array.from(selectedStructs).map(el => parseInt(el.dataset.id));
+      if (typeof window.__ccSyncBidirectionalLinks === 'function') window.__ccSyncBidirectionalLinks('character', card.id, 'structure', card.linkedStructures);
     }
 
     // 関連する世界観を取得（タグクリック形式）
@@ -22142,6 +22313,7 @@ function toggleCharacterTermLink(termId){
     if (worldContainer) {
       const selectedWorlds = worldContainer.querySelectorAll('.link-tag-item.selected');
       card.linkedWorlds = Array.from(selectedWorlds).map(el => parseInt(el.dataset.id));
+      if (typeof window.__ccSyncBidirectionalLinks === 'function') window.__ccSyncBidirectionalLinks('character', card.id, 'world', card.linkedWorlds);
 
 // 関連する用語を取得（タグクリック形式）
 const termContainer = document.getElementById('character-edit-terms');
@@ -23796,6 +23968,7 @@ function toggleWorldTermLink(termId){
     if (charContainer) {
       const selectedChars = charContainer.querySelectorAll('.link-tag-item.selected');
       card.linkedCharacters = Array.from(selectedChars).map(el => parseInt(el.dataset.id));
+      if (typeof window.__ccSyncBidirectionalLinks === 'function') window.__ccSyncBidirectionalLinks('world', card.id, 'character', card.linkedCharacters);
 
 // 関連する用語を取得（タグクリック形式）
 const termContainer = document.getElementById('world-edit-terms');
@@ -23815,6 +23988,7 @@ if (termContainer) {
     if (structureContainer) {
       const selectedStructures = structureContainer.querySelectorAll('.link-tag-item.selected');
       card.linkedStructures = Array.from(selectedStructures).map(el => parseInt(el.dataset.id));
+      if (typeof window.__ccSyncBidirectionalLinks === 'function') window.__ccSyncBidirectionalLinks('world', card.id, 'structure', card.linkedStructures);
     }
 
     // 関連する世界観を取得（タグクリック形式）
@@ -31016,6 +31190,343 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   window.isSplitActive = function() { return splitActive; };
   window.getSplitTabId = function() { return splitTabId; };
 
+})();
+</script>
+
+<!-- ========== タブグループ機能 ========== -->
+<style>
+.tab-group-header {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 6px 6px 0 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  margin-right: 1px;
+  user-select: none;
+  white-space: nowrap;
+  height: 24px;
+  position: relative;
+  vertical-align: bottom;
+}
+.tab-group-header .group-label { margin-right: 4px; }
+.tab-group-header .group-toggle { font-size: 0.65rem; opacity: 0.8; }
+.tab-group-header:hover { filter: brightness(1.15); }
+.tab-group-colors { display: flex; gap: 4px; padding: 8px; flex-wrap: wrap; }
+.tab-group-colors .color-swatch {
+  width: 20px; height: 20px; border-radius: 50%; cursor: pointer;
+  border: 2px solid transparent; transition: border-color 0.15s;
+}
+.tab-group-colors .color-swatch:hover,
+.tab-group-colors .color-swatch.active { border-color: var(--text-color); }
+</style>
+<script>
+(function(){
+  'use strict';
+  const TAB_GROUPS_KEY = 'cc_tab_groups_v1';
+  // tabGroups: { [groupId]: { name, color, collapsed, tabIds:[] } }
+  let tabGroups = {};
+  let nextGroupId = 1;
+
+  function loadTabGroups(){
+    try {
+      const s = localStorage.getItem(TAB_GROUPS_KEY);
+      if (s) {
+        const p = JSON.parse(s);
+        tabGroups = p.groups || {};
+        nextGroupId = p.nextId || 1;
+      }
+    } catch(e){ tabGroups = {}; nextGroupId = 1; }
+  }
+  function saveTabGroups(){
+    try {
+      localStorage.setItem(TAB_GROUPS_KEY, JSON.stringify({ groups: tabGroups, nextId: nextGroupId }));
+    } catch(e){}
+  }
+
+  const GROUP_COLORS = ['#4285f4','#34a853','#fbbc04','#ea4335','#ab47bc','#00acc1','#ff7043','#78909c'];
+
+  function getGroupForTab(tabId){
+    for (const [gid, g] of Object.entries(tabGroups)){
+      if (g.tabIds.includes(tabId)) return gid;
+    }
+    return null;
+  }
+
+  function createGroup(tabIds, name, color){
+    // Remove tabs from any existing group first
+    tabIds.forEach(tid => removeTabFromGroup(tid));
+    const gid = String(nextGroupId++);
+    tabGroups[gid] = { name: name || 'グループ', color: color || GROUP_COLORS[0], collapsed: false, tabIds: [...tabIds] };
+    saveTabGroups();
+    if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
+    return gid;
+  }
+
+  function removeTabFromGroup(tabId){
+    for (const [gid, g] of Object.entries(tabGroups)){
+      const idx = g.tabIds.indexOf(tabId);
+      if (idx >= 0) {
+        g.tabIds.splice(idx, 1);
+        if (g.tabIds.length === 0) delete tabGroups[gid];
+      }
+    }
+    saveTabGroups();
+  }
+
+  function addTabToGroup(tabId, groupId){
+    removeTabFromGroup(tabId);
+    if (tabGroups[groupId]) {
+      tabGroups[groupId].tabIds.push(tabId);
+      saveTabGroups();
+    }
+  }
+
+  function toggleGroupCollapse(groupId){
+    if (tabGroups[groupId]) {
+      tabGroups[groupId].collapsed = !tabGroups[groupId].collapsed;
+      saveTabGroups();
+      if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
+    }
+  }
+
+  function renameGroup(groupId){
+    if (!tabGroups[groupId]) return;
+    const newName = prompt('グループ名を入力:', tabGroups[groupId].name);
+    if (newName !== null) {
+      tabGroups[groupId].name = newName.trim() || 'グループ';
+      saveTabGroups();
+      if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
+    }
+  }
+
+  function deleteGroup(groupId){
+    delete tabGroups[groupId];
+    saveTabGroups();
+    if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
+  }
+
+  function changeGroupColor(groupId, color){
+    if (tabGroups[groupId]) {
+      tabGroups[groupId].color = color;
+      saveTabGroups();
+      if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
+    }
+  }
+
+  // Patch renderInputTabs to insert group headers
+  function patchRenderWithGroups(){
+    if (typeof window.renderInputTabs !== 'function' || window.renderInputTabs.__groupPatched) return;
+    const base = window.renderInputTabs;
+    const patched = function(){
+      const r = base.apply(this, arguments);
+      const container = document.getElementById('input-tabs-container');
+      if (!container) return r;
+
+      // Build ordered list: for each tab, check if it starts a group
+      const tabs = Array.isArray(window.inputTabs) ? window.inputTabs : [];
+      const tabEls = Array.from(container.querySelectorAll('.input-tab'));
+
+      // Track which groups have been rendered
+      const renderedGroups = new Set();
+
+      for (const tabEl of tabEls) {
+        const tabId = parseInt(tabEl.dataset.tabId, 10);
+        if (Number.isNaN(tabId)) continue;
+        const gid = getGroupForTab(tabId);
+        if (!gid || !tabGroups[gid]) continue;
+
+        const group = tabGroups[gid];
+
+        // Add colored bottom border to grouped tabs
+        tabEl.style.borderBottom = `3px solid ${group.color}`;
+
+        // Hide if collapsed and not active
+        if (group.collapsed && tabId !== window.activeTabId) {
+          tabEl.style.display = 'none';
+        }
+
+        // Insert group header before first tab in group
+        if (!renderedGroups.has(gid)) {
+          renderedGroups.add(gid);
+          const header = document.createElement('div');
+          header.className = 'tab-group-header';
+          header.style.backgroundColor = group.color;
+          header.innerHTML = `<span class="group-label">${window.escapeHtml ? window.escapeHtml(group.name) : group.name}</span><span class="group-toggle">${group.collapsed ? '▶' : '▼'}</span>`;
+          header.onclick = () => toggleGroupCollapse(gid);
+          header.oncontextmenu = (ev) => {
+            ev.preventDefault();
+            showGroupContextMenu(ev, gid);
+          };
+          container.insertBefore(header, tabEl);
+        }
+      }
+
+      return r;
+    };
+    patched.__groupPatched = true;
+    // Preserve other patches
+    if (base.__hotfixWrapped) patched.__hotfixWrapped = true;
+    window.renderInputTabs = patched;
+  }
+
+  function showGroupContextMenu(e, groupId){
+    if (window.hideAllContextMenus) window.hideAllContextMenus();
+    let menu = document.getElementById('group-context-menu');
+    if (!menu) {
+      menu = document.createElement('div');
+      menu.id = 'group-context-menu';
+      menu.className = 'context-menu';
+      menu.style.cssText = 'position:fixed; background:var(--panel-bg); border:1px solid var(--border-color); border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:10000; padding:4px 0; min-width:160px;';
+      document.body.appendChild(menu);
+    }
+    const group = tabGroups[groupId];
+    if (!group) return;
+
+    let colorSwatches = GROUP_COLORS.map(c =>
+      `<div class="color-swatch ${c===group.color?'active':''}" data-color="${c}" style="background:${c};" title="${c}"></div>`
+    ).join('');
+
+    menu.innerHTML = `
+      <div class="context-menu-item" data-action="rename">✏️ グループ名を変更</div>
+      <div class="context-menu-item" data-action="ungroup">🔓 グループを解除</div>
+      <div class="context-menu-sep"></div>
+      <div style="padding:4px 12px; font-size:0.75rem; color:var(--text-muted);">グループ色</div>
+      <div class="tab-group-colors">${colorSwatches}</div>
+    `;
+
+    menu.querySelectorAll('.context-menu-item').forEach(item => {
+      item.onclick = () => {
+        const action = item.dataset.action;
+        if (action === 'rename') renameGroup(groupId);
+        else if (action === 'ungroup') deleteGroup(groupId);
+        menu.style.display = 'none';
+      };
+    });
+
+    menu.querySelectorAll('.color-swatch').forEach(sw => {
+      sw.onclick = () => {
+        changeGroupColor(groupId, sw.dataset.color);
+        menu.style.display = 'none';
+      };
+    });
+
+    menu.style.left = e.clientX + 'px';
+    menu.style.top = e.clientY + 'px';
+    menu.style.display = 'block';
+
+    const closer = (ev) => {
+      if (!ev.target.closest('#group-context-menu')) {
+        menu.style.display = 'none';
+        document.removeEventListener('click', closer);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', closer), 0);
+  }
+
+  // Extend showTabContextMenu to add group options
+  function patchTabContextMenuForGroups(){
+    const origShow = window.showTabContextMenu;
+    // We patch the menu content after it's shown by observing its construction
+    // Instead, we add items to the menu via MutationObserver on the menu element
+    // Simpler approach: patch after menu is displayed
+
+    const observer = new MutationObserver(() => {
+      const menu = document.getElementById('tab-context-menu');
+      if (!menu || menu.style.display !== 'block') return;
+      if (menu.__groupItemsAdded) return;
+      menu.__groupItemsAdded = true;
+
+      // Find the target tab ID from the menu items / contextMenuTabId
+      const tabId = window.contextMenuTabId;
+      if (!tabId) return;
+
+      const currentGroup = getGroupForTab(tabId);
+      const sep = document.createElement('div');
+      sep.className = 'context-menu-sep';
+      menu.appendChild(sep);
+
+      if (currentGroup) {
+        const removeItem = document.createElement('div');
+        removeItem.className = 'context-menu-item';
+        removeItem.textContent = '🔓 グループから外す';
+        removeItem.onclick = () => {
+          removeTabFromGroup(tabId);
+          if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
+          menu.style.display = 'none';
+        };
+        menu.appendChild(removeItem);
+      }
+
+      // "New group from this tab"
+      const newGroupItem = document.createElement('div');
+      newGroupItem.className = 'context-menu-item';
+      newGroupItem.textContent = '📁 新しいグループを作成';
+      newGroupItem.onclick = () => {
+        const name = prompt('グループ名を入力:', 'グループ');
+        if (name !== null) {
+          createGroup([tabId], name.trim() || 'グループ');
+        }
+        menu.style.display = 'none';
+      };
+      menu.appendChild(newGroupItem);
+
+      // Add to existing group submenu
+      const groupIds = Object.keys(tabGroups);
+      if (groupIds.length > 0) {
+        for (const gid of groupIds) {
+          if (getGroupForTab(tabId) === gid) continue;
+          const g = tabGroups[gid];
+          const addItem = document.createElement('div');
+          addItem.className = 'context-menu-item';
+          addItem.innerHTML = `<span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:${g.color}; margin-right:6px;"></span>「${window.escapeHtml ? window.escapeHtml(g.name) : g.name}」に追加`;
+          addItem.onclick = () => {
+            addTabToGroup(tabId, gid);
+            if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
+            menu.style.display = 'none';
+          };
+          menu.appendChild(addItem);
+        }
+      }
+    });
+
+    // Watch for menu display changes
+    const menuCheck = setInterval(() => {
+      const menu = document.getElementById('tab-context-menu');
+      if (menu) {
+        clearInterval(menuCheck);
+        observer.observe(menu, { attributes: true, attributeFilter: ['style'] });
+        // Reset flag when menu is hidden
+        const hideObserver = new MutationObserver(() => {
+          if (menu.style.display === 'none' || menu.style.display === '') {
+            menu.__groupItemsAdded = false;
+          }
+        });
+        hideObserver.observe(menu, { attributes: true, attributeFilter: ['style'] });
+      }
+    }, 500);
+  }
+
+  loadTabGroups();
+
+  function init(){
+    patchRenderWithGroups();
+    patchTabContextMenuForGroups();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(init, 300));
+  } else {
+    setTimeout(init, 300);
+  }
+
+  // Expose for external use
+  window.tabGroupCreate = createGroup;
+  window.tabGroupRemoveTab = removeTabFromGroup;
+  window.tabGroupAddTab = addTabToGroup;
+  window.getTabGroups = function(){ return tabGroups; };
 })();
 </script>
 
