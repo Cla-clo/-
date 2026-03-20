@@ -6180,6 +6180,24 @@ body.theme-dark .card-shell:hover{
                     </div>
                 </div>
 
+                <div class="setting-group" data-settings-cat="font">
+                    <div class="setting-title">参照 <button class="btn btn-apply" onclick="applyReferenceSettings()">適用</button></div>
+                    <div class="setting-row vertical">
+                        <label>文字: <input type="number" id="st-ref-size" value="17" min="10" max="60"></label>
+                        <label>行間: <input type="number" id="st-ref-line" value="1.7" step="0.1" min="1.0" max="5.0"></label>
+                        <label><input type="checkbox" id="st-ref-v"> 縦書き</label>
+                            <label>フォント:
+                            <select id="st-ref-font">
+                                <option value="font-gothic">ゴシック</option>
+                                <option value="font-mincho" selected>明朝体</option>
+                                <option value="font-old">アンティーク</option>
+                                <option value="font-round">丸ゴシック</option>
+                                <option value="font-brush">筆文字</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="setting-group" data-settings-cat="support">
                     <div class="setting-title">表示オプション <button class="btn btn-apply" onclick="applyDisplaySettings()">適用</button></div>
                     <div class="setting-row">
@@ -8415,10 +8433,11 @@ window.closeActiveTab = closeActiveTab;
     // 設定エクスポート/インポート
     function collectAllSettings() {
         return {
-            version: '3.6',
+            version: '3.7',
             input: { size: document.getElementById('st-in-size').value, line: document.getElementById('st-in-line').value, font: document.getElementById('st-in-font').value, vertical: document.getElementById('st-in-v').checked },
             preview: { size: document.getElementById('st-pv-size').value, line: document.getElementById('st-pv-line').value, font: document.getElementById('st-pv-font').value, vertical: document.getElementById('st-pv-v').checked },
-            display: { showSpace: document.getElementById('st-show-space').checked, showHighlight: document.getElementById('st-show-highlight').checked, showInput: document.getElementById('check-show-input').checked, showPreview: document.getElementById('check-show-preview').checked, defaultPreviewHidden: document.getElementById('st-default-preview-hidden').checked, selectionToolWindow: document.getElementById('st-selection-tool-window')?.checked !== false },
+            reference: { size: document.getElementById('st-ref-size')?.value || '17', line: document.getElementById('st-ref-line')?.value || '1.7', font: document.getElementById('st-ref-font')?.value || 'font-mincho', vertical: document.getElementById('st-ref-v')?.checked || false },
+            display: { showSpace: document.getElementById('st-show-space').checked, showHighlight: document.getElementById('st-show-highlight').checked, showInput: document.getElementById('check-show-input').checked, showPreview: document.getElementById('check-show-preview').checked, showReference: document.getElementById('check-show-reference')?.checked || false, defaultPreviewHidden: document.getElementById('st-default-preview-hidden').checked, selectionToolWindow: document.getElementById('st-selection-tool-window')?.checked !== false },
             writing: { typewriter: document.getElementById('st-typewriter-mode').checked, tracker: document.getElementById('st-writing-tracker').checked },
             goal: {
                 chars: document.getElementById('st-goal-chars').value,
@@ -8454,18 +8473,29 @@ window.closeActiveTab = closeActiveTab;
             paneHeights: {
                 input: document.getElementById('st-pane-input-height').value,
                 preview: document.getElementById('st-pane-preview-height').value
+            },
+            zoom: {
+                inputIndex: typeof inputZoomIndex !== 'undefined' ? inputZoomIndex : DEFAULT_ZOOM_INDEX,
+                inputCustom: localStorage.getItem('cc_input_zoom_custom') || null,
+                previewIndex: typeof previewZoomIndex !== 'undefined' ? previewZoomIndex : DEFAULT_ZOOM_INDEX,
+                previewCustom: localStorage.getItem('cc_preview_zoom_custom') || null,
+                readerIndex: typeof readerZoomIndex !== 'undefined' ? readerZoomIndex : DEFAULT_ZOOM_INDEX,
+                readerCustom: localStorage.getItem('cc_reader_zoom_custom') || null
             }
         };
     }
     function applyImportedSettings(s) {
         if (s.input) { document.getElementById('st-in-size').value = s.input.size || 17; document.getElementById('st-in-line').value = s.input.line || 1.7; document.getElementById('st-in-font').value = s.input.font || 'font-mincho'; document.getElementById('st-in-v').checked = s.input.vertical !== false; }
         if (s.preview) { document.getElementById('st-pv-size').value = s.preview.size || 17; document.getElementById('st-pv-line').value = s.preview.line || 1.7; document.getElementById('st-pv-font').value = s.preview.font || 'font-mincho'; document.getElementById('st-pv-v').checked = s.preview.vertical !== false; }
+        if (s.reference) { const rs = document.getElementById('st-ref-size'); const rl = document.getElementById('st-ref-line'); const rf = document.getElementById('st-ref-font'); const rv = document.getElementById('st-ref-v'); if (rs) rs.value = s.reference.size || 17; if (rl) rl.value = s.reference.line || 1.7; if (rf) rf.value = s.reference.font || 'font-mincho'; if (rv) rv.checked = !!s.reference.vertical; }
         if (s.display) {
             document.getElementById('st-show-space').checked = s.display.showSpace !== false;
             document.getElementById('st-show-highlight').checked = s.display.showHighlight !== false;
             document.getElementById('check-show-input').checked = s.display.showInput !== false;
             document.getElementById('check-show-preview').checked = s.display.showPreview !== false;
             document.getElementById('st-default-preview-hidden').checked = s.display.defaultPreviewHidden || false;
+            const crb = document.getElementById('check-show-reference');
+            if (crb && s.display.showReference !== undefined) crb.checked = s.display.showReference;
             const stw = document.getElementById('st-selection-tool-window');
             if (stw) stw.checked = s.display.selectionToolWindow !== false;
         }
@@ -8549,8 +8579,24 @@ window.closeActiveTab = closeActiveTab;
             document.getElementById('st-pane-input-height').value = s.paneHeights.input || 520;
             document.getElementById('st-pane-preview-height').value = s.paneHeights.preview || 520;
         }
+        // v1.239: ズーム倍率の復元
+        if (s.zoom) {
+            if (s.zoom.inputCustom != null) localStorage.setItem('cc_input_zoom_custom', s.zoom.inputCustom);
+            else localStorage.removeItem('cc_input_zoom_custom');
+            if (s.zoom.previewCustom != null) localStorage.setItem('cc_preview_zoom_custom', s.zoom.previewCustom);
+            else localStorage.removeItem('cc_preview_zoom_custom');
+            if (s.zoom.readerCustom != null) localStorage.setItem('cc_reader_zoom_custom', s.zoom.readerCustom);
+            else localStorage.removeItem('cc_reader_zoom_custom');
+            if (s.zoom.inputIndex != null) { inputZoomIndex = parseInt(s.zoom.inputIndex); localStorage.setItem('cc_input_zoom_index', String(inputZoomIndex)); }
+            if (s.zoom.previewIndex != null) { previewZoomIndex = parseInt(s.zoom.previewIndex); localStorage.setItem('cc_preview_zoom_index', String(previewZoomIndex)); }
+            if (s.zoom.readerIndex != null) { readerZoomIndex = parseInt(s.zoom.readerIndex); localStorage.setItem('cc_reader_zoom_index', String(readerZoomIndex)); }
+        }
         if (typeof window.__ccApplyPanelSideClasses === 'function') window.__ccApplyPanelSideClasses();
         applyAllSettings();
+        // v1.239: ズーム倍率を設定適用後に再適用
+        if (typeof applyInputZoom === 'function') applyInputZoom();
+        if (typeof applyPreviewZoom === 'function') applyPreviewZoom();
+        if (typeof applyReaderZoom === 'function') applyReaderZoom();
     }
     function exportSettings() {
         const s = collectAllSettings(); const blob = new Blob([JSON.stringify(s, null, 2)], { type: 'application/json' });
@@ -10310,9 +10356,6 @@ const fontMap = { 'font-gothic': '"Noto Sans JP", sans-serif', 'font-mincho': '"
     inputMirror.style.lineHeight = l;
     inputMirror.style.fontFamily = f;
 
-    // 参照ペインにも同じフォントを適用（ダッシュ・三点リーダー等の表記統一）
-    const refArea = document.getElementById('reference-area');
-    if (refArea) refArea.style.fontFamily = f;
 
     if (v) inputArea.parentElement.classList.add('vertical-mode');
     else inputArea.parentElement.classList.remove('vertical-mode');
@@ -10354,6 +10397,35 @@ function applyPreviewSettings() {
     updateWritingModeButtonLabels();
     updatePreview();
 }
+
+    function applyReferenceSettings() {
+        const refArea = document.getElementById('reference-area');
+        const pane = document.getElementById('pane-reference');
+        if (!refArea) return;
+        const s = parseInt(document.getElementById('st-ref-size')?.value) || 17;
+        const l = document.getElementById('st-ref-line')?.value || '1.7';
+        const f = fontMap[document.getElementById('st-ref-font')?.value] || '"Shippori Mincho", serif';
+        const v = document.getElementById('st-ref-v')?.checked || false;
+
+        // v1.239: ズーム倍率を考慮してフォントサイズを適用
+        const refZoomDisp = document.getElementById('ref-zoom-display');
+        const currentZoom = refZoomDisp ? parseInt(refZoomDisp.textContent) || 100 : 100;
+        refArea.style.fontSize = (s * currentZoom / 100) + 'px';
+        refArea.style.lineHeight = l;
+        refArea.style.fontFamily = f;
+
+        if (pane) {
+            if (v) pane.classList.add('vertical');
+            else pane.classList.remove('vertical');
+        }
+        // referenceVertical変数を同期（参照スクリプトブロック内の変数を更新）
+        if (typeof window.setReferenceVertical === 'function') {
+            window.setReferenceVertical(v);
+        }
+        const btn = document.getElementById('btn-ref-writing-mode');
+        if (btn) btn.textContent = v ? '横書きへ' : '縦書きへ';
+        if (typeof updateWritingModeButtonLabels === 'function') updateWritingModeButtonLabels();
+    }
 
     function applyDisplaySettings() {
         settingsCache.showSpace = document.getElementById('st-show-space').checked;
@@ -11002,7 +11074,7 @@ window.__ccGetMaxPinnedPanels = function() {
         }
     }
 
-    function applyAllSettings() { applyInputSettings(); applyPreviewSettings(); applyDisplaySettings(); applyWritingSettings(); applyGoalSettings();
+    function applyAllSettings() { applyInputSettings(); applyPreviewSettings(); if (typeof applyReferenceSettings === 'function') applyReferenceSettings(); applyDisplaySettings(); applyWritingSettings(); applyGoalSettings();
         updateWritingModeButtonLabels(); applyManuscriptSettings(); applyThemeSettings(); applyOpenSettings(); applyPaneWidthSettings(); applyPaneHeightSettings(); applyDividerSettings(); applyTextColorSettings(); applyPinnedLimitSettings(); }
 
     function resetAllSettings() {
@@ -30335,6 +30407,9 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   let referenceZoom = 100;
   let referenceVertical = false;
 
+  // v1.239: 設定パネルから referenceVertical を同期するための公開関数
+  window.setReferenceVertical = function(v) { referenceVertical = v; };
+
   // 参照タブデータ
   let refTabs = [{ id: 1, name: '参照1', content: '' }];
   let refActiveTabId = 1;
@@ -30343,7 +30418,8 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   window.zoomReference = function(dir) {
     referenceZoom = Math.max(50, Math.min(200, referenceZoom + dir * 10));
     const area = document.getElementById('reference-area');
-    if (area) area.style.fontSize = (17 * referenceZoom / 100) + 'px';
+    const refBase = parseInt(document.getElementById('st-ref-size')?.value) || 17;
+    if (area) area.style.fontSize = (refBase * referenceZoom / 100) + 'px';
     const disp = document.getElementById('ref-zoom-display');
     if (disp) disp.textContent = referenceZoom + '%';
     saveReferenceState();
@@ -30373,7 +30449,8 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     const zoomPercent = Math.max(10, Math.min(500, parseInt(value, 10) || 100));
     referenceZoom = zoomPercent;
     const area = document.getElementById('reference-area');
-    if (area) area.style.fontSize = (17 * zoomPercent / 100) + 'px';
+    const refBase = parseInt(document.getElementById('st-ref-size')?.value) || 17;
+    if (area) area.style.fontSize = (refBase * zoomPercent / 100) + 'px';
     saveReferenceState();
     const input = document.querySelector('#ref-zoom-display');
     if (input) {
@@ -30398,6 +30475,9 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
       pane?.classList.remove('vertical');
       if (btn) btn.textContent = '縦書きへ';
     }
+    // 設定チェックボックスも同期
+    const rv = document.getElementById('st-ref-v');
+    if (rv) rv.checked = referenceVertical;
     saveReferenceState();
   };
 
@@ -30774,7 +30854,8 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
 
       if (data.zoom) {
         referenceZoom = data.zoom;
-        if (area) area.style.fontSize = (17 * referenceZoom / 100) + 'px';
+        const refBase = parseInt(document.getElementById('st-ref-size')?.value) || 17;
+    if (area) area.style.fontSize = (refBase * referenceZoom / 100) + 'px';
         const disp = document.getElementById('ref-zoom-display');
         if (disp) disp.textContent = referenceZoom + '%';
       }
