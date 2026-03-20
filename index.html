@@ -6370,9 +6370,8 @@ body.theme-dark .card-shell:hover{
                 <div class="setting-group" data-settings-cat="save">
                     <div class="setting-title">開く <button class="btn btn-apply" onclick="applyOpenSettingsAndSave()">適用</button></div>
                     <div class="setting-row vertical">
-                        <label><input type="radio" name="st-open-mode" value="current" checked > 現在のタブに開く</label>
+                        <label><input type="radio" name="st-open-mode" value="current" checked > 上書き</label>
                         <label><input type="radio" name="st-open-mode" value="new" > 新しいタブに開く</label>
-                        <label><input type="radio" name="st-open-mode" value="overwrite_all" > 全タブを上書き</label>
                     </div>
                 </div>
 
@@ -7427,9 +7426,8 @@ body.theme-dark .card-shell:hover{
             </div>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
-            <button class="btn" id="btn-open-choice-current" onclick="chooseOpenModeAndPickFile('current')">現在のタブに開く</button>
+            <button class="btn" id="btn-open-choice-current" onclick="chooseOpenModeAndPickFile('current')">上書き</button>
             <button class="btn btn-apply-all" id="btn-open-choice-new" onclick="chooseOpenModeAndPickFile('new')">新しいタブに開く</button>
-            <button class="btn" id="btn-open-choice-overwrite-all" onclick="chooseOpenModeAndPickFile('overwrite_all')" title="既存タブを全て削除し、ファイルの内容で置換します">全タブ上書き</button>
             <button class="btn" onclick="closeOpenChoiceModal()">キャンセル</button>
         </div>
     </div>
@@ -8966,12 +8964,12 @@ window.closeActiveTab = closeActiveTab;
 
         // ヘッダー/背景カラー（個別パネル色）も初期化
         try {
-            const headerVars = ['--pane-input-head', '--pane-preview-head', '--pane-memo-head', '--pane-outline-head', '--pane-structure-head', '--pane-search-head', '--pane-terms-head', '--pane-world-head', '--pane-character-head'];
+            const headerVars = ['--pane-input-head', '--pane-preview-head', '--pane-memo-head', '--pane-outline-head', '--pane-structure-head', '--pane-search-head', '--pane-terms-head', '--pane-world-head', '--pane-character-head', '--pane-reference-head'];
             headerVars.forEach(v => {
                 document.documentElement.style.removeProperty(v);
                 try { localStorage.removeItem('cc_' + v.replace('--', '')); } catch(e){}
             });
-            const bgVars = ['--pane-input-bg', '--pane-preview-bg', '--pane-memo-bg', '--pane-outline-bg', '--pane-structure-bg', '--pane-search-bg', '--pane-terms-bg', '--pane-world-bg', '--pane-character-bg'];
+            const bgVars = ['--pane-input-bg', '--pane-preview-bg', '--pane-memo-bg', '--pane-outline-bg', '--pane-structure-bg', '--pane-search-bg', '--pane-terms-bg', '--pane-world-bg', '--pane-character-bg', '--pane-reference-bg'];
             bgVars.forEach(v => {
                 document.documentElement.style.removeProperty(v);
                 try { localStorage.removeItem('cc_' + v.replace('--', '')); } catch(e){}
@@ -8985,7 +8983,7 @@ window.closeActiveTab = closeActiveTab;
                 settingsCache.panelOrderLeft = null;
                 settingsCache.panelOrderRight = null;
                 // panelSideMap は初期値へ（全部左）
-                settingsCache.panelSideMap = { memo:'left', outline:'left', search:'left', structure:'left', character:'left', world:'left', terms:'left' };
+                settingsCache.panelSideMap = { memo:'left', outline:'left', search:'left', structure:'left', character:'left', world:'left', terms:'left', reference:'left' };
             }
             if (typeof window.__ccInitPanelSideState === 'function') window.__ccInitPanelSideState();
         } catch (e) {}
@@ -9025,6 +9023,23 @@ window.closeActiveTab = closeActiveTab;
         try { if (typeof closeCharacterPanel === 'function') closeCharacterPanel(true); } catch (e) {}
         try { if (typeof closeWorldPanel === 'function') closeWorldPanel(true); } catch (e) {}
         try { if (typeof closeTermsPanel === 'function') closeTermsPanel(true); } catch (e) {}
+        // v1.239: 参照パネルも初期化
+        try { if (typeof window.hideReferencePane === 'function') window.hideReferencePane(); } catch (e) {}
+        try { localStorage.removeItem('cc_reference_state'); } catch (e) {}
+        try {
+            const refArea = document.getElementById('reference-area');
+            if (refArea) refArea.value = '';
+        } catch (e) {}
+        // v1.239: タブグループも初期化
+        try {
+            localStorage.removeItem('cc_tab_groups_v1');
+            if (typeof window.setTabGroups === 'function') window.setTabGroups({ groups: {}, nextId: 1 });
+        } catch (e) {}
+        // v1.239: 分割表示を解除
+        try {
+            if (typeof window.deactivateSplit === 'function') window.deactivateSplit();
+            localStorage.removeItem('cc_split_state');
+        } catch (e) {}
 
         if (typeof window.initStructureFromReset === 'function') window.initStructureFromReset();
         if (typeof window.initCharacterFromReset === 'function') window.initCharacterFromReset();
@@ -11329,7 +11344,8 @@ window.__ccGetMaxPinnedPanels = function() {
             }
         }
 
-        applyDockedPanelWidths(true);
+        // v1.239: 各パネル個別の幅をUIから読み取って適用（統一しない）
+        applyDockedPanelWidths(false);
         adjustPaneWidthsOnVisibility(true);
         updateDockSplitState();
     }
@@ -11391,6 +11407,9 @@ function resetPaneWidths() {
     if (charEl) charEl.value = 300;
     if (worldEl) worldEl.value = 300;
     if (termsEl) termsEl.value = 300;
+    // v1.239: 参照パネル幅もリセット
+    const refEl = document.getElementById('st-pane-reference-width');
+    if (refEl) refEl.value = 300;
 
     localStorage.removeItem(PANE_WIDTH_KEYS.input);
     localStorage.removeItem(PANE_WIDTH_KEYS.preview);
@@ -11402,6 +11421,7 @@ function resetPaneWidths() {
     localStorage.removeItem(PANE_WIDTH_KEYS.character);
     localStorage.removeItem(PANE_WIDTH_KEYS.world);
     localStorage.removeItem(PANE_WIDTH_KEYS.terms);
+    localStorage.removeItem(PANE_WIDTH_KEYS.reference);
     localStorage.removeItem(PANE_WIDTH_KEYS.legacyInput);
     localStorage.removeItem(PANE_WIDTH_KEYS.legacyPreview);
 
@@ -14680,6 +14700,7 @@ if (typeof applyPaneHeightSettings === 'function') {
         tabs.__parsedGroups = parsedGroups;
         return tabs;
     }
+    window.parseStructuredTabs = parseStructuredTabs;
 
     // -----------------------------
     // 📂 開く：その場で「現在タブ / 新規タブ」を選ぶ
@@ -14696,11 +14717,9 @@ if (typeof applyPaneHeightSettings === 'function') {
         const defaultMode = (settingsCache && settingsCache.openMode) ? settingsCache.openMode : 'current';
         const btnCur = document.getElementById('btn-open-choice-current');
         const btnNew = document.getElementById('btn-open-choice-new');
-        const btnOvr = document.getElementById('btn-open-choice-overwrite-all');
         if (btnCur && btnNew) {
             btnCur.classList.toggle('active', defaultMode === 'current');
             btnNew.classList.toggle('active', defaultMode === 'new');
-            if (btnOvr) btnOvr.classList.toggle('active', defaultMode === 'overwrite_all');
         }
 
         modal.classList.add('show');
@@ -15878,19 +15897,29 @@ function setupMemoInteractionGuard() {
 
       const currentTab = window.inputTabs.find(t=>t.id===window.activeTabId) || window.inputTabs[0];
 
-      if (openMode==='current'){
+      if (openMode==='overwrite_all' || openMode==='current'){
+        // v1.239: 上書きモード（全既存タブを削除し、ファイル内容で完全置換）
+        window.inputTabs.length = 0;
         if (parsedTabs.length>0){
-          const first=parsedTabs[0];
-          currentTab.name = first.name || currentTab.name || `タブ${currentTab.id}`;
-          currentTab.content = first.content;
-          for(let i=1;i<parsedTabs.length;i++){
-            const tab=parsedTabs[i];
+          for(const tab of parsedTabs){
             window.inputTabs.push({id: window.nextTabId++, name: tab.name || `タブ${window.inputTabs.length+1}`, content: tab.content});
           }
         } else {
-          currentTab.content = String(content);
+          window.inputTabs.push({id: window.nextTabId++, name: 'タブ1', content: String(content)});
         }
-        if (window.inputArea) window.inputArea.value = currentTab.content || '';
+        window.activeTabId = window.inputTabs[0].id;
+        if (window.inputArea) window.inputArea.value = window.inputTabs[0].content || '';
+        // v1.239: テキストファイルからグループ構造を復元
+        if (parsedTabs.__parsedGroups && parsedTabs.__parsedGroups.length > 0 && typeof window.tabGroupCreate === 'function') {
+          if (typeof window.setTabGroups === 'function') window.setTabGroups({ groups: {}, nextId: 1 });
+          for (const pg of parsedTabs.__parsedGroups) {
+            const tabIds = [];
+            for (let i = pg.startIdx; i <= pg.endIdx && i < parsedTabs.length; i++) {
+              if (i < window.inputTabs.length) tabIds.push(window.inputTabs[i].id);
+            }
+            if (tabIds.length > 0) window.tabGroupCreate(tabIds, pg.name, pg.color || '#4285f4');
+          }
+        }
         if (typeof window.renderInputTabs==='function') window.renderInputTabs();
         if (typeof window.updateInputStats==='function') window.updateInputStats();
       } else {
