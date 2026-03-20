@@ -9088,7 +9088,7 @@ window.closeActiveTab = closeActiveTab;
 </body></html>`;
     }
     let __ccSkipBeforeUnloadSave = false;
-    window.addEventListener('beforeunload', e => { if (!__ccSkipBeforeUnloadSave) { persistLocalState(); saveWritingTime(); } e.preventDefault(); e.returnValue = ''; });
+    window.addEventListener('beforeunload', e => { if (!__ccSkipBeforeUnloadSave) { persistLocalState(); saveWritingTime(); try { if (typeof saveReferenceState === 'function') saveReferenceState(); } catch(_){} try { if (typeof saveSplitState === 'function') saveSplitState(); } catch(_){} try { if (typeof saveMemoTabs === 'function') saveMemoTabs(); } catch(_){} } e.preventDefault(); e.returnValue = ''; });
 
     function undoInput() { inputArea.focus(); document.execCommand('undo'); }
     function redoInput() { inputArea.focus(); document.execCommand('redo'); }
@@ -10000,7 +10000,7 @@ function syncPreviewPositionCore() {
     function startEditInputZoom() {
         const display = document.getElementById('input-zoom-display');
         if (!display) return;
-        const currentZoom = ZOOM_LEVELS[inputZoomIndex];
+        const currentZoom = getInputZoomPercent();
         const input = document.createElement('input');
         input.type = 'number';
         input.className = 'zoom-input';
@@ -10043,7 +10043,7 @@ function syncPreviewPositionCore() {
     function startEditPreviewZoom() {
         const display = document.getElementById('preview-zoom-display');
         if (!display) return;
-        const currentZoom = ZOOM_LEVELS[previewZoomIndex];
+        const currentZoom = getPreviewZoomPercent();
         const input = document.createElement('input');
         input.type = 'number';
         input.className = 'zoom-input';
@@ -14030,7 +14030,8 @@ if (typeof applyPaneHeightSettings === 'function') {
                     search: localStorage.getItem('cc_search_width_px'),
                     character: localStorage.getItem('cc_character_width_px'),
                     world: localStorage.getItem('cc_world_width_px'),
-                    terms: localStorage.getItem('cc_terms_width_px')
+                    terms: localStorage.getItem('cc_terms_width_px'),
+                    reference: localStorage.getItem('cc_pane_reference_width_px')
                 },
                 theme: localStorage.getItem('cc_theme'),
                 activeTabColor: localStorage.getItem('cc_active_tab_color'),
