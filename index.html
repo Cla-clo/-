@@ -9533,6 +9533,19 @@ function openRubyInsertDialog() {
     const selEnd = ia.selectionEnd ?? selStart;
     const selectedText = (selStart !== selEnd) ? ia.value.slice(selStart, selEnd) : '';
 
+    // Parse existing ruby markup: ｜base《ruby》 or base《ruby》
+    let parsedBase = '';
+    let parsedRuby = '';
+    let isEditMode = false;
+    if (selectedText) {
+        const rubyMatch = selectedText.match(/^｜?([^《]+?)《([^》]*)》$/);
+        if (rubyMatch) {
+            parsedBase = rubyMatch[1];
+            parsedRuby = rubyMatch[2];
+            isEditMode = true;
+        }
+    }
+
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay show';
     overlay.style.zIndex = 99999;
@@ -9551,7 +9564,7 @@ function openRubyInsertDialog() {
     header.style.marginBottom = '10px';
 
     const hTitle = document.createElement('div');
-    hTitle.textContent = 'ルビ入力';
+    hTitle.textContent = isEditMode ? 'ルビ編集' : 'ルビ入力';
     hTitle.style.fontWeight = '700';
     hTitle.style.fontSize = '16px';
 
@@ -9594,13 +9607,18 @@ function openRubyInsertDialog() {
     rubyRow.input.placeholder = '例：よみ';
     const baseRow = makeRow('文字');
     baseRow.input.placeholder = '例：漢字';
-    if (selectedText) baseRow.input.value = selectedText;
+    if (isEditMode) {
+        baseRow.input.value = parsedBase;
+        rubyRow.input.value = parsedRuby;
+    } else if (selectedText) {
+        baseRow.input.value = selectedText;
+    }
 
     const hint = document.createElement('div');
     hint.style.fontSize = '12px';
     hint.style.color = 'var(--text-muted, #6b7280)';
     hint.style.margin = '2px 0 12px';
-    hint.textContent = '挿入形式：｜文字《ルビ》  （選択中の文字があれば置換します）';
+    hint.textContent = isEditMode ? '既存のルビを編集中  （選択範囲を置換します）' : '挿入形式：｜文字《ルビ》  （選択中の文字があれば置換します）';
 
     const footer = document.createElement('div');
     footer.style.display = 'flex';
@@ -9614,7 +9632,7 @@ function openRubyInsertDialog() {
 
     const insertBtn = document.createElement('button');
     insertBtn.className = 'btn';
-    insertBtn.textContent = '挿入';
+    insertBtn.textContent = isEditMode ? '更新' : '挿入';
     insertBtn.onclick = () => {
         const base = baseRow.input.value.trim();
         const ruby = rubyRow.input.value.trim();
@@ -9661,9 +9679,14 @@ function openRubyInsertDialog() {
 
     __rubyInsertDialog = { overlay, modal, onKeyDown, onDocDown, baseInput: baseRow.input };
 
-    // Focus order: ruby first
+    // Focus: edit mode → ruby field for correction; new → ruby first
     rubyRow.input.focus();
-    if (selectedText) baseRow.input.select();
+    if (isEditMode) {
+        // Position cursor at end of ruby input for easy editing
+        rubyRow.input.setSelectionRange(parsedRuby.length, parsedRuby.length);
+    } else if (selectedText) {
+        baseRow.input.select();
+    }
 }
 
 window.openRubyInsertDialog = openRubyInsertDialog;
@@ -14893,7 +14916,7 @@ if (typeof applyPaneHeightSettings === 'function') {
                 return;
             }
         }
-        const __macCtrl = typeof __isMac !== 'undefined' && __isMac;
+        const __macCtrl = /Mac|iPhone|iPad|iPod/.test(navigator.platform || '') || (navigator.userAgentData && navigator.userAgentData.platform === 'macOS');
         const __ctrlOrCmd = e.ctrlKey || (__macCtrl && e.metaKey);
         if (__ctrlOrCmd && !e.altKey && (__macCtrl || !e.metaKey)) {
             const k = (e.key || '').toLowerCase();
