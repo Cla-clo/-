@@ -1857,6 +1857,7 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
         box-sizing: border-box;
         line-height: 1.85;
         font-size: 16px;
+        font-family: "Shippori Mincho", serif;
     }
     .reader-section { margin-bottom: 18px; }
     .reader-marker {
@@ -10156,6 +10157,10 @@ function syncPreviewPositionCore() {
 
         contentEl.innerHTML = html;
         applyReaderWritingModeClass();
+
+        // 入力ペインのフォントを閲覧にも反映（ダッシュ・三点リーダー等の表記統一）
+        const inputFont = fontMap[document.getElementById('st-in-font')?.value];
+        if (inputFont) contentEl.style.fontFamily = inputFont;
 
         // 先頭へ
         scroll.scrollTop = 0;
