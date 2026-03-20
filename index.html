@@ -7419,6 +7419,10 @@ body.theme-dark .card-shell:hover{
     <div id="reader-header">
         <div id="reader-title">👁 閲覧（全タブ） <span class="reader-hint">※保存時の区切り記号「◆」を表示 / Escでも戻れます</span></div>
         <div id="reader-controls">
+            <select id="reader-toc" onchange="jumpToReaderSection(this.value)" title="目次から移動" style="height:30px; max-width:180px; border-radius:10px; border:1px solid var(--border-color); padding:0 8px; background:var(--panel-bg); color:var(--text-color); font-size:0.85rem; cursor:pointer;">
+                <option value="">📖 目次</option>
+            </select>
+            <span style="border-left:1px solid var(--border-color); height:18px; margin:0 4px;"></span>
             <input type="text" id="reader-search-input" placeholder="閲覧内検索..." style="height:30px; width:160px; border-radius:10px; border:1px solid var(--border-color); padding:0 10px; background:var(--panel-bg); color:var(--text-color);" onkeydown="if(event.key==='Enter') readerDoSearch()">
             <button class="btn" onclick="readerDoSearch()">検索</button>
             <button class="btn" onclick="readerFindPrev()">▲</button>
@@ -10205,18 +10209,33 @@ function syncPreviewPositionCore() {
         else contentEl.classList.remove('highlight-active');
 
         let html = '';
+        const tocOptions = [];
         inputTabs.forEach((tab, idx) => {
             const name = tab.name || `タブ${idx+1}`;
             const marker = `◆ ${name}`;
+            const sectionId = `reader-sec-${idx}`;
             const body = renderTextToHTML(tab.content || '');
-            html += `<div class="reader-section">` +
+            html += `<div class="reader-section" id="${sectionId}">` +
                     `<div class="reader-marker">${escapeHtml(marker)}</div>` +
                     `<div class="reader-text">${body}</div>` +
                     `</div>`;
+            tocOptions.push({ id: sectionId, name: name });
         });
 
         contentEl.innerHTML = html;
         applyReaderWritingModeClass();
+
+        // 目次プルダウンを更新
+        const toc = document.getElementById('reader-toc');
+        if (toc) {
+            toc.innerHTML = '<option value="">📖 目次</option>';
+            tocOptions.forEach(o => {
+                const opt = document.createElement('option');
+                opt.value = o.id;
+                opt.textContent = o.name;
+                toc.appendChild(opt);
+            });
+        }
 
         // 入力ペインのフォントを閲覧にも反映（ダッシュ・三点リーダー等の表記統一）
         const inputFont = fontMap[document.getElementById('st-in-font')?.value];
@@ -10248,6 +10267,27 @@ function syncPreviewPositionCore() {
         if (!overlay) return;
         overlay.classList.remove('show');
         overlay.setAttribute('aria-hidden', 'true');
+    }
+
+    function jumpToReaderSection(sectionId) {
+        if (!sectionId) return;
+        const section = document.getElementById(sectionId);
+        const scroll = document.getElementById('reader-scroll');
+        if (!section || !scroll) return;
+        // 縦書き時はscrollLeftで横移動、横書き時はscrollTopで縦移動
+        const isVertical = document.getElementById('reader-scroll')?.classList.contains('vertical-mode');
+        if (isVertical) {
+            // 縦書き: right-to-left なのでセクションの右端へスクロール
+            const scrollRight = scroll.scrollWidth - section.offsetLeft - section.offsetWidth;
+            scroll.scrollLeft = -(scrollRight);
+            // scrollIntoViewが縦書きで安定しない場合の代替
+            section.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+        } else {
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        // プルダウンを「目次」に戻す
+        const toc = document.getElementById('reader-toc');
+        if (toc) setTimeout(() => { toc.value = ''; }, 300);
     }
 
     function toggleReaderWritingMode() {
