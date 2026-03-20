@@ -8304,7 +8304,8 @@ window.closeActiveTab = closeActiveTab;
         return inputArea.value;
     }
 
-    function getTodayDateStr() { const n = new Date(); return `${n.getFullYear()}-${(n.getMonth()+1).toString().padStart(2,'0')}-${n.getDate().toString().padStart(2,'0')}`; }
+    // 論理日付版（window.getTodayDateStr）を使用。dayStart未ロード時のフォールバック付き
+    function getTodayDateStr() { if (window.getTodayDateStr && window.getTodayDateStr !== getTodayDateStr) return window.getTodayDateStr(); const n = new Date(); return `${n.getFullYear()}-${(n.getMonth()+1).toString().padStart(2,'0')}-${n.getDate().toString().padStart(2,'0')}`; }
 
     function loadTodayStart() {
         const s = localStorage.getItem(TODAY_START_KEY);
@@ -9154,7 +9155,7 @@ window.closeActiveTab = closeActiveTab;
 </body></html>`;
     }
     let __ccSkipBeforeUnloadSave = false;
-    window.addEventListener('beforeunload', e => { if (!__ccSkipBeforeUnloadSave) { persistLocalState(); saveWritingTime(); try { if (typeof saveReferenceState === 'function') saveReferenceState(); } catch(_){} try { if (typeof saveSplitState === 'function') saveSplitState(); } catch(_){} try { if (typeof saveMemoTabs === 'function') saveMemoTabs(); } catch(_){} } e.preventDefault(); e.returnValue = ''; });
+    window.addEventListener('beforeunload', e => { if (!__ccSkipBeforeUnloadSave) { persistLocalState(); saveWritingTime(); try { if (typeof saveReferenceState === 'function') saveReferenceState(); } catch(_){} try { if (typeof saveSplitState === 'function') saveSplitState(); } catch(_){} try { if (typeof saveMemoTabs === 'function') saveMemoTabs(); } catch(_){} try { if (typeof saveStructureData === 'function') saveStructureData(); } catch(_){} try { if (typeof saveCharacterData === 'function') saveCharacterData(); } catch(_){} try { if (typeof saveWorldData === 'function') saveWorldData(); } catch(_){} try { if (typeof saveTermsData === 'function') saveTermsData(); } catch(_){} } e.preventDefault(); e.returnValue = ''; });
 
     function undoInput() { inputArea.focus(); document.execCommand('undo'); }
     function redoInput() { inputArea.focus(); document.execCommand('redo'); }
@@ -14088,7 +14089,15 @@ if (typeof applyPaneHeightSettings === 'function') {
             // 設定
             if (should('proj-load-settings') && sections.settings !== undefined) {
                 const s = sections.settings || {};
-                if (s.paneWidths) {
+                // collectAllSettings() 形式の完全設定がある場合は applyImportedSettings で復元
+                if (s.version && typeof applyImportedSettings === 'function') {
+                    try {
+                        applyImportedSettings(s);
+                        saveSettingsToStorage();
+                    } catch(e) {}
+                }
+                // 旧形式 or フォールバック: paneWidths/theme/activeTabColor/dayStart
+                if (s.paneWidths && !s.version) {
                     Object.entries(s.paneWidths).forEach(([k, v]) => {
                         if (v) localStorage.setItem(`cc_${k === 'input' ? 'pane_input' : k === 'preview' ? 'pane_preview' : k}_width_px`, v);
                     });
@@ -14098,7 +14107,6 @@ if (typeof applyPaneHeightSettings === 'function') {
                 if (__atc) localStorage.setItem('cc_active_tab_color', __atc);
                 const __ds = (s.dayStart || s.day_start || (s.goal && s.goal.dayStart));
                 if (__ds) localStorage.setItem('cc_day_start_hhmm', __ds);
-
             }
 
             closeProjectLoadDialog();
@@ -14209,24 +14217,30 @@ if (typeof applyPaneHeightSettings === 'function') {
         } catch(e) {}
 
         if (document.getElementById('proj-save-settings').checked) {
-            project.settings = {
-                paneWidths: {
-                    input: localStorage.getItem('cc_pane_input_width_px'),
-                    preview: localStorage.getItem('cc_pane_preview_width_px'),
-                    side: localStorage.getItem('cc_side_width_px'),
-                    memo: localStorage.getItem('cc_memo_width_px'),
-                    outline: localStorage.getItem('cc_outline_width_px'),
-                    structure: localStorage.getItem('cc_structure_width_px'),
-                    search: localStorage.getItem('cc_search_width_px'),
-                    character: localStorage.getItem('cc_character_width_px'),
-                    world: localStorage.getItem('cc_world_width_px'),
-                    terms: localStorage.getItem('cc_terms_width_px'),
-                    reference: localStorage.getItem('cc_pane_reference_width_px')
-                },
-                theme: localStorage.getItem('cc_theme'),
-                activeTabColor: localStorage.getItem('cc_active_tab_color'),
-                dayStart: localStorage.getItem('cc_day_start_hhmm')
-            };
+            // collectAllSettings() で全設定を網羅的に保存
+            try {
+                project.settings = collectAllSettings();
+            } catch(e) {
+                // フォールバック: 最低限の設定
+                project.settings = {
+                    paneWidths: {
+                        input: localStorage.getItem('cc_pane_input_width_px'),
+                        preview: localStorage.getItem('cc_pane_preview_width_px'),
+                        side: localStorage.getItem('cc_side_width_px'),
+                        memo: localStorage.getItem('cc_memo_width_px'),
+                        outline: localStorage.getItem('cc_outline_width_px'),
+                        structure: localStorage.getItem('cc_structure_width_px'),
+                        search: localStorage.getItem('cc_search_width_px'),
+                        character: localStorage.getItem('cc_character_width_px'),
+                        world: localStorage.getItem('cc_world_width_px'),
+                        terms: localStorage.getItem('cc_terms_width_px'),
+                        reference: localStorage.getItem('cc_pane_reference_width_px')
+                    },
+                    theme: localStorage.getItem('cc_theme'),
+                    activeTabColor: localStorage.getItem('cc_active_tab_color'),
+                    dayStart: localStorage.getItem('cc_day_start_hhmm')
+                };
+            }
         }
 
         const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' });
