@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.238</title>
+<title>ⓒエディタ v1.240</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5893,7 +5893,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.239</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.240</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -6059,37 +6059,38 @@ body.theme-dark .card-shell:hover{
             </div>
             <div class="help-section" style="flex: 1; min-width: 180px;">
                 <div class="help-title">【ショートカットキー】</div>
-                ・<b>Ctrl+Alt+S</b>：保存ダイアログ<br>
-                ・<b>Ctrl+Z</b>：元に戻す / <b>Ctrl+Y</b>：やり直し<br>
-                ・<b>Ctrl+Alt+F</b>：検索（NAV/検索）<br>
-                ・<b>Ctrl+Alt+G</b>：行番号ジャンプ<br>
-                ・<b>Ctrl+Alt+N</b>：新規本文タブ<br>
-                ・<b>Ctrl+Alt+M</b>：新規メモタブ<br>
-                ・<b>Ctrl+Alt+Enter</b>：同期（更新＋位置合わせ）<br>
-                ・<b>Alt+Shift+=</b>：入力拡大 / <b>Alt+Shift+-</b>：入力縮小<br>
-                ・<b>Ctrl+Alt+L</b>：集中モード切替<br>
-                ・<b>Ctrl+Alt+V</b>：閲覧モード<br>
-                ・<b>Ctrl+Alt+A</b>：分析<br>
-                ・<b>Ctrl+Alt+H</b>：使い方パネル<br>
-                ・<b>Ctrl+Alt+R</b>：ルビ入力ダイアログ<br>
-                ・<b>Ctrl+Alt+B</b>：傍点<br>
-                ・<b>Ctrl+Alt+K</b>：「」鉤括弧<br>
-                ・<b>Ctrl+Alt+Shift+K</b>：『』二重鉤括弧<br>
-                ・<b>Ctrl+Alt+P</b>：（）括弧<br>
-                ・<b>Ctrl+Alt+Shift+B</b>：しおりを追加<br>
-                ・<b>Ctrl+Shift+F</b>：振り仮名（ルビ）<br>
-                ・<b>Ctrl+Shift+B</b>：傍点<br>
-                ・<b>Ctrl+Shift+1</b>：構成パネル<br>
-                ・<b>Ctrl+Shift+2</b>：世界観パネル<br>
-                ・<b>Ctrl+Shift+3</b>：人物パネル<br>
-                ・<b>Ctrl+Shift+4</b>：用語パネル<br>
-                ・<b>Ctrl+Shift+5</b>：メモパネル<br>
-                ・<b>Ctrl+Shift+6</b>：目次パネル<br>
-                ・<b>Ctrl+PageDown</b> / <b>Ctrl+Alt+PageDown</b>：次のタブへ<br>
-                ・<b>Ctrl+PageUp</b> / <b>Ctrl+Alt+PageUp</b>：前のタブへ<br>
-                ・<b>Alt+←</b> / <b>Ctrl+Alt+←</b>：前の編集位置へ戻る<br>
-                ・<b>Alt+→</b> / <b>Ctrl+Alt+→</b>：次の編集位置へ進む<br>
-                <small>※ブラウザで競合する場合は Ctrl+Alt 系を推奨</small><br>
+                <small style="color:var(--text-muted,#888)">※Mac: Ctrl→⌘、Alt→⌥ に読み替え</small><br>
+                ・<b>Ctrl+Alt+S</b> <small>(Mac: ⌘⌥S)</small>：保存ダイアログ<br>
+                ・<b>Ctrl+Z</b> <small>(Mac: ⌘Z)</small>：元に戻す / <b>Ctrl+Y</b> <small>(Mac: ⌘Y)</small>：やり直し<br>
+                ・<b>Ctrl+Alt+F</b> <small>(Mac: ⌘⌥F)</small>：検索（NAV/検索）<br>
+                ・<b>Ctrl+Alt+G</b> <small>(Mac: ⌘⌥G)</small>：行番号ジャンプ<br>
+                ・<b>Ctrl+Alt+N</b> <small>(Mac: ⌘⌥N)</small>：新規本文タブ<br>
+                ・<b>Ctrl+Alt+M</b> <small>(Mac: ⌘⌥M)</small>：新規メモタブ<br>
+                ・<b>Ctrl+Alt+Enter</b> <small>(Mac: ⌘⌥Enter)</small>：同期（更新＋位置合わせ）<br>
+                ・<b>Alt+Shift+=</b> <small>(Mac: ⌥⇧=)</small>：入力拡大 / <b>Alt+Shift+-</b> <small>(Mac: ⌥⇧-)</small>：入力縮小<br>
+                ・<b>Ctrl+Alt+L</b> <small>(Mac: ⌘⌥L)</small>：集中モード切替<br>
+                ・<b>Ctrl+Alt+V</b> <small>(Mac: ⌘⌥V)</small>：閲覧モード<br>
+                ・<b>Ctrl+Alt+A</b> <small>(Mac: ⌘⌥A)</small>：分析<br>
+                ・<b>Ctrl+Alt+H</b> <small>(Mac: ⌘⌥H)</small>：使い方パネル<br>
+                ・<b>Ctrl+Alt+R</b> <small>(Mac: ⌘⌥R)</small>：ルビ入力ダイアログ<br>
+                ・<b>Ctrl+Alt+B</b> <small>(Mac: ⌘⌥B)</small>：傍点<br>
+                ・<b>Ctrl+Alt+K</b> <small>(Mac: ⌘⌥K)</small>：「」鉤括弧<br>
+                ・<b>Ctrl+Alt+Shift+K</b> <small>(Mac: ⌘⌥⇧K)</small>：『』二重鉤括弧<br>
+                ・<b>Ctrl+Alt+P</b> <small>(Mac: ⌘⌥P)</small>：（）括弧<br>
+                ・<b>Ctrl+Alt+Shift+B</b> <small>(Mac: ⌘⌥⇧B)</small>：しおりを追加<br>
+                ・<b>Ctrl+Shift+F</b> <small>(Mac: ⌘⇧F)</small>：振り仮名（ルビ）<br>
+                ・<b>Ctrl+Shift+B</b> <small>(Mac: ⌘⇧B)</small>：傍点<br>
+                ・<b>Ctrl+Shift+1</b> <small>(Mac: ⌘⇧1)</small>：構成パネル<br>
+                ・<b>Ctrl+Shift+2</b> <small>(Mac: ⌘⇧2)</small>：世界観パネル<br>
+                ・<b>Ctrl+Shift+3</b> <small>(Mac: ⌘⇧3)</small>：人物パネル<br>
+                ・<b>Ctrl+Shift+4</b> <small>(Mac: ⌘⇧4)</small>：用語パネル<br>
+                ・<b>Ctrl+Shift+5</b> <small>(Mac: ⌘⇧5)</small>：メモパネル<br>
+                ・<b>Ctrl+Shift+6</b> <small>(Mac: ⌘⇧6)</small>：目次パネル<br>
+                ・<b>Ctrl+PageDown</b> / <b>Ctrl+Alt+PageDown</b> <small>(Mac: ⌘PageDown / ⌘⌥PageDown)</small>：次のタブへ<br>
+                ・<b>Ctrl+PageUp</b> / <b>Ctrl+Alt+PageUp</b> <small>(Mac: ⌘PageUp / ⌘⌥PageUp)</small>：前のタブへ<br>
+                ・<b>Alt+←</b> / <b>Ctrl+Alt+←</b> <small>(Mac: ⌥← / ⌘⌥←)</small>：前の編集位置へ戻る<br>
+                ・<b>Alt+→</b> / <b>Ctrl+Alt+→</b> <small>(Mac: ⌥→ / ⌘⌥→)</small>：次の編集位置へ進む<br>
+                <small>※ブラウザで競合する場合は Ctrl+Alt 系（Mac: ⌘⌥ 系）を推奨</small><br>
                 ・<b>Esc</b>：ダイアログ閉じる
             </div>
             <div class="help-section" style="flex: 1; min-width: 180px;">
@@ -9645,7 +9646,8 @@ function openRubyInsertDialog() {
             return;
         }
         if (ev.key === 'Enter') {
-            // Avoid interfering with other Enter handlers
+            // IME composition confirm should NOT trigger insert
+            if (ev.isComposing || ev.keyCode === 229) return;
             ev.preventDefault();
             ev.stopPropagation();
             insertBtn.click();
@@ -9672,7 +9674,8 @@ window.quickAddBookmark = quickAddBookmark;
 document.addEventListener('keydown', function(e) {
     const __api = window.__ccShortcutAPI;
     const __combo = (__api && __api.getShortcuts ? (__api.getShortcuts().rubyDialog) : null) || 'Ctrl+Alt+R';
-    const isRubyShortcut = (__api && __api.matchesEvent) ? __api.matchesEvent(e, __combo) : (e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && (e.key === 'r' || e.key === 'R'));
+    const __macFb = /Mac|iPhone|iPad|iPod/.test(navigator.platform || '');
+    const isRubyShortcut = (__api && __api.matchesEvent) ? __api.matchesEvent(e, __combo) : ((e.ctrlKey || (__macFb && e.metaKey)) && e.altKey && !e.shiftKey && (e.key === 'r' || e.key === 'R'));
     if (!isRubyShortcut) return;
 
     const ia = document.getElementById('input-area');
@@ -14890,7 +14893,9 @@ if (typeof applyPaneHeightSettings === 'function') {
                 return;
             }
         }
-        if (e.ctrlKey && !e.altKey && !e.metaKey) {
+        const __macCtrl = typeof __isMac !== 'undefined' && __isMac;
+        const __ctrlOrCmd = e.ctrlKey || (__macCtrl && e.metaKey);
+        if (__ctrlOrCmd && !e.altKey && (__macCtrl || !e.metaKey)) {
             const k = (e.key || '').toLowerCase();
             if (e.shiftKey) {
                 const panelShortcutMap = {
@@ -17705,7 +17710,7 @@ function bulkResetCardsBgColor(paneId){
     document.addEventListener('keydown', (e)=>{
       const __api = window.__ccShortcutAPI;
       const __combo = (__api && __api.getShortcuts ? (__api.getShortcuts().searchPanel) : null) || 'Ctrl+Alt+F';
-      if ((__api && __api.matchesEvent) ? __api.matchesEvent(e, __combo) : (e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && (e.key==='f' || e.key==='F'))){
+      if ((__api && __api.matchesEvent) ? __api.matchesEvent(e, __combo) : ((e.ctrlKey || (/Mac|iPhone|iPad|iPod/.test(navigator.platform||'') && e.metaKey)) && e.altKey && !e.shiftKey && (e.key==='f' || e.key==='F'))){
         e.preventDefault();
         e.stopImmediatePropagation();
         openNavTab('search');
@@ -18283,7 +18288,7 @@ function bulkResetCardsBgColor(paneId){
     document.addEventListener('keydown', (e)=>{
       const __api = window.__ccShortcutAPI;
       const __combo = (__api && __api.getShortcuts ? (__api.getShortcuts().searchPanel) : null) || 'Ctrl+Alt+F';
-      if ((__api && __api.matchesEvent) ? __api.matchesEvent(e, __combo) : (e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && (e.key==='f' || e.key==='F'))){
+      if ((__api && __api.matchesEvent) ? __api.matchesEvent(e, __combo) : ((e.ctrlKey || (/Mac|iPhone|iPad|iPod/.test(navigator.platform||'') && e.metaKey)) && e.altKey && !e.shiftKey && (e.key==='f' || e.key==='F'))){
         e.preventDefault();
         e.stopImmediatePropagation();
         toggleSearchPanel();
@@ -29066,14 +29071,18 @@ bindResize('cc-resize-sw', 'sw');
     }catch(_){}
   }
 
+  const __isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform || '') || (navigator.userAgentData && navigator.userAgentData.platform === 'macOS');
+
   function eventToShortcutString(e){
     // ignore pure modifier presses
     if (e.key === 'Control' || e.key === 'Shift' || e.key === 'Alt' || e.key === 'Meta') return '';
     const parts = [];
-    if (e.ctrlKey) parts.push('Ctrl');
+    // On Mac, treat Cmd (metaKey) as Ctrl for shortcut matching
+    if (e.ctrlKey || (__isMac && e.metaKey)) parts.push('Ctrl');
     if (e.altKey) parts.push('Alt');
     if (e.shiftKey) parts.push('Shift');
-    if (e.metaKey) parts.push('Meta');
+    // Only add Meta separately if NOT on Mac (on Mac it's already mapped to Ctrl)
+    if (e.metaKey && !__isMac) parts.push('Meta');
     parts.push(normalizeKeyName(e.key));
     return parts.join('+');
   }
