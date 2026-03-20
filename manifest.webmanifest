@@ -1,6 +1,6 @@
 {
-  "name": "C-エディタ",
-  "short_name": "C-エディタ",
+  "name": "C-エディタ v1.240",
+  "short_name": "C-エディタ v1.240",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
