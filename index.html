@@ -1261,18 +1261,22 @@ background: transparent;
     }
     .vertical-mode textarea, .vertical-mode #input-mirror-container {
         writing-mode: vertical-rl;
+        text-orientation: upright;
         -webkit-writing-mode: vertical-rl;
-        text-orientation: mixed;
-        -webkit-text-orientation: mixed;
+        -webkit-text-orientation: upright;
+        font-feature-settings: "vert" 1;
+        -webkit-font-feature-settings: "vert" 1;
     }
 
     #preview-scroll { width: 100%; height: 100%; padding: 20px; scroll-behavior: smooth; overflow-x: auto; overflow-y: auto; box-sizing: border-box; min-width: 0; position: relative; }
     #preview-scroll.vertical-mode { overflow-x: auto !important; overflow-y: hidden !important; height: 100%; width: 100%; max-width: 100%; }
     #preview-scroll.vertical-mode #preview-content {
         writing-mode: vertical-rl;
+        text-orientation: upright;
         -webkit-writing-mode: vertical-rl;
-        text-orientation: mixed;
-        -webkit-text-orientation: mixed;
+        -webkit-text-orientation: upright;
+        font-feature-settings: "vert" 1;
+        -webkit-font-feature-settings: "vert" 1;
         min-height: 100%;
         width: max-content;
         max-width: none;
@@ -1855,9 +1859,11 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     }
     #reader-scroll.vertical-mode #reader-content {
         writing-mode: vertical-rl;
+        text-orientation: upright;
         -webkit-writing-mode: vertical-rl;
-        text-orientation: mixed;
-        -webkit-text-orientation: mixed;
+        -webkit-text-orientation: upright;
+        font-feature-settings: "vert" 1;
+        -webkit-font-feature-settings: "vert" 1;
         min-height: 100%;
         width: max-content;
         max-width: none;
@@ -4356,7 +4362,7 @@ body.terms-fullscreen-mode #terms-panel .fullscreen-layout-btn{
     background: var(--panel-bg);
     color: var(--text-color);
   }
-  #focus-overlay .fo-body.vertical-mode { writing-mode: vertical-rl; -webkit-writing-mode: vertical-rl; text-orientation: mixed; -webkit-text-orientation: mixed; }
+  #focus-overlay .fo-body.vertical-mode { writing-mode: vertical-rl; -webkit-writing-mode: vertical-rl; text-orientation: upright; -webkit-text-orientation: upright; font-feature-settings: "vert" 1; -webkit-font-feature-settings: "vert" 1; }
   #focus-overlay pre {
     white-space: pre-wrap;
     word-break: break-word;
@@ -5908,7 +5914,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.241</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.240</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -12159,7 +12165,7 @@ if (typeof adjustPaneHeightsOnVisibility === 'function') {
         const t = inputArea.value, v = document.getElementById('st-in-v').checked, cs = getCachedInputStyle();
         const padBottom = v ? '20px' : '45%';
         const padLeft = v ? '45%' : '20px';
-        inputMirror.style.cssText = `font-size:${cs.fontSize};line-height:${cs.lineHeight};font-family:${cs.fontFamily};width:${inputArea.clientWidth}px;height:${inputArea.clientHeight}px;padding:20px 20px ${padBottom} ${padLeft};box-sizing:border-box;${v ? 'writing-mode:vertical-rl;-webkit-writing-mode:vertical-rl;text-orientation:mixed;-webkit-text-orientation:mixed;' : ''}`;
+        inputMirror.style.cssText = `font-size:${cs.fontSize};line-height:${cs.lineHeight};font-family:${cs.fontFamily};width:${inputArea.clientWidth}px;height:${inputArea.clientHeight}px;padding:20px 20px ${padBottom} ${padLeft};box-sizing:border-box;${v ? 'writing-mode:vertical-rl;-webkit-writing-mode:vertical-rl;text-orientation:upright;-webkit-text-orientation:upright;font-feature-settings:"vert" 1;-webkit-font-feature-settings:"vert" 1;' : ''}`;
         const tc = t.substring(0, idx), m = document.createElement('span'); m.textContent = '|'; inputMirror.innerHTML = ''; inputMirror.appendChild(document.createTextNode(tc)); inputMirror.appendChild(m);
         const mr = m.getBoundingClientRect(), mir = inputMirror.getBoundingClientRect(), mot = mr.top - mir.top + inputMirror.scrollTop, mol = mr.left - mir.left + inputMirror.scrollLeft;
         if (v) {
@@ -30237,6 +30243,8 @@ body.theme-dark .split-side-item:hover { background: #4b5563; }
   -webkit-writing-mode: vertical-rl;
   text-orientation: mixed;
   -webkit-text-orientation: mixed;
+  font-feature-settings: "vert" 1;
+  -webkit-font-feature-settings: "vert" 1;
   overflow-x: auto;
   overflow-y: hidden;
 }
@@ -30595,10 +30603,14 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
       if (fontFamily) ta.style.fontFamily = fontFamily;
       if (isVertical) {
         ta.style.writingMode = 'vertical-rl';
-        ta.style.textOrientation = 'mixed';
+        ta.style.textOrientation = 'upright';
+        ta.style.fontFeatureSettings = '"vert" 1';
+        ta.style.webkitFontFeatureSettings = '"vert" 1';
       } else {
         ta.style.writingMode = '';
         ta.style.textOrientation = '';
+        ta.style.fontFeatureSettings = '';
+        ta.style.webkitFontFeatureSettings = '';
       }
     });
   }
