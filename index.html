@@ -7603,21 +7603,33 @@ function updateTabScrollButtonsFor(targetId) {
 
 function initTabScrollers() {
   setupTabScrollButtons();
-  ['input-tabs-container', 'preview-tabs-container', 'memo-tabs-container'].forEach(id => {
+  // ホイールでタブを横スクロール + スクロール位置監視
+  ['input-tabs-container', 'preview-tabs-container', 'memo-tabs-container', 'ref-tabs-container'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('scroll', () => updateTabScrollButtonsFor(id), { passive: true });
+    // タブバー上のホイールを横スクロールに変換（タブコンテナ＋ラッパー全域）
+    const wheelHandler = e => {
+      if (el.scrollWidth <= el.clientWidth + 1) return;
+      e.preventDefault();
+      el.scrollBy({ left: e.deltaY > 0 ? 120 : -120, behavior: 'smooth' });
+    };
+    el.addEventListener('wheel', wheelHandler, { passive: false });
+    const wrap = el.closest('.tabs-scroll-wrap');
+    if (wrap) wrap.addEventListener('wheel', wheelHandler, { passive: false });
   });
   window.addEventListener('resize', () => {
     updateTabScrollButtonsFor('input-tabs-container');
     updateTabScrollButtonsFor('preview-tabs-container');
     updateTabScrollButtonsFor('memo-tabs-container');
+    updateTabScrollButtonsFor('ref-tabs-container');
   });
 
   // 初期状態
   updateTabScrollButtonsFor('input-tabs-container');
   updateTabScrollButtonsFor('preview-tabs-container');
   updateTabScrollButtonsFor('memo-tabs-container');
+  updateTabScrollButtonsFor('ref-tabs-container');
 }
 
 // 起動時に1回だけセットアップ
