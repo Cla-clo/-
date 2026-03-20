@@ -6003,7 +6003,7 @@ body.theme-dark .card-shell:hover{
                 <button class="btn btn-focus" id="btn-focus" onclick="toggleFocusMode()" data-desc="集中モードを切替" data-shortcut="Ctrl+Alt+L">🧘 集中</button>
                 <button class="btn btn-sync" id="btn-sync" onclick="syncPreviewPosition()" data-desc="プレビューを同期" data-shortcut="Ctrl+Alt+Enter">📲 同期</button>
                 <span class="ribbon-separator">|</span>
-                <button class="btn" id="btn-toggle-preview" onclick="document.getElementById('check-show-preview').click()" data-desc="プレビュー表示切替" data-shortcut="Ctrl+Alt+Shift+P">📄 プレビュー</button>
+                <button class="btn" id="btn-toggle-preview" onclick="togglePreviewPaneVis()" data-desc="プレビュー表示切替" data-shortcut="Ctrl+Alt+Shift+P">📄 プレビュー</button>
                 <button class="btn" id="btn-toggle-reference" onclick="toggleReferencePaneVis()" data-desc="参照ペイン表示切替" data-shortcut="Ctrl+Alt+Shift+R">📑 参照</button>
             </div>
         </div>
@@ -10249,6 +10249,16 @@ function applyPreviewSettings() {
         updatePreview();
         updateSelectionToolWindowVisibility();
     }
+    function togglePreviewPaneVis() {
+        const cb = document.getElementById('check-show-preview');
+        const pane = document.getElementById('pane-preview');
+        if (!cb || !pane) return;
+        cb.checked = !cb.checked;
+        if (cb.checked) pane.classList.remove('hidden');
+        else pane.classList.add('hidden');
+        adjustPaneWidthsOnVisibility(true);
+        updatePreview();
+    }
     function applyWritingSettings() {
         settingsCache.typewriterMode = document.getElementById('st-typewriter-mode').checked;
         settingsCache.writingTracker = document.getElementById('st-writing-tracker').checked;
@@ -11807,7 +11817,7 @@ if (typeof adjustPaneHeightsOnVisibility === 'function') {
     }
 
     inputArea.addEventListener('keydown', e => {
-        if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+        if (e.key === 'Enter' && !e.isComposing && !e.shiftKey && !e.ctrlKey && !e.altKey) {
             const p = inputArea.selectionStart, t = inputArea.value, ls = t.lastIndexOf('\n', p - 1) + 1, cl = t.substring(ls, p);
             if (cl.startsWith('　')) { e.preventDefault(); const b = t.substring(0, p), a = t.substring(inputArea.selectionEnd); inputArea.value = b + '\n　' + a; const np = p + 2; inputArea.setSelectionRange(np, np); updateInputStats(); if (settingsCache.typewriterMode) setTimeout(() => scrollToCursorPosition(np), 10); }
         }
@@ -28629,7 +28639,7 @@ bindResize('cc-resize-sw', 'sw');
 
       if (matches(e, sc.togglePreview)){
         e.preventDefault(); e.stopImmediatePropagation();
-        try{ const cb = document.getElementById('check-show-preview'); if(cb) cb.click(); }catch(_){}
+        try{ if (typeof togglePreviewPaneVis === 'function') togglePreviewPaneVis(); }catch(_){}
         return;
       }
 
@@ -30686,6 +30696,23 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     const area = document.getElementById('reference-area');
     if (!area || area.__refBound) return;
     area.__refBound = true;
+    // 入力と同じ字下げ自動挿入
+    area.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.isComposing && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+        const p = area.selectionStart, t = area.value;
+        const ls = t.lastIndexOf('\n', p - 1) + 1;
+        const cl = t.substring(ls, p);
+        if (cl.startsWith('　')) {
+          e.preventDefault();
+          const b = t.substring(0, p), a = t.substring(area.selectionEnd);
+          area.value = b + '\n　' + a;
+          const np = p + 2;
+          area.setSelectionRange(np, np);
+          updateRefCharCount();
+          saveReferenceState();
+        }
+      }
+    });
     area.addEventListener('input', () => {
       updateRefCharCount();
       saveReferenceState();
