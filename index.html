@@ -8044,26 +8044,64 @@ function cc_applyHeaderBadgePriority(_root){ /* no-op: handled by CSS */ }
             tabEl.onclick = () => switchTab(tab.id);
             tabEl.addEventListener('dragstart', e => {
                 draggingInputTabId = tab.id;
+                window.__draggingGroupId = null;
                 tabEl.classList.add('dragging');
                 e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', ''); // required for Firefox
             });
             tabEl.addEventListener('dragend', () => {
                 draggingInputTabId = null;
+                window.__draggingGroupId = null;
                 tabEl.classList.remove('dragging');
+                // Clear all drop indicators
+                container.querySelectorAll('.input-tab, .tab-group-header').forEach(el => {
+                    el.classList.remove('drop-before', 'drop-after');
+                });
             });
             tabEl.addEventListener('dragover', e => {
-                if (draggingInputTabId === null || draggingInputTabId === tab.id) return;
+                if (draggingInputTabId === null && !window.__draggingGroupId) return;
+                if (draggingInputTabId === tab.id) return;
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'move';
+                // Determine left/right insertion based on mouse position
+                const rect = tabEl.getBoundingClientRect();
+                const midX = rect.left + rect.width / 2;
+                const isLeft = e.clientX < midX;
+                // Clear all indicators first
+                container.querySelectorAll('.input-tab, .tab-group-header').forEach(el => {
+                    el.classList.remove('drop-before', 'drop-after');
+                });
+                tabEl.classList.add(isLeft ? 'drop-before' : 'drop-after');
+            });
+            tabEl.addEventListener('dragleave', () => {
+                tabEl.classList.remove('drop-before', 'drop-after');
             });
             tabEl.addEventListener('drop', e => {
                 e.preventDefault();
+                tabEl.classList.remove('drop-before', 'drop-after');
+                container.querySelectorAll('.input-tab, .tab-group-header').forEach(el => {
+                    el.classList.remove('drop-before', 'drop-after');
+                });
+
+                const rect = tabEl.getBoundingClientRect();
+                const midX = rect.left + rect.width / 2;
+                const insertBefore = e.clientX < midX;
+                const toIndex = inputTabs.findIndex(t => t.id === tab.id);
+                if (toIndex === -1) return;
+                const targetIndex = insertBefore ? toIndex : toIndex + 1;
+
+                // Group drag
+                if (window.__draggingGroupId && typeof window.__dropGroupAtIndex === 'function') {
+                    window.__dropGroupAtIndex(window.__draggingGroupId, targetIndex);
+                    return;
+                }
+
                 if (draggingInputTabId === null || draggingInputTabId === tab.id) return;
                 const fromIndex = inputTabs.findIndex(t => t.id === draggingInputTabId);
-                const toIndex = inputTabs.findIndex(t => t.id === tab.id);
-                if (fromIndex === -1 || toIndex === -1) return;
+                if (fromIndex === -1) return;
                 const [moved] = inputTabs.splice(fromIndex, 1);
-                inputTabs.splice(toIndex, 0, moved);
+                const adjIndex = fromIndex < targetIndex ? targetIndex - 1 : targetIndex;
+                inputTabs.splice(adjIndex, 0, moved);
                 renderInputTabs();
                 saveTabsToStorage();
             });
@@ -31195,6 +31233,33 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
 
 <!-- ========== タブグループ機能 ========== -->
 <style>
+/* ドラッグ中の挿入位置インジケーター */
+.input-tab.drop-before {
+  margin-left: 12px !important;
+  transition: margin 0.15s ease;
+  box-shadow: -3px 0 0 0 var(--accent-color, #4285f4);
+}
+.input-tab.drop-after {
+  margin-right: 12px !important;
+  transition: margin 0.15s ease;
+  box-shadow: 3px 0 0 0 var(--accent-color, #4285f4);
+}
+.input-tab.dragging {
+  opacity: 0.4;
+}
+.tab-group-header.drop-before {
+  margin-left: 12px !important;
+  transition: margin 0.15s ease;
+  box-shadow: -3px 0 0 0 var(--accent-color, #4285f4);
+}
+.tab-group-header.drop-after {
+  margin-right: 12px !important;
+  transition: margin 0.15s ease;
+  box-shadow: 3px 0 0 0 var(--accent-color, #4285f4);
+}
+.tab-group-header.dragging {
+  opacity: 0.4;
+}
 .tab-group-header {
   display: inline-flex;
   align-items: center;
@@ -31354,12 +31419,72 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
           const header = document.createElement('div');
           header.className = 'tab-group-header';
           header.style.backgroundColor = group.color;
+          header.draggable = true;
+          header.dataset.groupId = gid;
           header.innerHTML = `<span class="group-label">${window.escapeHtml ? window.escapeHtml(group.name) : group.name}</span><span class="group-toggle">${group.collapsed ? '▶' : '▼'}</span>`;
           header.onclick = () => toggleGroupCollapse(gid);
           header.oncontextmenu = (ev) => {
             ev.preventDefault();
             showGroupContextMenu(ev, gid);
           };
+          // Group drag handlers
+          header.addEventListener('dragstart', (ev) => {
+            window.__draggingGroupId = gid;
+            window.draggingInputTabId = null;
+            header.classList.add('dragging');
+            ev.dataTransfer.effectAllowed = 'move';
+            ev.dataTransfer.setData('text/plain', '');
+          });
+          header.addEventListener('dragend', () => {
+            window.__draggingGroupId = null;
+            header.classList.remove('dragging');
+            container.querySelectorAll('.input-tab, .tab-group-header').forEach(el => {
+              el.classList.remove('drop-before', 'drop-after');
+            });
+          });
+          header.addEventListener('dragover', (ev) => {
+            if (!window.__draggingGroupId && !window.draggingInputTabId) return;
+            ev.preventDefault();
+            ev.dataTransfer.dropEffect = 'move';
+            container.querySelectorAll('.input-tab, .tab-group-header').forEach(el => {
+              el.classList.remove('drop-before', 'drop-after');
+            });
+            const rect = header.getBoundingClientRect();
+            const isLeft = ev.clientX < rect.left + rect.width / 2;
+            header.classList.add(isLeft ? 'drop-before' : 'drop-after');
+          });
+          header.addEventListener('dragleave', () => {
+            header.classList.remove('drop-before', 'drop-after');
+          });
+          header.addEventListener('drop', (ev) => {
+            ev.preventDefault();
+            header.classList.remove('drop-before', 'drop-after');
+            container.querySelectorAll('.input-tab, .tab-group-header').forEach(el => {
+              el.classList.remove('drop-before', 'drop-after');
+            });
+            // Find the first tab of this group to determine insert position
+            const firstTabId = group.tabIds[0];
+            const toIndex = (window.inputTabs || []).findIndex(t => t.id === firstTabId);
+            if (toIndex === -1) return;
+            const rect = header.getBoundingClientRect();
+            const insertBefore = ev.clientX < rect.left + rect.width / 2;
+            const targetIndex = insertBefore ? toIndex : toIndex + group.tabIds.length;
+
+            if (window.__draggingGroupId && typeof window.__dropGroupAtIndex === 'function') {
+              window.__dropGroupAtIndex(window.__draggingGroupId, targetIndex);
+              return;
+            }
+            // Single tab dropped on group header
+            if (window.draggingInputTabId) {
+              const fromIdx = (window.inputTabs || []).findIndex(t => t.id === window.draggingInputTabId);
+              if (fromIdx === -1) return;
+              const [moved] = window.inputTabs.splice(fromIdx, 1);
+              const adj = fromIdx < targetIndex ? targetIndex - 1 : targetIndex;
+              window.inputTabs.splice(adj, 0, moved);
+              if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
+              if (typeof window.saveTabsToStorage === 'function') window.saveTabsToStorage();
+            }
+          });
           container.insertBefore(header, tabEl);
         }
       }
@@ -31519,6 +31644,31 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   } else {
     setTimeout(init, 300);
   }
+
+  // グループ一括移動: グループ内のタブをまとめて targetIndex に移動
+  function dropGroupAtIndex(groupId, targetIndex) {
+    const group = tabGroups[groupId];
+    if (!group || !group.tabIds.length) return;
+    const tabs = window.inputTabs;
+    if (!Array.isArray(tabs)) return;
+
+    // Extract group tabs from their current positions (preserve order)
+    const groupTabIds = new Set(group.tabIds);
+    const extracted = [];
+    for (let i = tabs.length - 1; i >= 0; i--) {
+      if (groupTabIds.has(tabs[i].id)) {
+        extracted.unshift(tabs.splice(i, 1)[0]);
+        // Adjust targetIndex if removed tab was before target
+        if (i < targetIndex) targetIndex--;
+      }
+    }
+    // Insert at target position
+    tabs.splice(targetIndex, 0, ...extracted);
+
+    if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
+    if (typeof window.saveTabsToStorage === 'function') window.saveTabsToStorage();
+  }
+  window.__dropGroupAtIndex = dropGroupAtIndex;
 
   // Expose for external use
   window.tabGroupCreate = createGroup;
