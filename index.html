@@ -12157,7 +12157,7 @@ if (typeof adjustPaneHeightsOnVisibility === 'function') {
     inputArea.addEventListener('keydown', e => {
         if (e.key === 'Enter' && !e.isComposing && !e.shiftKey && !e.ctrlKey && !e.altKey) {
             const p = inputArea.selectionStart, t = inputArea.value, ls = t.lastIndexOf('\n', p - 1) + 1, cl = t.substring(ls, p);
-            if (cl.startsWith('　')) { e.preventDefault(); const b = t.substring(0, p), a = t.substring(inputArea.selectionEnd); inputArea.value = b + '\n　' + a; const np = p + 2; inputArea.setSelectionRange(np, np); updateInputStats(); if (settingsCache.typewriterMode) setTimeout(() => scrollToCursorPosition(np), 10); }
+            if (cl.startsWith('　') || cl.startsWith('「')) { e.preventDefault(); const b = t.substring(0, p), a = t.substring(inputArea.selectionEnd); inputArea.value = b + '\n　' + a; const np = p + 2; inputArea.setSelectionRange(np, np); updateInputStats(); if (settingsCache.typewriterMode) setTimeout(() => scrollToCursorPosition(np), 10); }
         }
     });
     inputArea.addEventListener('input', () => {
@@ -12211,19 +12211,16 @@ if (typeof adjustPaneHeightsOnVisibility === 'function') {
         items += '<div class="context-menu-item" data-act="copy"' + (hasSel ? '' : ' style="opacity:.4;pointer-events:none"') + '>📋 コピー</div>';
         items += '<div class="context-menu-item" data-act="paste">📄 貼り付け</div>';
         items += '<div class="context-menu-item" data-act="selectall">☐ すべて選択</div>';
-        // 選択がある場合は書式メニューを追加
+        // 書式メニュー
+        items += sepHtml;
+        items += '<div class="context-menu-item" data-act="rubydlg">🈂 ルビ</div>';
         if (hasSel) {
-          items += sepHtml;
-          items += '<div class="context-menu-item" data-act="ruby">🈂 ルビ（選択文字）</div>';
           items += '<div class="context-menu-item" data-act="bouten">● 傍点</div>';
           items += sepHtml;
           items += '<div class="context-menu-item" data-act="kagi">「」 鉤括弧</div>';
           items += '<div class="context-menu-item" data-act="nijukagi">『』 二重鉤括弧</div>';
           items += '<div class="context-menu-item" data-act="paren">（）括弧</div>';
         }
-        // ルビ入力ダイアログは選択不問
-        items += sepHtml;
-        items += '<div class="context-menu-item" data-act="rubydlg">🈂 ルビ入力ダイアログ</div>';
 
         textCtxMenu.innerHTML = items;
         textCtxMenu.querySelectorAll('.context-menu-item').forEach(item => {
@@ -12247,9 +12244,6 @@ if (typeof adjustPaneHeightsOnVisibility === 'function') {
                 break;
               case 'selectall':
                 inputArea.setSelectionRange(0, inputArea.value.length);
-                break;
-              case 'ruby':
-                insertRubyToSelection();
                 break;
               case 'bouten':
                 insertBoutenToSelection();
