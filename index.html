@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.241</title>
+<title>ⓒエディタ v1.242</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -6050,55 +6050,63 @@ body.theme-dark .card-shell:hover{
             <div class="help-section" style="flex: 1; min-width: 180px;">
                 <div class="help-title">【基本操作】</div>
                 ・<b>入力エリア</b>：文章を入力<br>
-                                ・<b>📲 同期</b>：カーソル位置にプレビュー移動<br>
-                ・<b>👁 閲覧</b>：全タブをまとめて全画面表示（区切り記号「◆」付き / Escで戻る）<br>
-                ・閲覧中は『縦書きへ/横書きへ』で書字方向を切替できます<br>
-                ・終了は <b>Esc</b> または『↩ 元の画面に戻る』です<br>
+                ・<b>プレビュー</b>：ルビ・傍点をリアルタイム表示<br>
+                ・<b>📲 同期</b>：カーソル位置にプレビュー移動<br>
+                ・<b>👁 閲覧</b>：全タブをまとめて全画面表示（Escで戻る）<br>
+                ・閲覧中は『縦書きへ/横書きへ』で書字方向を切替可能<br>
+                ・<b>📑 参照</b>：別テキストを参照しながら執筆<br>
                 ・<b>縦横切替</b>：レイアウト変更<br>
                 ・<b>入替</b>：ペインの順序を入れ替え
             </div>
-            <div class="help-section" style="flex: 1; min-width: 180px;">
+            <div class="help-section" style="flex: 1; min-width: 240px;">
                 <div class="help-title">【ショートカットキー】</div>
-                <small style="color:var(--text-muted,#888)">※Mac: Ctrl→⌘、Alt→⌥ に読み替え</small><br>
-                ・<b>Ctrl+Alt+S</b> <small>(Mac: ⌘⌥S)</small>：保存ダイアログ<br>
-                ・<b>Ctrl+Z</b> <small>(Mac: ⌘Z)</small>：元に戻す / <b>Ctrl+Y</b> <small>(Mac: ⌘Y)</small>：やり直し<br>
-                ・<b>Ctrl+Alt+F</b> <small>(Mac: ⌘⌥F)</small>：検索（NAV/検索）<br>
-                ・<b>Ctrl+Alt+G</b> <small>(Mac: ⌘⌥G)</small>：行番号ジャンプ<br>
-                ・<b>Ctrl+Alt+N</b> <small>(Mac: ⌘⌥N)</small>：新規本文タブ<br>
-                ・<b>Ctrl+Alt+M</b> <small>(Mac: ⌘⌥M)</small>：新規メモタブ<br>
-                ・<b>Ctrl+Alt+Enter</b> <small>(Mac: ⌘⌥Enter)</small>：同期（更新＋位置合わせ）<br>
-                ・<b>Alt+Shift+=</b> <small>(Mac: ⌥⇧=)</small>：入力拡大 / <b>Alt+Shift+-</b> <small>(Mac: ⌥⇧-)</small>：入力縮小<br>
-                ・<b>Ctrl+Alt+L</b> <small>(Mac: ⌘⌥L)</small>：集中モード切替<br>
-                ・<b>Ctrl+Alt+V</b> <small>(Mac: ⌘⌥V)</small>：閲覧モード<br>
-                ・<b>Ctrl+Alt+A</b> <small>(Mac: ⌘⌥A)</small>：分析<br>
-                ・<b>Ctrl+Alt+H</b> <small>(Mac: ⌘⌥H)</small>：使い方パネル<br>
-                ・<b>Ctrl+Alt+R</b> <small>(Mac: ⌘⌥R)</small>：ルビ入力ダイアログ<br>
-                ・<b>Ctrl+Alt+B</b> <small>(Mac: ⌘⌥B)</small>：傍点<br>
-                ・<b>Ctrl+Alt+K</b> <small>(Mac: ⌘⌥K)</small>：「」鉤括弧<br>
-                ・<b>Ctrl+Alt+Shift+K</b> <small>(Mac: ⌘⌥⇧K)</small>：『』二重鉤括弧<br>
-                ・<b>Ctrl+Alt+P</b> <small>(Mac: ⌘⌥P)</small>：（）括弧<br>
-                ・<b>Ctrl+Alt+Shift+B</b> <small>(Mac: ⌘⌥⇧B)</small>：しおりを追加<br>
-                ・<b>Ctrl+Shift+F</b> <small>(Mac: ⌘⇧F)</small>：振り仮名（ルビ）<br>
-                ・<b>Ctrl+Shift+B</b> <small>(Mac: ⌘⇧B)</small>：傍点<br>
-                ・<b>Ctrl+Shift+1</b> <small>(Mac: ⌘⇧1)</small>：構成パネル<br>
-                ・<b>Ctrl+Shift+2</b> <small>(Mac: ⌘⇧2)</small>：世界観パネル<br>
-                ・<b>Ctrl+Shift+3</b> <small>(Mac: ⌘⇧3)</small>：人物パネル<br>
-                ・<b>Ctrl+Shift+4</b> <small>(Mac: ⌘⇧4)</small>：用語パネル<br>
-                ・<b>Ctrl+Shift+5</b> <small>(Mac: ⌘⇧5)</small>：メモパネル<br>
-                ・<b>Ctrl+Shift+6</b> <small>(Mac: ⌘⇧6)</small>：目次パネル<br>
-                ・<b>Ctrl+PageDown</b> / <b>Ctrl+Alt+PageDown</b> <small>(Mac: ⌘PageDown / ⌘⌥PageDown)</small>：次のタブへ<br>
-                ・<b>Ctrl+PageUp</b> / <b>Ctrl+Alt+PageUp</b> <small>(Mac: ⌘PageUp / ⌘⌥PageUp)</small>：前のタブへ<br>
-                ・<b>Alt+←</b> / <b>Ctrl+Alt+←</b> <small>(Mac: ⌥← / ⌘⌥←)</small>：前の編集位置へ戻る<br>
-                ・<b>Alt+→</b> / <b>Ctrl+Alt+→</b> <small>(Mac: ⌥→ / ⌘⌥→)</small>：次の編集位置へ進む<br>
-                <small>※ブラウザで競合する場合は Ctrl+Alt 系（Mac: ⌘⌥ 系）を推奨</small><br>
-                ・<b>Esc</b>：ダイアログ閉じる
+                <small style="color:var(--text-muted,#888)">Win / Mac の順に表記。Macでは一部ブラウザ競合を避けたキー配置です。</small><br>
+                <b style="color:var(--text-muted,#888); font-size:12px;">--- 基本操作 ---</b><br>
+                ・保存ダイアログ：<b>Ctrl+Alt+S</b> / <b>⌘⌥S</b><br>
+                ・元に戻す：<b>Ctrl+Z</b> / <b>⌘Z</b><br>
+                ・やり直し：<b>Ctrl+Y</b> / <b>⌘Y</b><br>
+                ・検索：<b>Ctrl+Alt+F</b> / <b>⌘⌥F</b><br>
+                ・行番号ジャンプ：<b>Ctrl+Alt+G</b> / <b>⌘⌥G</b><br>
+                ・新規本文タブ：<b>Ctrl+Alt+N</b> / <b>⌘⌥N</b><br>
+                ・新規メモタブ：<b>Ctrl+Alt+M</b> / <b>⌘⌥⇧N</b><br>
+                ・同期（更新＋位置合わせ）：<b>Ctrl+Alt+Enter</b> / <b>⌘⌥Enter</b><br>
+                ・入力拡大/縮小：<b>Alt+Shift+=/-</b> / <b>⌥⇧=/-</b><br>
+                <b style="color:var(--text-muted,#888); font-size:12px;">--- 表示切替 ---</b><br>
+                ・集中モード：<b>Ctrl+Alt+L</b> / <b>⌘⌥Y</b><br>
+                ・閲覧モード：<b>Ctrl+Alt+V</b> / <b>⌘⌥O</b><br>
+                ・分析：<b>Ctrl+Alt+A</b> / <b>⌘⌥A</b><br>
+                ・使い方パネル：<b>Ctrl+Alt+H</b> / <b>⌘⌥⇧H</b><br>
+                ・プレビュー表示切替：<b>Ctrl+Alt+Shift+P</b> / <b>⌘⌥⇧P</b><br>
+                ・参照ペイン表示切替：<b>Ctrl+Alt+Shift+R</b> / <b>⌘⌥⇧R</b><br>
+                <b style="color:var(--text-muted,#888); font-size:12px;">--- 記法挿入 ---</b><br>
+                ・ルビ入力ダイアログ：<b>Ctrl+Alt+R</b> / <b>⌘⌥R</b><br>
+                ・ルビ（選択→ダイアログ）：<b>Ctrl+Shift+F</b> / <b>⌘⇧F</b><br>
+                ・傍点：<b>Ctrl+Alt+B</b> / <b>⌘⌥E</b><br>
+                ・「」鉤括弧：<b>Ctrl+Alt+K</b> / <b>⌘⌥K</b><br>
+                ・『』二重鉤括弧：<b>Ctrl+Alt+Shift+K</b> / <b>⌘⌥⇧K</b><br>
+                ・（）括弧：<b>Ctrl+Alt+P</b> / <b>⌘⌥P</b><br>
+                ・しおりを追加：<b>Ctrl+Alt+Shift+B</b> / <b>⌘⌥⇧B</b><br>
+                <b style="color:var(--text-muted,#888); font-size:12px;">--- パネル切替 ---</b><br>
+                ・構成：<b>Ctrl+Shift+1</b> / <b>Ctrl+⇧1</b><br>
+                ・世界観：<b>Ctrl+Shift+2</b> / <b>Ctrl+⇧2</b><br>
+                ・人物：<b>Ctrl+Shift+3</b> / <b>Ctrl+⇧3</b><br>
+                ・用語：<b>Ctrl+Shift+4</b> / <b>Ctrl+⇧4</b><br>
+                ・メモ：<b>Ctrl+Shift+5</b> / <b>Ctrl+⇧5</b><br>
+                ・目次：<b>Ctrl+Shift+6</b> / <b>Ctrl+⇧6</b><br>
+                <small>※Macではパネル切替に物理Ctrlキー（⌘ではなく）を使用してください（⌘⇧3-6はスクリーンショットと競合）</small><br>
+                <b style="color:var(--text-muted,#888); font-size:12px;">--- ナビゲーション ---</b><br>
+                ・次/前のタブへ：<b>Ctrl+PageDown/Up</b> / <b>⌘PageDown/Up</b><br>
+                ・前/次の編集位置：<b>Alt+←/→</b> / <b>⌥←/→</b><br>
+                ・<b>Esc</b>：ダイアログ閉じる / 集中モード解除
             </div>
             <div class="help-section" style="flex: 1; min-width: 180px;">
                 <div class="help-title">【記法（小説向け）】</div>
                 ・<b>ルビ</b>：｜漢字《かんじ》<br>
                 ・<b>傍点</b>：《《強調》》<br>
                 ・<b>傍線</b>：__下線__<br>
-                <small>※テキスト選択時、ポップアップからワンクリックでルビ・傍点挿入可能</small>
+                ・<b>ハイライト</b>：==重要==<br>
+                <small>※テキスト選択時、ポップアップからワンクリックでルビ・傍点挿入可能</small><br>
+                <small>※既存ルビ（｜文字《よみ》）を選択してルビダイアログを開くと編集モードになります</small>
             </div>
             <div class="help-section" style="flex: 1; min-width: 180px;">
                 <div class="help-title">【執筆支援】</div>
@@ -6106,6 +6114,14 @@ body.theme-dark .card-shell:hover{
                 ・<b>タイプライター</b>：カーソル位置を中央に固定<br>
                 ・<b>執筆時間トラッカー</b>：自動計測<br>
                 ・<b>📊 分析</b>：文字種・文長・頻出語を分析
+            </div>
+            <div class="help-section" style="flex: 1; min-width: 180px;">
+                <div class="help-title">【参照ペイン】</div>
+                ・<b>📑 参照</b>：別テキストを横に表示して参照<br>
+                ・複数タブで資料を管理<br>
+                ・縦書き/横書き切替対応<br>
+                ・拡大/縮小対応<br>
+                ・設定パネルから表示/非表示切替
             </div>
             <div class="help-section" style="flex: 1; min-width: 180px;">
                 <div class="help-title">【目標機能】</div>
@@ -11895,6 +11911,8 @@ function applyShortcutTooltips() {
     const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform || '') || (navigator.userAgentData && navigator.userAgentData.platform === 'macOS');
     function toMacSymbols(s) {
         if (!isMac) return s;
+        // Ctrl+Shift+1-6 uses physical Ctrl on Mac (not ⌘), so keep "Ctrl" for those
+        if (/^Ctrl\+Shift\+\d$/.test(s)) return s.replace(/Shift\+/g, '⇧');
         return s.replace(/Ctrl\+/g, '⌘').replace(/Alt\+/g, '⌥').replace(/Shift\+/g, '⇧');
     }
     document.querySelectorAll('[data-shortcut]').forEach((el) => {
@@ -14936,6 +14954,7 @@ if (typeof applyPaneHeightSettings === 'function') {
         if (__ctrlOrCmd && !e.altKey && (__macCtrl || !e.metaKey)) {
             const k = (e.key || '').toLowerCase();
             if (e.shiftKey) {
+                // On Mac, ⌘+⇧+3-6 are macOS screenshots. Use physical Ctrl only for panel toggles.
                 const panelShortcutMap = {
                     Digit1: 'structure',
                     Digit2: 'world',
@@ -14945,7 +14964,7 @@ if (typeof applyPaneHeightSettings === 'function') {
                     Digit6: 'outline'
                 };
                 const panelTarget = panelShortcutMap[e.code];
-                if (panelTarget) {
+                if (panelTarget && (!__macCtrl || e.ctrlKey)) {
                     e.preventDefault();
                     e.stopPropagation();
                     if (panelTarget === 'structure' && typeof toggleStructurePanel === 'function') toggleStructurePanel();
@@ -29013,6 +29032,21 @@ bindResize('cc-resize-sw', 'sw');
     toggleReference: 'Ctrl+Alt+Shift+R'
   };
 
+  // Mac-specific defaults for shortcuts that conflict with Chrome/macOS
+  // ⌘⌥B→Chrome Bookmark Mgr, ⌘⌥L→Chrome Downloads, ⌘⌥H→macOS Hide Others,
+  // ⌘⌥M→macOS Minimize All, ⌘⌥V→Chrome Paste w/o format
+  const MAC_DEFAULT_OVERRIDES = {
+    bouten: 'Ctrl+Alt+E',           // E for Emphasis (⌘⌥B conflicts)
+    focusToggle: 'Ctrl+Alt+Y',      // Y (⌘⌥L conflicts)
+    helpPanel: 'Ctrl+Alt+Shift+H',  // add Shift (⌘⌥H conflicts)
+    newMemoTab: 'Ctrl+Alt+Shift+N', // add Shift (⌘⌥M conflicts)
+    readerView: 'Ctrl+Alt+O',       // O for Open reader (⌘⌥V conflicts)
+  };
+
+  function getDefaults(){
+    return __isMac ? { ...DEFAULT_SHORTCUTS, ...MAC_DEFAULT_OVERRIDES } : DEFAULT_SHORTCUTS;
+  }
+
   function normalizeKeyName(k){
     if (!k) return '';
     if (k === ' ') return 'Space';
@@ -29042,6 +29076,7 @@ bindResize('cc-resize-sw', 'sw');
   }
 
   function getShortcuts(){
+    const defs = getDefaults();
     try{
       const raw = localStorage.getItem(SHORTCUTS_KEY);
       const obj = raw ? JSON.parse(raw) : {};
@@ -29050,32 +29085,17 @@ bindResize('cc-resize-sw', 'sw');
         let changed = false;
         const nt  = normalizeShortcutString(obj.newTab || '');
         const nmt = normalizeShortcutString(obj.newMemoTab || '');
-        if (nt === 'Ctrl+N' || nt === 'Ctrl+Shift+N') { obj.newTab = DEFAULT_SHORTCUTS.newTab; changed = true; }
-        if (nmt === 'Ctrl+Shift+N' || nmt === 'Ctrl+N') { obj.newMemoTab = DEFAULT_SHORTCUTS.newMemoTab; changed = true; }
+        if (nt === 'Ctrl+N' || nt === 'Ctrl+Shift+N') { obj.newTab = defs.newTab; changed = true; }
+        if (nmt === 'Ctrl+Shift+N' || nmt === 'Ctrl+N') { obj.newMemoTab = defs.newMemoTab; changed = true; }
         if (changed) localStorage.setItem(SHORTCUTS_KEY, JSON.stringify(obj));
       }catch(e){}
-      return {
-        searchPanel: normalizeShortcutString(obj.searchPanel || DEFAULT_SHORTCUTS.searchPanel),
-        rubyDialog: normalizeShortcutString(obj.rubyDialog || DEFAULT_SHORTCUTS.rubyDialog),
-        saveDialog: normalizeShortcutString(obj.saveDialog || DEFAULT_SHORTCUTS.saveDialog),
-        jumpLine: normalizeShortcutString(obj.jumpLine || DEFAULT_SHORTCUTS.jumpLine),
-        newTab: normalizeShortcutString(obj.newTab || DEFAULT_SHORTCUTS.newTab),
-        newMemoTab: normalizeShortcutString(obj.newMemoTab || DEFAULT_SHORTCUTS.newMemoTab),
-        syncPreview: normalizeShortcutString(obj.syncPreview || DEFAULT_SHORTCUTS.syncPreview),
-        focusToggle: normalizeShortcutString(obj.focusToggle || DEFAULT_SHORTCUTS.focusToggle),
-        readerView: normalizeShortcutString(obj.readerView || DEFAULT_SHORTCUTS.readerView),
-        analysis: normalizeShortcutString(obj.analysis || DEFAULT_SHORTCUTS.analysis),
-        helpPanel: normalizeShortcutString(obj.helpPanel || DEFAULT_SHORTCUTS.helpPanel),
-        bouten: normalizeShortcutString(obj.bouten || DEFAULT_SHORTCUTS.bouten),
-        wrapKagi: normalizeShortcutString(obj.wrapKagi || DEFAULT_SHORTCUTS.wrapKagi),
-        wrapNijuKagi: normalizeShortcutString(obj.wrapNijuKagi || DEFAULT_SHORTCUTS.wrapNijuKagi),
-        wrapParen: normalizeShortcutString(obj.wrapParen || DEFAULT_SHORTCUTS.wrapParen),
-        quickBookmark: normalizeShortcutString(obj.quickBookmark || DEFAULT_SHORTCUTS.quickBookmark),
-        togglePreview: normalizeShortcutString(obj.togglePreview || DEFAULT_SHORTCUTS.togglePreview),
-        toggleReference: normalizeShortcutString(obj.toggleReference || DEFAULT_SHORTCUTS.toggleReference),
-      };
+      const result = {};
+      for (const k of Object.keys(defs)){
+        result[k] = normalizeShortcutString(obj[k] || defs[k]);
+      }
+      return result;
     }catch(e){
-      return { ...DEFAULT_SHORTCUTS };
+      return { ...defs };
     }
   }
 
@@ -29159,9 +29179,10 @@ bindResize('cc-resize-sw', 'sw');
       const sc = getShortcuts();
 
       // If a shortcut was changed, neutralize the old default combo so it doesn't fire elsewhere.
-      for (const k of Object.keys(DEFAULT_SHORTCUTS)){
+      const defs = getDefaults();
+      for (const k of Object.keys(defs)){
         try{
-          if (sc[k] && sc[k] !== DEFAULT_SHORTCUTS[k] && matches(e, DEFAULT_SHORTCUTS[k])){
+          if (sc[k] && sc[k] !== defs[k] && matches(e, defs[k])){
             e.preventDefault(); e.stopImmediatePropagation(); return;
           }
         }catch(_){}
@@ -29661,8 +29682,9 @@ bindResize('cc-resize-sw', 'sw');
       }
 
       // 2) Suppress old defaults if user changed away (prevents legacy fixed handlers from firing)
+      const __defs = __api.getDefaults ? __api.getDefaults() : __api.defaults;
       for (const a of actions){
-        const def = DEFAULT_SHORTCUTS[a.key];
+        const def = __defs[a.key];
         if (!def) continue;
         const cur = sc[a.key] || def;
         if (__api.normalize(cur) !== __api.normalize(def) && __api.matchesEvent(e, def)){
@@ -29680,6 +29702,8 @@ bindResize('cc-resize-sw', 'sw');
     getShortcuts: getShortcuts,
     setShortcuts: setShortcuts,
     defaults: DEFAULT_SHORTCUTS,
+    getDefaults: getDefaults,
+    isMac: __isMac,
     normalize: normalizeShortcutString,
     eventToString: eventToShortcutString,
     matchesEvent: function(e, combo){ return eventToShortcutString(e) === normalizeShortcutString(combo); }
@@ -29688,6 +29712,36 @@ bindResize('cc-resize-sw', 'sw');
 
   try{ initShortcutInterceptor(); }catch(e){}
 
+  // Sync data-shortcut attributes on buttons with current (possibly Mac-adjusted) shortcuts
+  function syncDataShortcutAttrs(){
+    const sc = getShortcuts();
+    const map = {
+      '.qip-ruby-dialog': 'rubyDialog',
+      '.qip-bouten[data-shortcut]': 'bouten',
+      '[data-shortcut="Ctrl+Alt+K"]': 'wrapKagi',
+      '[data-shortcut="Ctrl+Alt+Shift+K"]': 'wrapNijuKagi',
+      '[data-shortcut="Ctrl+Alt+P"]': 'wrapParen',
+      '[data-shortcut="Ctrl+Alt+Shift+B"]': 'quickBookmark',
+      '#btn-toggle-search[data-shortcut]': 'searchPanel',
+      '#btn-toggle-help[data-shortcut]': 'helpPanel',
+      '[data-shortcut="Ctrl+Alt+V"]': 'readerView',
+      '[data-shortcut="Ctrl+Alt+A"]': 'analysis',
+      '[data-shortcut="Ctrl+Alt+L"]': 'focusToggle',
+      '[data-shortcut="Ctrl+Alt+Enter"]': 'syncPreview',
+      '[data-shortcut="Ctrl+Alt+Shift+P"]': 'togglePreview',
+      '[data-shortcut="Ctrl+Alt+Shift+R"]': 'toggleReference',
+    };
+    for (const [sel, key] of Object.entries(map)){
+      try{
+        document.querySelectorAll(sel).forEach(el => {
+          if (sc[key]) el.dataset.shortcut = sc[key];
+        });
+      }catch(_){}
+    }
+    // Re-apply tooltip text
+    if (typeof applyShortcutTooltips === 'function') applyShortcutTooltips();
+  }
+  try{ syncDataShortcutAttrs(); }catch(e){}
 
   // Expose shortcut editor for app menu
   window.__ccOpenShortcutEditor = openShortcutEditor;
