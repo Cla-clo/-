@@ -4,8 +4,7 @@
   .pv-tab.active {
     background: var(--active-tab-bg) !important;
     color: var(--active-tab-text) !important;
-    font-weight: normal !important;
-    text-shadow: 0 0 0.65px currentColor, 0 0 0.65px currentColor;
+    font-weight: bold !important;
   }
 
   /* タブの字数表示 */
