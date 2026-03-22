@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.244</title>
+<title>ⓒエディタ v1.245</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5906,7 +5906,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.244</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.245</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -5997,9 +5997,30 @@ body.theme-dark .card-shell:hover{
     <div class="ribbon-section ribbon-view" data-section="view">
         <div class="ribbon-group ribbon-view-pack">
             <div class="ribbon-subgroup">
-                <span class="ribbon-group-label">入力/プレビュー</span>
+                <span class="ribbon-group-label">レイアウト</span>
                 <button class="btn" onclick="toggleLayoutAxis()">↕ 縦横切替</button>
-                <button class="btn" id="btn-layout-swap" onclick="toggleLayoutOrder()">⇄ 左右入替</button>
+                <div class="panel-move-dropdown" id="layout-swap-dropdown">
+                    <button class="btn" onclick="toggleLayoutSwapDropdown()">⇄ 入替 ▾</button>
+                    <div class="panel-move-dropdown-content" id="layout-swap-dropdown-content">
+                        <div class="dropdown-item" onclick="toggleLayoutOrder(); closeLayoutSwapDropdown();">
+                            <span>⇄ 入力 / プレビュー</span>
+                        </div>
+                        <div class="dropdown-item" onclick="swapAllPanelSides(); closeLayoutSwapDropdown();">
+                            <span>⇄ 作品パネル左右入替</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-move-dropdown" id="ref-swap-dropdown">
+                    <button class="btn" onclick="toggleRefSwapDropdown()">⇄ 参照 ▾</button>
+                    <div class="panel-move-dropdown-content" id="ref-swap-dropdown-content">
+                        <div class="dropdown-item" onclick="swapInputAndReference(); closeRefSwapDropdown();">
+                            <span>⇄ 入力 / 参照</span>
+                        </div>
+                        <div class="dropdown-item" onclick="swapPreviewAndReference(); closeRefSwapDropdown();">
+                            <span>⇄ プレビュー / 参照</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="ribbon-subgroup">
                 <span class="ribbon-group-label">パネル</span>
@@ -10778,7 +10799,9 @@ function applyPreviewSettings() {
     const setOrder = (k, ord)=>{
       const el = document.getElementById(k+'-panel');
       if (el) el.style.order = String(ord);
-      // also resizer elements if any (legacy) will be hidden via CSS
+      // also set resizer order to match (panel order + 0.5 so it sits right after)
+      const resizer = document.getElementById('resizer-'+k);
+      if (resizer) resizer.style.order = String(ord);
     };
     // left side: negative increasing
     (settingsCache.panelOrderLeft||[]).forEach((k,i)=>setOrder(k, -100 + i));
@@ -10916,6 +10939,7 @@ window.__ccGetMaxPinnedPanels = function() {
         maybeClose('structure-panel','check-structure-dock','structure-docked');
         maybeClose('character-panel','check-character-dock','character-docked');
         maybeClose('world-panel','check-world-dock','world-docked');
+        maybeClose('terms-panel','check-terms-dock','terms-docked');
 
         // control-panel（設定など）
         document.querySelectorAll('.control-panel.open').forEach(p => {
@@ -14035,10 +14059,72 @@ if (typeof applyPaneHeightSettings === 'function') {
         if (dropdown) dropdown.classList.remove('open');
     }
 
+    // ---- Layout swap dropdown (入力/プレビュー + 作品パネル左右一括入替) ----
+    function toggleLayoutSwapDropdown() {
+        const dd = document.getElementById('layout-swap-dropdown');
+        const isOpen = dd && dd.classList.contains('open');
+        closeAllLayoutDropdowns();
+        if (!isOpen && dd) dd.classList.add('open');
+    }
+    function closeLayoutSwapDropdown() {
+        const dd = document.getElementById('layout-swap-dropdown');
+        if (dd) dd.classList.remove('open');
+    }
+
+    // ---- Ref swap dropdown (入力/参照、プレビュー/参照) ----
+    function toggleRefSwapDropdown() {
+        const dd = document.getElementById('ref-swap-dropdown');
+        const isOpen = dd && dd.classList.contains('open');
+        closeAllLayoutDropdowns();
+        if (!isOpen && dd) dd.classList.add('open');
+    }
+    function closeRefSwapDropdown() {
+        const dd = document.getElementById('ref-swap-dropdown');
+        if (dd) dd.classList.remove('open');
+    }
+
+    function closeAllLayoutDropdowns() {
+        closeLayoutSwapDropdown();
+        closeRefSwapDropdown();
+        closePanelMoveDropdown();
+    }
+
+    // 作品パネル左右一括入替
+    function swapAllPanelSides() {
+        const keys = ['structure','world','character','terms','memo','outline','search'];
+        keys.forEach(k => {
+            if (typeof window.__ccTogglePanelSide === 'function') window.__ccTogglePanelSide(k);
+        });
+    }
+
+    // 入力↔参照の入れ替え（order値を交換）
+    function swapInputAndReference() {
+        const inputPane = document.getElementById('pane-input');
+        const refPane = document.getElementById('pane-reference');
+        if (!inputPane || !refPane) return;
+        const inputOrder = inputPane.style.order || '0';
+        const refOrder = refPane.style.order || '2';
+        inputPane.style.order = refOrder;
+        refPane.style.order = inputOrder;
+        try { localStorage.setItem('cc_swap_input_ref', JSON.stringify({input: refOrder, ref: inputOrder})); } catch(e){}
+    }
+
+    // プレビュー↔参照の入れ替え（order値を交換）
+    function swapPreviewAndReference() {
+        const previewPane = document.getElementById('pane-preview');
+        const refPane = document.getElementById('pane-reference');
+        if (!previewPane || !refPane) return;
+        const previewOrder = previewPane.style.order || '1';
+        const refOrder = refPane.style.order || '2';
+        previewPane.style.order = refOrder;
+        refPane.style.order = previewOrder;
+        try { localStorage.setItem('cc_swap_preview_ref', JSON.stringify({preview: refOrder, ref: previewOrder})); } catch(e){}
+    }
+
     // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.panel-move-dropdown')) {
-            closePanelMoveDropdown();
+            closeAllLayoutDropdowns();
         }
     });
 
@@ -14046,6 +14132,13 @@ if (typeof applyPaneHeightSettings === 'function') {
     window.togglePanelMoveDropdown = togglePanelMoveDropdown;
     window.movePanelToOppositeSide = movePanelToOppositeSide;
     window.closePanelMoveDropdown = closePanelMoveDropdown;
+    window.toggleLayoutSwapDropdown = toggleLayoutSwapDropdown;
+    window.closeLayoutSwapDropdown = closeLayoutSwapDropdown;
+    window.toggleRefSwapDropdown = toggleRefSwapDropdown;
+    window.closeRefSwapDropdown = closeRefSwapDropdown;
+    window.swapAllPanelSides = swapAllPanelSides;
+    window.swapInputAndReference = swapInputAndReference;
+    window.swapPreviewAndReference = swapPreviewAndReference;
 
     function showJumpDialog() { document.getElementById('jump-dialog').classList.add('show'); document.getElementById('jump-line-input').value = ''; document.getElementById('jump-line-input').focus(); }
     function closeJumpDialog() { document.getElementById('jump-dialog').classList.remove('show'); }
@@ -19041,6 +19134,10 @@ panel.style.width = '320px';
   function isPanelVisibleByKey(key){
     const el = document.getElementById(`${key}-panel`);
     if (!el) return false;
+    // ドック固定（open + checkbox checked）のパネルのみスワップ対象
+    const cb = document.getElementById(`check-${key}-dock`);
+    if (cb && cb.checked && el.classList.contains('open')) return true;
+    // フォールバック: display で判定
     try{
       return getComputedStyle(el).display !== 'none';
     }catch(e){
