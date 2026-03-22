@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.244</title>
+<title>ⓒエディタ v1.245</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -270,6 +270,9 @@ body.theme-dark .panel-header .panel-icon-btn:hover{ background: rgba(255,255,25
         opacity: 1;
     }
     body.focus-mode #pane-preview .pane-footer { display: none !important; }
+    body.focus-mode #pane-input .pane-footer .footer-right.is-overflowing::after {
+        background: linear-gradient(to right, transparent, rgba(0,0,0,0.8) 50%); color: white;
+    }
     .focus-exit-hint {
         position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%);
         background: rgba(0,0,0,0.7); color: white; padding: 8px 16px;
@@ -1031,14 +1034,21 @@ background: transparent;
         padding: 0 8px; font-size: 0.7rem; color: var(--text-muted);
         text-align: right; border-top: 1px solid var(--border-color); background: var(--panel-bg);
         display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 24px;
-        flex-wrap: wrap; flex-shrink: 0; row-gap: 4px;
+        flex-wrap: nowrap; flex-shrink: 0;
     }
     .pane-footer .footer-left,
     .pane-footer .footer-right {
-        display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;
+        display: inline-flex; align-items: center; gap: 8px; flex-wrap: nowrap;
     }
-    .pane-footer .footer-left { justify-content: flex-start; flex-wrap: nowrap; }
-    .pane-footer .footer-right { justify-content: flex-end; margin-left: auto; }
+    .pane-footer .footer-left { justify-content: flex-start; flex-shrink: 0; }
+    .pane-footer .footer-right { justify-content: flex-start; margin-left: auto; overflow: hidden; flex-shrink: 1; min-width: 0; position: relative; }
+    .pane-footer .footer-right.is-overflowing::after {
+        content: '…'; position: absolute; right: 0; top: 0; bottom: 0;
+        display: flex; align-items: center;
+        background: linear-gradient(to right, transparent, var(--panel-bg) 50%);
+        padding-left: 16px; padding-right: 2px;
+        font-size: 0.7rem; color: var(--text-muted); pointer-events: none;
+    }
     .selection-count { font-weight: bold; color: var(--text-color); }
     .progress-wrap{
         display:inline-flex;
@@ -5906,7 +5916,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.244</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.245</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -8706,7 +8716,7 @@ window.closeActiveTab = closeActiveTab;
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-        const defaultText = `　ⓒエディタ（使い方） v1.16
+        const defaultText = `　ⓒエディタ（使い方） v1.161
 
 ■ はじめに（最短で使い始める）
 
@@ -32098,6 +32108,24 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     nextGroupId = data.nextId || 1;
     saveTabGroups();
   };
+})();
+</script>
+
+<!-- v1.245: Footer overflow detection — right side truncates with "…" -->
+<script>
+(function(){
+  function checkFooterOverflow(){
+    document.querySelectorAll('.pane-footer .footer-right').forEach(function(el){
+      el.classList.toggle('is-overflowing', el.scrollWidth > el.clientWidth + 1);
+    });
+  }
+  var ro = new ResizeObserver(checkFooterOverflow);
+  document.querySelectorAll('.pane-footer').forEach(function(f){ ro.observe(f); });
+  document.querySelectorAll('.pane-footer .footer-right').forEach(function(f){ ro.observe(f); });
+  var mo = new MutationObserver(checkFooterOverflow);
+  document.querySelectorAll('.pane-footer .footer-right').forEach(function(el){
+    mo.observe(el, { childList:true, subtree:true, characterData:true });
+  });
 })();
 </script>
 
