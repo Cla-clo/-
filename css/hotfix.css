@@ -5,7 +5,6 @@
     background: var(--active-tab-bg) !important;
     color: var(--active-tab-text) !important;
     font-weight: bold !important;
-    border-top: 2px solid var(--active-tab-border) !important;
   }
 
   /* タブの字数表示 */
