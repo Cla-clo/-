@@ -12162,20 +12162,23 @@ if (typeof adjustPaneHeightsOnVisibility === 'function') {
     });
     inputArea.addEventListener('input', () => {
         lastInputTime = Date.now();
-        /* ── 会話文「の自動字下げ解除 ── */
-        const cp = inputArea.selectionStart;
-        const tv = inputArea.value;
-        const lineStart = tv.lastIndexOf('\n', cp - 1) + 1;
-        const lineText = tv.substring(lineStart, cp);
-        // 行頭が「　「」のパターン → 全角スペースを除去
-        if (lineText === '　「') {
-            const before = tv.substring(0, lineStart);
-            const after = tv.substring(lineStart + 1); // skip the
-            inputArea.value = before + after;
-            inputArea.setSelectionRange(cp - 1, cp - 1);
-        }
         updateInputStats();
         if (settingsCache.typewriterMode) scrollToCursorPosition(inputArea.selectionStart);
+    });
+
+    /* ── 会話文「の自動字下げ解除（IME確定後に実行） ── */
+    inputArea.addEventListener('compositionend', () => {
+        setTimeout(() => {
+            const cp = inputArea.selectionStart;
+            const tv = inputArea.value;
+            const lineStart = tv.lastIndexOf('\n', cp - 1) + 1;
+            const lineText = tv.substring(lineStart, cp);
+            if (lineText === '　「') {
+                // 全角スペースを選択して削除（execCommandでIMEと干渉しない）
+                inputArea.setSelectionRange(lineStart, lineStart + 1);
+                document.execCommand('delete', false);
+            }
+        }, 0);
     });
 
     /* ── テキスト選択時の右クリックコンテキストメニュー ── */
