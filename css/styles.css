@@ -945,7 +945,7 @@ background: transparent;
     body.theme-dark .input-tab { background: rgba(255,255,255,0.04); }
     .input-tab:hover { background: rgba(0,0,0,0.07); }
     body.theme-dark .input-tab:hover { background: rgba(255,255,255,0.10); }
-    .input-tab.active { background: var(--panel-bg); color: var(--active-tab-text); font-weight: bold; }
+    .input-tab.active { background: var(--panel-bg); color: var(--active-tab-text); font-weight: normal; text-shadow: 0 0 0.65px currentColor, 0 0 0.65px currentColor; }
     .input-tab .tab-close {
         font-size: 0.7rem; color: var(--text-muted); cursor: pointer;
         padding: 0 2px; border-radius: 2px; line-height: 1;
@@ -1274,7 +1274,7 @@ background: transparent;
     body.theme-dark .preview-tab { background: rgba(255,255,255,0.04); }
     .preview-tab:hover { background: rgba(0,0,0,0.07); }
     body.theme-dark .preview-tab:hover { background: rgba(255,255,255,0.10); }
-    .preview-tab.active { background: var(--panel-bg); color: var(--text-color); font-weight: bold; }
+    .preview-tab.active { background: var(--panel-bg); color: var(--text-color); font-weight: normal; text-shadow: 0 0 0.65px currentColor, 0 0 0.65px currentColor; }
     #pane-preview .pane-title h2 { color: var(--text-color); font-weight: 700; }
     #pane-preview .preview-tab { color: var(--text-color); }
     #pane-preview .preview-tab:not(.active) { opacity: 0.75; }
