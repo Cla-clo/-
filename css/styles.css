@@ -1008,8 +1008,8 @@ background: transparent;
     .pane-footer {
         padding: 0 8px; font-size: 0.7rem; color: var(--text-muted);
         text-align: right; border-top: 1px solid var(--border-color); background: var(--panel-bg);
-        display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 24px;
-        flex-wrap: nowrap; flex-shrink: 0;
+        display: flex; justify-content: space-between; align-items: center; gap: 10px; height: 24px;
+        flex-wrap: nowrap; flex-shrink: 0; overflow: hidden;
     }
     .pane-footer .footer-left,
     .pane-footer .footer-right {
@@ -1017,6 +1017,7 @@ background: transparent;
     }
     .pane-footer .footer-left { justify-content: flex-start; flex-shrink: 0; }
     .pane-footer .footer-right { justify-content: flex-start; margin-left: auto; overflow: hidden; flex-shrink: 1; min-width: 0; position: relative; }
+    .pane-footer .footer-right > * { flex-shrink: 0; white-space: nowrap; }
     .pane-footer .footer-right.is-overflowing::after {
         content: '…'; position: absolute; right: 0; top: 0; bottom: 0;
         display: flex; align-items: center;
