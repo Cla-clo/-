@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.245</title>
+<title>ⓒエディタ v1.246</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -1031,14 +1031,15 @@ background: transparent;
         padding: 0 8px; font-size: 0.7rem; color: var(--text-muted);
         text-align: right; border-top: 1px solid var(--border-color); background: var(--panel-bg);
         display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 24px;
-        flex-wrap: wrap; flex-shrink: 0; row-gap: 4px;
+        flex-wrap: nowrap; flex-shrink: 0; overflow: hidden;
     }
     .pane-footer .footer-left,
     .pane-footer .footer-right {
-        display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;
+        display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
     }
-    .pane-footer .footer-left { justify-content: flex-start; flex-wrap: nowrap; }
-    .pane-footer .footer-right { justify-content: flex-end; margin-left: auto; }
+    .pane-footer .footer-left { justify-content: flex-start; flex-shrink: 0; }
+    .pane-footer .footer-right { justify-content: flex-end; margin-left: auto; flex-shrink: 1; min-width: 0; overflow: hidden; }
+    .pane-footer .footer-right > span { flex-shrink: 0; }
     .selection-count { font-weight: bold; color: var(--text-color); }
     .progress-wrap{
         display:inline-flex;
@@ -5906,7 +5907,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.245</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.246</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
