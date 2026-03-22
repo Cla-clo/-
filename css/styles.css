@@ -936,15 +936,16 @@ background: transparent;
     .input-tabs-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
     .input-tab {
         padding: 5px 12px; font-size: 0.75rem; cursor: pointer;
-        border: 1px solid transparent; border-bottom: none;
+        border: 1px solid var(--border-color); border-bottom: none;
         border-radius: 8px 8px 0 0;
-        background: transparent; color: var(--text-muted); white-space: nowrap;
+        background: rgba(0,0,0,0.03); color: var(--text-muted); white-space: nowrap;
         display: inline-flex; align-items: center; gap: 6px;
         transition: all 0.2s; user-select: none;
     }
-    .input-tab:hover { background: rgba(0,0,0,0.04); }
-    body.theme-dark .input-tab:hover { background: rgba(255,255,255,0.06); }
-    .input-tab.active { background: var(--panel-bg); color: var(--active-tab-text); font-weight: bold; border-color: var(--border-color); }
+    body.theme-dark .input-tab { background: rgba(255,255,255,0.04); }
+    .input-tab:hover { background: rgba(0,0,0,0.07); }
+    body.theme-dark .input-tab:hover { background: rgba(255,255,255,0.10); }
+    .input-tab.active { background: var(--panel-bg); color: var(--active-tab-text); font-weight: bold; }
     .input-tab .tab-close {
         font-size: 0.7rem; color: var(--text-muted); cursor: pointer;
         padding: 0 2px; border-radius: 2px; line-height: 1;
@@ -1264,15 +1265,16 @@ background: transparent;
     .preview-tabs-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
     .preview-tab {
         padding: 5px 12px; font-size: 0.75rem; cursor: pointer;
-        border: 1px solid transparent; border-bottom: none;
+        border: 1px solid var(--border-color); border-bottom: none;
         border-radius: 8px 8px 0 0;
-        background: transparent; color: var(--text-muted); white-space: nowrap;
+        background: rgba(0,0,0,0.03); color: var(--text-muted); white-space: nowrap;
         display: inline-flex; align-items: center;
         transition: all 0.2s; user-select: none;
     }
-    .preview-tab:hover { background: rgba(0,0,0,0.04); }
-    body.theme-dark .preview-tab:hover { background: rgba(255,255,255,0.06); }
-    .preview-tab.active { background: var(--panel-bg); color: var(--text-color); font-weight: bold; border-color: var(--border-color); }
+    body.theme-dark .preview-tab { background: rgba(255,255,255,0.04); }
+    .preview-tab:hover { background: rgba(0,0,0,0.07); }
+    body.theme-dark .preview-tab:hover { background: rgba(255,255,255,0.10); }
+    .preview-tab.active { background: var(--panel-bg); color: var(--text-color); font-weight: bold; }
     #pane-preview .pane-title h2 { color: var(--text-color); font-weight: 700; }
     #pane-preview .preview-tab { color: var(--text-color); }
     #pane-preview .preview-tab:not(.active) { opacity: 0.75; }
