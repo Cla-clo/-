@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.244</title>
+<title>ⓒエディタ v1.243</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -970,7 +970,7 @@ background: transparent;
     body.theme-dark .input-tab { background: rgba(255,255,255,0.04); }
     .input-tab:hover { background: rgba(0,0,0,0.07); }
     body.theme-dark .input-tab:hover { background: rgba(255,255,255,0.10); }
-    .input-tab.active { background: var(--panel-bg); color: var(--active-tab-text); font-weight: normal; text-shadow: 0 0 0.65px currentColor, 0 0 0.65px currentColor; }
+    .input-tab.active { background: var(--panel-bg); color: var(--active-tab-text); font-weight: bold; }
     .input-tab .tab-close {
         font-size: 0.7rem; color: var(--text-muted); cursor: pointer;
         padding: 0 2px; border-radius: 2px; line-height: 1;
@@ -1299,7 +1299,7 @@ background: transparent;
     body.theme-dark .preview-tab { background: rgba(255,255,255,0.04); }
     .preview-tab:hover { background: rgba(0,0,0,0.07); }
     body.theme-dark .preview-tab:hover { background: rgba(255,255,255,0.10); }
-    .preview-tab.active { background: var(--panel-bg); color: var(--text-color); font-weight: normal; text-shadow: 0 0 0.65px currentColor, 0 0 0.65px currentColor; }
+    .preview-tab.active { background: var(--panel-bg); color: var(--text-color); font-weight: bold; }
     #pane-preview .pane-title h2 { color: var(--text-color); font-weight: 700; }
     #pane-preview .preview-tab { color: var(--text-color); }
     #pane-preview .preview-tab:not(.active) { opacity: 0.75; }
@@ -5906,7 +5906,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.244</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.243</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -8059,7 +8059,6 @@ function cc_applyHeaderBadgePriority(_root){ /* no-op: handled by CSS */ }
 
     function renderInputTabs() {
         const container = document.getElementById('input-tabs-container');
-        const savedScrollLeft = container.scrollLeft;
         container.innerHTML = '';
         inputTabs.forEach(tab => {
             const tabEl = document.createElement('div');
@@ -8146,7 +8145,6 @@ function cc_applyHeaderBadgePriority(_root){ /* no-op: handled by CSS */ }
         addBtn.title = '新しいタブを追加';
         addBtn.onclick = addNewTab;
         container.appendChild(addBtn);
-        container.scrollLeft = savedScrollLeft;
         updateTabScrollButtonsFor('input-tabs-container');
         updateActiveTabTitle();
         updatePreviewTabOptions();
@@ -30485,8 +30483,7 @@ body.theme-dark #ref-tabs-container .ref-tab { background: rgba(255,255,255,0.04
 body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,255,0.10); }
 #ref-tabs-container .ref-tab.active {
   background: var(--panel-bg);
-  font-weight: normal;
-  text-shadow: 0 0 0.65px currentColor, 0 0 0.65px currentColor;
+  font-weight: 600;
 }
 #ref-tabs-container .ref-tab .tab-close {
   font-size: 0.7rem;
