@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.246</title>
+<title>ⓒエディタ v1.247</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5917,7 +5917,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.246</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.247</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -5953,6 +5953,8 @@ body.theme-dark .card-shell:hover{
                     <button onclick="insertBoutenToSelection()">⚫ 選択文字に傍点</button>
                 </div>
             </div>
+            <span class="ribbon-separator">|</span>
+            <button class="btn btn-focus" id="btn-focus-ribbon" onclick="toggleFocusMode()" title="集中モード (Ctrl+Alt+L)">🧘 集中</button>
             <span class="ribbon-separator">|</span>
             <div class="ribbon-inline-slot" id="ribbon-inline-slot"></div>
         </div>
@@ -8070,6 +8072,7 @@ function cc_applyHeaderBadgePriority(_root){ /* no-op: handled by CSS */ }
 
     function renderInputTabs() {
         const container = document.getElementById('input-tabs-container');
+        const savedScrollLeft = container.scrollLeft;
         container.innerHTML = '';
         inputTabs.forEach(tab => {
             const tabEl = document.createElement('div');
@@ -8156,6 +8159,7 @@ function cc_applyHeaderBadgePriority(_root){ /* no-op: handled by CSS */ }
         addBtn.title = '新しいタブを追加';
         addBtn.onclick = addNewTab;
         container.appendChild(addBtn);
+        container.scrollLeft = savedScrollLeft;
         updateTabScrollButtonsFor('input-tabs-container');
         updateActiveTabTitle();
         updatePreviewTabOptions();
@@ -8717,7 +8721,7 @@ window.closeActiveTab = closeActiveTab;
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-        const defaultText = `　ⓒエディタ（使い方） v1.246
+        const defaultText = `　ⓒエディタ（使い方） v1.247
 
 ■ はじめに（最短で使い始める）
 
@@ -9995,6 +9999,7 @@ document.addEventListener('keydown', function(e) {
     function renderPreviewTabs() {
         const container = document.getElementById('preview-tabs-container');
         if (!container) return;
+        const savedScrollLeft = container.scrollLeft;
         container.innerHTML = '';
 
         // Individual tabs only (removed "全タブ")
@@ -10006,6 +10011,7 @@ document.addEventListener('keydown', function(e) {
             tabEl.onclick = () => { previewTabId = tab.id; renderPreviewTabs(); updatePreview(); };
             container.appendChild(tabEl);
         });
+        container.scrollLeft = savedScrollLeft;
         updateTabScrollButtonsFor('preview-tabs-container');
     }
 
@@ -12154,6 +12160,8 @@ if (typeof adjustPaneHeightsOnVisibility === 'function') {
     function toggleFocusMode() {
         document.body.classList.toggle('focus-mode');
         document.getElementById('btn-focus').classList.toggle('active');
+        const btnFocusRibbon = document.getElementById('btn-focus-ribbon');
+        if (btnFocusRibbon) btnFocusRibbon.classList.toggle('active');
         const hint = document.querySelector('.focus-exit-hint');
         if (document.body.classList.contains('focus-mode')) {
             inputArea.focus();
@@ -31013,6 +31021,7 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   // 4) Reference Pane (with tabs)
   // ========================================
   let referenceZoom = 100;
+  let refZoomIndex = (typeof ZOOM_LEVELS !== 'undefined') ? ZOOM_LEVELS.indexOf(100) : 5;
   let referenceVertical = false;
 
   // v1.239: 設定パネルから referenceVertical を同期するための公開関数
@@ -31024,7 +31033,14 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   let refNextTabId = 2;
 
   window.zoomReference = function(dir) {
-    referenceZoom = Math.max(50, Math.min(200, referenceZoom + dir * 10));
+    // v1.247: ZOOM_LEVELS配列を使用して入力ペインと同じズームステップに統一
+    if (typeof ZOOM_LEVELS !== 'undefined') {
+      refZoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, refZoomIndex + dir));
+      referenceZoom = ZOOM_LEVELS[refZoomIndex];
+    } else {
+      referenceZoom = Math.max(50, Math.min(200, referenceZoom + dir * 10));
+    }
+    localStorage.removeItem('cc_ref_zoom_custom');
     const area = document.getElementById('reference-area');
     const refBase = parseInt(document.getElementById('st-ref-size')?.value) || 17;
     if (area) area.style.fontSize = (refBase * referenceZoom / 100) + 'px';
@@ -31056,6 +31072,14 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   function finishEditRefZoom(value) {
     const zoomPercent = Math.max(10, Math.min(500, parseInt(value, 10) || 100));
     referenceZoom = zoomPercent;
+    // v1.247: ZOOM_LEVELS配列の最も近いインデックスに同期
+    if (typeof ZOOM_LEVELS !== 'undefined') {
+      let closest = 0;
+      for (let i = 1; i < ZOOM_LEVELS.length; i++) {
+        if (Math.abs(ZOOM_LEVELS[i] - zoomPercent) < Math.abs(ZOOM_LEVELS[closest] - zoomPercent)) closest = i;
+      }
+      refZoomIndex = closest;
+    }
     const area = document.getElementById('reference-area');
     const refBase = parseInt(document.getElementById('st-ref-size')?.value) || 17;
     if (area) area.style.fontSize = (refBase * zoomPercent / 100) + 'px';
@@ -31127,6 +31151,7 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   function renderRefTabs() {
     const container = document.getElementById('ref-tabs-container');
     if (!container) return;
+    const savedScrollLeft = container.scrollLeft;
     container.innerHTML = '';
     refTabs.forEach(tab => {
       const tabEl = document.createElement('div');
@@ -31160,6 +31185,7 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     addBtn.onclick = addRefTab;
     container.appendChild(addBtn);
 
+    container.scrollLeft = savedScrollLeft;
     updateRefTotalStats();
   }
 
@@ -31462,6 +31488,14 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
 
       if (data.zoom) {
         referenceZoom = data.zoom;
+        // v1.247: 復元時にrefZoomIndexも同期
+        if (typeof ZOOM_LEVELS !== 'undefined') {
+          let closest = 0;
+          for (let i = 1; i < ZOOM_LEVELS.length; i++) {
+            if (Math.abs(ZOOM_LEVELS[i] - referenceZoom) < Math.abs(ZOOM_LEVELS[closest] - referenceZoom)) closest = i;
+          }
+          refZoomIndex = closest;
+        }
         const refBase = parseInt(document.getElementById('st-ref-size')?.value) || 17;
     if (area) area.style.fontSize = (refBase * referenceZoom / 100) + 'px';
         const disp = document.getElementById('ref-zoom-display');
@@ -32112,7 +32146,7 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
 })();
 </script>
 
-<!-- v1.246: Footer overflow detection — right side truncates with "…" -->
+<!-- v1.247: Footer overflow detection — right side truncates with "…" -->
 <script>
 (function(){
   function checkFooterOverflow(){
