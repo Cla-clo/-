@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.251</title>
+<title>ⓒエディタ v1.252</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5922,7 +5922,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.251</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.252</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -8728,7 +8728,7 @@ window.closeActiveTab = closeActiveTab;
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-        const defaultText = `　ⓒエディタ（使い方） v1.251
+        const defaultText = `　ⓒエディタ（使い方） v1.252
 
 ■ はじめに（最短で使い始める）
 
@@ -9382,12 +9382,16 @@ window.closeActiveTab = closeActiveTab;
         const tl = statsSourceText.replace(/[\n\r]/g, '').length;
         const nl = computeNetLength(statsSourceText);
         const ll = statsSourceText.split('\n').length;
+        // v1.252: 全体目標は全タブ合算で計算
+        const currentTab = inputTabs.find(tab => tab.id === activeTabId);
+        if (currentTab) currentTab.content = inputArea.value;
+        const allTabsNet = inputTabs.reduce((sum, tab) => sum + computeNetLength(tab.content || ''), 0);
         if (charCountEl) charCountEl.innerText = `全体: ${tl}`;
         if (inputNetCountEl) inputNetCountEl.innerText = `実質: ${nl}`;
         if (lineCountEl) lineCountEl.innerText = `${ll} 行`;
         const g = settingsCache.goalChars;
         if (inputGoalEl) {
-            if (g > 0) { const p = Math.round((nl / g) * 100); inputGoalEl.innerText = `目標: ${nl}/${g} (${p}%)`; inputGoalEl.className = 'goal-display ' + getGoalColorClass(p); } else { inputGoalEl.innerText = ''; }
+            if (g > 0) { const p = Math.round((allTabsNet / g) * 100); inputGoalEl.innerText = `目標: ${allTabsNet}/${g} (${p}%)`; inputGoalEl.className = 'goal-display ' + getGoalColorClass(p); } else { inputGoalEl.innerText = ''; }
         }
         const tg = settingsCache.todayGoal;
         let tw = 0;
@@ -9418,7 +9422,7 @@ window.closeActiveTab = closeActiveTab;
         updateProgressBar(nl, tw, tg, g);
         updateCursorLineDisplay();
         // Check goal achievement
-        checkGoalAchievement(tw, tg, nl, g);
+        checkGoalAchievement(tw, tg, allTabsNet, g);
         updateAllTabsStats();
     }
     function updateProgressBar(netChars, todayWritten, todayGoal, totalGoal) {
