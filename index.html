@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.250</title>
+<title>ⓒエディタ v1.251</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5520,6 +5520,11 @@ window.__ccInitPanelDnDAndResizers = function(){
   };
 })();
 
+  // v1.251: メインスクリプトからアクセスできるようエクスポート
+  window.__ccNormalizedLen = normalizedLen;
+  window.__ccTabDayBaselines = function() { return tabDayBaselines; };
+  window.__ccLoadTabBaselines = loadTabBaselines;
+  window.__ccEnsureTabBaselinesForToday = ensureTabBaselinesForToday;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initHotfix);
@@ -5917,7 +5922,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.250</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.251</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -8723,7 +8728,7 @@ window.closeActiveTab = closeActiveTab;
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-        const defaultText = `　ⓒエディタ（使い方） v1.250
+        const defaultText = `　ⓒエディタ（使い方） v1.251
 
 ■ はじめに（最短で使い始める）
 
@@ -9386,18 +9391,23 @@ window.closeActiveTab = closeActiveTab;
         }
         const tg = settingsCache.todayGoal;
         let tw = 0;
-        // v1.250: 今日の執筆量を常に計算（目標の有無にかかわらず）
+        // v1.251: 今日の執筆量を常に計算（目標の有無にかかわらず）
         // 全タブの（現在文字数−開始時文字数）合計で算出
         {
             const curTab = inputTabs.find(tab => tab.id === activeTabId);
             if (curTab) curTab.content = inputArea.value;
-            try { loadTabBaselines(); ensureTabBaselinesForToday(); } catch(e) {}
-            inputTabs.forEach(tab => {
-                const key = String(tab.id);
-                const cur = normalizedLen(tab.content || '');
-                const base = (tabDayBaselines.base[key] != null) ? tabDayBaselines.base[key] : cur;
-                tw += Math.max(0, cur - base);
-            });
+            try {
+                if (window.__ccLoadTabBaselines) window.__ccLoadTabBaselines();
+                if (window.__ccEnsureTabBaselinesForToday) window.__ccEnsureTabBaselinesForToday();
+                const baselines = window.__ccTabDayBaselines ? window.__ccTabDayBaselines() : {};
+                const nLen = window.__ccNormalizedLen || function(t){ return String(t||'').replace(/[\n\r\s\u3000]/g,'').length; };
+                inputTabs.forEach(tab => {
+                    const key = String(tab.id);
+                    const cur = nLen(tab.content || '');
+                    const base = (baselines.base && baselines.base[key] != null) ? baselines.base[key] : cur;
+                    tw += Math.max(0, cur - base);
+                });
+            } catch(e) {}
         }
         if (inputTodayGoalEl) {
             if (tg > 0) { const tp = Math.round((tw / tg) * 100); inputTodayGoalEl.innerText = `今日: ${tw}/${tg} (${tp}%)`; inputTodayGoalEl.className = tw >= tg ? 'today-goal achieved' : 'today-goal'; }
