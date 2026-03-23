@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.248</title>
+<title>ⓒエディタ v1.249</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5917,7 +5917,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.248</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.249</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -8723,7 +8723,7 @@ window.closeActiveTab = closeActiveTab;
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-        const defaultText = `　ⓒエディタ（使い方） v1.248
+        const defaultText = `　ⓒエディタ（使い方） v1.249
 
 ■ はじめに（最短で使い始める）
 
@@ -9386,7 +9386,19 @@ window.closeActiveTab = closeActiveTab;
         }
         const tg = settingsCache.todayGoal;
         let tw = 0;
-        if (tg > 0) { tw = Math.max(0, nl - todayStartChars); }
+        // v1.249: 全タブの（現在文字数−開始時文字数）合計で今日の執筆量を計算
+        // タブ切替による誤カウント・誤達成通知を防止
+        if (tg > 0) {
+            const curTab = inputTabs.find(tab => tab.id === activeTabId);
+            if (curTab) curTab.content = inputArea.value;
+            try { loadTabBaselines(); ensureTabBaselinesForToday(); } catch(e) {}
+            inputTabs.forEach(tab => {
+                const key = String(tab.id);
+                const cur = normalizedLen(tab.content || '');
+                const base = (tabDayBaselines.base[key] != null) ? tabDayBaselines.base[key] : cur;
+                tw += Math.max(0, cur - base);
+            });
+        }
         if (inputTodayGoalEl) {
             if (tg > 0) { const tp = Math.round((tw / tg) * 100); inputTodayGoalEl.innerText = `今日: ${tw}/${tg} (${tp}%)`; inputTodayGoalEl.className = tw >= tg ? 'today-goal achieved' : 'today-goal'; } else { inputTodayGoalEl.innerText = ''; }
         }
