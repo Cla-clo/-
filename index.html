@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.249</title>
+<title>ⓒエディタ v1.250</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5917,7 +5917,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.249</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.250</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -8723,7 +8723,7 @@ window.closeActiveTab = closeActiveTab;
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-        const defaultText = `　ⓒエディタ（使い方） v1.249
+        const defaultText = `　ⓒエディタ（使い方） v1.250
 
 ■ はじめに（最短で使い始める）
 
@@ -9386,9 +9386,9 @@ window.closeActiveTab = closeActiveTab;
         }
         const tg = settingsCache.todayGoal;
         let tw = 0;
-        // v1.249: 全タブの（現在文字数−開始時文字数）合計で今日の執筆量を計算
-        // タブ切替による誤カウント・誤達成通知を防止
-        if (tg > 0) {
+        // v1.250: 今日の執筆量を常に計算（目標の有無にかかわらず）
+        // 全タブの（現在文字数−開始時文字数）合計で算出
+        {
             const curTab = inputTabs.find(tab => tab.id === activeTabId);
             if (curTab) curTab.content = inputArea.value;
             try { loadTabBaselines(); ensureTabBaselinesForToday(); } catch(e) {}
@@ -9400,7 +9400,8 @@ window.closeActiveTab = closeActiveTab;
             });
         }
         if (inputTodayGoalEl) {
-            if (tg > 0) { const tp = Math.round((tw / tg) * 100); inputTodayGoalEl.innerText = `今日: ${tw}/${tg} (${tp}%)`; inputTodayGoalEl.className = tw >= tg ? 'today-goal achieved' : 'today-goal'; } else { inputTodayGoalEl.innerText = ''; }
+            if (tg > 0) { const tp = Math.round((tw / tg) * 100); inputTodayGoalEl.innerText = `今日: ${tw}/${tg} (${tp}%)`; inputTodayGoalEl.className = tw >= tg ? 'today-goal achieved' : 'today-goal'; }
+            else { inputTodayGoalEl.innerText = `今日: +${tw}`; inputTodayGoalEl.className = 'today-goal'; }
         }
         inputReadingEl.innerText = settingsCache.showReadingTime ? `約${Math.ceil(nl / 400)}分` : '';
         if (settingsCache.showManuscript) { const cpp = settingsCache.manuscriptRows * settingsCache.manuscriptCols; inputManuscriptEl.innerText = `原稿用紙: ${(nl / cpp).toFixed(1)}枚`; } else { inputManuscriptEl.innerText = ''; }
