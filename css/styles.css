@@ -1368,7 +1368,7 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
         margin-left: 2px; padding: 0 4px; border-radius: 4px; font-size: 0.65rem;
     }
     .memo-tab .tab-close:hover { background: #fee2e2; color: #dc2626; }
-    .memo-tab.dragging, .input-tab.dragging { opacity: 0.5; }
+    .memo-tab.dragging, .input-tab.dragging, .ref-tab.dragging { opacity: 0.5; }
     .memo-file-btns { display: flex; gap: 2px; }
     #memo-area {
         flex: 1; width: 100%; padding: 12px; border: none; resize: none;
