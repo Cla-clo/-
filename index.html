@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.253</title>
+<title>ⓒエディタ v1.254</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5922,7 +5922,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.253</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.254</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -8728,7 +8728,7 @@ window.closeActiveTab = closeActiveTab;
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-        const defaultText = `　ⓒエディタ（使い方） v1.253
+        const defaultText = `　ⓒエディタ（使い方） v1.254
 
 ■ はじめに（最短で使い始める）
 
@@ -9257,7 +9257,7 @@ window.closeActiveTab = closeActiveTab;
         });
     }
 
-    function persistLocalState() { saveTabsToStorage(); saveSettingsToStorage(); }
+    function persistLocalState() { saveTabsToStorage(); saveSettingsToStorage(); try { if (typeof window.saveTabGroups === 'function') window.saveTabGroups(); } catch(e){} }
     function buildHtmlExport(scope) {
         const v = document.getElementById('st-pv-v').checked;
         const fk = document.getElementById('st-pv-font').value;
@@ -32186,10 +32186,15 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     initGroupContextMenu();
   }
 
+  // v1.254: 300ms遅延を除去し即座にパッチ適用（グループ未反映バグ修正）
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => setTimeout(init, 300));
+    document.addEventListener('DOMContentLoaded', () => {
+      init();
+      if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
+    });
   } else {
-    setTimeout(init, 300);
+    init();
+    if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
   }
 
   // グループ一括移動: グループ内のタブをまとめて targetIndex に移動
@@ -32235,6 +32240,7 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   window.tabGroupRemoveTab = removeTabFromGroup;
   window.tabGroupAddTab = addTabToGroup;
   window.getTabGroups = function(){ return tabGroups; };
+  window.saveTabGroups = saveTabGroups;
   window.setTabGroups = function(data){
     if (!data) return;
     tabGroups = data.groups || {};
