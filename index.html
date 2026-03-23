@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.252</title>
+<title>ⓒエディタ v1.253</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5922,7 +5922,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.252</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.253</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -8728,7 +8728,7 @@ window.closeActiveTab = closeActiveTab;
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-        const defaultText = `　ⓒエディタ（使い方） v1.252
+        const defaultText = `　ⓒエディタ（使い方） v1.253
 
 ■ はじめに（最短で使い始める）
 
@@ -31177,6 +31177,8 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   };
 
   // --- 参照タブ機能 ---
+  let draggingRefTabId = null;
+
   function renderRefTabs() {
     const container = document.getElementById('ref-tabs-container');
     if (!container) return;
@@ -31202,6 +31204,60 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
       }
 
       tabEl.onclick = () => switchRefTab(tab.id);
+
+      // v1.253: ドラッグ&ドロップ（入力タブと同様）
+      tabEl.draggable = true;
+      tabEl.addEventListener('dragstart', e => {
+        draggingRefTabId = tab.id;
+        tabEl.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', '');
+      });
+      tabEl.addEventListener('dragend', () => {
+        draggingRefTabId = null;
+        tabEl.classList.remove('dragging');
+        container.querySelectorAll('.ref-tab').forEach(el => {
+          el.classList.remove('drop-before', 'drop-after');
+        });
+      });
+      tabEl.addEventListener('dragover', e => {
+        if (draggingRefTabId === null) return;
+        if (draggingRefTabId === tab.id) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const rect = tabEl.getBoundingClientRect();
+        const midX = rect.left + rect.width / 2;
+        const isLeft = e.clientX < midX;
+        container.querySelectorAll('.ref-tab').forEach(el => {
+          el.classList.remove('drop-before', 'drop-after');
+        });
+        tabEl.classList.add(isLeft ? 'drop-before' : 'drop-after');
+      });
+      tabEl.addEventListener('dragleave', () => {
+        tabEl.classList.remove('drop-before', 'drop-after');
+      });
+      tabEl.addEventListener('drop', e => {
+        e.preventDefault();
+        tabEl.classList.remove('drop-before', 'drop-after');
+        container.querySelectorAll('.ref-tab').forEach(el => {
+          el.classList.remove('drop-before', 'drop-after');
+        });
+        if (draggingRefTabId === null || draggingRefTabId === tab.id) return;
+        const rect = tabEl.getBoundingClientRect();
+        const midX = rect.left + rect.width / 2;
+        const insertBefore = e.clientX < midX;
+        const toIndex = refTabs.findIndex(t => t.id === tab.id);
+        if (toIndex === -1) return;
+        const targetIndex = insertBefore ? toIndex : toIndex + 1;
+        const fromIndex = refTabs.findIndex(t => t.id === draggingRefTabId);
+        if (fromIndex === -1) return;
+        const [moved] = refTabs.splice(fromIndex, 1);
+        const adjIndex = fromIndex < targetIndex ? targetIndex - 1 : targetIndex;
+        refTabs.splice(adjIndex, 0, moved);
+        renderRefTabs();
+        saveReferenceState();
+      });
+
       container.appendChild(tabEl);
     });
 
@@ -31723,6 +31779,19 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   box-shadow: 3px 0 0 0 var(--accent-color, #4285f4);
 }
 .input-tab.dragging {
+  opacity: 0.4;
+}
+.ref-tab.drop-before {
+  margin-left: 12px !important;
+  transition: margin 0.15s ease;
+  box-shadow: -3px 0 0 0 var(--accent-color, #4285f4);
+}
+.ref-tab.drop-after {
+  margin-right: 12px !important;
+  transition: margin 0.15s ease;
+  box-shadow: 3px 0 0 0 var(--accent-color, #4285f4);
+}
+.ref-tab.dragging {
   opacity: 0.4;
 }
 .tab-group-header.drop-before {
