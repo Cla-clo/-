@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.258</title>
+<title>ⓒエディタ v1.259</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -959,11 +959,12 @@ background: transparent;
         padding: 2px 2px 0;
         background: transparent;
     }
-    .input-tabs-container > * { margin-bottom: 8px; }
-    .input-tabs-container::-webkit-scrollbar { height: 6px; }
+    .input-tabs-container > * { margin-bottom: 3px; }
+    .input-tabs-container::-webkit-scrollbar { height: 5px; }
     .input-tabs-container::-webkit-scrollbar-track { background: transparent; }
-    .input-tabs-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
-    .input-tabs-container::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    .input-tabs-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; transition: background 0.15s; }
+    .input-tabs-container::-webkit-scrollbar-thumb:hover { background: #888; }
+    .input-tabs-container::-webkit-scrollbar-thumb:active { background: #666; }
     .input-tab {
         padding: 5px 12px; font-size: 0.75rem; cursor: pointer;
         border: 1px solid var(--border-color); border-bottom: none;
@@ -1298,11 +1299,12 @@ background: transparent;
         padding: 2px 2px 0;
         background: transparent;
     }
-    .preview-tabs-container > * { margin-bottom: 8px; }
-    .preview-tabs-container::-webkit-scrollbar { height: 6px; }
+    .preview-tabs-container > * { margin-bottom: 3px; }
+    .preview-tabs-container::-webkit-scrollbar { height: 5px; }
     .preview-tabs-container::-webkit-scrollbar-track { background: transparent; }
-    .preview-tabs-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
-    .preview-tabs-container::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    .preview-tabs-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; transition: background 0.15s; }
+    .preview-tabs-container::-webkit-scrollbar-thumb:hover { background: #888; }
+    .preview-tabs-container::-webkit-scrollbar-thumb:active { background: #666; }
     .preview-tab {
         padding: 5px 12px; font-size: 0.75rem; cursor: pointer;
         border: 1px solid var(--border-color); border-bottom: none;
@@ -1383,11 +1385,12 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
         display: flex; gap: 4px; flex: 1; overflow-x: scroll;
         align-items: flex-end; padding: 2px 2px 0; min-height: 24px; min-width: 0;
     }
-    .memo-tabs > * { margin-bottom: 6px; }
-    .memo-tabs::-webkit-scrollbar { height: 6px; }
+    .memo-tabs > * { margin-bottom: 3px; }
+    .memo-tabs::-webkit-scrollbar { height: 5px; }
     .memo-tabs::-webkit-scrollbar-track { background: transparent; }
-    .memo-tabs::-webkit-scrollbar-thumb { background: #fcd34d; border-radius: 3px; }
-    .memo-tabs::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+    .memo-tabs::-webkit-scrollbar-thumb { background: #fcd34d; border-radius: 3px; transition: background 0.15s; }
+    .memo-tabs::-webkit-scrollbar-thumb:hover { background: #eab308; }
+    .memo-tabs::-webkit-scrollbar-thumb:active { background: #ca8a04; }
     .memo-tab {
         padding: 2px 8px; font-size: 0.75rem; background: #fff3b3; border: 1px solid #f59e0b;
         border-radius: 4px 4px 0 0; cursor: pointer; white-space: nowrap;
@@ -5930,7 +5933,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.258</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.259</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -8756,7 +8759,7 @@ window.closeActiveTab = closeActiveTab;
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-        const defaultText = `　ⓒエディタ（使い方） v1.258
+        const defaultText = `　ⓒエディタ（使い方） v1.259
 
 ■ はじめに（最短で使い始める）
 
@@ -32263,7 +32266,7 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     initGroupContextMenu();
   }
 
-  // v1.258: 300ms遅延を除去し即座にパッチ適用（グループ未反映バグ修正）
+  // v1.259: 300ms遅延を除去し即座にパッチ適用（グループ未反映バグ修正）
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       init();
