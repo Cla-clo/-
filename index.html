@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.254</title>
+<title>ⓒエディタ v1.255</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -956,10 +956,10 @@ background: transparent;
         flex: 1 1 auto;
         min-height: 32px;
         min-width: 0;
-        padding: 2px 2px 0;
+        padding: 2px 2px 4px;
         background: transparent;
     }
-    .input-tabs-container::-webkit-scrollbar { height: 3px; }
+    .input-tabs-container::-webkit-scrollbar { height: 4px; }
     .input-tabs-container::-webkit-scrollbar-track { background: transparent; }
     .input-tabs-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
     .input-tab {
@@ -1293,10 +1293,10 @@ background: transparent;
         flex: 1 1 auto;
         min-height: 32px;
         min-width: 0;
-        padding: 2px 2px 0;
+        padding: 2px 2px 4px;
         background: transparent;
     }
-    .preview-tabs-container::-webkit-scrollbar { height: 3px; }
+    .preview-tabs-container::-webkit-scrollbar { height: 4px; }
     .preview-tabs-container::-webkit-scrollbar-track { background: transparent; }
     .preview-tabs-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
     .preview-tab {
@@ -1377,9 +1377,9 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     body.theme-dark .memo-tab-add { border-color: #f59e0b; color: #fbbf24; }
     .memo-tabs {
         display: flex; gap: 4px; flex: 1; overflow-x: scroll;
-        align-items: flex-end; padding: 2px 2px 0; min-height: 24px; min-width: 0;
+        align-items: flex-end; padding: 2px 2px 4px; min-height: 24px; min-width: 0;
     }
-    .memo-tabs::-webkit-scrollbar { height: 3px; }
+    .memo-tabs::-webkit-scrollbar { height: 4px; }
     .memo-tabs::-webkit-scrollbar-track { background: transparent; }
     .memo-tabs::-webkit-scrollbar-thumb { background: #fcd34d; border-radius: 3px; }
     .memo-tab {
@@ -1505,6 +1505,8 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     }
     .outline-item:hover { background: #e0f2fe; color: #0284c7; }
     body.theme-dark .outline-item:hover { background: #1e3a5f; }
+    .outline-level-group { font-weight: bold; font-size: 0.8rem; padding-left: 4px; margin-top: 6px; }
+    .outline-level-group:first-child { margin-top: 0; }
     .outline-level-1 { font-weight: bold; background: var(--pane-header-bg); border-left: 4px solid #6b7280; }
     .outline-level-2 { padding-left: 20px; border-left: 3px solid #9ca3af; }
     .outline-level-3 { padding-left: 35px; border-left: 2px solid #d1d5db; font-size: 0.8rem; }
@@ -5922,7 +5924,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.254</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.255</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -8728,7 +8730,7 @@ window.closeActiveTab = closeActiveTab;
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-        const defaultText = `　ⓒエディタ（使い方） v1.254
+        const defaultText = `　ⓒエディタ（使い方） v1.255
 
 ■ はじめに（最短で使い始める）
 
@@ -13928,9 +13930,42 @@ function closeOutlinePanel() {
             return items;
         }
 
-        // 全タブから目次生成（タブ名が最上位）
+        // 全タブから目次生成（グループ対応：グループヘッダーを挿入）
+        const tg = (typeof window.getTabGroups === 'function') ? window.getTabGroups() : {};
+        const processedTabIds = new Set();
+        // グループごとにタブをまとめて出力
+        for (const [gid, g] of Object.entries(tg)) {
+            if (!g.tabIds || g.tabIds.length === 0) continue;
+            // グループヘッダー（level 0）
+            const groupTabs = g.tabIds.map(tid => inputTabs.find(t => t.id === tid)).filter(Boolean);
+            if (groupTabs.length === 0) continue;
+            const groupCharCount = groupTabs.reduce((sum, tab) => {
+                const txt = (tab.content || '').replace(/[\n\r\s\u3000]/g, '');
+                return sum + txt.length;
+            }, 0);
+            outlineData.push({
+                text: g.name || 'グループ',
+                level: 0,
+                pos: 0, length: 0,
+                collapsed: false,
+                index: 0,
+                directCharCount: groupCharCount,
+                charCount: groupCharCount,
+                tabId: null,
+                tabName: g.name,
+                isGroupHeader: true,
+                groupColor: g.color || '#6b7280'
+            });
+            groupTabs.forEach(tab => {
+                outlineData.push(...outlineItemsForTab(tab));
+                processedTabIds.add(tab.id);
+            });
+        }
+        // グループに属さないタブ
         inputTabs.forEach(tab => {
-            outlineData.push(...outlineItemsForTab(tab));
+            if (!processedTabIds.has(tab.id)) {
+                outlineData.push(...outlineItemsForTab(tab));
+            }
         });
 
         // Lv別集計（全タブ合算）
@@ -13959,13 +13994,20 @@ function closeOutlinePanel() {
     function renderOutline() {
         const l = document.getElementById('outline-list'); l.innerHTML = '';
         outlineData.forEach((it, idx) => {
-            const d = document.createElement('div'); d.className = `outline-item outline-level-${Math.min(it.level, 3)}`;
+            const lvClass = it.isGroupHeader ? 'outline-level-group' : `outline-level-${Math.min(it.level, 3)}`;
+            const d = document.createElement('div'); d.className = `outline-item ${lvClass}`;
+            if (it.isGroupHeader && it.groupColor) {
+                d.style.borderLeft = `4px solid ${it.groupColor}`;
+                d.style.background = `${it.groupColor}18`;
+            }
             const hc = outlineData.some((x, i) => i > idx && x.level > it.level && !outlineData.slice(idx + 1, i).some(m => m.level <= it.level));
             const tg = document.createElement('span'); tg.className = 'outline-toggle'; if (hc) { tg.textContent = it.collapsed ? '▶' : '▼'; tg.onclick = e => { e.stopPropagation(); toggleOutlineItem(idx); }; } d.appendChild(tg);
-            const ts = document.createElement('span'); ts.className = 'outline-text'; ts.textContent = it.text; d.appendChild(ts);
+            const ts = document.createElement('span'); ts.className = 'outline-text'; ts.textContent = it.isGroupHeader ? `📁 ${it.text}` : it.text; d.appendChild(ts);
             const cc = document.createElement('span'); cc.className = 'outline-char-count'; cc.textContent = it.charCount.toLocaleString(); d.appendChild(cc);
             let hd = false; for (let i = 0; i < idx; i++) { if (outlineData[i].collapsed && outlineData[i].level < it.level) { let ir = true; for (let j = i + 1; j < idx; j++) { if (outlineData[j].level <= outlineData[i].level) { ir = false; break; } } if (ir) { hd = true; break; } } } if (hd) d.classList.add('outline-hidden');
-            d.onclick = e => { if (e.target.classList.contains('outline-toggle')) return; if (it.tabId && it.tabId !== activeTabId) switchTab(it.tabId); inputArea.focus(); inputArea.setSelectionRange(it.pos, it.pos + it.length); setTimeout(() => scrollToCursorPosition(it.pos), 100); updateCursorLineDisplay(); if (window.innerWidth < 768 && !document.getElementById('check-outline-dock').checked) closeOutlinePanel(); };
+            if (!it.isGroupHeader) {
+                d.onclick = e => { if (e.target.classList.contains('outline-toggle')) return; if (it.tabId && it.tabId !== activeTabId) switchTab(it.tabId); inputArea.focus(); inputArea.setSelectionRange(it.pos, it.pos + it.length); setTimeout(() => scrollToCursorPosition(it.pos), 100); updateCursorLineDisplay(); if (window.innerWidth < 768 && !document.getElementById('check-outline-dock').checked) closeOutlinePanel(); };
+            }
             l.appendChild(d);
         });
     }
@@ -32123,9 +32165,9 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
       removeItem.textContent = '🔓 グループから外す';
       removeItem.addEventListener('click', (ev) => {
         ev.stopPropagation();
+        if (window.hideAllContextMenus) window.hideAllContextMenus();
         removeTabFromGroup(tabId);
         if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
-        if (window.hideAllContextMenus) window.hideAllContextMenus();
       });
       menu.appendChild(removeItem);
     }
@@ -32137,11 +32179,11 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     newGroupItem.textContent = '📁 新しいグループを作成';
     newGroupItem.addEventListener('click', (ev) => {
       ev.stopPropagation();
+      if (window.hideAllContextMenus) window.hideAllContextMenus();
       const name = prompt('グループ名を入力:', 'グループ');
       if (name !== null) {
         createGroup([tabId], name.trim() || 'グループ');
       }
-      if (window.hideAllContextMenus) window.hideAllContextMenus();
     });
     menu.appendChild(newGroupItem);
 
@@ -32156,9 +32198,9 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
       addItem.innerHTML = `<span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:${g.color}; margin-right:6px;"></span>「${window.escapeHtml ? window.escapeHtml(g.name) : g.name}」に追加`;
       addItem.addEventListener('click', (ev) => {
         ev.stopPropagation();
+        if (window.hideAllContextMenus) window.hideAllContextMenus();
         addTabToGroup(tabId, gid);
         if (typeof window.renderInputTabs === 'function') window.renderInputTabs();
-        if (window.hideAllContextMenus) window.hideAllContextMenus();
       });
       menu.appendChild(addItem);
     }
@@ -32186,7 +32228,7 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     initGroupContextMenu();
   }
 
-  // v1.254: 300ms遅延を除去し即座にパッチ適用（グループ未反映バグ修正）
+  // v1.255: 300ms遅延を除去し即座にパッチ適用（グループ未反映バグ修正）
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       init();
