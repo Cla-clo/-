@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.259</title>
+<title>ⓒエディタ v1.260</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -5933,7 +5933,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.259</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.260</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -8759,7 +8759,7 @@ window.closeActiveTab = closeActiveTab;
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-        const defaultText = `　ⓒエディタ（使い方） v1.259
+        const defaultText = `　ⓒエディタ（使い方） v1.260
 
 ■ はじめに（最短で使い始める）
 
@@ -9150,6 +9150,8 @@ window.closeActiveTab = closeActiveTab;
         activeTabId = 1;
         nextTabId = 2;
         inputArea.value = defaultText;
+        // タブグループも初期化
+        try { if (typeof window.setTabGroups === 'function') window.setTabGroups({ groups: {}, nextId: 1 }); } catch(e){}
         previewTabId = null;
         previewShowAll = false;
         bookmarks = [];
@@ -15143,6 +15145,9 @@ if (typeof applyPaneHeightSettings === 'function') {
                 }
             }
 
+            // タブIDが変わったので孤立グループを掃除
+            if (typeof window.cleanupOrphanedGroups === 'function') window.cleanupOrphanedGroups();
+
             // v1.239: テキストファイルからグループ構造を復元
             if (parsedTabs.__parsedGroups && parsedTabs.__parsedGroups.length > 0 && typeof window.tabGroupCreate === 'function') {
                 // overwrite_allの場合はグループもリセット
@@ -16234,6 +16239,8 @@ function setupMemoInteractionGuard() {
         }
         window.activeTabId = window.inputTabs[0].id;
         if (window.inputArea) window.inputArea.value = window.inputTabs[0].content || '';
+        // タブIDが変わったので孤立グループを掃除
+        if (typeof window.cleanupOrphanedGroups === 'function') window.cleanupOrphanedGroups();
         // v1.239: テキストファイルからグループ構造を復元
         if (parsedTabs.__parsedGroups && parsedTabs.__parsedGroups.length > 0 && typeof window.tabGroupCreate === 'function') {
           if (typeof window.setTabGroups === 'function') window.setTabGroups({ groups: {}, nextId: 1 });
@@ -31936,6 +31943,22 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     } catch(e){}
   }
 
+  // 存在しないタブIDを参照するグループを掃除
+  function cleanupOrphanedGroups(){
+    const tabs = window.inputTabs || [];
+    const validIds = new Set(tabs.map(t => t.id));
+    let changed = false;
+    for (const [gid, g] of Object.entries(tabGroups)) {
+      if (!g.tabIds) { delete tabGroups[gid]; changed = true; continue; }
+      const before = g.tabIds.length;
+      g.tabIds = g.tabIds.filter(id => validIds.has(id));
+      if (g.tabIds.length !== before) changed = true;
+      if (g.tabIds.length === 0) { delete tabGroups[gid]; changed = true; }
+    }
+    if (changed) saveTabGroups();
+    return changed;
+  }
+
   const GROUP_COLORS = ['#4285f4','#34a853','#fbbc04','#ea4335','#ab47bc','#00acc1','#ff7043','#78909c'];
 
   function getGroupForTab(tabId){
@@ -32014,6 +32037,9 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
       const r = base.apply(this, arguments);
       const container = document.getElementById('input-tabs-container');
       if (!container) return r;
+
+      // 存在しないタブIDを参照するグループを掃除
+      cleanupOrphanedGroups();
 
       // Build ordered list: for each tab, check if it starts a group
       const tabs = Array.isArray(window.inputTabs) ? window.inputTabs : [];
@@ -32187,6 +32213,9 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     // 既にグループ項目があれば何もしない
     if (menu.querySelector('[data-group-action]')) return;
 
+    // 存在しないタブIDを参照するグループを掃除
+    cleanupOrphanedGroups();
+
     const tabId = _groupCtxTabId || window.activeTabId;
     if (!tabId) return;
 
@@ -32266,7 +32295,7 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     initGroupContextMenu();
   }
 
-  // v1.259: 300ms遅延を除去し即座にパッチ適用（グループ未反映バグ修正）
+  // v1.260: 300ms遅延を除去し即座にパッチ適用（グループ未反映バグ修正）
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       init();
@@ -32321,6 +32350,7 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   window.tabGroupAddTab = addTabToGroup;
   window.getTabGroups = function(){ return tabGroups; };
   window.saveTabGroups = saveTabGroups;
+  window.cleanupOrphanedGroups = cleanupOrphanedGroups;
   window.setTabGroups = function(data){
     if (!data) return;
     tabGroups = data.groups || {};
