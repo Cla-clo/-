@@ -937,8 +937,7 @@ background: transparent;
     .input-tabs-container > * { margin-bottom: 8px; }
     .input-tabs-container::-webkit-scrollbar { height: 6px; }
     .input-tabs-container::-webkit-scrollbar-track { background: transparent; }
-    .input-tabs-container::-webkit-scrollbar-thumb { background: transparent; border-radius: 3px; transition: background 0.2s; }
-    .input-tabs-container:hover::-webkit-scrollbar-thumb { background: var(--border-color); }
+    .input-tabs-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
     .input-tabs-container::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
     .input-tab {
         padding: 5px 12px; font-size: 0.75rem; cursor: pointer;
@@ -1277,8 +1276,7 @@ background: transparent;
     .preview-tabs-container > * { margin-bottom: 8px; }
     .preview-tabs-container::-webkit-scrollbar { height: 6px; }
     .preview-tabs-container::-webkit-scrollbar-track { background: transparent; }
-    .preview-tabs-container::-webkit-scrollbar-thumb { background: transparent; border-radius: 3px; transition: background 0.2s; }
-    .preview-tabs-container:hover::-webkit-scrollbar-thumb { background: var(--border-color); }
+    .preview-tabs-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
     .preview-tabs-container::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
     .preview-tab {
         padding: 5px 12px; font-size: 0.75rem; cursor: pointer;
@@ -1363,8 +1361,7 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     .memo-tabs > * { margin-bottom: 6px; }
     .memo-tabs::-webkit-scrollbar { height: 6px; }
     .memo-tabs::-webkit-scrollbar-track { background: transparent; }
-    .memo-tabs::-webkit-scrollbar-thumb { background: transparent; border-radius: 3px; transition: background 0.2s; }
-    .memo-tabs:hover::-webkit-scrollbar-thumb { background: #fcd34d; }
+    .memo-tabs::-webkit-scrollbar-thumb { background: #fcd34d; border-radius: 3px; }
     .memo-tabs::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
     .memo-tab {
         padding: 2px 8px; font-size: 0.75rem; background: #fff3b3; border: 1px solid #f59e0b;
