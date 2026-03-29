@@ -1279,11 +1279,11 @@ background: transparent;
         visibility: hidden; pointer-events: none;
         white-space: pre-wrap; word-wrap: break-word; overflow: hidden; padding: 20px; box-sizing: border-box;
     }
-    .vertical-mode textarea, .vertical-mode #input-mirror-container { writing-mode: vertical-rl; text-orientation: upright; }
+    .vertical-mode textarea, .vertical-mode #input-mirror-container { writing-mode: vertical-rl; text-orientation: mixed; }
 
     #preview-scroll { width: 100%; height: 100%; padding: 20px; scroll-behavior: smooth; overflow-x: auto; overflow-y: auto; box-sizing: border-box; min-width: 0; position: relative; }
     #preview-scroll.vertical-mode { overflow-x: auto !important; overflow-y: hidden !important; height: 100%; width: 100%; max-width: 100%; }
-    #preview-scroll.vertical-mode #preview-content { writing-mode: vertical-rl; text-orientation: upright; min-height: 100%; width: max-content; max-width: none; }
+    #preview-scroll.vertical-mode #preview-content { writing-mode: vertical-rl; text-orientation: mixed; min-height: 100%; width: max-content; max-width: none; }
     #preview-content { word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; color: var(--text-color); max-width: 100%; min-width: 0; box-sizing: border-box; }
     body.scroll-mode #preview-scroll { height: 100%; overflow-y: auto; }
     body.scroll-mode #preview-scroll.vertical-mode { overflow-x: auto !important; }
@@ -1321,19 +1321,21 @@ background: transparent;
     #pane-preview .preview-tab { color: var(--text-color); }
     #pane-preview .preview-tab:not(.active) { opacity: 0.75; }
 
-    ruby { ruby-align: space-between; ruby-position: over; }
-    rt { color: #555; user-select: none; font-size: 0.5em; }
+    ruby { ruby-align: space-between; ruby-position: over; line-height: 1; }
+    rt { color: #555; user-select: none; font-size: var(--ruby-size, 0.5em); line-height: 1; transform: translate(var(--ruby-offset, -0.5em), var(--ruby-vertical-offset, 0em)); margin-left: -0.1em; }
     body.theme-dark rt { color: #aaa; }
-    .bouten-ruby rt { font-size: 0.8em; font-weight: bold; color: #333; transform: translateY(10%); }
+    .bouten-ruby rt { font-size: var(--bouten-size, 0.8em); font-weight: bold; color: #333; transform: translate(var(--bouten-offset, -0.6em), var(--bouten-vertical-offset, 0em)); }
     body.theme-dark .bouten-ruby rt { color: #eee; }
-    .space-zen, .space-han { display: inline-block; font-family: monospace; color: var(--col-mute-tx); background-color: var(--col-mute-bg); }
+    .space-zen, .space-han { display: inline-block; font-family: inherit; color: var(--col-mute-tx); background-color: var(--col-mute-bg); text-align: center; line-height: 1; }
+    .space-zen { width: 1em; height: 1em; }
     .space-han { min-width: 0.3em; text-align: center; }
     .highlight-active .space-zen { background-color: var(--col-zen-bg); color: var(--col-zen-tx); }
     .highlight-active .space-han { background-color: var(--col-han-bg); color: var(--col-han-tx); }
     .symbol-hl { background-color: var(--col-sym-bg); color: var(--col-sym-tx); font-weight: bold; }
-    .bracket-blue { color: #2563eb; font-weight: bold; }
-    .bracket-green { color: #059669; font-weight: bold; }
+    .bracket-blue { color: #1d4ed8; text-shadow: none; font-weight: 500; }
+    .bracket-green { color: #047857; text-shadow: none; font-weight: 500; }
     .underline-text { text-decoration: underline; text-decoration-color: #dc2626; text-underline-offset: 2px; }
+    .mac-dash-fix { font-family: "Hiragino Mincho ProN", "YuMincho", serif !important; }
 
     /* Memo Panel */
     #memo-panel {
@@ -5539,7 +5541,36 @@ window.__ccInitPanelDnDAndResizers = function(){
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initHotfix);
-  } else {
+  }
+
+  // ===== カーソル復帰セーフティネット =====
+  // リサイザードラッグ中にmouseupが捕捉されなかった場合の保険
+  (function setupCursorSafetyNet(){
+    function resetStuckCursor(){
+      if (document.body.style.cursor) {
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        // resizingクラスが残っている要素もクリーンアップ
+        document.querySelectorAll('.resizing').forEach(el => el.classList.remove('resizing'));
+      }
+    }
+    // ウィンドウからフォーカスが外れたらリセット
+    window.addEventListener('blur', resetStuckCursor);
+    // マウスがドキュメント外に出たらリセット
+    document.addEventListener('mouseleave', resetStuckCursor);
+    // mouseupでもbodyのcursorが残っていたらリセット（二重の安全策）
+    document.addEventListener('mouseup', function(){
+      // 少し遅延して、個別のmouseupハンドラが先に処理されるようにする
+      setTimeout(function(){
+        if (document.body.style.cursor) {
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+        }
+      }, 100);
+    });
+  })();
+
+  {
     // Allow vertical wheel to scroll toolbars horizontally when overflowing
     document.addEventListener('wheel', (e)=>{
       const tb = e.target && e.target.closest ? e.target.closest('.panel-toolbar') : null;
@@ -5920,6 +5951,9 @@ body.theme-dark .card-shell:hover{
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
+/* WKWebView Fix: Prevent double-animate layout jump when docking panels */
+.control-panel { transition: none !important; }
+
 </style>
 
 </head>
@@ -6053,7 +6087,7 @@ body.theme-dark .card-shell:hover{
     </div>
 <div class="ribbon-section ribbon-tools" data-section="tools">
         <div class="ribbon-group">
-            <button class="btn panel-toggle" id="btn-toggle-settings" onclick="togglePanel('settings-bar')" data-label="⚙️ 設定">
+            <button class="btn panel-toggle" id="btn-toggle-settings" onclick="toggleSettingsAll()" data-label="⚙️ 設定">
                 <span class="panel-label">⚙️ 設定</span><span class="panel-state-icon">▾</span>
             </button>
             <span class="ribbon-separator">|</span>
@@ -6211,11 +6245,14 @@ body.theme-dark .card-shell:hover{
                         <label><input type="checkbox" id="st-in-v" checked> 縦書き</label>
                             <label>フォント: 
                             <select id="st-in-font">
-                                <option value="font-gothic" selected>ゴシック</option>
+                                <option value="font-gothic">ゴシック</option>
                                 <option value="font-mincho">明朝体</option>
+                                <option value="font-biz-mincho" selected>BIZ UDP明朝</option>
                                 <option value="font-old">アンティーク</option>
                                 <option value="font-round">丸ゴシック</option>
                                 <option value="font-brush">筆文字</option>
+                                <option value="font-mac-mincho">Mac標準 明朝体</option>
+                                <option value="font-mac-gothic">Mac標準 ゴシック体</option>
                             </select>
                         </label>
                     </div>
@@ -6229,11 +6266,14 @@ body.theme-dark .card-shell:hover{
                         <label><input type="checkbox" id="st-pv-v" checked> 縦書き</label>
                             <label>フォント: 
                             <select id="st-pv-font">
-                                <option value="font-gothic" selected>ゴシック</option>
+                                <option value="font-gothic">ゴシック</option>
                                 <option value="font-mincho">明朝体</option>
+                                <option value="font-biz-mincho" selected>BIZ UDP明朝</option>
                                 <option value="font-old">アンティーク</option>
                                 <option value="font-round">丸ゴシック</option>
                                 <option value="font-brush">筆文字</option>
+                                <option value="font-mac-mincho">Mac標準 明朝体</option>
+                                <option value="font-mac-gothic">Mac標準 ゴシック体</option>
                             </select>
                         </label>
                     </div>
@@ -6244,16 +6284,31 @@ body.theme-dark .card-shell:hover{
                     <div class="setting-row vertical">
                         <label>文字: <input type="number" id="st-ref-size" value="17" min="10" max="60"></label>
                         <label>行間: <input type="number" id="st-ref-line" value="1.7" step="0.1" min="1.0" max="5.0"></label>
-                        <label><input type="checkbox" id="st-ref-v"> 縦書き</label>
+                        <label><input type="checkbox" id="st-ref-v" checked> 縦書き</label>
                             <label>フォント:
                             <select id="st-ref-font">
                                 <option value="font-gothic">ゴシック</option>
-                                <option value="font-mincho" selected>明朝体</option>
+                                <option value="font-mincho">明朝体</option>
+                                <option value="font-biz-mincho" selected>BIZ UDP明朝</option>
                                 <option value="font-old">アンティーク</option>
                                 <option value="font-round">丸ゴシック</option>
                                 <option value="font-brush">筆文字</option>
+                                <option value="font-mac-mincho">Mac標準 明朝体</option>
+                                <option value="font-mac-gothic">Mac標準 ゴシック体</option>
                             </select>
                         </label>
+                    </div>
+                </div>
+
+                <div class="setting-group" data-settings-cat="font">
+                    <div class="setting-title">ルビ・傍点の微調整 <button class="btn btn-apply" onclick="applyTypographySettings()">適用</button></div>
+                    <div class="setting-row vertical">
+                        <label>ルビの大きさ: <input type="number" id="st-ruby-size" value="0.5" step="0.05" style="width:70px;"> em</label>
+                        <label>ルビの位置（左右）: <input type="number" id="st-ruby-dist" value="-0.5" step="0.05" style="width:70px;"> em</label>
+                        <label>ルビの距離（上下）: <input type="number" id="st-ruby-vdist" value="0" step="0.05" style="width:70px;"> em</label>
+                        <label>傍点の大きさ: <input type="number" id="st-bouten-size" value="0.8" step="0.05" style="width:70px;"> em</label>
+                        <label>傍点の位置（左右）: <input type="number" id="st-bouten-dist" value="-0.6" step="0.05" style="width:70px;"> em</label>
+                        <label>傍点の距離（上下）: <input type="number" id="st-bouten-vdist" value="0" step="0.05" style="width:70px;"> em</label>
                     </div>
                 </div>
 
@@ -6452,6 +6507,9 @@ body.theme-dark .card-shell:hover{
                 <button class="btn btn-apply-all settings-action-btn" onclick="applyAllSettings()">⚡ 一括適用</button>
             </div>
             <input type="file" id="settings-file-input" accept=".json" onchange="importSettings(this)" style="display:none;">
+        </div>
+        <div id="cat-apply-all-wrap" style="display:none; text-align:right; padding:6px 12px 8px;">
+            <button class="btn btn-apply-all" onclick="applyAllSettings()" style="font-size:0.8rem;">⚡ 一括適用</button>
         </div>
     </div>
 </div>
@@ -7856,6 +7914,30 @@ function filterSettingsBarByCategory(cat){
     try { bar.scrollTop = 0; } catch(e){}
 }
 
+function resetSettingsCategoryFilter(){
+    const bar = document.getElementById('settings-bar');
+    if (!bar) return;
+    // show all groups/blocks/actions that have a category
+    bar.querySelectorAll('.setting-group[data-settings-cat], .setting-block[data-settings-cat], .settings-actions[data-settings-cat]').forEach(el => {
+        el.style.display = '';
+    });
+    // show all sections
+    bar.querySelectorAll('.settings-section').forEach(sec => {
+        sec.style.display = '';
+        sec.setAttribute('open','');
+    });
+    // clear active state on category buttons
+    document.querySelectorAll('.btn-settings-cat').forEach(btn => btn.classList.remove('active'));
+    // hide category-level apply button
+    const catApply = document.getElementById('cat-apply-all-wrap');
+    if (catApply) catApply.style.display = 'none';
+}
+
+function toggleSettingsAll(){
+    resetSettingsCategoryFilter();
+    togglePanel('settings-bar');
+}
+
 function openSettingsCategory(cat){
     // open settings panel without toggling pin state
     if (typeof ensureSettingsPanelOpen === 'function') ensureSettingsPanelOpen();
@@ -7874,6 +7956,10 @@ function openSettingsCategory(cat){
     document.querySelectorAll('.btn-settings-cat').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.cat === cat);
     });
+
+    // show category-level apply-all button
+    const catApply = document.getElementById('cat-apply-all-wrap');
+    if (catApply) catApply.style.display = '';
 }
 
 function initSettingsPanelSelector() {
@@ -8583,7 +8669,8 @@ window.closeActiveTab = closeActiveTab;
             version: '3.7',
             input: { size: document.getElementById('st-in-size').value, line: document.getElementById('st-in-line').value, font: document.getElementById('st-in-font').value, vertical: document.getElementById('st-in-v').checked },
             preview: { size: document.getElementById('st-pv-size').value, line: document.getElementById('st-pv-line').value, font: document.getElementById('st-pv-font').value, vertical: document.getElementById('st-pv-v').checked },
-            reference: { size: document.getElementById('st-ref-size')?.value || '17', line: document.getElementById('st-ref-line')?.value || '1.7', font: document.getElementById('st-ref-font')?.value || 'font-mincho', vertical: document.getElementById('st-ref-v')?.checked || false },
+            reference: { size: document.getElementById('st-ref-size')?.value || '17', line: document.getElementById('st-ref-line')?.value || '1.7', font: document.getElementById('st-ref-font')?.value || 'font-biz-mincho', vertical: document.getElementById('st-ref-v')?.checked || false },
+            typography: { rubyOffset: document.getElementById('st-ruby-dist')?.value, rubySize: document.getElementById('st-ruby-size')?.value, rubyVOffset: document.getElementById('st-ruby-vdist')?.value, boutenOffset: document.getElementById('st-bouten-dist')?.value, boutenSize: document.getElementById('st-bouten-size')?.value, boutenVOffset: document.getElementById('st-bouten-vdist')?.value },
             display: { showSpace: document.getElementById('st-show-space').checked, showHighlight: document.getElementById('st-show-highlight').checked, showInput: document.getElementById('check-show-input').checked, showPreview: document.getElementById('check-show-preview').checked, showReference: document.getElementById('check-show-reference')?.checked || false, defaultPreviewHidden: document.getElementById('st-default-preview-hidden').checked, selectionToolWindow: document.getElementById('st-selection-tool-window')?.checked !== false },
             writing: { typewriter: document.getElementById('st-typewriter-mode').checked, tracker: document.getElementById('st-writing-tracker').checked },
             goal: {
@@ -8632,9 +8719,17 @@ window.closeActiveTab = closeActiveTab;
         };
     }
     function applyImportedSettings(s) {
-        if (s.input) { document.getElementById('st-in-size').value = s.input.size || 17; document.getElementById('st-in-line').value = s.input.line || 1.7; document.getElementById('st-in-font').value = s.input.font || 'font-mincho'; document.getElementById('st-in-v').checked = s.input.vertical !== false; }
-        if (s.preview) { document.getElementById('st-pv-size').value = s.preview.size || 17; document.getElementById('st-pv-line').value = s.preview.line || 1.7; document.getElementById('st-pv-font').value = s.preview.font || 'font-mincho'; document.getElementById('st-pv-v').checked = s.preview.vertical !== false; }
-        if (s.reference) { const rs = document.getElementById('st-ref-size'); const rl = document.getElementById('st-ref-line'); const rf = document.getElementById('st-ref-font'); const rv = document.getElementById('st-ref-v'); if (rs) rs.value = s.reference.size || 17; if (rl) rl.value = s.reference.line || 1.7; if (rf) rf.value = s.reference.font || 'font-mincho'; if (rv) rv.checked = !!s.reference.vertical; }
+        if (s.input) { document.getElementById('st-in-size').value = s.input.size || 17; document.getElementById('st-in-line').value = s.input.line || 1.7; document.getElementById('st-in-font').value = s.input.font || 'font-biz-mincho'; document.getElementById('st-in-v').checked = s.input.vertical !== false; }
+        if (s.preview) { document.getElementById('st-pv-size').value = s.preview.size || 17; document.getElementById('st-pv-line').value = s.preview.line || 1.7; document.getElementById('st-pv-font').value = s.preview.font || 'font-biz-mincho'; document.getElementById('st-pv-v').checked = s.preview.vertical !== false; }
+        if (s.reference) { const rs = document.getElementById('st-ref-size'); const rl = document.getElementById('st-ref-line'); const rf = document.getElementById('st-ref-font'); const rv = document.getElementById('st-ref-v'); if (rs) rs.value = s.reference.size || 17; if (rl) rl.value = s.reference.line || 1.7; if (rf) rf.value = s.reference.font || 'font-biz-mincho'; if (rv) rv.checked = !!s.reference.vertical; }
+        if (s.typography) {
+            const trd = document.getElementById('st-ruby-dist'); if (trd) trd.value = s.typography.rubyOffset ?? -0.5;
+            const trs = document.getElementById('st-ruby-size'); if (trs) trs.value = s.typography.rubySize ?? 0.5;
+            const trv = document.getElementById('st-ruby-vdist'); if (trv) trv.value = s.typography.rubyVOffset ?? 0;
+            const tbd = document.getElementById('st-bouten-dist'); if (tbd) tbd.value = s.typography.boutenOffset ?? -0.6;
+            const tbs = document.getElementById('st-bouten-size'); if (tbs) tbs.value = s.typography.boutenSize ?? 0.8;
+            const tbv = document.getElementById('st-bouten-vdist'); if (tbv) tbv.value = s.typography.boutenVOffset ?? 0;
+        }
         if (s.display) {
             document.getElementById('st-show-space').checked = s.display.showSpace !== false;
             document.getElementById('st-show-highlight').checked = s.display.showHighlight !== false;
@@ -8994,12 +9089,12 @@ window.closeActiveTab = closeActiveTab;
             // 表示/入力/プレビュー
             document.getElementById('st-in-size').value = 17;
             document.getElementById('st-in-line').value = 1.7;
-            document.getElementById('st-in-font').value = 'font-gothic';
+            document.getElementById('st-in-font').value = 'font-biz-mincho';
             document.getElementById('st-in-v').checked = true;
 
             document.getElementById('st-pv-size').value = 17;
             document.getElementById('st-pv-line').value = 1.7;
-            document.getElementById('st-pv-font').value = 'font-gothic';
+            document.getElementById('st-pv-font').value = 'font-biz-mincho';
             document.getElementById('st-pv-v').checked = true;
 
             document.getElementById('check-show-input').checked = true;
@@ -9167,11 +9262,11 @@ window.closeActiveTab = closeActiveTab;
         // 設定のリセット（すべての設定を初期値に）
         document.getElementById('st-in-size').value = 17;
         document.getElementById('st-in-line').value = 1.7;
-        document.getElementById('st-in-font').value = 'font-gothic';
+        document.getElementById('st-in-font').value = 'font-biz-mincho';
         document.getElementById('st-in-v').checked = true;
         document.getElementById('st-pv-size').value = 17;
         document.getElementById('st-pv-line').value = 1.7;
-        document.getElementById('st-pv-font').value = 'font-gothic';
+        document.getElementById('st-pv-font').value = 'font-biz-mincho';
         document.getElementById('st-pv-v').checked = true;
         document.getElementById('check-show-input').checked = true;
         document.getElementById('check-show-preview').checked = true;
@@ -10098,7 +10193,8 @@ document.addEventListener('keydown', function(e) {
         s = s.replace(/｜([^《]+?)《(.+?)》/g, '<ruby>$1<rt>$2</rt></ruby>').replace(/([一-龠々〆ヵヶ]+)《(.+?)》/g, '<ruby>$1<rt>$2</rt></ruby>');
         s = s.replace(/《《(.+?)》》/g, (m, p) => { let r = ''; for (let c of p) r += `<ruby class="bouten-ruby">${c}<rt>・</rt></ruby>`; return r; });
         s = s.replace(/__(.+?)__/g, '<span class="underline-text">$1</span>').replace(/==(.+?)==/g, '<span class="highlight-text">$1</span>');
-        if (sh) s = s.replace(/([―─]{2,}|…{2,})/g, '<span class="symbol-hl">$1</span>');
+        s = s.replace(/([―─—]{1,}|…{1,})/g, '<span class="mac-dash-fix">$1</span>');
+        if (sh) s = s.replace(/(<span class="mac-dash-fix">([^<]+)<\/span>){2,}/g, '<span class="symbol-hl">$&</span>');
         if (ss) { s = s.split(MZ).join('<span class="space-zen">□</span>').split(MH).join('<span class="space-han">･</span>'); }
         s = s.replace(/\n/g, '<br>'); previewContent.innerHTML = s;
         
@@ -10557,7 +10653,7 @@ function syncPreviewPositionCore() {
         updateReaderWritingModeButtonLabel();
     }
 
-const fontMap = { 'font-gothic': '"Noto Sans JP", sans-serif', 'font-mincho': '"Shippori Mincho", serif', 'font-old': '"Zen Old Mincho", serif', 'font-round': '"M PLUS Rounded 1c", sans-serif', 'font-brush': '"Yuji Syuku", serif' };
+const fontMap = { 'font-mac-mincho': '"Hiragino Mincho ProN", serif', 'font-mac-gothic': '"Hiragino Sans", sans-serif', 'font-gothic': '"Noto Sans JP", sans-serif', 'font-mincho': '"Shippori Mincho", serif', 'font-old': '"Zen Old Mincho", serif', 'font-round': '"M PLUS Rounded 1c", sans-serif', 'font-brush': '"Yuji Syuku", serif', 'font-biz-mincho': '"BIZ UDPMincho", "BIZ UDP明朝", serif' };
     function applyInputSettings() {
     const s = document.getElementById('st-in-size').value + 'px';
     const l = document.getElementById('st-in-line').value;
@@ -10619,7 +10715,7 @@ function applyPreviewSettings() {
         if (!refArea) return;
         const s = parseInt(document.getElementById('st-ref-size')?.value) || 17;
         const l = document.getElementById('st-ref-line')?.value || '1.7';
-        const f = fontMap[document.getElementById('st-ref-font')?.value] || '"Shippori Mincho", serif';
+        const f = fontMap[document.getElementById('st-ref-font')?.value] || '"BIZ UDPMincho", "BIZ UDP明朝", serif';
         const v = document.getElementById('st-ref-v')?.checked || false;
 
         // v1.239: ズーム倍率を考慮してフォントサイズを適用
@@ -10756,6 +10852,29 @@ function applyPreviewSettings() {
         if (t) document.body.classList.add(t);
         applyTextColorSettings();
     }
+    
+    function applyTypographySettings() {
+        const trd = document.getElementById('st-ruby-dist');
+        const trs = document.getElementById('st-ruby-size');
+        const trv = document.getElementById('st-ruby-vdist');
+        const tbd = document.getElementById('st-bouten-dist');
+        const tbs = document.getElementById('st-bouten-size');
+        const tbv = document.getElementById('st-bouten-vdist');
+        const rDist = trd ? parseFloat(trd.value) : -0.5;
+        const rSize = trs ? parseFloat(trs.value) : 0.5;
+        const rVDist = trv ? parseFloat(trv.value) : 0;
+        const bDist = tbd ? parseFloat(tbd.value) : -0.6;
+        const bSize = tbs ? parseFloat(tbs.value) : 0.8;
+        const bVDist = tbv ? parseFloat(tbv.value) : 0;
+        document.documentElement.style.setProperty('--ruby-offset', `${isNaN(rDist) ? -0.5 : rDist}em`);
+        document.documentElement.style.setProperty('--ruby-size', `${isNaN(rSize) ? 0.5 : rSize}em`);
+        document.documentElement.style.setProperty('--ruby-vertical-offset', `${isNaN(rVDist) ? 0 : rVDist}em`);
+        document.documentElement.style.setProperty('--bouten-offset', `${isNaN(bDist) ? -0.6 : bDist}em`);
+        document.documentElement.style.setProperty('--bouten-size', `${isNaN(bSize) ? 0.8 : bSize}em`);
+        document.documentElement.style.setProperty('--bouten-vertical-offset', `${isNaN(bVDist) ? 0 : bVDist}em`);
+        if (typeof saveSettingsToStorage === 'function') saveSettingsToStorage();
+    }
+
     function applyOpenSettings() { settingsCache.openMode = document.querySelector('input[name="st-open-mode"]:checked')?.value || 'current'; }
     function applyOpenSettingsAndSave() {
         applyOpenSettings();
@@ -10774,6 +10893,7 @@ function applyPreviewSettings() {
         applyDividerSettings();
     }
     function applyPaperSettings() { applyManuscriptSettings(); applyThemeSettings(); applyPinnedLimitSettings(); }
+    function applyAllSettings() { applyInputSettings(); applyPreviewSettings(); if (typeof applyReferenceSettings === 'function') applyReferenceSettings(); applyDisplaySettings(); applyWritingSettings(); applyGoalSettings(); applyTypographySettings(); applyPaperSettings(); applyThemeSettings(); applyZoomSettings(); applyDividerSettings(); applyOpenSettings(); }
     // 固定パネル上限（2～7）: 入力/プレビュー + ドック固定パネル（メモ/目次/検索/構成/登場人物/世界観）
     window.__ccPinnableDefs = {
         input:    { key:'input',    label:'入力',    kind:'pane', checkboxId:'check-show-input',  paneId:'pane-input',  nonReplaceable:true },
@@ -11289,7 +11409,7 @@ window.__ccGetMaxPinnedPanels = function() {
         }
     }
 
-    function applyAllSettings() { applyInputSettings(); applyPreviewSettings(); if (typeof applyReferenceSettings === 'function') applyReferenceSettings(); applyDisplaySettings(); applyWritingSettings(); applyGoalSettings();
+    function applyAllSettings() { applyInputSettings(); applyPreviewSettings(); if (typeof applyReferenceSettings === 'function') applyReferenceSettings(); applyDisplaySettings(); applyWritingSettings(); applyGoalSettings(); applyTypographySettings();
         updateWritingModeButtonLabels(); applyManuscriptSettings(); applyThemeSettings(); applyOpenSettings(); applyPaneWidthSettings(); applyPaneHeightSettings(); applyDividerSettings(); applyTextColorSettings(); applyPinnedLimitSettings(); }
 
     function resetAllSettings() {
@@ -11297,11 +11417,11 @@ window.__ccGetMaxPinnedPanels = function() {
         // Reset to defaults
         document.getElementById('st-in-size').value = 17;
         document.getElementById('st-in-line').value = 1.7;
-        document.getElementById('st-in-font').value = 'font-gothic';
+        document.getElementById('st-in-font').value = 'font-biz-mincho';
         document.getElementById('st-in-v').checked = true;
         document.getElementById('st-pv-size').value = 17;
         document.getElementById('st-pv-line').value = 1.7;
-        document.getElementById('st-pv-font').value = 'font-gothic';
+        document.getElementById('st-pv-font').value = 'font-biz-mincho';
         document.getElementById('st-pv-v').checked = true;
         document.getElementById('check-show-input').checked = true;
         document.getElementById('check-show-preview').checked = true;
@@ -11321,6 +11441,12 @@ window.__ccGetMaxPinnedPanels = function() {
         document.getElementById('st-theme-preset').value = '';
         document.getElementById('st-text-color-text').value = '';
         document.getElementById('st-text-color').value = '#1f2937';
+        document.getElementById('st-ruby-dist').value = -0.5;
+        document.getElementById('st-ruby-size').value = 0.5;
+        document.getElementById('st-ruby-vdist').value = 0;
+        document.getElementById('st-bouten-size').value = 0.8;
+        document.getElementById('st-bouten-dist').value = -0.6;
+        document.getElementById('st-bouten-vdist').value = 0;
         document.getElementById('st-pane-input-width').value = 520;
         document.getElementById('st-pane-preview-width').value = 520;
         document.getElementById('st-pane-memo-width').value = 260;
@@ -12428,7 +12554,7 @@ if (typeof adjustPaneHeightsOnVisibility === 'function') {
         const t = inputArea.value, v = document.getElementById('st-in-v').checked, cs = getCachedInputStyle();
         const padBottom = v ? '20px' : '45%';
         const padLeft = v ? '45%' : '20px';
-        inputMirror.style.cssText = `font-size:${cs.fontSize};line-height:${cs.lineHeight};font-family:${cs.fontFamily};width:${inputArea.clientWidth}px;height:${inputArea.clientHeight}px;padding:20px 20px ${padBottom} ${padLeft};box-sizing:border-box;${v ? 'writing-mode:vertical-rl;text-orientation:upright;' : ''}`;
+        inputMirror.style.cssText = `font-size:${cs.fontSize};line-height:${cs.lineHeight};font-family:${cs.fontFamily};width:${inputArea.clientWidth}px;height:${inputArea.clientHeight}px;padding:20px 20px ${padBottom} ${padLeft};box-sizing:border-box;${v ? 'writing-mode:vertical-rl;text-orientation:mixed;' : ''}`;
         const tc = t.substring(0, idx), m = document.createElement('span'); m.textContent = '|'; inputMirror.innerHTML = ''; inputMirror.appendChild(document.createTextNode(tc)); inputMirror.appendChild(m);
         const mr = m.getBoundingClientRect(), mir = inputMirror.getBoundingClientRect(), mot = mr.top - mir.top + inputMirror.scrollTop, mol = mr.left - mir.left + inputMirror.scrollLeft;
         if (v) {
@@ -14960,7 +15086,8 @@ if (typeof applyPaneHeightSettings === 'function') {
         s = s.replace(/｜([^《]+?)《(.+?)》/g, '<ruby>$1<rt>$2</rt></ruby>').replace(/([一-龠々〆ヵヶ]+)《(.+?)》/g, '<ruby>$1<rt>$2</rt></ruby>');
         s = s.replace(/《《(.+?)》》/g, (m, p) => { let r = ''; for (let c of p) r += `<ruby class="bouten-ruby">${c}<rt>・</rt></ruby>`; return r; });
         s = s.replace(/__(.+?)__/g, '<span class="underline-text">$1</span>').replace(/==(.+?)==/g, '<span class="highlight-text">$1</span>');
-        if (sh) s = s.replace(/([―─]{2,}|…{2,})/g, '<span class="symbol-hl">$1</span>');
+        s = s.replace(/([―─—]{1,}|…{1,})/g, '<span class="mac-dash-fix">$1</span>');
+        if (sh) s = s.replace(/(<span class="mac-dash-fix">([^<]+)<\/span>){2,}/g, '<span class="symbol-hl">$&</span>');
         if (ss) { s = s.split(MZ).join('<span class="space-zen">□</span>').split(MH).join('<span class="space-han">･</span>'); }
         return s.replace(/\n/g, '<br>');
     }
