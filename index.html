@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ⓒエディタ v1.260</title>
+<title>ⓒエディタ v1.265</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&family=Noto+Sans+JP&family=Zen+Old+Mincho&family=M+PLUS+Rounded+1c&family=Yuji+Syuku&display=swap" rel="stylesheet">
 
 <style>
@@ -1561,7 +1561,7 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
     /* v1.189: shortcut editor draggable/resizable */
     .cc-shortcut-editor.cc-dragging { box-shadow: 0 6px 28px rgba(0,0,0,0.35); }
     .cc-shortcut-editor-header { user-select: none; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; cursor: move; user-select: none; }
     .modal-header h3 { margin: 0; font-size: 1.2rem; }
     .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
     .modal-close:hover { color: #dc2626; }
@@ -1853,6 +1853,473 @@ body.theme-dark body.theme-dark .memo-tab { background: #a16207; border-color: #
 
     .btn-view { background: #ecfeff; color: #0e7490; border-color: #a5f3fc; font-weight: bold; }
     .btn-view:hover { background: #cffafe; }
+
+    /* ===== Ribbon Save Dropdown v1.266 ===== */
+    .ribbon-save-dropdown {
+      position: relative; display: inline-block;
+    }
+    .ribbon-save-dropdown-menu {
+      display: none; position: absolute; top: 100%; left: 0; z-index: 3500;
+      background: var(--panel-bg); border: 1px solid var(--border-color);
+      border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+      min-width: 170px; padding: 4px 0; margin-top: 2px;
+    }
+    .ribbon-save-dropdown-menu.show { display: block; }
+    .ribbon-save-dropdown-menu .dropdown-item {
+      padding: 8px 14px; cursor: pointer; font-size: 0.88rem;
+      white-space: nowrap; display: flex; align-items: center; gap: 4px;
+    }
+    .ribbon-save-dropdown-menu .dropdown-item:hover {
+      background: var(--hover-bg, rgba(0,0,0,0.06));
+    }
+
+    /* ===== Progress Overlay v1.267 ===== */
+    .progress-overlay {
+      position: fixed; inset: 0; z-index: 6000;
+      background: rgba(0,0,0,0.45);
+      display: none; align-items: center; justify-content: center;
+    }
+    .progress-overlay[aria-hidden="false"] { display: flex; }
+    .progress-dialog {
+      background: var(--panel-bg); border-radius: 14px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+      width: 560px; max-width: 94vw; max-height: 85vh;
+      display: flex; flex-direction: column; overflow: hidden;
+      position: relative;
+    }
+    .progress-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; border-bottom: 1px solid var(--border-color);
+      cursor: move; user-select: none;
+    }
+    /* ドラッグ可能ダイアログ共通 */
+    .overlay-dragging { cursor: move !important; }
+    .overlay-dragging * { cursor: move !important; user-select: none !important; }
+    .progress-header h3 { margin: 0; font-size: 1rem; }
+    .progress-close {
+      background: none; border: none; font-size: 1.1rem;
+      cursor: pointer; color: var(--text-muted); padding: 4px 8px; border-radius: 6px;
+    }
+    .progress-close:hover { background: rgba(0,0,0,0.06); }
+    .progress-body { padding: 14px 18px; overflow-y: auto; flex: 1; }
+
+    /* サマリーカード */
+    .progress-summary {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px;
+    }
+    .progress-card {
+      background: var(--bg-color); border: 1px solid var(--border-color);
+      border-radius: 10px; padding: 10px; text-align: center;
+    }
+    .progress-card-value {
+      font-size: 1.3rem; font-weight: 700; color: var(--text-color);
+      font-feature-settings: "tnum"; font-variant-numeric: tabular-nums;
+    }
+    .progress-card-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* カレンダー */
+    .progress-section { margin-bottom: 14px; }
+    .progress-section-header {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; margin-bottom: 8px;
+    }
+    .progress-section-title { font-weight: 600; font-size: 0.88rem; }
+    .progress-month-label { font-weight: 600; font-size: 0.92rem; min-width: 100px; text-align: center; }
+    .progress-nav-btn {
+      background: none; border: 1px solid var(--border-color); border-radius: 6px;
+      cursor: pointer; padding: 2px 8px; font-size: 0.8rem; color: var(--text-muted);
+    }
+    .progress-nav-btn:hover { background: rgba(0,0,0,0.05); }
+    .progress-calendar {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 0;
+      border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;
+    }
+    .progress-cal-head {
+      font-size: 1em; text-align: center; color: var(--text-muted); font-weight: 600; padding: 2px 0;
+    }
+    .progress-cal-day {
+      min-height: 54px; border-radius: 0; display: flex; flex-direction: column;
+      align-items: flex-start; justify-content: flex-start;
+      position: relative; cursor: pointer; border: 1px solid var(--border-color, #e5e7eb);
+      padding: 2px 3px; overflow: hidden;
+    }
+    .progress-cal-day.today { outline: 2px solid #f59e0b; outline-offset: -2px; z-index: 1; }
+    .progress-cal-day.empty { background: transparent; min-height: 0; }
+    .progress-cal-day .cal-num {
+      font-weight: 700; font-size: 1.15em; line-height: 1; color: inherit;
+      align-self: flex-start;
+    }
+    .progress-cal-day .cal-info {
+      display: flex; flex-direction: column; gap: 1px; margin-top: auto; width: 100%;
+      font-size: 0.6rem; line-height: 1.1;
+    }
+    .progress-cal-day .cal-chars {
+      font-size: 0.9em; color: var(--text-color); line-height: 1;
+      font-weight: 600; opacity: 0.75;
+      font-feature-settings: "tnum"; font-variant-numeric: tabular-nums;
+    }
+    .progress-cal-day.heat-4 .cal-chars,
+    .progress-cal-day.heat-5 .cal-chars { color: #fff; opacity: 0.9; }
+    .progress-cal-day .cal-event {
+      font-size: 0.85em; line-height: 1.15; color: var(--text-color); opacity: 0.8;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+    }
+    .progress-cal-day[data-tooltip]:hover::after {
+      content: attr(data-tooltip); position: absolute; bottom: calc(100% + 4px); left: 50%;
+      transform: translateX(-50%); background: rgba(0,0,0,0.85); color: #fff;
+      padding: 4px 10px; border-radius: 5px; font-size: 0.75rem; white-space: pre-line; z-index: 10;
+      pointer-events: none; max-width: 220px;
+    }
+    /* ヒートマップ色 */
+    .progress-cal-day.heat-0 { background: var(--bg-color); }
+    .progress-cal-day.heat-1 { background: #dcfce7; }
+    .progress-cal-day.heat-2 { background: #bbf7d0; }
+    .progress-cal-day.heat-3 { background: #86efac; }
+    .progress-cal-day.heat-4 { background: #4ade80; }
+    .progress-cal-day.heat-5 { background: #22c55e; color: #fff; }
+    body.theme-dark .progress-cal-day.heat-1 { background: #064e3b; }
+    body.theme-dark .progress-cal-day.heat-2 { background: #065f46; }
+    body.theme-dark .progress-cal-day.heat-3 { background: #047857; }
+    body.theme-dark .progress-cal-day.heat-4 { background: #059669; }
+    body.theme-dark .progress-cal-day.heat-5 { background: #10b981; color: #fff; }
+
+    /* グラフ */
+    .progress-graph-toggle { display: flex; gap: 4px; }
+    .progress-graph-btn {
+      padding: 2px 10px !important; font-size: 0.78rem !important;
+      min-height: auto !important; border-radius: 5px !important;
+    }
+    .progress-graph-btn.active {
+      background: var(--accent-color, #3b82f6); color: #fff !important;
+      border-color: var(--accent-color, #3b82f6);
+    }
+    .progress-graph-wrap {
+      background: var(--bg-color); border: 1px solid var(--border-color);
+      border-radius: 10px; padding: 10px; overflow: hidden;
+    }
+    .progress-graph-wrap canvas { width: 100%; height: 150px; }
+
+    /* 目標 */
+    .progress-goal-section {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; background: var(--bg-color); border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+    .progress-goal-label { font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
+    .progress-goal-input {
+      min-width: 90px; width: auto; padding: 4px 8px; border: 1px solid var(--border-color);
+      border-radius: 6px; font-size: 0.85rem; text-align: right;
+      background: var(--panel-bg); color: var(--text-color);
+      font-variant-numeric: tabular-nums;
+    }
+    .progress-goal-unit { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* コンボバー */
+    .progress-combo-bar {
+      text-align: center; padding: 6px 0 10px; font-size: 0.88rem; font-weight: 600;
+      min-height: 22px;
+    }
+    .progress-combo-bar .combo-badge {
+      display: inline-block; padding: 4px 14px; border-radius: 20px;
+      font-size: 0.82rem; font-weight: 700; letter-spacing: 0.3px;
+    }
+    /* 期間プルダウン */
+    .progress-range-select {
+      padding: 3px 8px; border: 1px solid var(--border-color); border-radius: 6px;
+      background: var(--panel-bg); color: var(--text-color); font-size: 0.82rem;
+      cursor: pointer;
+    }
+    /* 設定グリッド */
+    .progress-settings-grid { display: flex; flex-direction: column; gap: 8px; }
+    .progress-details { border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-color); }
+    .progress-details-summary {
+      padding: 8px 12px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted);
+      list-style: none; user-select: none;
+    }
+    .progress-details-summary::-webkit-details-marker { display: none; }
+    .progress-details-body { padding: 8px 12px; }
+    .progress-setting-row {
+      display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-bottom: 8px;
+      font-size: 0.82rem;
+    }
+    .progress-setting-row label { display: flex; align-items: center; gap: 6px; }
+    .progress-color-input {
+      width: 28px; height: 28px; border: 1px solid var(--border-color);
+      border-radius: 6px; padding: 1px; cursor: pointer; background: none;
+    }
+    .progress-combo-tiers-input {
+      width: 120px; padding: 3px 6px; border: 1px solid var(--border-color);
+      border-radius: 6px; font-size: 0.82rem; background: var(--panel-bg); color: var(--text-color);
+    }
+    /* 総文字数・残り日数バー */
+    .progress-total-bar {
+      text-align: center; padding: 4px 0 8px; font-size: 0.85rem; color: var(--text-muted);
+      display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+    }
+    .progress-total-bar .ptb-item { display: inline-flex; align-items: center; gap: 4px; }
+    .progress-total-bar .ptb-value { font-weight: 700; color: var(--text-color); font-size: 0.92rem; }
+    /* 今日ボタン */
+    .progress-today-btn {
+      font-size: 0.75rem; padding: 2px 8px; border-radius: 5px;
+      background: var(--accent-color, #3b82f6); color: #fff; border: none; cursor: pointer;
+      margin-right: 6px; font-weight: 600;
+    }
+    .progress-today-btn:hover { opacity: 0.85; }
+    /* 月ラベルクリック */
+    .progress-month-label-clickable { cursor: pointer; user-select: none; }
+    .progress-month-label-clickable:hover { text-decoration: underline; }
+    /* ミニ月ピッカー */
+    .progress-month-picker {
+      position: absolute; top: calc(100% + 4px); left: 50%; transform: translateX(-50%);
+      background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18); z-index: 20; padding: 10px;
+      min-width: 220px;
+    }
+    .progress-month-picker-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+    }
+    .progress-month-picker-header button { background: none; border: none; cursor: pointer; font-size: 1rem; color: var(--text-color); }
+    .progress-month-picker-header span { font-weight: 700; font-size: 0.92rem; }
+    .progress-month-picker-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+    }
+    .progress-month-picker-grid button {
+      padding: 6px 4px; border: 1px solid var(--border-color); border-radius: 6px;
+      background: var(--panel-bg); color: var(--text-color); cursor: pointer; font-size: 0.82rem;
+    }
+    .progress-month-picker-grid button:hover { background: var(--accent-color, #3b82f6); color: #fff; }
+    .progress-month-picker-grid button.current { background: var(--accent-color, #3b82f6); color: #fff; font-weight: 700; }
+    /* カレンダー罫線＋曜日色 */
+    .progress-cal-head {
+      border-bottom: 1px solid var(--border-color);
+    }
+    .progress-cal-head.sun { color: #dc2626; font-weight: 700; }
+    .progress-cal-head.sat { color: #2563eb; font-weight: 700; }
+    .progress-cal-day .cal-num.sun { color: #dc2626; }
+    .progress-cal-day .cal-num.sat { color: #2563eb; }
+    .progress-cal-day[style*="color:#fff"] .cal-num.sun,
+    .progress-cal-day[style*="color:#fff"] .cal-num.sat { color: #fff; }
+    .progress-cal-day .cal-remaining { font-size: 0.8em; color: var(--text-muted); opacity: 0.7; line-height: 1; }
+    /* 作品全体目標 進捗率 */
+    .progress-total-goal-pct { font-size: 0.82rem; color: var(--text-muted); margin-left: 8px; }
+    /* 目標日入力 */
+    .progress-deadline-input {
+      padding: 3px 6px; border: 1px solid var(--border-color); border-radius: 6px;
+      font-size: 0.82rem; background: var(--panel-bg); color: var(--text-color);
+    }
+    .progress-deadline-name-input {
+      padding: 3px 6px; border: 1px solid var(--border-color); border-radius: 6px;
+      font-size: 0.82rem; background: var(--panel-bg); color: var(--text-color); width: 140px;
+    }
+    /* カレンダー日編集モーダル */
+    .progress-day-modal {
+      position: fixed; inset: 0; z-index: 6500; background: rgba(0,0,0,0.4);
+      display: none; align-items: center; justify-content: center;
+    }
+    .progress-day-modal[aria-hidden="false"] { display: flex; }
+    .progress-day-modal-content {
+      background: var(--panel-bg); border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      width: 360px; max-width: 92vw; padding: 16px;
+    }
+    .progress-day-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .progress-day-modal-header h4 { margin: 0; font-size: 1rem; }
+    .progress-day-modal-body { display: flex; flex-direction: column; gap: 10px; }
+    .progress-day-modal-body label { font-size: 0.88rem; display: flex; flex-direction: column; gap: 4px; }
+    .progress-day-modal-body label:has(input[type="checkbox"]) { flex-direction: row; align-items: center; gap: 6px; }
+    .progress-memo-textarea {
+      width: 100%; padding: 6px 8px; border: 1px solid var(--border-color); border-radius: 6px;
+      font-size: 0.85rem; background: var(--panel-bg); color: var(--text-color); resize: vertical;
+    }
+    .progress-day-modal-footer { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+
+    /* ===== File Status Overlay ===== */
+    .file-status-overlay {
+      position: fixed; inset: 0; z-index: 6000;
+      background: rgba(0,0,0,0.45);
+      display: none; align-items: center; justify-content: center;
+    }
+    .file-status-overlay[aria-hidden="false"] { display: flex; }
+    .file-status-dialog {
+      background: var(--panel-bg); border-radius: 14px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+      width: 520px; max-width: 94vw; max-height: 80vh;
+      display: flex; flex-direction: column; overflow: hidden;
+      position: relative;
+    }
+    .file-status-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; border-bottom: 1px solid var(--border-color);
+      cursor: move; user-select: none;
+    }
+    .file-status-header h3 { margin: 0; font-size: 1rem; }
+    .file-status-close {
+      background: none; border: none; font-size: 1.1rem;
+      cursor: pointer; color: var(--text-muted); padding: 4px 8px; border-radius: 6px;
+    }
+    .file-status-close:hover { background: rgba(0,0,0,0.06); }
+    .file-status-body { padding: 14px 18px; overflow-y: auto; flex: 1; }
+    .file-status-item {
+      padding: 12px 14px; border-radius: 10px; margin-bottom: 10px;
+      border: 1px solid var(--border-color); background: var(--bg-color);
+    }
+    .file-status-item-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .file-status-item-title { font-weight: 600; font-size: 0.9rem; }
+    .file-status-badge {
+      font-size: 0.75rem; padding: 2px 8px; border-radius: 10px;
+      font-weight: 600;
+    }
+    .file-status-badge.linked { background: #bbf7d0; color: #14532d; }
+    .file-status-badge.unlinked { background: #f3f4f6; color: #9ca3af; }
+    body.theme-dark .file-status-badge.linked { background: #064e3b; color: #6ee7b7; }
+    body.theme-dark .file-status-badge.unlinked { background: #374151; color: #6b7280; }
+    .file-status-detail { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; }
+    .file-status-detail .file-path {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78rem; word-break: break-all;
+    }
+    .file-status-item-clickable {
+      cursor: pointer; transition: background 0.15s, border-color 0.15s;
+    }
+    .file-status-item-clickable:hover {
+      background: rgba(37,99,235,0.06); border-color: rgba(37,99,235,0.3);
+    }
+    body.theme-dark .file-status-item-clickable:hover {
+      background: rgba(96,165,250,0.1); border-color: rgba(96,165,250,0.3);
+    }
+    .file-status-unlink-btn {
+      font-size: 0.75rem; padding: 3px 8px; border-radius: 6px;
+      border: 1px solid var(--border-color); background: var(--panel-bg);
+      cursor: pointer; color: var(--text-muted); margin-left: 8px;
+    }
+    .file-status-unlink-btn:hover { background: #fecaca; color: #7f1d1d; border-color: #fca5a5; }
+    .file-status-footer {
+      padding: 10px 18px; border-top: 1px solid var(--border-color);
+    }
+    .file-status-hint { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* ===== Proofread Mode ===== */
+    /* -- Dialog -- */
+    .proofread-dialog-overlay {
+      position: fixed; inset: 0; z-index: 6000;
+      background: rgba(0,0,0,0.45);
+      display: none; align-items: center; justify-content: center;
+    }
+    .proofread-dialog-overlay[aria-hidden="false"] { display: flex; }
+    .proofread-dialog {
+      background: var(--panel-bg); border-radius: 14px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+      width: 480px; max-width: 94vw;
+      overflow: hidden;
+      position: relative;
+    }
+    .proofread-dialog-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; border-bottom: 1px solid var(--border-color);
+      cursor: move; user-select: none;
+    }
+    .proofread-dialog-header h3 { margin: 0; font-size: 1rem; }
+    .proofread-dialog-close {
+      background: none; border: none; font-size: 1.1rem;
+      cursor: pointer; color: var(--text-muted); padding: 4px 8px; border-radius: 6px;
+    }
+    .proofread-dialog-close:hover { background: rgba(0,0,0,0.06); }
+    .proofread-dialog-body { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+    .proofread-dialog-row { display: flex; align-items: center; gap: 10px; }
+    .proofread-dialog-col { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .proofread-dialog-col-sep { font-size: 1.2rem; color: var(--text-muted); flex-shrink: 0; padding-top: 18px; }
+    #proofread-swap-btn:hover { background: var(--bg-secondary, #f3f4f6); }
+    .proofread-label { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); }
+    .proofread-select {
+      height: 34px; border-radius: 8px; border: 1px solid var(--border-color);
+      padding: 0 10px; background: var(--panel-bg); color: var(--text-color);
+      font-size: 0.88rem; cursor: pointer; width: 100%;
+    }
+    .proofread-dialog-footer {
+      display: flex; justify-content: flex-end; gap: 8px;
+      padding: 12px 18px; border-top: 1px solid var(--border-color);
+    }
+
+    /* -- Overlay -- */
+    #proofread-overlay {
+      position: fixed; inset: 0; z-index: 5500;
+      background: var(--bg-color);
+      display: none; flex-direction: column;
+    }
+    #proofread-overlay.show { display: flex; }
+    #proofread-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px; gap: 8px; flex-wrap: wrap;
+      background: var(--pane-header-bg);
+      border-bottom: 1px solid var(--border-color);
+    }
+    #proofread-title { font-weight: bold; font-size: 0.95rem; }
+    #proofread-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .proofread-ctrl-label { font-size: 0.82rem; color: var(--text-muted); }
+    .proofread-ctrl-select {
+      height: 30px; border-radius: 8px; border: 1px solid var(--border-color);
+      padding: 0 6px; background: var(--panel-bg); color: var(--text-color);
+      font-size: 0.82rem; cursor: pointer;
+    }
+    .proofread-separator { border-left: 1px solid var(--border-color); height: 18px; margin: 0 4px; }
+    .proofread-stats { font-size: 0.82rem; color: var(--text-muted); white-space: nowrap; }
+
+    /* -- Body & Panes -- */
+    #proofread-body { flex: 1; display: flex; overflow: hidden; }
+    .proofread-view { flex: 1; display: flex; overflow: hidden; }
+    #proofread-split-view { flex-direction: row; }
+    .proofread-pane { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .proofread-pane-header {
+      padding: 6px 14px; font-size: 0.82rem; font-weight: 600;
+      background: var(--pane-header-bg); border-bottom: 1px solid var(--border-color);
+      color: var(--text-muted); flex-shrink: 0;
+    }
+    .proofread-pane-scroll { flex: 1; overflow: auto; padding: 16px; background: var(--preview-bg-color); }
+    .proofread-pane-content {
+      font-size: 15px; line-height: 1.85; font-family: "Shippori Mincho", serif;
+      white-space: pre-wrap; word-wrap: break-word;
+    }
+    .proofread-divider { width: 2px; background: var(--border-color); flex-shrink: 0; }
+    .proofread-inline-scroll { flex: 1; overflow: auto; padding: 16px; background: var(--preview-bg-color); }
+
+    /* -- Diff highlighting -- */
+    .diff-add { background: #bbf7d0; color: #14532d; border-radius: 2px; }
+    .diff-del { background: #fecaca; color: #7f1d1d; text-decoration: line-through; border-radius: 2px; }
+    .diff-change-group { position: relative; display: inline; }
+    body.theme-dark .diff-add { background: #064e3b; color: #6ee7b7; }
+    body.theme-dark .diff-del { background: #7f1d1d; color: #fca5a5; }
+
+    /* Inline view: del shown as strikethrough red, add as green underline */
+    #proofread-content-inline .diff-del { opacity: 0.7; }
+    #proofread-content-inline .diff-add { text-decoration: underline; }
+
+    /* -- Action buttons per diff chunk -- */
+    .diff-action-group { display: inline-flex; gap: 2px; margin: 0 2px; vertical-align: middle; }
+    .diff-action-btn {
+      font-size: 0.7rem; padding: 1px 5px; border-radius: 4px;
+      border: 1px solid var(--border-color); background: var(--panel-bg);
+      cursor: pointer; color: var(--text-color); line-height: 1.2;
+    }
+    .diff-action-btn:hover { background: rgba(0,0,0,0.06); }
+    .diff-action-btn.accepted { background: #bbf7d0; border-color: #86efac; }
+    .diff-action-btn.rejected { background: #fecaca; border-color: #fca5a5; }
+    body.theme-dark .diff-action-btn:hover { background: rgba(255,255,255,0.08); }
+    body.theme-dark .diff-action-btn.accepted { background: #064e3b; border-color: #065f46; }
+    body.theme-dark .diff-action-btn.rejected { background: #7f1d1d; border-color: #991b1b; }
+
+    /* -- Vertical writing mode -- */
+    #proofread-body.vertical-mode #proofread-split-view { flex-direction: row; }
+    #proofread-body.vertical-mode .proofread-pane-content {
+      writing-mode: vertical-rl; text-orientation: upright;
+      min-height: 100%; width: max-content; max-width: none;
+    }
+    #proofread-body.vertical-mode .proofread-divider { width: 2px; }
+    #proofread-body.vertical-mode #proofread-content-inline {
+      writing-mode: vertical-rl; text-orientation: upright;
+      min-height: 100%; width: max-content; max-width: none;
+    }
 
     /* Reader (All Tabs) Fullscreen */
     #reader-overlay {
@@ -5020,7 +5487,8 @@ function contrastRatioRgb(bg, fg){
       tabDayBaselines = { date: today, base: {} };
     }
     // base未登録は現在値を採用
-    inputTabs.forEach(t => {
+    const tabs = window.inputTabs || [];
+    tabs.forEach(t => {
       const key = String(t.id);
       if (tabDayBaselines.base[key] == null) {
         tabDayBaselines.base[key] = normalizedLen(t.content || '');
@@ -5237,7 +5705,7 @@ function contrastRatioRgb(bg, fg){
     wrapRenderInputTabs();
     bindInputTabContextMenuDelegation();
     wrapUpdateInputStats();
-    initAppContextMenu();
+    try{ if (typeof initAppContextMenu === 'function') initAppContextMenu(); }catch(e){}
     try{ if (typeof window.__ccApplyPanelSideClasses === 'function') window.__ccApplyPanelSideClasses(); }catch(e){}
     try{ if (typeof window.__ccInitPanelDnDAndResizers === 'function') window.__ccInitPanelDnDAndResizers(); }catch(e){}
     
@@ -5967,7 +6435,7 @@ body.theme-dark .card-shell:hover{
                 <img class="app-icon-img" src="icons/favicon-32.png" alt="" aria-hidden="true">
                 <span class="app-emoji-icon" aria-hidden="true">📝</span>
             </button>
-            <span class="app-title" id="app-title">ⓒエディタver.1.260</span>
+            <span class="app-title" id="app-title">ⓒエディタver.1.279</span>
             <nav class="ribbon-menu" aria-label="リボンメニュー">
                 <button class="ribbon-menu-btn" data-section-target="file" onclick="setActiveRibbonSection('file')">ファイル</button>
                 <button class="ribbon-menu-btn" data-section-target="view" onclick="setActiveRibbonSection('view')">表示</button>
@@ -5984,27 +6452,18 @@ body.theme-dark .card-shell:hover{
             <button class="btn btn-undo" onclick="undoInput()" title="元に戻す" data-desc="元に戻す" data-shortcut="Ctrl+Z">↩</button>
             <button class="btn btn-undo" onclick="redoInput()" title="やり直し" data-desc="やり直し" data-shortcut="Ctrl+Y">↪</button>
             <span class="ribbon-separator">|</span>
-            <button class="btn panel-toggle" id="btn-toggle-search" onclick="toggleSearchPanel()" data-label="🔍 検索" data-desc="検索パネルを開閉" data-shortcut="Ctrl+Alt+F">
-                <span class="panel-label">🔍 検索</span><span class="panel-state-icon">▾</span>
-            </button>
-            <span class="ribbon-separator">|</span>
-            <div class="dropdown">
-                <button class="btn dropdown-btn" onclick="toggleDropdown('insert-dropdown')">📝 挿入</button>
-                <div id="insert-dropdown" class="dropdown-content">
-                    <button onclick="insertText('――')">―― ダッシュ</button>
-                    <button onclick="insertText('……')">…… 三点リーダー</button>
-                    <button onclick="insertText('「」', 1)">「」 鉤括弧</button>
-                    <button onclick="insertText('『』', 1)">『』 二重鉤括弧</button>
-                    <button onclick="insertText('｜《》', 1)">｜《》 ルビ記法</button>
-                    <button onclick="insertText('《《》》', 2)">《《》》 傍点記法</button>
-                    <button onclick="insertText('__下線__', 2)">__下線__ 下線</button>
-                    <button onclick="insertText('==強調==', 2)">==強調== 強調表示</button>
-                    <button onclick="insertRubyToSelection()">🈂️ 選択文字にルビ</button>
-                    <button onclick="insertBoutenToSelection()">⚫ 選択文字に傍点</button>
+            <div class="ribbon-save-dropdown" id="ribbon-save-dropdown">
+                <button class="btn" id="btn-ribbon-save" onclick="toggleRibbonSaveDropdown()" title="テキスト / プロジェクト保存">💾 保存 ▾</button>
+                <div class="ribbon-save-dropdown-menu" id="ribbon-save-dropdown-menu">
+                    <div class="dropdown-item" onclick="ribbonSmartSaveText(); closeRibbonSaveDropdown();">📄 テキスト保存</div>
+                    <div class="dropdown-item" onclick="ribbonSmartSaveProject(); closeRibbonSaveDropdown();">📦 プロジェクト保存</div>
                 </div>
             </div>
             <span class="ribbon-separator">|</span>
-            <button class="btn btn-focus" id="btn-focus-ribbon" onclick="toggleFocusMode()" title="集中モード (Ctrl+Alt+L)">🧘 集中</button>
+            <button class="btn" id="btn-toggle-reference-ribbon" onclick="toggleReferencePaneVis()" title="参照ペイン表示切替 (Ctrl+Alt+Shift+R)" data-desc="参照ペイン表示切替" data-shortcut="Ctrl+Alt+Shift+R">📑 参照</button>
+            <button class="btn" id="btn-toggle-preview-ribbon" onclick="togglePreviewPaneVis()" title="プレビュー表示切替 (Ctrl+Alt+Shift+P)" data-desc="プレビュー表示切替" data-shortcut="Ctrl+Alt+Shift+P">📄 プレビュー</button>
+            <button class="btn btn-view" onclick="openReaderView()" title="全タブをまとめて閲覧（Escで戻る）" data-desc="全タブをまとめて閲覧（Escで戻る）" data-shortcut="Ctrl+Alt+V">👁 閲覧</button>
+            <button class="btn btn-focus" id="btn-focus" onclick="toggleFocusMode()" data-desc="集中モードを切替" data-shortcut="Ctrl+Alt+L">🧘 集中</button>
             <span class="ribbon-separator">|</span>
             <div class="ribbon-inline-slot" id="ribbon-inline-slot"></div>
         </div>
@@ -6075,11 +6534,6 @@ body.theme-dark .card-shell:hover{
             </div>
             <span class="ribbon-separator">|</span>
             <div class="ribbon-subgroup">
-                <button class="btn btn-view" onclick="openReaderView()" title="全タブをまとめて閲覧（Escで戻る）" data-desc="全タブをまとめて閲覧（Escで戻る）" data-shortcut="Ctrl+Alt+V">👁 閲覧</button>
-                <button class="btn btn-analysis" onclick="showAnalysis()" data-desc="分析を開く" data-shortcut="Ctrl+Alt+A">📊 分析</button>
-                <button class="btn btn-focus" id="btn-focus" onclick="toggleFocusMode()" data-desc="集中モードを切替" data-shortcut="Ctrl+Alt+L">🧘 集中</button>
-                <button class="btn btn-sync" id="btn-sync" onclick="syncPreviewPosition()" data-desc="プレビューを同期" data-shortcut="Ctrl+Alt+Enter">📲 同期</button>
-                <span class="ribbon-separator">|</span>
                 <button class="btn" id="btn-toggle-preview" onclick="togglePreviewPaneVis()" data-desc="プレビュー表示切替" data-shortcut="Ctrl+Alt+Shift+P">📄 プレビュー</button>
                 <button class="btn" id="btn-toggle-reference" onclick="toggleReferencePaneVis()" data-desc="参照ペイン表示切替" data-shortcut="Ctrl+Alt+Shift+R">📑 参照</button>
             </div>
@@ -6102,7 +6556,17 @@ body.theme-dark .card-shell:hover{
     </div>
 
     <div class="ribbon-section ribbon-extensions" data-section="extensions">
-        <span class="ribbon-menu-item">🚧 開発中</span>
+        <div class="ribbon-group">
+            <button class="btn" onclick="openProofreadDialog()" title="入力タブと参照タブの差分を比較・校正">📝 校正</button>
+            <button class="btn panel-toggle" id="btn-toggle-search" onclick="toggleSearchPanel()" data-label="🔍 検索" data-desc="検索パネルを開閉" data-shortcut="Ctrl+Alt+F">
+                <span class="panel-label">🔍 検索</span><span class="panel-state-icon">▾</span>
+            </button>
+            <button class="btn" onclick="openFileStatus()" title="ファイル連携の状態を確認">📂 ステータス</button>
+            <button class="btn" onclick="openProgressOverlay()" title="執筆進捗の記録・確認">📈 進捗</button>
+            <span class="ribbon-separator">|</span>
+            <button class="btn btn-analysis" onclick="showAnalysis()" data-desc="分析を開く" data-shortcut="Ctrl+Alt+A">📊 分析</button>
+            <button class="btn btn-sync" id="btn-sync" onclick="syncPreviewPosition()" data-desc="プレビューを同期" data-shortcut="Ctrl+Alt+Enter">📲 同期</button>
+        </div>
     </div>
     <div class="ribbon-section ribbon-help" data-section="help">
         <button class="btn panel-toggle" id="btn-toggle-help" onclick="togglePanel('help-bar')" data-label="❓ 使い方" data-desc="使い方パネルを開閉" data-shortcut="Ctrl+Alt+H">
@@ -7070,6 +7534,7 @@ body.theme-dark .card-shell:hover{
             <label style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-reference" checked> 参照テキスト</label>
             <label id="proj-save-bookmarks-row" style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-bookmarks" checked> しおり</label>
             <label id="proj-save-settings-row" style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-settings" checked> 設定（ペイン幅・色など）</label>
+            <label id="proj-save-progress-row" style="display: block; margin-bottom: 5px;"><input type="checkbox" id="proj-save-progress" checked> 執筆進捗ログ</label>
         </div>
         <div id="proj-save-newproject-hint" style="display:none; margin: 0 0 10px 0; font-size:0.78rem; color:var(--text-muted);">
             新規プロジェクトを開始する前にバックアップを推奨します。必要なら「保存して新規開始」を押してください。
@@ -7574,6 +8039,294 @@ body.theme-dark .card-shell:hover{
     <div id="reader-scroll"><div id="reader-content"></div></div>
 </div>
 
+<!-- ===== 執筆進捗オーバーレイ v1.271 ===== -->
+<div id="progress-overlay" class="progress-overlay" aria-hidden="true">
+  <div class="progress-dialog" role="dialog" aria-label="執筆進捗">
+    <div class="progress-header">
+      <h3>📈 執筆進捗</h3>
+      <button class="progress-close" onclick="closeProgressOverlay()" title="閉じる">✕</button>
+    </div>
+    <div class="progress-body">
+      <!-- サマリーカード -->
+      <div class="progress-summary" id="progress-summary"></div>
+      <!-- 総文字数＋残り日数バー -->
+      <div class="progress-total-bar" id="progress-total-bar"></div>
+      <!-- コンボ表示 -->
+      <div class="progress-combo-bar" id="progress-combo-bar"></div>
+      <!-- カレンダーヒートマップ -->
+      <div class="progress-section">
+        <div class="progress-section-header" style="position:relative;">
+          <button class="progress-nav-btn progress-today-btn" onclick="progressGoToday()" title="今日に戻る">今日</button>
+          <button class="progress-nav-btn" onclick="progressNavMonth(-1)" title="前月">◀</button>
+          <span class="progress-month-label progress-month-label-clickable" id="progress-month-label" onclick="toggleProgressMonthPicker()" title="クリックで月選択"></span>
+          <button class="progress-nav-btn" onclick="progressNavMonth(1)" title="翌月">▶</button>
+          <div class="progress-month-picker" id="progress-month-picker" style="display:none;"></div>
+        </div>
+        <div class="progress-calendar" id="progress-calendar"></div>
+      </div>
+      <!-- グラフ -->
+      <div class="progress-section">
+        <div class="progress-section-header">
+          <select id="progress-range-select" class="progress-range-select">
+            <option value="7">直近7日</option>
+            <option value="14">直近14日</option>
+            <option value="30" selected>直近30日</option>
+          </select>
+          <div class="progress-graph-toggle">
+            <button class="btn progress-graph-btn active" data-graph="bar" onclick="switchProgressGraph('bar')">棒</button>
+            <button class="btn progress-graph-btn" data-graph="line" onclick="switchProgressGraph('line')">折線</button>
+          </div>
+        </div>
+        <div class="progress-graph-wrap">
+          <canvas id="progress-graph" width="480" height="150"></canvas>
+        </div>
+      </div>
+      <!-- 目標セクション -->
+      <div class="progress-section progress-settings-grid">
+        <div class="progress-goal-section">
+          <label class="progress-goal-label">🎯 日次目標:
+            <input type="number" id="progress-goal-input" class="progress-goal-input" min="0" step="100" placeholder="例: 2000">
+            <span class="progress-goal-unit">文字</span>
+          </label>
+        </div>
+        <div class="progress-goal-section">
+          <label class="progress-goal-label">📚 作品全体の目標:
+            <input type="number" id="progress-total-goal-input" class="progress-goal-input" min="0" step="1000" placeholder="例: 120000">
+            <span class="progress-goal-unit">文字</span>
+          </label>
+          <span class="progress-total-goal-pct" id="progress-total-goal-pct"></span>
+        </div>
+        <div class="progress-goal-section">
+          <label class="progress-goal-label">📅 目標日:
+            <input type="date" id="progress-deadline-input" class="progress-deadline-input">
+          </label>
+          <label class="progress-goal-label" style="margin-left:8px;">目標名:
+            <input type="text" id="progress-deadline-name" class="progress-deadline-name-input" placeholder="例: 電撃小説大賞">
+          </label>
+        </div>
+        <details class="progress-details">
+          <summary class="progress-details-summary">⚙ 表示設定</summary>
+          <div class="progress-details-body">
+            <div class="progress-setting-row">
+              <label>カレンダー色:
+                <input type="color" id="progress-cal-color" value="#22c55e" class="progress-color-input">
+              </label>
+              <label>コンボ色（到達時）:
+                <input type="color" id="progress-combo-color" value="#f59e0b" class="progress-color-input">
+              </label>
+            </div>
+            <div class="progress-setting-row">
+              <label>コンボ日数区切り:
+                <input type="text" id="progress-combo-tiers" value="2,5,7,14,30" class="progress-combo-tiers-input" placeholder="2,5,7,14,30">
+              </label>
+            </div>
+            <div style="margin-top:6px;border-top:1px solid var(--border-color,#e5e7eb);padding-top:6px;">
+              <div style="font-size:0.72rem;font-weight:600;margin-bottom:4px;">カレンダー文字スタイル</div>
+              <table style="font-size:0.7rem;border-collapse:collapse;width:100%;">
+                <thead><tr>
+                  <th style="text-align:left;padding:2px 4px;">要素</th>
+                  <th style="text-align:center;padding:2px 4px;">サイズ</th>
+                  <th style="text-align:center;padding:2px 4px;">色</th>
+                </tr></thead>
+                <tbody>
+                  <tr>
+                    <td style="padding:2px 4px;">日付</td>
+                    <td style="padding:2px 4px;text-align:center;">
+                      <select id="pcal-date-size" style="font-size:0.68rem;padding:1px 2px;">
+                        <option value="0.7em">小</option><option value="0.85em">中小</option>
+                        <option value="1em" selected>標準</option><option value="1.2em">大</option><option value="1.4em">特大</option>
+                      </select>
+                    </td>
+                    <td style="padding:2px 4px;text-align:center;">
+                      <input type="color" id="pcal-date-color" value="#374151" class="progress-color-input">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:2px 4px;">文字数</td>
+                    <td style="padding:2px 4px;text-align:center;">
+                      <select id="pcal-chars-size" style="font-size:0.68rem;padding:1px 2px;">
+                        <option value="0.7em">小</option><option value="0.85em" selected>中小</option>
+                        <option value="1em">標準</option><option value="1.2em">大</option><option value="1.4em">特大</option>
+                      </select>
+                    </td>
+                    <td style="padding:2px 4px;text-align:center;">
+                      <input type="color" id="pcal-chars-color" value="#374151" class="progress-color-input">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:2px 4px;">予定メモ</td>
+                    <td style="padding:2px 4px;text-align:center;">
+                      <select id="pcal-memo-size" style="font-size:0.68rem;padding:1px 2px;">
+                        <option value="0.7em" selected>小</option><option value="0.85em">中小</option>
+                        <option value="1em">標準</option><option value="1.2em">大</option><option value="1.4em">特大</option>
+                      </select>
+                    </td>
+                    <td style="padding:2px 4px;text-align:center;">
+                      <input type="color" id="pcal-memo-color" value="#666666" class="progress-color-input">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:2px 4px;">残り日数</td>
+                    <td style="padding:2px 4px;text-align:center;">
+                      <select id="pcal-remain-size" style="font-size:0.68rem;padding:1px 2px;">
+                        <option value="0.7em" selected>小</option><option value="0.85em">中小</option>
+                        <option value="1em">標準</option><option value="1.2em">大</option><option value="1.4em">特大</option>
+                      </select>
+                    </td>
+                    <td style="padding:2px 4px;text-align:center;">
+                      <input type="color" id="pcal-remain-color" value="#9ca3af" class="progress-color-input">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style="margin-top:4px;">
+                <label style="font-size:0.7rem;">全体ベースサイズ:
+                  <select id="progress-cal-font-size" style="font-size:0.68rem;padding:1px 2px;">
+                    <option value="0.58rem">極小</option><option value="0.68rem" selected>小（標準）</option>
+                    <option value="0.78rem">中</option><option value="0.88rem">大</option><option value="1rem">特大</option>
+                  </select>
+                </label>
+                <button id="progress-cal-font-reset" style="font-size:0.68rem;padding:2px 8px;margin-left:8px;border:1px solid var(--border-color,#ccc);border-radius:3px;background:var(--bg-secondary,#f3f4f6);cursor:pointer;">全てリセット</button>
+              </div>
+            </div>
+            <div class="progress-setting-row" style="margin-top:8px;border-top:1px solid var(--border-color,#e5e7eb);padding-top:8px;">
+              <button onclick="resetProgressLog()" style="font-size:0.75rem;padding:4px 10px;background:#dc2626;color:#fff;border:none;border-radius:4px;cursor:pointer;">進捗ログをリセット</button>
+              <span style="font-size:0.7rem;color:var(--text-muted,#999);margin-left:6px;">記録された日別文字数を全て消去します</span>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- カレンダー日編集モーダル -->
+<div id="progress-day-modal" class="progress-day-modal" aria-hidden="true">
+  <div class="progress-day-modal-content">
+    <div class="progress-day-modal-header">
+      <h4 id="progress-day-modal-title"></h4>
+      <button onclick="closeProgressDayModal()" class="progress-close">✕</button>
+    </div>
+    <div class="progress-day-modal-body">
+      <label>✏️ 執筆文字数:
+        <input type="number" id="pdm-chars" min="0" step="100" class="progress-goal-input">
+      </label>
+      <label>📝 予定メモ:
+        <textarea id="pdm-memo" rows="2" class="progress-memo-textarea" placeholder="予定やメモを入力"></textarea>
+      </label>
+      <label><input type="checkbox" id="pdm-is-deadline"> 📅 この日を目標日に設定する</label>
+      <div id="pdm-deadline-opts" style="display:none; margin-left: 20px;">
+        <label>目標名: <input type="text" id="pdm-deadline-name-edit" class="progress-deadline-name-input" placeholder="例: 電撃小説大賞"></label>
+      </div>
+    </div>
+    <div class="progress-day-modal-footer">
+      <button class="btn" onclick="saveProgressDayModal()">💾 保存</button>
+      <button class="btn" onclick="closeProgressDayModal()">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ファイル連携ステータス ===== -->
+<div id="file-status-overlay" class="file-status-overlay" aria-hidden="true">
+  <div class="file-status-dialog" role="dialog" aria-label="ファイル連携ステータス">
+    <div class="file-status-header">
+      <h3>📂 ファイル連携ステータス</h3>
+      <button class="file-status-close" onclick="closeFileStatus()" title="閉じる">✕</button>
+    </div>
+    <div class="file-status-body" id="file-status-body">
+      <!-- JS で動的に生成 -->
+    </div>
+    <div class="file-status-footer">
+      <span class="file-status-hint">※ File System Access API で保存したファイルはハンドルが維持され、次回以降は上書き保存されます</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 校正モード設定ダイアログ ===== -->
+<div id="proofread-dialog-overlay" class="proofread-dialog-overlay" aria-hidden="true">
+  <div class="proofread-dialog" role="dialog" aria-label="校正設定">
+    <div class="proofread-dialog-header">
+      <h3>📝 校正チェック</h3>
+      <button class="proofread-dialog-close" onclick="closeProofreadDialog()" title="閉じる">✕</button>
+    </div>
+    <div class="proofread-dialog-body">
+      <div class="proofread-dialog-row">
+        <div class="proofread-dialog-col">
+          <label class="proofread-label">比較元（変更後）</label>
+          <select id="proofread-input-tab" class="proofread-select"></select>
+        </div>
+        <div class="proofread-dialog-col-sep"><button type="button" id="proofread-swap-btn" title="左右を入れ替え" style="background:none;border:none;cursor:pointer;font-size:1.2rem;padding:2px 6px;border-radius:4px;color:var(--text-color,#333);transition:background 0.15s;">⇔</button></div>
+        <div class="proofread-dialog-col">
+          <label class="proofread-label">比較先（変更前）</label>
+          <select id="proofread-ref-tab" class="proofread-select"></select>
+        </div>
+      </div>
+      <div class="proofread-dialog-row">
+        <div class="proofread-dialog-col">
+          <label class="proofread-label">差分の粒度</label>
+          <select id="proofread-granularity" class="proofread-select">
+            <option value="char">文字単位</option>
+            <option value="word" selected>文節単位</option>
+            <option value="line">行単位</option>
+          </select>
+        </div>
+        <div class="proofread-dialog-col">
+          <label class="proofread-label">表示形式</label>
+          <select id="proofread-view-mode" class="proofread-select">
+            <option value="split" selected>2カラム（左右）</option>
+            <option value="inline">インライン（1カラム）</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="proofread-dialog-footer">
+      <button class="btn" onclick="closeProofreadDialog()">キャンセル</button>
+      <button class="btn btn-apply-all" onclick="startProofreadMode()">比較開始</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 校正モード オーバーレイ ===== -->
+<div id="proofread-overlay" aria-hidden="true">
+  <div id="proofread-header">
+    <div id="proofread-title">📝 校正モード</div>
+    <div id="proofread-controls">
+      <label class="proofread-ctrl-label">粒度:</label>
+      <select id="proofread-ctrl-granularity" class="proofread-ctrl-select" onchange="rerunProofreadDiff()">
+        <option value="char">文字</option>
+        <option value="word">文節</option>
+        <option value="line">行</option>
+      </select>
+      <label class="proofread-ctrl-label">表示:</label>
+      <select id="proofread-ctrl-view" class="proofread-ctrl-select" onchange="switchProofreadView()">
+        <option value="split">2カラム</option>
+        <option value="inline">インライン</option>
+      </select>
+      <span class="proofread-separator"></span>
+      <span id="proofread-stats" class="proofread-stats"></span>
+      <span class="proofread-separator"></span>
+      <button class="btn" id="btn-proofread-writing-mode" onclick="toggleProofreadWritingMode()" title="書字方向切替">縦書きへ</button>
+      <button class="btn btn-apply-all" onclick="applyProofreadChanges()" title="選択した変更を入力タブに反映">✔ 適用</button>
+      <button class="btn" onclick="closeProofreadMode()" title="校正モードを閉じる（Esc）">✕ 閉じる</button>
+    </div>
+  </div>
+  <div id="proofread-body">
+    <div id="proofread-split-view" class="proofread-view">
+      <div class="proofread-pane" id="proofread-pane-before">
+        <div class="proofread-pane-header">参照（変更前）</div>
+        <div class="proofread-pane-scroll"><div class="proofread-pane-content" id="proofread-content-before"></div></div>
+      </div>
+      <div class="proofread-divider"></div>
+      <div class="proofread-pane" id="proofread-pane-after">
+        <div class="proofread-pane-header">入力（変更後）</div>
+        <div class="proofread-pane-scroll"><div class="proofread-pane-content" id="proofread-content-after"></div></div>
+      </div>
+    </div>
+    <div id="proofread-inline-view" class="proofread-view" style="display:none;">
+      <div class="proofread-pane-scroll proofread-inline-scroll"><div class="proofread-pane-content" id="proofread-content-inline"></div></div>
+    </div>
+  </div>
+</div>
+
 <div id="jump-dialog" class="jump-dialog">
     <h4>行番号ジャンプ</h4>
     <input type="number" id="jump-line-input" placeholder="行番号を入力..." min="1">
@@ -8012,6 +8765,15 @@ memo: 'cc_memo_width_px',
     let lastHtmlSaveHandle = null;
     let lastMemoSaveHandle = null;
 
+    // v1.265: ファイル連携ステータスからアクセスできるようエクスポート
+    window.__ccFileHandles = {
+      get text() { return lastTextSaveHandle; },
+      set text(v) { lastTextSaveHandle = v; },
+      get html() { return lastHtmlSaveHandle; },
+      set html(v) { lastHtmlSaveHandle = v; },
+      get memo() { return lastMemoSaveHandle; },
+      set memo(v) { lastMemoSaveHandle = v; },
+    };
 
     // Utility function - must be defined before use in renderInputTabs
     function escapeHtml(s) {
@@ -8544,7 +9306,15 @@ window.closeActiveTab = closeActiveTab;
         if (s) { try { const d = JSON.parse(s); if (d.date === getTodayDateStr()) { todayStartChars = d.startChars; return; } } catch (e) {} }
         saveTodayStart();
     }
-    function saveTodayStart() { const n = inputArea.value.replace(/[\n\s　]/g, '').length; todayStartChars = n; localStorage.setItem(TODAY_START_KEY, JSON.stringify({ date: getTodayDateStr(), startChars: n })); }
+    function saveTodayStart() {
+        // 全タブの合計文字数を基準にする（getEditorTotalCharsと同じ計算）
+        let n = (inputArea.value || '').replace(/[\n\s　]/g, '').length;
+        const tabs = window.inputTabs || [];
+        const activeId = (typeof window.activeTabId !== 'undefined') ? window.activeTabId : null;
+        tabs.forEach(function(t) { if (t.id !== activeId) n += (t.content || '').replace(/[\n\s　]/g, '').length; });
+        todayStartChars = n;
+        localStorage.setItem(TODAY_START_KEY, JSON.stringify({ date: getTodayDateStr(), startChars: n }));
+    }
     function resetTodayStart() { if (confirm('今日の開始点をリセットしますか？')) { saveTodayStart(); updateInputStats(); updatePreview(); } }
 
     function loadWritingTime() {
@@ -8854,7 +9624,7 @@ window.closeActiveTab = closeActiveTab;
     function saveSettingsToStorage() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(collectAllSettings())); }
     function loadSettingsFromStorage() { const s = localStorage.getItem(SETTINGS_KEY); if (s) { try { applyImportedSettings(JSON.parse(s)); } catch (e) {} } }
 
-        const defaultText = `　ⓒエディタ（使い方） v1.260
+        const defaultText = `　ⓒエディタ（使い方） v1.265
 
 ■ はじめに（最短で使い始める）
 
@@ -14395,6 +15165,252 @@ if (typeof applyPaneHeightSettings === 'function') {
     function showSaveDialog() { document.getElementById('save-dialog-overlay').style.display = 'flex'; }
     function closeSaveDialog() { document.getElementById('save-dialog-overlay').style.display = 'none'; }
 
+    // ===== v1.266: リボン保存ドロップダウン =====
+    let lastProjectSaveHandle = null;
+    // ファイル連携ステータスからもアクセスできるようエクスポート
+    if (window.__ccFileHandles) {
+        Object.defineProperty(window.__ccFileHandles, 'project', {
+            get() { return lastProjectSaveHandle; },
+            set(v) { lastProjectSaveHandle = v; },
+            configurable: true
+        });
+    }
+
+    function toggleRibbonSaveDropdown() {
+        const menu = document.getElementById('ribbon-save-dropdown-menu');
+        if (!menu) return;
+        menu.classList.toggle('show');
+    }
+    function closeRibbonSaveDropdown() {
+        const menu = document.getElementById('ribbon-save-dropdown-menu');
+        if (menu) menu.classList.remove('show');
+    }
+    // 外部クリックで閉じる
+    document.addEventListener('click', function(e) {
+        const dd = document.getElementById('ribbon-save-dropdown');
+        if (dd && !dd.contains(e.target)) {
+            closeRibbonSaveDropdown();
+        }
+    });
+
+    // スマート テキスト保存: ハンドルがあれば上書き、なければピッカー表示
+    async function ribbonSmartSaveText() {
+        try {
+            // saveTabsToStorage で最新データをローカルに確定
+            if (typeof saveTabsToStorage === 'function') saveTabsToStorage();
+        } catch(e) {}
+        const scope = getSaveScope ? getSaveScope() : 'current';
+        const content = getContentToSave ? getContentToSave(scope) : getCurrentTabContent();
+        const b = new Blob([content], { type: 'text/plain' });
+
+        if (lastTextSaveHandle) {
+            // ハンドルがある → 上書き試行
+            try {
+                const ok = await saveWithHandle(lastTextSaveHandle, b);
+                if (ok) {
+                    recordLastSave('テキスト上書き保存');
+                    showToast('テキストを上書き保存しました');
+                    return;
+                }
+            } catch(e) {
+                // ハンドルが無効（ファイル削除等）→ ピッカーへフォールスルー
+            }
+            // ハンドル失敗 → nullにリセットしてピッカーへ
+            lastTextSaveHandle = null;
+        }
+        // ハンドルなし → File System Access API ピッカー
+        const name = buildSuggestedName ? buildSuggestedName('txt', scope) : 'novel.txt';
+        if (window.showSaveFilePicker) {
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: name,
+                    types: [{ description: 'Text', accept: { 'text/plain': ['.txt'] } }]
+                });
+                const ok = await saveWithHandle(handle, b);
+                if (ok) {
+                    lastTextSaveHandle = handle;
+                    recordLastSave('テキスト保存');
+                    showToast('テキストを保存しました');
+                }
+                return;
+            } catch(err) {
+                if (err && err.name === 'AbortError') return; // キャンセル → 何もしない
+            }
+        }
+        // File System Access API 非対応 → ダウンロードフォールバック
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(b);
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        recordLastSave('テキスト保存');
+        showToast('テキストを保存しました');
+    }
+
+    // スマート プロジェクト保存: ハンドルがあれば上書き、なければピッカー表示
+    async function ribbonSmartSaveProject() {
+        // 直前の入力を取りこぼさないよう同期
+        try { if (typeof saveTabsToStorage === 'function') saveTabsToStorage(); } catch(e){}
+        try { if (typeof saveMemoTabs === 'function') saveMemoTabs(); } catch(e){}
+        try { if (typeof saveWritingTime === 'function') saveWritingTime(); } catch(e){}
+        try { if (typeof saveSettingsToStorage === 'function') saveSettingsToStorage(); } catch(e){}
+
+        // プロジェクトデータを構築（全項目含む）
+        const project = buildFullProjectData();
+        const jsonStr = JSON.stringify(project, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+
+        if (lastProjectSaveHandle) {
+            try {
+                const ok = await saveWithHandle(lastProjectSaveHandle, blob);
+                if (ok) {
+                    recordLastSave('プロジェクト上書き保存');
+                    showToast('プロジェクトを上書き保存しました');
+                    return;
+                }
+            } catch(e) {}
+            lastProjectSaveHandle = null;
+        }
+
+        // ハンドルなし → ピッカー
+        const dateStr = new Date().toISOString().slice(0,10);
+        let filename;
+        if (novelTitle && novelTitle !== DEFAULT_NOVEL_TITLE) {
+            const safeTitle = novelTitle.replace(/[\\/:*?"<>|]/g, '').trim();
+            filename = safeTitle ? `${safeTitle}_${dateStr}.ccproj` : `project_${dateStr}.ccproj`;
+        } else {
+            filename = `project_${dateStr}.ccproj`;
+        }
+
+        if (window.showSaveFilePicker) {
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: filename,
+                    types: [{ description: 'ⓒエディタ Project', accept: { 'application/json': ['.ccproj'] } }]
+                });
+                const ok = await saveWithHandle(handle, blob);
+                if (ok) {
+                    lastProjectSaveHandle = handle;
+                    recordLastSave('プロジェクト保存');
+                    showToast('プロジェクトを保存しました');
+                    return;
+                }
+            } catch(err) {
+                if (err && err.name === 'AbortError') return; // ユーザーがキャンセル
+            }
+        }
+        // File System Access API 非対応 → ダウンロードフォールバック
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        recordLastSave('プロジェクト保存');
+        showToast('プロジェクトを保存しました');
+    }
+
+    // プロジェクトデータ構築（全項目）
+    function buildFullProjectData() {
+        const project = { version: 1, timestamp: Date.now() };
+
+        // タブ
+        const tabState = JSON.parse(localStorage.getItem(TABS_KEY) || '{}');
+        project.tabs = Array.isArray(tabState.tabs) ? tabState.tabs : [];
+        project.currentTabId = tabState.activeTabId || (project.tabs[0]?.id ?? 1);
+        project.nextTabId = tabState.nextTabId || (Math.max(0, ...project.tabs.map(t => t.id||0)) + 1);
+        try {
+            const tg = JSON.parse(localStorage.getItem('cc_tab_groups_v1') || '{}');
+            if (tg.groups && Object.keys(tg.groups).length > 0) project.tabGroups = tg;
+        } catch(e) {}
+
+        // メモ
+        const memoState = JSON.parse(localStorage.getItem(MEMO_KEY) || '{}');
+        project.memoTabs = Array.isArray(memoState.tabs) ? memoState.tabs : [];
+        project.currentMemoTabId = memoState.activeId || (project.memoTabs[0]?.id ?? 1);
+        project.nextMemoTabId = memoState.nextId || (Math.max(0, ...project.memoTabs.map(t => t.id||0)) + 1);
+
+        // 構成・キャラクター・世界観・用語
+        const structData = localStorage.getItem('cc_editor_structure');
+        if (structData) project.structure = JSON.parse(structData);
+        const charData = localStorage.getItem('cc_editor_character');
+        if (charData) project.character = JSON.parse(charData);
+        const worldData = localStorage.getItem('cc_editor_world');
+        if (worldData) project.world = JSON.parse(worldData);
+        const termsData = localStorage.getItem('cc_editor_terms');
+        if (termsData) project.terms = JSON.parse(termsData);
+
+        // タイトル
+        project.title = novelTitle || DEFAULT_NOVEL_TITLE;
+
+        // しおり
+        try {
+            const bm = localStorage.getItem(BOOKMARKS_KEY);
+            if (bm) project.bookmarks = JSON.parse(bm);
+        } catch(e) {}
+
+        // 設定
+        try {
+            const settings = localStorage.getItem(SETTINGS_KEY);
+            if (settings) project.settings = JSON.parse(settings);
+        } catch(e) {}
+        project.settingsMeta = {
+            paneWidths: {
+                input: localStorage.getItem('cc_pane_input_width_px'),
+                preview: localStorage.getItem('cc_pane_preview_width_px'),
+                side: localStorage.getItem('cc_side_width_px'),
+                memo: localStorage.getItem('cc_memo_width_px'),
+                outline: localStorage.getItem('cc_outline_width_px'),
+                structure: localStorage.getItem('cc_structure_width_px'),
+                search: localStorage.getItem('cc_search_width_px'),
+                character: localStorage.getItem('cc_character_width_px'),
+                world: localStorage.getItem('cc_world_width_px'),
+                terms: localStorage.getItem('cc_terms_width_px'),
+                reference: localStorage.getItem('cc_pane_reference_width_px')
+            },
+            theme: localStorage.getItem('cc_theme'),
+            activeTabColor: localStorage.getItem('cc_active_tab_color'),
+            dayStart: localStorage.getItem('cc_day_start_hhmm')
+        };
+
+        // 執筆時間
+        project.todayStartChars = todayStartChars;
+        project.writingSeconds = writingSeconds;
+
+        // v1.268: 執筆進捗ログ
+        try {
+            const progressLog = localStorage.getItem('cc_progress_log');
+            if (progressLog) project.progressLog = JSON.parse(progressLog);
+        } catch(e) {}
+        // v1.270: 進捗イベント/メモ + 進捗設定
+        try {
+            const progressEvents = localStorage.getItem('cc_progress_events');
+            if (progressEvents) project.progressEvents = JSON.parse(progressEvents);
+        } catch(e) {}
+        try {
+            const progressPrefs = localStorage.getItem('cc_progress_prefs');
+            if (progressPrefs) project.progressPrefs = JSON.parse(progressPrefs);
+        } catch(e) {}
+
+        return project;
+    }
+
+    // 簡易トースト通知
+    function showToast(msg) {
+        let toast = document.getElementById('cc-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'cc-toast';
+            toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#fff;padding:10px 20px;border-radius:8px;font-size:0.88rem;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = msg;
+        toast.style.opacity = '1';
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+    }
+
     // ヘッダーファイルドロップダウン
     function toggleTextFileDropdown() {
         const dropdown = document.getElementById('text-file-dropdown');
@@ -14477,7 +15493,10 @@ if (typeof applyPaneHeightSettings === 'function') {
                 terms: __ccPickFirst(project, ['terms', 'term', 'glossary', 'words']),
                 bookmarks: __ccPickFirst(project, ['bookmarks', 'bookmark']),
                 reference: __ccPickFirst(project, ['reference']),
-                settings: __ccPickFirst(project, ['settings', 'config'])
+                settings: __ccPickFirst(project, ['settings', 'config']),
+                progressLog: __ccPickFirst(project, ['progressLog', 'progress_log']),
+                progressEvents: __ccPickFirst(project, ['progressEvents', 'progress_events']),
+                progressPrefs: __ccPickFirst(project, ['progressPrefs', 'progress_prefs'])
             };
 
             const seemsProject = !!(sections.tabs || sections.memoTabs || sections.structure || sections.character || sections.world || sections.terms || sections.bookmarks || sections.reference || sections.settings);
@@ -14509,7 +15528,8 @@ if (typeof applyPaneHeightSettings === 'function') {
             { id: 'proj-load-terms', key: 'terms', label: '用語' },
             { id: 'proj-load-bookmarks', key: 'bookmarks', label: 'しおり' },
             { id: 'proj-load-reference', key: 'reference', label: '参照テキスト' },
-            { id: 'proj-load-settings', key: 'settings', label: '設定（ペイン幅・色など）' }
+            { id: 'proj-load-settings', key: 'settings', label: '設定（ペイン幅・色など）' },
+            { id: 'proj-load-progress', key: 'progressLog', label: '執筆進捗ログ' }
         ];
 
         if (info) {
@@ -14627,6 +15647,36 @@ if (typeof applyPaneHeightSettings === 'function') {
                 }
             } catch(e) {}
 
+            // v1.268: 執筆進捗ログ
+            if (should('proj-load-progress') && sections.progressLog !== undefined) {
+                // 既存のログとマージ（日ごとに大きい方を採用）
+                try {
+                    const existing = JSON.parse(localStorage.getItem('cc_progress_log') || '{}');
+                    const incoming = sections.progressLog || {};
+                    Object.keys(incoming).forEach(k => {
+                        existing[k] = Math.max(existing[k] || 0, incoming[k] || 0);
+                    });
+                    localStorage.setItem('cc_progress_log', JSON.stringify(existing));
+                } catch(e) {}
+            }
+            // v1.270: 進捗イベント/メモ
+            if (should('proj-load-progress') && sections.progressEvents !== undefined) {
+                try {
+                    const existing = JSON.parse(localStorage.getItem('cc_progress_events') || '{}');
+                    const incoming = sections.progressEvents || {};
+                    Object.keys(incoming).forEach(k => {
+                        existing[k] = Object.assign(existing[k] || {}, incoming[k]);
+                    });
+                    localStorage.setItem('cc_progress_events', JSON.stringify(existing));
+                } catch(e) {}
+            }
+            // v1.270: 進捗設定（目標日・作品全体目標など）
+            if (should('proj-load-progress') && sections.progressPrefs !== undefined) {
+                try {
+                    localStorage.setItem('cc_progress_prefs', JSON.stringify(sections.progressPrefs));
+                } catch(e) {}
+            }
+
             // 設定
             if (should('proj-load-settings') && sections.settings !== undefined) {
                 const s = sections.settings || {};
@@ -14645,6 +15695,8 @@ if (typeof applyPaneHeightSettings === 'function') {
 
             closeProjectLoadDialog();
             alert('選択した項目を読み込みました。ページを再読み込みします。');
+            // プロジェクト読込後に基準値をリセット（読込テキストを今日の執筆量に含めない）
+            localStorage.removeItem('cc_editor_today_start');
             __ccSkipBeforeUnloadSave = true;
             location.reload();
         } catch (e) {
@@ -14674,15 +15726,18 @@ if (typeof applyPaneHeightSettings === 'function') {
         const radios = document.querySelectorAll('input[name="proj-save-format"]');
         const bookmarksRow = document.getElementById('proj-save-bookmarks-row');
         const settingsRow = document.getElementById('proj-save-settings-row');
-        
+        const progressRow = document.getElementById('proj-save-progress-row');
+
         function updateVisibility() {
             const selectedFormat = document.querySelector('input[name="proj-save-format"]:checked')?.value || 'ccproj';
             if (selectedFormat === 'txt') {
                 if (bookmarksRow) bookmarksRow.style.display = 'none';
                 if (settingsRow) settingsRow.style.display = 'none';
+                if (progressRow) progressRow.style.display = 'none';
             } else {
                 if (bookmarksRow) bookmarksRow.style.display = 'block';
                 if (settingsRow) settingsRow.style.display = 'block';
+                if (progressRow) progressRow.style.display = 'block';
             }
         }
         
@@ -14774,6 +15829,14 @@ if (typeof applyPaneHeightSettings === 'function') {
                 activeTabColor: localStorage.getItem('cc_active_tab_color'),
                 dayStart: localStorage.getItem('cc_day_start_hhmm')
             };
+        }
+
+        // v1.268: 執筆進捗ログ
+        if (document.getElementById('proj-save-progress')?.checked) {
+            try {
+                const plog = localStorage.getItem('cc_progress_log');
+                if (plog) project.progressLog = JSON.parse(plog);
+            } catch(e) {}
         }
 
         const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' });
@@ -15302,6 +16365,7 @@ if (typeof applyPaneHeightSettings === 'function') {
             }
 
             renderInputTabs();
+            saveTodayStart(); // ファイル読込後に基準値をリセット（読込テキストを今日の執筆量に含めない）
             updateInputStats();
             updatePreview();
             saveTabsToStorage();
@@ -15347,6 +16411,8 @@ if (typeof applyPaneHeightSettings === 'function') {
         const __macCtrl = /Mac|iPhone|iPad|iPod/.test(navigator.platform || '') || (navigator.userAgentData && navigator.userAgentData.platform === 'macOS');
         const __ctrlOrCmd = e.ctrlKey || (__macCtrl && e.metaKey);
         if (__ctrlOrCmd && !e.altKey && (__macCtrl || !e.metaKey)) {
+            // v1.265: 矢印・Home/Endはブラウザのデフォルト動作に委ねる（Mac Cmd+→ 等）
+            if (/^Arrow/.test(e.key) || e.key === 'Home' || e.key === 'End' || e.key === 'PageUp' || e.key === 'PageDown') return;
             const k = (e.key || '').toLowerCase();
             if (e.shiftKey) {
                 // On Mac, ⌘+⇧+3-6 are macOS screenshots. Use physical Ctrl only for panel toggles.
@@ -31266,6 +32332,10 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   let refActiveTabId = 1;
   let refNextTabId = 2;
 
+  // v1.265: 校正モードから参照タブにアクセスできるようエクスポート
+  Object.defineProperty(window, 'refTabs', { get(){ return refTabs; }, configurable: true });
+  Object.defineProperty(window, 'refActiveTabId', { get(){ return refActiveTabId; }, configurable: true });
+
   window.zoomReference = function(dir) {
     // v1.247: ZOOM_LEVELS配列を使用して入力ペインと同じズームステップに統一
     if (typeof ZOOM_LEVELS !== 'undefined') {
@@ -32422,7 +33492,7 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
     initGroupContextMenu();
   }
 
-  // v1.260: 300ms遅延を除去し即座にパッチ適用（グループ未反映バグ修正）
+  // v1.265: 300ms遅延を除去し即座にパッチ適用（グループ未反映バグ修正）
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       init();
@@ -32502,6 +33572,1569 @@ body.theme-dark #ref-tabs-container .ref-tab:hover { background: rgba(255,255,25
   document.querySelectorAll('.pane-footer .footer-right').forEach(function(el){
     mo.observe(el, { childList:true, subtree:true, characterData:true });
   });
+})();
+</script>
+
+<!-- ===== ファイル連携ステータス v1.265 ===== -->
+<script>
+(function(){
+  'use strict';
+
+  const FILE_TYPES = [
+    { key: 'text',    label: 'テキストファイル',   icon: '📄', desc: '入力タブの内容を .txt として保存',
+      accept: { 'text/plain': ['.txt'] }, pickerDesc: 'Text' },
+    { key: 'html',    label: 'HTMLファイル',       icon: '🌐', desc: 'プレビュー内容を .html として保存',
+      accept: { 'text/html': ['.html'] }, pickerDesc: 'HTML' },
+    { key: 'memo',    label: 'メモファイル',       icon: '📝', desc: 'メモタブの内容を .txt として保存',
+      accept: { 'text/plain': ['.txt'] }, pickerDesc: 'Text' },
+    { key: 'project', label: 'プロジェクトファイル', icon: '📦', desc: 'プロジェクトを .ccproj として保存',
+      accept: { 'application/json': ['.ccproj'] }, pickerDesc: 'ⓒエディタ Project' },
+  ];
+
+  function getHandles() {
+    return window.__ccFileHandles || {};
+  }
+
+  function renderStatus() {
+    const body = document.getElementById('file-status-body');
+    if (!body) return;
+    const handles = getHandles();
+    let html = '';
+
+    FILE_TYPES.forEach(ft => {
+      const handle = handles[ft.key];
+      const linked = !!handle;
+      const badgeClass = linked ? 'linked' : 'unlinked';
+      const badgeText = linked ? '🟢 連携中' : '⚪ 未連携';
+      const fileName = handle ? handle.name : null;
+
+      const clickable = !linked ? ' file-status-item-clickable' : '';
+      html += `<div class="file-status-item${clickable}" data-file-key="${ft.key}"${!linked ? ` onclick="linkFileHandle('${ft.key}')" title="クリックしてファイルを選択・連携"` : ''}>`;
+      html += `<div class="file-status-item-header">`;
+      html += `<span class="file-status-item-title">${ft.icon} ${ft.label}</span>`;
+      html += `<span>`;
+      html += `<span class="file-status-badge ${badgeClass}">${badgeText}</span>`;
+      if (linked) {
+        html += `<button class="file-status-unlink-btn" onclick="event.stopPropagation(); unlinkFileHandle('${ft.key}')" title="連携を解除">解除</button>`;
+      }
+      html += `</span>`;
+      html += `</div>`;
+      if (linked && fileName) {
+        html += `<div class="file-status-detail">ファイル名: <span class="file-path">${escHtml(fileName)}</span></div>`;
+      } else if (!linked) {
+        html += `<div class="file-status-detail">${ft.desc}<br><span style="color:var(--link-color,#2563eb);font-size:0.78rem;cursor:pointer;">▶ クリックしてファイルを選択</span></div>`;
+      }
+      html += `</div>`;
+    });
+
+    // localStorage usage
+    let storageUsed = 0;
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('cc_')) {
+          storageUsed += (localStorage.getItem(key) || '').length * 2; // UTF-16
+        }
+      }
+    } catch(e) {}
+    const storageKB = (storageUsed / 1024).toFixed(1);
+    html += `<div class="file-status-item">`;
+    html += `<div class="file-status-item-header">`;
+    html += `<span class="file-status-item-title">💾 ローカルストレージ</span>`;
+    html += `<span class="file-status-badge linked">使用中</span>`;
+    html += `</div>`;
+    html += `<div class="file-status-detail">使用量: ${storageKB} KB（cc_* キーのみ）</div>`;
+    html += `</div>`;
+
+    body.innerHTML = html;
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  window.openFileStatus = function() {
+    const overlay = document.getElementById('file-status-overlay');
+    if (!overlay) return;
+    renderStatus();
+    overlay.setAttribute('aria-hidden', 'false');
+  };
+
+  window.closeFileStatus = function() {
+    const overlay = document.getElementById('file-status-overlay');
+    if (overlay) overlay.setAttribute('aria-hidden', 'true');
+  };
+
+  window.unlinkFileHandle = function(key) {
+    const handles = getHandles();
+    if (handles && key in handles) {
+      handles[key] = null;
+    }
+    renderStatus();
+  };
+
+  // v1.266: 未連携アイテムをクリックしてファイルを選択・連携
+  window.linkFileHandle = async function(key) {
+    if (!window.showSaveFilePicker) {
+      alert('お使いのブラウザは File System Access API に対応していないため、この機能は使用できません。');
+      return;
+    }
+    const ft = FILE_TYPES.find(f => f.key === key);
+    if (!ft) return;
+    try {
+      const ext = Object.values(ft.accept)[0][0]; // e.g. '.txt'
+      const defaultNames = { text: 'novel', html: 'preview', memo: 'memo', project: 'project' };
+      const handle = await window.showSaveFilePicker({
+        suggestedName: (defaultNames[key] || key) + ext,
+        types: [{ description: ft.pickerDesc, accept: ft.accept }]
+      });
+      const handles = getHandles();
+      if (handles) handles[key] = handle;
+      renderStatus();
+    } catch(err) {
+      if (err && err.name === 'AbortError') return; // ユーザーがキャンセル
+    }
+  };
+
+  // Esc で閉じる
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const overlay = document.getElementById('file-status-overlay');
+      if (overlay && overlay.getAttribute('aria-hidden') === 'false') {
+        e.preventDefault(); e.stopPropagation();
+        window.closeFileStatus();
+      }
+    }
+  }, true);
+
+})();
+</script>
+
+<!-- ===== オーバーレイ共通: ドラッグ移動 + 外側クリック閉じ v1.274 ===== -->
+<script>
+(function(){
+  'use strict';
+
+  /**
+   * オーバーレイダイアログにドラッグ移動 + 背景クリックで閉じる機能を付与
+   * @param {Object} cfg
+   *   overlayId:    背景要素のID
+   *   dialogSel:    ダイアログ要素のCSSセレクタ
+   *   handleSel:    ドラッグハンドルのCSSセレクタ（ヘッダー等）
+   *   closeFn:      閉じる関数名 (window上) or function
+   *   isVisible:    表示判定関数 (省略時: aria-hidden !== 'true')
+   */
+  window.__initOverlayDragAndDismiss = function(cfg) {
+    const { overlayId, dialogSel, handleSel, closeFn, isVisible } = cfg;
+    const overlay = document.getElementById(overlayId);
+    if (!overlay) return;
+    const dialog = overlay.querySelector(dialogSel);
+    const handle = overlay.querySelector(handleSel);
+    if (!dialog || !handle) return;
+
+    let dragging = false, startX = 0, startY = 0, offsetX = 0, offsetY = 0;
+
+    function resetPosition() {
+      offsetX = 0; offsetY = 0;
+      dialog.style.marginLeft = '';
+      dialog.style.marginTop = '';
+    }
+
+    // ドラッグ開始
+    handle.addEventListener('mousedown', function(e) {
+      // 閉じるボタンなどは除外
+      if (e.target.closest('button')) return;
+      e.preventDefault();
+      dragging = true;
+      startX = e.clientX - offsetX;
+      startY = e.clientY - offsetY;
+      document.body.classList.add('overlay-dragging');
+    });
+
+    document.addEventListener('mousemove', function(e) {
+      if (!dragging) return;
+      e.preventDefault();
+      offsetX = e.clientX - startX;
+      offsetY = e.clientY - startY;
+      dialog.style.marginLeft = offsetX + 'px';
+      dialog.style.marginTop = offsetY + 'px';
+    });
+
+    document.addEventListener('mouseup', function() {
+      if (dragging) {
+        dragging = false;
+        document.body.classList.remove('overlay-dragging');
+      }
+    });
+
+    // 背景クリックで閉じる
+    overlay.addEventListener('mousedown', function(e) {
+      if (e.target !== overlay) return; // ダイアログ内部クリックは無視
+      const fn = typeof closeFn === 'function' ? closeFn : window[closeFn];
+      if (fn) fn();
+    });
+
+    // オーバーレイが開くたびに位置をリセット
+    const observer = new MutationObserver(function() {
+      const visible = isVisible
+        ? isVisible()
+        : overlay.getAttribute('aria-hidden') !== 'true';
+      if (visible) resetPosition();
+    });
+    observer.observe(overlay, { attributes: true, attributeFilter: ['aria-hidden', 'class'] });
+  };
+
+  // DOM準備後に全オーバーレイを初期化
+  document.addEventListener('DOMContentLoaded', function() {
+    // 進捗
+    window.__initOverlayDragAndDismiss({
+      overlayId: 'progress-overlay',
+      dialogSel: '.progress-dialog',
+      handleSel: '.progress-header',
+      closeFn: 'closeProgressOverlay'
+    });
+    // ファイルステータス
+    window.__initOverlayDragAndDismiss({
+      overlayId: 'file-status-overlay',
+      dialogSel: '.file-status-dialog',
+      handleSel: '.file-status-header',
+      closeFn: 'closeFileStatus'
+    });
+    // 校正ダイアログ
+    window.__initOverlayDragAndDismiss({
+      overlayId: 'proofread-dialog-overlay',
+      dialogSel: '.proofread-dialog',
+      handleSel: '.proofread-dialog-header',
+      closeFn: 'closeProofreadDialog'
+    });
+    // テキスト分析
+    window.__initOverlayDragAndDismiss({
+      overlayId: 'analysis-modal',
+      dialogSel: '.modal-content',
+      handleSel: '.modal-header',
+      closeFn: 'closeAnalysis',
+      isVisible: function() {
+        var el = document.getElementById('analysis-modal');
+        return el && el.classList.contains('show');
+      }
+    });
+  });
+})();
+</script>
+
+<!-- ===== 執筆進捗 (Progress Tracker) v1.274 ===== -->
+<script>
+(function(){
+  'use strict';
+
+  const PROGRESS_KEY = 'cc_progress_log';
+  const PROGRESS_PREFS_KEY = 'cc_progress_prefs';
+  const PROGRESS_EVENTS_KEY = 'cc_progress_events';
+  let currentMonth = new Date();
+  let graphMode = 'bar';
+  let editingDateKey = null; // カレンダー日編集中のキー
+
+  function fmtKey(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  // ===== 表示設定の永続化 =====
+  function loadPrefs() {
+    try {
+      const p = JSON.parse(localStorage.getItem(PROGRESS_PREFS_KEY) || '{}');
+      return {
+        calColor: p.calColor || '#22c55e',
+        comboColor: p.comboColor || '#f59e0b',
+        comboTiers: Array.isArray(p.comboTiers) ? p.comboTiers : [2,5,7,14,30],
+        totalGoal: p.totalGoal || 0,
+        deadlineDate: p.deadlineDate || '',
+        deadlineName: p.deadlineName || '',
+        calFontSize: p.calFontSize || '0.68rem',
+        calDateSize: p.calDateSize || '1em',
+        calDateColor: p.calDateColor || '#374151',
+        calCharsSize: p.calCharsSize || '0.85em',
+        calCharsColor: p.calCharsColor || '#374151',
+        calMemoSize: p.calMemoSize || '0.7em',
+        calMemoColor: p.calMemoColor || '#666666',
+        calRemainSize: p.calRemainSize || '0.7em',
+        calRemainColor: p.calRemainColor || '#9ca3af',
+      };
+    } catch(e) { return { calColor:'#22c55e', comboColor:'#f59e0b', comboTiers:[2,5,7,14,30], totalGoal:0, deadlineDate:'', deadlineName:'', calFontSize:'0.68rem', calDateSize:'1em', calDateColor:'#374151', calCharsSize:'0.85em', calCharsColor:'#374151', calMemoSize:'0.7em', calMemoColor:'#666666', calRemainSize:'0.7em', calRemainColor:'#9ca3af' }; }
+  }
+  function savePrefs(p) {
+    try { localStorage.setItem(PROGRESS_PREFS_KEY, JSON.stringify(p)); } catch(e) {}
+  }
+
+  // ===== イベント/メモ永続化 =====
+  function loadEvents() {
+    try { return JSON.parse(localStorage.getItem(PROGRESS_EVENTS_KEY) || '{}'); } catch(e) { return {}; }
+  }
+  function saveEvents(ev) {
+    try { localStorage.setItem(PROGRESS_EVENTS_KEY, JSON.stringify(ev)); } catch(e) {}
+  }
+
+  // ===== データ永続化 =====
+  function loadLog() {
+    try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}'); } catch(e) { return {}; }
+  }
+  function saveLog(log) {
+    try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(log)); } catch(e) {}
+  }
+  function todayKey() { return fmtKey(new Date()); }
+
+  function loadGoal() {
+    if (typeof settingsCache !== 'undefined' && settingsCache.todayGoal != null) return settingsCache.todayGoal || 0;
+    const el = document.getElementById('st-today-goal');
+    return el ? (parseInt(el.value,10)||0) : 0;
+  }
+  function saveGoal(v) {
+    if (typeof settingsCache !== 'undefined') settingsCache.todayGoal = v;
+    const el = document.getElementById('st-today-goal');
+    if (el) el.value = v || '';
+    try { if (typeof saveSettingsToStorage === 'function') saveSettingsToStorage(); } catch(e) {}
+  }
+
+  // ===== エディタ総文字数を取得 =====
+  function getEditorTotalChars() {
+    let total = 0;
+    try {
+      const ta = document.getElementById('input-area');
+      if (ta) {
+        total = (ta.value||'').replace(/[\n\s　]/g,'').length;
+        const tabs = window.inputTabs || [];
+        const activeId = (typeof window.activeTabId!=='undefined') ? window.activeTabId : null;
+        tabs.forEach(t => { if(t.id!==activeId) total += (t.content||'').replace(/[\n\s　]/g,'').length; });
+      }
+    } catch(e) {}
+    return total;
+  }
+
+  // ===== 残り日数計算 =====
+  function calcDaysRemaining(deadlineStr) {
+    if (!deadlineStr) return null;
+    const dl = new Date(deadlineStr + 'T23:59:59');
+    const now = new Date();
+    now.setHours(0,0,0,0);
+    const diff = Math.ceil((dl - now) / (1000*60*60*24));
+    return diff;
+  }
+
+  // ===== 今日の「新規入力」文字数を記録 =====
+  window.__ccProgressRecord = function(todayWritten) {
+    if (todayWritten < 0) todayWritten = 0;
+    const log = loadLog();
+    const key = todayKey();
+    const prev = log[key] || 0;
+    log[key] = Math.max(prev, todayWritten);
+    saveLog(log);
+  };
+
+  // ===== 自動記録 =====
+  function getTodayStartChars() {
+    try {
+      const s = localStorage.getItem('cc_editor_today_start');
+      if (s) { const d = JSON.parse(s); if (d.date === todayKey()) return d.startChars || 0; }
+    } catch(e) {}
+    // 今日の基準値が無い場合、現在の全タブ文字数を基準としてセット（既存テキストを新規執筆に含めない）
+    const current = getEditorTotalChars();
+    try {
+      localStorage.setItem('cc_editor_today_start', JSON.stringify({ date: todayKey(), startChars: current }));
+    } catch(e) {}
+    return current;
+  }
+  function autoRecord() {
+    try {
+      const startChars = getTodayStartChars();
+      const currentTotal = getEditorTotalChars();
+      const todayWritten = Math.max(0, currentTotal - startChars);
+      if (todayWritten > 0) window.__ccProgressRecord(todayWritten);
+    } catch(e) {}
+  }
+  setInterval(autoRecord, 60000);
+
+  // ===== ログリセット =====
+  window.resetProgressLog = function() {
+    if (!confirm('進捗ログ（日別の執筆文字数記録）を全て消去しますか？\nこの操作は元に戻せません。')) return;
+    localStorage.removeItem('cc_progress_log');
+    renderAll();
+  };
+
+  // ===== コンボ（連続執筆日数）計算 =====
+  function calcStreak(log) {
+    const now = new Date();
+    let streak = 0;
+    for (let i = 0; i < 365; i++) {
+      const d = new Date(now); d.setDate(d.getDate() - i);
+      if ((log[fmtKey(d)] || 0) > 0) streak++; else break;
+    }
+    return streak;
+  }
+  function calcDayStreak(log, dateKey) {
+    const parts = dateKey.split('-');
+    const d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+    let streak = 0;
+    for (let i = 0; i < 365; i++) {
+      const dd = new Date(d); dd.setDate(dd.getDate() - i);
+      if ((log[fmtKey(dd)] || 0) > 0) streak++; else break;
+    }
+    return streak;
+  }
+  function getComboTier(streak, tiers) {
+    let tier = 0;
+    for (let i = 0; i < tiers.length; i++) { if (streak >= tiers[i]) tier = i + 1; }
+    return tier;
+  }
+
+  // ===== 色のユーティリティ =====
+  function hexToHsl(hex) {
+    let r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
+    const max=Math.max(r,g,b), min=Math.min(r,g,b), l=(max+min)/2;
+    let h=0, s=0;
+    if(max!==min){ const d=max-min; s=l>0.5?d/(2-max-min):d/(max+min);
+      if(max===r) h=((g-b)/d+(g<b?6:0))/6; else if(max===g) h=((b-r)/d+2)/6; else h=((r-g)/d+4)/6; }
+    return [h*360, s*100, l*100];
+  }
+  function hslToHex(h,s,l) {
+    s/=100; l/=100;
+    const a=s*Math.min(l,1-l), f=n=>{const k=(n+h/30)%12; return l-a*Math.max(Math.min(k-3,9-k,1),-1);};
+    const toHex=x=>Math.round(x*255).toString(16).padStart(2,'0');
+    return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+  }
+  function calHeatColor(baseHex, level) {
+    if (level === 0) return null;
+    const [h,s,l] = hexToHsl(baseHex);
+    const lightness = l + (95 - l) * (1 - level / 5);
+    return hslToHex(h, s, Math.max(10, Math.min(95, lightness)));
+  }
+  function comboTierColor(baseHex, tier, maxTier) {
+    if (tier <= 0) return null;
+    const [h,s,l] = hexToHsl(baseHex);
+    const lightness = l + (85 - l) * (1 - tier / maxTier);
+    return hslToHex(h, Math.min(100, s + 10), Math.max(20, Math.min(90, lightness)));
+  }
+
+  // ===== 開閉 =====
+  window.openProgressOverlay = function() {
+    autoRecord();
+    currentMonth = new Date();
+    const prefs = loadPrefs();
+    // 各UIに設定値を反映
+    const inp = document.getElementById('progress-goal-input');
+    if (inp) inp.value = loadGoal() || '';
+    const tgi = document.getElementById('progress-total-goal-input');
+    if (tgi) tgi.value = loadTotalGoal() || prefs.totalGoal || '';
+    const ddi = document.getElementById('progress-deadline-input');
+    if (ddi) ddi.value = prefs.deadlineDate || '';
+    const ddn = document.getElementById('progress-deadline-name');
+    if (ddn) ddn.value = prefs.deadlineName || '';
+    const cc = document.getElementById('progress-cal-color');
+    if (cc) cc.value = prefs.calColor;
+    const ccb = document.getElementById('progress-combo-color');
+    if (ccb) ccb.value = prefs.comboColor;
+    const ct = document.getElementById('progress-combo-tiers');
+    if (ct) ct.value = prefs.comboTiers.join(',');
+    // カレンダー文字スタイル（要素別）
+    function _setV(id, val) { var el = document.getElementById(id); if (el) el.value = val; }
+    _setV('progress-cal-font-size', prefs.calFontSize || '0.68rem');
+    _setV('pcal-date-size', prefs.calDateSize || '1em');
+    _setV('pcal-date-color', prefs.calDateColor || '#374151');
+    _setV('pcal-chars-size', prefs.calCharsSize || '0.85em');
+    _setV('pcal-chars-color', prefs.calCharsColor || '#374151');
+    _setV('pcal-memo-size', prefs.calMemoSize || '0.7em');
+    _setV('pcal-memo-color', prefs.calMemoColor || '#666666');
+    _setV('pcal-remain-size', prefs.calRemainSize || '0.7em');
+    _setV('pcal-remain-color', prefs.calRemainColor || '#9ca3af');
+    renderAll();
+    const overlay = document.getElementById('progress-overlay');
+    if (overlay) overlay.setAttribute('aria-hidden', 'false');
+  };
+  window.closeProgressOverlay = function() {
+    const overlay = document.getElementById('progress-overlay');
+    if (overlay) overlay.setAttribute('aria-hidden', 'true');
+  };
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      // 日編集モーダルが開いている場合はそちらを先に閉じる
+      const dm = document.getElementById('progress-day-modal');
+      if (dm && dm.getAttribute('aria-hidden') === 'false') {
+        e.preventDefault(); e.stopPropagation(); closeProgressDayModal(); return;
+      }
+      const ov = document.getElementById('progress-overlay');
+      if (ov && ov.getAttribute('aria-hidden') === 'false') {
+        e.preventDefault(); e.stopPropagation(); window.closeProgressOverlay();
+      }
+    }
+  }, true);
+  window.progressNavMonth = function(dir) {
+    currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + dir, 1);
+    renderAll();
+  };
+  window.switchProgressGraph = function(mode) {
+    graphMode = mode;
+    document.querySelectorAll('.progress-graph-btn').forEach(b => b.classList.toggle('active', b.dataset.graph === mode));
+    renderGraph();
+  };
+
+  // ===== 今日ボタン =====
+  window.progressGoToday = function() {
+    currentMonth = new Date();
+    closeMonthPicker();
+    renderAll();
+  };
+
+  // ===== ミニ月ピッカー =====
+  let monthPickerYear = new Date().getFullYear();
+  function closeMonthPicker() {
+    const el = document.getElementById('progress-month-picker');
+    if (el) el.style.display = 'none';
+  }
+  window.toggleProgressMonthPicker = function() {
+    const el = document.getElementById('progress-month-picker');
+    if (!el) return;
+    if (el.style.display !== 'none') { el.style.display = 'none'; return; }
+    monthPickerYear = currentMonth.getFullYear();
+    renderMonthPicker();
+    el.style.display = 'block';
+  };
+  function renderMonthPicker() {
+    const el = document.getElementById('progress-month-picker');
+    if (!el) return;
+    const now = new Date();
+    const curY = currentMonth.getFullYear(), curM = currentMonth.getMonth();
+    let html = `<div class="progress-month-picker-header">`;
+    html += `<button onclick="progressPickerNavYear(-1)">◀</button>`;
+    html += `<span>${monthPickerYear}年</span>`;
+    html += `<button onclick="progressPickerNavYear(1)">▶</button>`;
+    html += `</div><div class="progress-month-picker-grid">`;
+    for (let m = 0; m < 12; m++) {
+      const isCur = (monthPickerYear === curY && m === curM) ? ' current' : '';
+      html += `<button class="${isCur}" onclick="progressPickMonth(${monthPickerYear},${m})">${m+1}月</button>`;
+    }
+    html += `</div>`;
+    el.innerHTML = html;
+  }
+  window.progressPickerNavYear = function(dir) {
+    monthPickerYear += dir;
+    renderMonthPicker();
+  };
+  window.progressPickMonth = function(y, m) {
+    currentMonth = new Date(y, m, 1);
+    closeMonthPicker();
+    renderAll();
+  };
+
+  // ===== カレンダー日編集モーダル =====
+  function openProgressDayModal(dateKey) {
+    editingDateKey = dateKey;
+    const log = loadLog();
+    const events = loadEvents();
+    const prefs = loadPrefs();
+    const ev = events[dateKey] || {};
+    // 未来日判定
+    const today = new Date(); today.setHours(0,0,0,0);
+    const target = new Date(dateKey + 'T00:00:00');
+    const isFuture = target > today;
+    document.getElementById('progress-day-modal-title').textContent = dateKey + (isFuture ? '（未来）' : '');
+    const charsEl = document.getElementById('pdm-chars');
+    charsEl.value = log[dateKey] || '';
+    charsEl.disabled = isFuture;
+    charsEl.style.opacity = isFuture ? '0.4' : '1';
+    document.getElementById('pdm-memo').value = ev.memo || '';
+    const isDeadline = prefs.deadlineDate === dateKey;
+    document.getElementById('pdm-is-deadline').checked = isDeadline;
+    document.getElementById('pdm-deadline-name-edit').value = isDeadline ? (prefs.deadlineName || '') : '';
+    document.getElementById('pdm-deadline-opts').style.display = isDeadline ? 'block' : 'none';
+    document.getElementById('progress-day-modal').setAttribute('aria-hidden', 'false');
+  }
+  window.openProgressDayModal = openProgressDayModal;
+
+  function closeProgressDayModal() {
+    document.getElementById('progress-day-modal').setAttribute('aria-hidden', 'true');
+    editingDateKey = null;
+  }
+  window.closeProgressDayModal = closeProgressDayModal;
+
+  window.saveProgressDayModal = function() {
+    if (!editingDateKey) return;
+    const log = loadLog();
+    const events = loadEvents();
+    const prefs = loadPrefs();
+    // 文字数
+    const chars = parseInt(document.getElementById('pdm-chars').value, 10) || 0;
+    if (chars > 0) log[editingDateKey] = chars;
+    else delete log[editingDateKey];
+    saveLog(log);
+    // メモ
+    const memo = document.getElementById('pdm-memo').value.trim();
+    if (memo) { if (!events[editingDateKey]) events[editingDateKey] = {}; events[editingDateKey].memo = memo; }
+    else if (events[editingDateKey]) { delete events[editingDateKey].memo; if (Object.keys(events[editingDateKey]).length === 0) delete events[editingDateKey]; }
+    saveEvents(events);
+    // 目標日
+    const isDeadline = document.getElementById('pdm-is-deadline').checked;
+    if (isDeadline) {
+      prefs.deadlineDate = editingDateKey;
+      prefs.deadlineName = document.getElementById('pdm-deadline-name-edit').value.trim();
+    } else if (prefs.deadlineDate === editingDateKey) {
+      prefs.deadlineDate = '';
+      prefs.deadlineName = '';
+    }
+    savePrefs(prefs);
+    // UIの目標日入力も同期
+    const ddi = document.getElementById('progress-deadline-input');
+    if (ddi) ddi.value = prefs.deadlineDate;
+    const ddn = document.getElementById('progress-deadline-name');
+    if (ddn) ddn.value = prefs.deadlineName;
+    closeProgressDayModal();
+    renderAll();
+  };
+
+  // イベント登録
+  document.addEventListener('DOMContentLoaded', function() {
+    const inp = document.getElementById('progress-goal-input');
+    if (inp) inp.addEventListener('change', function() { saveGoal(parseInt(this.value,10)||0); renderAll(); });
+    // 作品全体の目標
+    const tgi = document.getElementById('progress-total-goal-input');
+    if (tgi) tgi.addEventListener('change', function() { saveCurrentPrefs(); renderAll(); });
+    // 目標日・目標名
+    const ddi = document.getElementById('progress-deadline-input');
+    if (ddi) ddi.addEventListener('change', function() { saveCurrentPrefs(); renderAll(); });
+    const ddn = document.getElementById('progress-deadline-name');
+    if (ddn) ddn.addEventListener('change', function() { saveCurrentPrefs(); });
+    // 表示設定の変更
+    ['progress-cal-color','progress-combo-color'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', function() { saveCurrentPrefs(); renderAll(); });
+    });
+    const tiersEl = document.getElementById('progress-combo-tiers');
+    if (tiersEl) tiersEl.addEventListener('change', function() { saveCurrentPrefs(); renderAll(); });
+    // カレンダー文字スタイル設定（要素別）
+    ['progress-cal-font-size','pcal-date-size','pcal-chars-size','pcal-memo-size','pcal-remain-size'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('change', function() { saveCurrentPrefs(); renderAll(); });
+    });
+    ['pcal-date-color','pcal-chars-color','pcal-memo-color','pcal-remain-color'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('input', function() { saveCurrentPrefs(); renderAll(); });
+    });
+    var calFontReset = document.getElementById('progress-cal-font-reset');
+    if (calFontReset) calFontReset.addEventListener('click', function() {
+      function _r(id,v){ var el=document.getElementById(id); if(el) el.value=v; }
+      _r('progress-cal-font-size','0.68rem');
+      _r('pcal-date-size','1em');       _r('pcal-date-color','#374151');
+      _r('pcal-chars-size','0.85em');    _r('pcal-chars-color','#374151');
+      _r('pcal-memo-size','0.7em');      _r('pcal-memo-color','#666666');
+      _r('pcal-remain-size','0.7em');    _r('pcal-remain-color','#9ca3af');
+      saveCurrentPrefs(); renderAll();
+    });
+    // 期間セレクト
+    const rangeEl = document.getElementById('progress-range-select');
+    if (rangeEl) rangeEl.addEventListener('change', function() { renderGraph(); });
+    // 目標日チェックボックス連動
+    const pdmCb = document.getElementById('pdm-is-deadline');
+    if (pdmCb) pdmCb.addEventListener('change', function() {
+      document.getElementById('pdm-deadline-opts').style.display = this.checked ? 'block' : 'none';
+    });
+  });
+
+  // 作品全体目標を設定（settingsCache.goalChars）と連動
+  function loadTotalGoal() {
+    if (typeof settingsCache !== 'undefined' && settingsCache.goalChars != null) return settingsCache.goalChars || 0;
+    const el = document.getElementById('st-goal-chars');
+    return el ? (parseInt(el.value,10)||0) : 0;
+  }
+  function saveTotalGoal(v) {
+    if (typeof settingsCache !== 'undefined') settingsCache.goalChars = v;
+    const el = document.getElementById('st-goal-chars');
+    if (el) el.value = v || '';
+    try { if (typeof saveSettingsToStorage === 'function') saveSettingsToStorage(); } catch(e) {}
+  }
+
+  // UI要素からprefs値を取得するヘルパー
+  function _v(id, fallback) { const el = document.getElementById(id); return el ? el.value : fallback; }
+
+  function saveCurrentPrefs() {
+    const tgi = document.getElementById('progress-total-goal-input');
+    // 全体目標をsettingsCacheと連動
+    if (tgi) saveTotalGoal(parseInt(tgi.value,10)||0);
+    const prefs = {
+      calColor: _v('progress-cal-color', '#22c55e'),
+      comboColor: _v('progress-combo-color', '#f59e0b'),
+      comboTiers: (function(){ var el=document.getElementById('progress-combo-tiers'); return el ? el.value.split(',').map(function(v){return parseInt(v.trim(),10)}).filter(function(v){return v>0}).sort(function(a,b){return a-b}) : [2,5,7,14,30]; })(),
+      totalGoal: tgi ? (parseInt(tgi.value,10)||0) : 0,
+      deadlineDate: _v('progress-deadline-input', ''),
+      deadlineName: (document.getElementById('progress-deadline-name')||{value:''}).value.trim(),
+      calFontSize: _v('progress-cal-font-size', '0.68rem'),
+      calDateSize: _v('pcal-date-size', '1em'),
+      calDateColor: _v('pcal-date-color', '#374151'),
+      calCharsSize: _v('pcal-chars-size', '0.85em'),
+      calCharsColor: _v('pcal-chars-color', '#374151'),
+      calMemoSize: _v('pcal-memo-size', '0.7em'),
+      calMemoColor: _v('pcal-memo-color', '#666666'),
+      calRemainSize: _v('pcal-remain-size', '0.7em'),
+      calRemainColor: _v('pcal-remain-color', '#9ca3af'),
+    };
+    savePrefs(prefs);
+  }
+
+  // ===== レンダリング =====
+  function renderAll() {
+    renderSummary();
+    renderTotalBar();
+    renderCombo();
+    renderCalendar();
+    renderGraph();
+    renderTotalGoalPct();
+  }
+
+  function renderSummary() {
+    const el = document.getElementById('progress-summary');
+    if (!el) return;
+    const log = loadLog();
+    const today = todayKey();
+    const todayChars = log[today] || 0;
+    const now = new Date();
+    const dayOfWeek = (now.getDay() + 6) % 7;
+    let weekTotal = 0;
+    for (let i = 0; i <= dayOfWeek; i++) {
+      const d = new Date(now); d.setDate(d.getDate() - (dayOfWeek - i));
+      if (log[fmtKey(d)]) weekTotal += log[fmtKey(d)];
+    }
+    const y = now.getFullYear(), m = now.getMonth();
+    let monthTotal = 0, monthDays = 0, monthMax = 0;
+    for (let d = 1; d <= new Date(y, m+1, 0).getDate(); d++) {
+      const k = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      if (log[k]) { monthTotal += log[k]; monthDays++; if(log[k]>monthMax) monthMax=log[k]; }
+    }
+    const monthAvg = monthDays > 0 ? Math.round(monthTotal / monthDays) : 0;
+    el.innerHTML = `
+      <div class="progress-card"><div class="progress-card-value">${todayChars.toLocaleString()}</div><div class="progress-card-label">今日</div></div>
+      <div class="progress-card"><div class="progress-card-value">${weekTotal.toLocaleString()}</div><div class="progress-card-label">今週</div></div>
+      <div class="progress-card"><div class="progress-card-value">${monthAvg.toLocaleString()}</div><div class="progress-card-label">今月平均/日</div></div>
+      <div class="progress-card"><div class="progress-card-value">${monthMax.toLocaleString()}</div><div class="progress-card-label">今月最高</div></div>
+    `;
+  }
+
+  // --- 総文字数バー + 残り日数 ---
+  function renderTotalBar() {
+    const el = document.getElementById('progress-total-bar');
+    if (!el) return;
+    const totalChars = getEditorTotalChars();
+    const prefs = loadPrefs();
+    let html = `<span class="ptb-item">📖 エディタ総文字数: <span class="ptb-value">${totalChars.toLocaleString()}</span></span>`;
+    if (prefs.deadlineDate) {
+      const rem = calcDaysRemaining(prefs.deadlineDate);
+      const name = prefs.deadlineName ? `（${prefs.deadlineName}）` : '';
+      if (rem !== null) {
+        const label = rem > 0 ? `あと<span class="ptb-value">${rem}</span>日` : rem === 0 ? '<span class="ptb-value" style="color:#dc2626;">本日締切</span>' : '<span class="ptb-value" style="color:#dc2626;">期限超過</span>';
+        html += `<span class="ptb-item">📅 ${label}${name}</span>`;
+      }
+    }
+    el.innerHTML = html;
+  }
+
+  // --- 作品全体目標の進捗率表示 ---
+  function renderTotalGoalPct() {
+    const el = document.getElementById('progress-total-goal-pct');
+    if (!el) return;
+    const goal = loadTotalGoal() || loadPrefs().totalGoal || 0;
+    if (goal > 0) {
+      const total = getEditorTotalChars();
+      const pct = Math.round((total / goal) * 100);
+      el.textContent = `(${total.toLocaleString()} / ${goal.toLocaleString()} = ${pct}%)`;
+    } else {
+      el.textContent = '';
+    }
+  }
+
+  // --- コンボ表示 ---
+  function renderCombo() {
+    const el = document.getElementById('progress-combo-bar');
+    if (!el) return;
+    const log = loadLog();
+    const prefs = loadPrefs();
+    const streak = calcStreak(log);
+    if (streak < 2) { el.innerHTML = ''; return; }
+    const tier = getComboTier(streak, prefs.comboTiers);
+    const maxTier = prefs.comboTiers.length;
+    const bg = comboTierColor(prefs.comboColor, Math.max(tier,1), maxTier) || prefs.comboColor;
+    const textColor = tier >= maxTier - 1 ? '#fff' : '#333';
+    const tierLabel = tier > 0 ? ` (Lv.${tier})` : '';
+    el.innerHTML = `<span class="combo-badge" style="background:${bg};color:${textColor};">🔥 ${streak}日連続${tierLabel}</span>`;
+  }
+
+  // --- カレンダーヒートマップ ---
+  function renderCalendar() {
+    const cal = document.getElementById('progress-calendar');
+    const label = document.getElementById('progress-month-label');
+    if (!cal) return;
+    const log = loadLog();
+    const goal = loadGoal();
+    const prefs = loadPrefs();
+    const events = loadEvents();
+
+    const y = currentMonth.getFullYear(), m = currentMonth.getMonth();
+    if (label) label.textContent = `${y}年${m + 1}月`;
+    const firstDay = new Date(y, m, 1).getDay();
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    const today = todayKey();
+
+    let maxChars = 0;
+    for (let d = 1; d <= daysInMonth; d++) {
+      const k = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      if (log[k] && log[k] > maxChars) maxChars = log[k];
+    }
+    if (goal > 0 && goal > maxChars) maxChars = goal;
+    if (maxChars === 0) maxChars = 1;
+
+    // カレンダー文字スタイル設定を取得（要素別）
+    const calFontSize = prefs.calFontSize || '0.68rem';
+    const sDate = { size: prefs.calDateSize || '1em', color: prefs.calDateColor || '#374151' };
+    const sChars = { size: prefs.calCharsSize || '0.85em', color: prefs.calCharsColor || '#374151' };
+    const sMemo = { size: prefs.calMemoSize || '0.7em', color: prefs.calMemoColor || '#666666' };
+    const sRemain = { size: prefs.calRemainSize || '0.7em', color: prefs.calRemainColor || '#9ca3af' };
+    // カレンダー全体にベースフォントサイズを適用
+    cal.style.fontSize = calFontSize;
+
+    const dayNames = ['日','月','火','水','木','金','土'];
+    let html = '';
+    dayNames.forEach((dn, i) => {
+      const cls = i === 0 ? ' sun' : i === 6 ? ' sat' : '';
+      html += `<div class="progress-cal-head${cls}">${dn}</div>`;
+    });
+    for (let i = 0; i < firstDay; i++) html += `<div class="progress-cal-day empty"></div>`;
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const k = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const chars = log[k] || 0;
+      const level = chars === 0 ? 0 : Math.min(5, Math.ceil((chars / maxChars) * 5));
+      const isToday = k === today ? ' today' : '';
+      const dow = new Date(y, m, d).getDay();
+      const dowClass = dow === 0 ? 'sun' : dow === 6 ? 'sat' : '';
+      const goalMark = (goal > 0 && chars >= goal) ? ' ★' : '';
+      const ev = events[k] || {};
+      let tipParts = [k];
+      if (chars > 0) tipParts.push(`${chars.toLocaleString()}文字${goalMark}`);
+      if (ev.memo) tipParts.push(ev.memo);
+      const tip = tipParts.join(' | ');
+
+      // コンボ色
+      let comboStyle = '';
+      if (chars > 0) {
+        const dayStreak = calcDayStreak(log, k);
+        const tier = getComboTier(dayStreak, prefs.comboTiers);
+        if (tier > 0) {
+          const bc = comboTierColor(prefs.comboColor, tier, prefs.comboTiers.length);
+          comboStyle = `outline:2px solid ${bc}; outline-offset:-2px; z-index:1;`;
+        }
+      }
+      const bgColor = calHeatColor(prefs.calColor, level);
+      const bgStyle = bgColor ? `background:${bgColor};` : '';
+      const darkText = level >= 4 ? 'color:#fff;' : '';
+      const isDark = level >= 4;
+      const isDeadlineDay = prefs.deadlineDate === k;
+
+      // ツールチップ（マウスオーバー用）に予定全文を含める
+      const tipEsc = tip.replace(/"/g, '&quot;');
+      html += `<div class="progress-cal-day${isToday}" style="${bgStyle}${darkText}${comboStyle}" data-tooltip="${tipEsc}" onclick="openProgressDayModal('${k}')">`;
+      // 日付（左上）+ 目標日マーク — 個別スタイル適用
+      // 土日は固有色(赤/青)を維持、暗背景は白、それ以外はカスタム色
+      const dateColorPart = isDark ? 'color:#fff;' : (dow === 0 ? 'color:#dc2626;' : dow === 6 ? 'color:#2563eb;' : `color:${sDate.color};`);
+      const dateStyle = `font-size:${sDate.size};${dateColorPart}`;
+      html += `<span class="cal-num ${dowClass}" style="${dateStyle}">${d}${isDeadlineDay ? ' 🏁' : ''}</span>`;
+      // 情報エリア（下部）
+      html += `<div class="cal-info">`;
+      if (ev.memo) {
+        const memoEsc = (ev.memo||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        const memoStyle = `font-size:${sMemo.size};color:${isDark ? 'rgba(255,255,255,0.85)' : sMemo.color};`;
+        html += `<span class="cal-event" style="${memoStyle}" title="${memoEsc}">${memoEsc}</span>`;
+      }
+      if (chars > 0) {
+        const charsStyle = `font-size:${sChars.size};color:${isDark ? 'rgba(255,255,255,0.9)' : sChars.color};`;
+        html += `<span class="cal-chars" style="${charsStyle}">${chars >= 1000 ? (chars/1000).toFixed(1)+'k' : chars}字</span>`;
+      }
+      if (prefs.deadlineDate) {
+        const dayDate = new Date(y, m, d); dayDate.setHours(0,0,0,0);
+        const dlDate = new Date(prefs.deadlineDate + 'T23:59:59'); dlDate.setHours(0,0,0,0);
+        const rem = Math.ceil((dlDate - dayDate) / (1000*60*60*24));
+        if (rem >= 0 && rem <= 99) {
+          const remStyle = `font-size:${sRemain.size};color:${isDark ? 'rgba(255,255,255,0.7)' : sRemain.color};`;
+          html += `<span class="cal-remaining" style="${remStyle}">残${rem}日</span>`;
+        }
+      }
+      html += `</div></div>`;
+    }
+    cal.innerHTML = html;
+  }
+
+  // --- グラフ ---
+  function renderGraph() {
+    const canvas = document.getElementById('progress-graph');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const log = loadLog();
+    const goal = loadGoal();
+    const prefs = loadPrefs();
+
+    const rangeSelect = document.getElementById('progress-range-select');
+    const range = rangeSelect ? parseInt(rangeSelect.value, 10) : 30;
+
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const W = Math.max(rect.width - 20, 300), H = 150;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const days = [];
+    const now = new Date();
+    for (let i = range - 1; i >= 0; i--) {
+      const d = new Date(now); d.setDate(d.getDate() - i);
+      days.push({ key: fmtKey(d), day: d.getDate(), month: d.getMonth()+1, chars: log[fmtKey(d)] || 0 });
+    }
+    const maxVal = Math.max(goal || 0, ...days.map(d => d.chars), 1);
+
+    // Y軸ラベルのフォーマット関数（値に応じてk/万表記）
+    function fmtYLabel(v) {
+      if (v >= 10000) return (v/10000).toFixed(v%10000===0?0:1) + '万';
+      if (v >= 1000) return (v/1000).toFixed(v%1000===0?0:1) + 'k';
+      return String(v);
+    }
+    // 左余白を最大ラベル幅に応じて動的調整
+    ctx.font = '10px sans-serif';
+    const maxLabel = fmtYLabel(Math.round(maxVal));
+    const padL = Math.max(40, ctx.measureText(maxLabel).width + 12);
+    const padR = 10, padT = 10, padB = 22;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    ctx.clearRect(0, 0, W, H);
+
+    const cs = getComputedStyle(document.documentElement);
+    const textMuted = cs.getPropertyValue('--text-muted').trim() || '#999';
+    const borderCol = cs.getPropertyValue('--border-color').trim() || '#e5e7eb';
+    ctx.font = '10px sans-serif'; ctx.fillStyle = textMuted; ctx.textAlign = 'right';
+    for (let i = 0; i <= 4; i++) {
+      const val = Math.round(maxVal * i / 4);
+      const yy = padT + plotH - (plotH * i / 4);
+      ctx.fillText(fmtYLabel(val), padL - 4, yy + 3);
+      ctx.strokeStyle = borderCol; ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(padL, yy); ctx.lineTo(W - padR, yy); ctx.stroke();
+    }
+    // 目標ラインの破線だけ先に描画（ラベルはバーの後）
+    let goalY = -1;
+    if (goal > 0) {
+      goalY = padT + plotH - (plotH * goal / maxVal);
+      ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
+      ctx.beginPath(); ctx.moveTo(padL, goalY); ctx.lineTo(W - padR, goalY); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    const barW = plotW / days.length;
+    const baseBarColor = prefs.calColor;
+    const [bh,bs] = hexToHsl(baseBarColor);
+
+    if (graphMode === 'bar') {
+      days.forEach((d, i) => {
+        const x = padL + i * barW;
+        const h = d.chars > 0 ? Math.max(2, plotH * d.chars / maxVal) : 0;
+        const yy = padT + plotH - h;
+        const reached = goal > 0 && d.chars >= goal;
+        ctx.fillStyle = reached ? baseBarColor : hslToHex(bh, bs, 70);
+        ctx.fillRect(x + 1, yy, barW - 2, h);
+      });
+    } else {
+      ctx.strokeStyle = hslToHex(bh, bs, 55); ctx.lineWidth = 2; ctx.beginPath();
+      days.forEach((d, i) => {
+        const x = padL + (i + 0.5) * barW;
+        const yy = padT + plotH - (d.chars > 0 ? plotH * d.chars / maxVal : 0);
+        i === 0 ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy);
+      }); ctx.stroke();
+      days.forEach((d, i) => {
+        if (d.chars > 0) {
+          const x = padL + (i + 0.5) * barW, yy = padT + plotH - plotH * d.chars / maxVal;
+          ctx.fillStyle = (goal > 0 && d.chars >= goal) ? baseBarColor : hslToHex(bh, bs, 55);
+          ctx.beginPath(); ctx.arc(x, yy, 3, 0, Math.PI * 2); ctx.fill();
+        }
+      });
+    }
+
+    // 目標ラベルをバーの上に背景付きで描画（左側Y軸寄りに配置）
+    if (goal > 0 && goalY >= padT - 5) {
+      ctx.font = '9px sans-serif';
+      const labelText = '目標';
+      const tw = ctx.measureText(labelText).width;
+      const lx = padL + 4;
+      const ly = goalY - 4;
+      // 半透明背景で視認性確保
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.fillRect(lx - 2, ly - 8, tw + 4, 11);
+      ctx.fillStyle = '#f59e0b'; ctx.textAlign = 'left';
+      ctx.fillText(labelText, lx, ly);
+    }
+    ctx.fillStyle = textMuted; ctx.textAlign = 'center'; ctx.font = '9px sans-serif';
+    const labelStep = range <= 7 ? 1 : range <= 14 ? 2 : 5;
+    days.forEach((d, i) => {
+      if (i % labelStep === 0 || i === days.length - 1) {
+        // 月が変わった場合・先頭・末尾は M/D 表示
+        const prevMonth = i > 0 ? days[i-1].month : null;
+        const showMonth = (i === 0 || i === days.length - 1 || d.month !== prevMonth);
+        const lbl = showMonth ? `${d.month}/${d.day}` : `${d.day}`;
+        ctx.fillText(lbl, padL + (i + 0.5) * barW, H - 4);
+      }
+    });
+  }
+
+})();
+</script>
+
+<!-- ===== 校正モード (Proofread / Diff) v1.265 ===== -->
+<script>
+(function(){
+  'use strict';
+
+  // ===== State =====
+  let prfState = {
+    inputTabId: null,
+    refTabId: null,
+    granularity: 'word',
+    viewMode: 'split',
+    vertical: false,
+    diffs: [],       // array of {type:'equal'|'add'|'del', value:string}
+    decisions: [],   // 'pending'|'accepted'|'rejected' per diff chunk (only for add/del)
+    inputText: '',
+    refText: '',
+  };
+
+  // ===== Myers Diff Algorithm =====
+  function myersDiff(a, b) {
+    const N = a.length, M = b.length;
+    if (N === 0 && M === 0) return [];
+    if (N === 0) return b.map(v => ({type:'add', value:v}));
+    if (M === 0) return a.map(v => ({type:'del', value:v}));
+
+    const MAX = N + M;
+    const size = 2 * MAX + 1;
+    const vf = new Int32Array(size); // forward
+    const vb = new Int32Array(size); // backward
+    const offset = MAX;
+
+    // Shortcut for identical
+    if (a.join('') === b.join('')) return [{type:'equal', value: a.join('')}];
+
+    // Simple O(ND) implementation with output
+    const trace = [];
+    vf.fill(-1);
+    vf[offset + 1] = 0;
+    for (let d = 0; d <= MAX; d++) {
+      const newV = new Int32Array(vf);
+      for (let k = -d; k <= d; k += 2) {
+        let x;
+        if (k === -d || (k !== d && vf[offset + k - 1] < vf[offset + k + 1])) {
+          x = vf[offset + k + 1];
+        } else {
+          x = vf[offset + k - 1] + 1;
+        }
+        let y = x - k;
+        while (x < N && y < M && a[x] === b[y]) { x++; y++; }
+        newV[offset + k] = x;
+        if (x >= N && y >= M) {
+          trace.push(newV);
+          return buildResult(trace, a, b, N, M, offset);
+        }
+      }
+      trace.push(newV);
+      vf.set(newV);
+    }
+    return [{type:'del', value: a.join('')}, {type:'add', value: b.join('')}];
+  }
+
+  function buildResult(trace, a, b, N, M, offset) {
+    let x = N, y = M;
+    const edits = [];
+    for (let d = trace.length - 1; d >= 0; d--) {
+      const v = trace[d];
+      const k = x - y;
+      let prevK;
+      if (k === -d || (k !== d && (d > 0 ? trace[d-1] : new Int32Array(v.length))[offset + k - 1]
+          < (d > 0 ? trace[d-1] : new Int32Array(v.length))[offset + k + 1])) {
+        prevK = k + 1;
+      } else {
+        prevK = k - 1;
+      }
+      const prevV = d > 0 ? trace[d - 1] : null;
+      const prevX = prevV ? prevV[offset + prevK] : 0;
+      const prevY = prevX - prevK;
+
+      // Diag (equal)
+      while (x > prevX && y > prevY) {
+        x--; y--;
+        edits.unshift({type: 'equal', value: a[x]});
+      }
+      if (d > 0) {
+        if (x === prevX) {
+          edits.unshift({type: 'add', value: b[prevY]});
+          y--;
+        } else {
+          edits.unshift({type: 'del', value: a[prevX]});
+          x--;
+        }
+        x = prevX; y = prevY;
+      }
+    }
+    // Merge consecutive same-type edits
+    return mergeEdits(edits);
+  }
+
+  function mergeEdits(edits) {
+    if (!edits.length) return [];
+    const merged = [edits[0]];
+    for (let i = 1; i < edits.length; i++) {
+      const last = merged[merged.length - 1];
+      if (last.type === edits[i].type) {
+        last.value += edits[i].value;
+      } else {
+        merged.push({...edits[i]});
+      }
+    }
+    return merged;
+  }
+
+  // ===== Tokenizers =====
+  function tokenizeChar(text) { return text.split(''); }
+  function tokenizeLine(text) { return text.split('\n'); }
+  function tokenizeWord(text) {
+    // Split on Japanese punctuation boundaries, spaces, and newlines while keeping delimiters
+    const result = [];
+    let buf = '';
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (/[\n\r]/.test(ch)) {
+        if (buf) { result.push(buf); buf = ''; }
+        result.push(ch);
+      } else if (/[、。，．！？!?…―─「」『』（）\(\)【】\s　]/.test(ch)) {
+        buf += ch;
+        result.push(buf); buf = '';
+      } else {
+        buf += ch;
+      }
+    }
+    if (buf) result.push(buf);
+    return result;
+  }
+
+  function getTokenizer(gran) {
+    if (gran === 'char') return tokenizeChar;
+    if (gran === 'line') return tokenizeLine;
+    return tokenizeWord;
+  }
+
+  // ===== Compute diff =====
+  function computeDiff() {
+    const tokenize = getTokenizer(prfState.granularity);
+    const aTokens = tokenize(prfState.refText);
+    const bTokens = tokenize(prfState.inputText);
+    prfState.diffs = myersDiff(aTokens, bTokens);
+    // init decisions for non-equal chunks
+    prfState.decisions = prfState.diffs.map(d => d.type === 'equal' ? null : 'pending');
+  }
+
+  // ===== Render diff =====
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  function renderSplitView() {
+    const beforeEl = document.getElementById('proofread-content-before');
+    const afterEl = document.getElementById('proofread-content-after');
+    if (!beforeEl || !afterEl) return;
+
+    let beforeHtml = '', afterHtml = '';
+    let chunkIdx = 0;
+
+    prfState.diffs.forEach((d, i) => {
+      const esc = escHtml(d.value);
+      if (d.type === 'equal') {
+        beforeHtml += esc;
+        afterHtml += esc;
+      } else if (d.type === 'del') {
+        const cls = prfState.decisions[i] === 'accepted' ? ' accepted' : prfState.decisions[i] === 'rejected' ? ' rejected' : '';
+        beforeHtml += `<span class="diff-del" data-chunk="${i}">${esc}</span>`;
+        // show action buttons on the "after" side if next is 'add' or standalone del
+        const nextIsAdd = (i + 1 < prfState.diffs.length && prfState.diffs[i + 1].type === 'add');
+        if (!nextIsAdd) {
+          afterHtml += buildActionButtons(i);
+        }
+      } else if (d.type === 'add') {
+        const cls = prfState.decisions[i] === 'accepted' ? ' accepted' : prfState.decisions[i] === 'rejected' ? ' rejected' : '';
+        afterHtml += `<span class="diff-add" data-chunk="${i}">${esc}</span>`;
+        afterHtml += buildActionButtons(i);
+      }
+    });
+
+    beforeEl.innerHTML = beforeHtml;
+    afterEl.innerHTML = afterHtml;
+    bindActionButtons();
+    syncSplitScroll();
+  }
+
+  function renderInlineView() {
+    const el = document.getElementById('proofread-content-inline');
+    if (!el) return;
+    let html = '';
+    prfState.diffs.forEach((d, i) => {
+      const esc = escHtml(d.value);
+      if (d.type === 'equal') {
+        html += esc;
+      } else if (d.type === 'del') {
+        html += `<span class="diff-del" data-chunk="${i}">${esc}</span>`;
+      } else if (d.type === 'add') {
+        html += `<span class="diff-add" data-chunk="${i}">${esc}</span>`;
+        html += buildActionButtons(i);
+      }
+    });
+    el.innerHTML = html;
+    bindActionButtons();
+  }
+
+  function buildActionButtons(chunkIndex) {
+    const dec = prfState.decisions[chunkIndex] || 'pending';
+    const accCls = dec === 'accepted' ? ' accepted' : '';
+    const rejCls = dec === 'rejected' ? ' rejected' : '';
+    return `<span class="diff-action-group" data-chunk="${chunkIndex}">` +
+      `<button class="diff-action-btn${accCls}" data-action="accept" data-chunk="${chunkIndex}" title="この変更を採用">✓</button>` +
+      `<button class="diff-action-btn${rejCls}" data-action="reject" data-chunk="${chunkIndex}" title="この変更を却下">✗</button>` +
+      `</span>`;
+  }
+
+  function bindActionButtons() {
+    document.querySelectorAll('#proofread-overlay .diff-action-btn').forEach(btn => {
+      btn.onclick = function(e) {
+        e.preventDefault();
+        const idx = parseInt(this.dataset.chunk);
+        const action = this.dataset.action;
+        if (isNaN(idx)) return;
+
+        if (action === 'accept') {
+          prfState.decisions[idx] = prfState.decisions[idx] === 'accepted' ? 'pending' : 'accepted';
+          // If this is an add and previous is del (pair), accept del too
+          if (prfState.diffs[idx].type === 'add' && idx > 0 && prfState.diffs[idx - 1].type === 'del') {
+            prfState.decisions[idx - 1] = prfState.decisions[idx];
+          }
+        } else {
+          prfState.decisions[idx] = prfState.decisions[idx] === 'rejected' ? 'pending' : 'rejected';
+          if (prfState.diffs[idx].type === 'add' && idx > 0 && prfState.diffs[idx - 1].type === 'del') {
+            prfState.decisions[idx - 1] = prfState.decisions[idx];
+          }
+        }
+        renderCurrentView();
+        updateStats();
+      };
+    });
+  }
+
+  function renderCurrentView() {
+    if (prfState.viewMode === 'split') renderSplitView();
+    else renderInlineView();
+  }
+
+  // ===== Split scroll sync =====
+  function syncSplitScroll() {
+    const panes = document.querySelectorAll('#proofread-split-view .proofread-pane-scroll');
+    if (panes.length < 2) return;
+    let syncing = false;
+    panes.forEach((pane, i) => {
+      pane.onscroll = function() {
+        if (syncing) return;
+        syncing = true;
+        const other = panes[1 - i];
+        if (prfState.vertical) {
+          const ratio = pane.scrollLeft / (pane.scrollWidth - pane.clientWidth || 1);
+          other.scrollLeft = ratio * (other.scrollWidth - other.clientWidth);
+        } else {
+          const ratio = pane.scrollTop / (pane.scrollHeight - pane.clientHeight || 1);
+          other.scrollTop = ratio * (other.scrollHeight - other.clientHeight);
+        }
+        syncing = false;
+      };
+    });
+  }
+
+  // ===== Stats =====
+  function updateStats() {
+    const el = document.getElementById('proofread-stats');
+    if (!el) return;
+    let adds = 0, dels = 0, accepted = 0, rejected = 0;
+    prfState.diffs.forEach((d, i) => {
+      if (d.type === 'add') adds++;
+      if (d.type === 'del') dels++;
+      if (prfState.decisions[i] === 'accepted') accepted++;
+      if (prfState.decisions[i] === 'rejected') rejected++;
+    });
+    el.textContent = `追加: ${adds}件　削除: ${dels}件　採用: ${accepted}　却下: ${rejected}`;
+  }
+
+  // ===== Dialog =====
+  // 全タブ（入力＋参照）をoptgroupで一つのselectに詰める共通関数
+  function populateAllTabs(sel) {
+    sel.innerHTML = '';
+    const tabs = window.inputTabs || [];
+    const rTabs = window.refTabs || [];
+    if (tabs.length > 0) {
+      const grp = document.createElement('optgroup');
+      grp.label = '入力タブ';
+      tabs.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = 'input:' + t.id;
+        opt.textContent = t.name || ('タブ' + t.id);
+        grp.appendChild(opt);
+      });
+      sel.appendChild(grp);
+    }
+    if (rTabs.length > 0) {
+      const grp = document.createElement('optgroup');
+      grp.label = '参照タブ';
+      rTabs.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = 'ref:' + t.id;
+        opt.textContent = t.name || ('参照' + t.id);
+        grp.appendChild(opt);
+      });
+      sel.appendChild(grp);
+    }
+  }
+
+  window.openProofreadDialog = function() {
+    const overlay = document.getElementById('proofread-dialog-overlay');
+    if (!overlay) return;
+
+    const inputSel = document.getElementById('proofread-input-tab');
+    const refSel = document.getElementById('proofread-ref-tab');
+    populateAllTabs(inputSel);
+    populateAllTabs(refSel);
+
+    // デフォルト選択: 左=アクティブ入力タブ、右=最初の参照タブ（なければ2番目の入力タブ）
+    if (window.activeTabId) inputSel.value = 'input:' + window.activeTabId;
+    const rTabs = window.refTabs || [];
+    if (rTabs.length > 0) {
+      refSel.value = 'ref:' + rTabs[0].id;
+    } else {
+      const tabs = window.inputTabs || [];
+      if (tabs.length > 1) {
+        const second = tabs.find(t => t.id !== window.activeTabId);
+        if (second) refSel.value = 'input:' + second.id;
+      }
+    }
+
+    overlay.setAttribute('aria-hidden', 'false');
+  };
+
+  // ⇔ ボタンで左右の選択値を入れ替え
+  document.addEventListener('DOMContentLoaded', function() {
+    var swapBtn = document.getElementById('proofread-swap-btn');
+    if (swapBtn) swapBtn.addEventListener('click', function() {
+      var inputSel = document.getElementById('proofread-input-tab');
+      var refSel = document.getElementById('proofread-ref-tab');
+      if (!inputSel || !refSel) return;
+      var tmp = inputSel.value;
+      inputSel.value = refSel.value;
+      refSel.value = tmp;
+    });
+  });
+
+  window.closeProofreadDialog = function() {
+    const overlay = document.getElementById('proofread-dialog-overlay');
+    if (overlay) overlay.setAttribute('aria-hidden', 'true');
+  };
+
+  // ===== Start proofread mode =====
+  // "input:123" or "ref:456" 形式からタブを取得するヘルパー
+  function resolveTabSelection(val) {
+    if (!val) return { id: 0, text: '' };
+    const parts = val.split(':');
+    const source = parts[0];
+    const id = parseInt(parts[1]);
+    // 現在のエディタ内容を同期
+    const tabs = window.inputTabs || [];
+    if (window.activeTabId && window.inputArea) {
+      const curTab = tabs.find(t => t.id === window.activeTabId);
+      if (curTab) curTab.content = window.inputArea.value;
+    }
+    const refArea = document.getElementById('reference-area');
+    if (refArea && window.refActiveTabId != null) {
+      const rCur = (window.refTabs || []).find(t => t.id === window.refActiveTabId);
+      if (rCur) rCur.content = refArea.value;
+    }
+    if (source === 'input') {
+      const tab = tabs.find(t => t.id === id);
+      return { id: id, text: tab ? (tab.content || '') : '' };
+    } else {
+      const rTabs = window.refTabs || [];
+      const tab = rTabs.find(t => t.id === id);
+      return { id: id, text: tab ? (tab.content || '') : '' };
+    }
+  }
+
+  window.startProofreadMode = function() {
+    const leftVal = document.getElementById('proofread-input-tab').value;
+    const rightVal = document.getElementById('proofread-ref-tab').value;
+    const granularity = document.getElementById('proofread-granularity').value;
+    const viewMode = document.getElementById('proofread-view-mode').value;
+
+    const left = resolveTabSelection(leftVal);
+    const right = resolveTabSelection(rightVal);
+    const inputText = left.text;
+    const refText = right.text;
+
+    if (!inputText && !refText) {
+      alert('比較するテキストがありません。');
+      return;
+    }
+
+    const inputTabId = left.id;
+    const refTabId = right.id;
+    prfState.inputTabId = inputTabId;
+    prfState.refTabId = refTabId;
+    prfState.granularity = granularity;
+    prfState.viewMode = viewMode;
+    prfState.inputText = inputText;
+    prfState.refText = refText;
+    prfState.vertical = false;
+
+    // Close dialog
+    window.closeProofreadDialog();
+
+    // Compute diff
+    computeDiff();
+
+    // Set controls
+    document.getElementById('proofread-ctrl-granularity').value = granularity;
+    document.getElementById('proofread-ctrl-view').value = viewMode;
+
+    // Show overlay
+    const overlay = document.getElementById('proofread-overlay');
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+
+    // Show correct view
+    switchProofreadViewInternal(viewMode);
+    renderCurrentView();
+    updateStats();
+    updateProofreadWritingModeBtn();
+  };
+
+  // ===== Close =====
+  window.closeProofreadMode = function() {
+    const overlay = document.getElementById('proofread-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden', 'true');
+  };
+
+  // ===== Rerun diff (granularity changed) =====
+  window.rerunProofreadDiff = function() {
+    prfState.granularity = document.getElementById('proofread-ctrl-granularity').value;
+    computeDiff();
+    renderCurrentView();
+    updateStats();
+  };
+
+  // ===== Switch view =====
+  window.switchProofreadView = function() {
+    const mode = document.getElementById('proofread-ctrl-view').value;
+    prfState.viewMode = mode;
+    switchProofreadViewInternal(mode);
+    renderCurrentView();
+  };
+
+  function switchProofreadViewInternal(mode) {
+    const split = document.getElementById('proofread-split-view');
+    const inline = document.getElementById('proofread-inline-view');
+    if (mode === 'split') {
+      split.style.display = 'flex';
+      inline.style.display = 'none';
+    } else {
+      split.style.display = 'none';
+      inline.style.display = 'flex';
+    }
+  }
+
+  // ===== Writing mode toggle =====
+  window.toggleProofreadWritingMode = function() {
+    prfState.vertical = !prfState.vertical;
+    const body = document.getElementById('proofread-body');
+    if (prfState.vertical) body.classList.add('vertical-mode');
+    else body.classList.remove('vertical-mode');
+    updateProofreadWritingModeBtn();
+  };
+
+  function updateProofreadWritingModeBtn() {
+    const btn = document.getElementById('btn-proofread-writing-mode');
+    if (btn) btn.textContent = prfState.vertical ? '横書きへ' : '縦書きへ';
+  }
+
+  // ===== Apply accepted changes =====
+  window.applyProofreadChanges = function() {
+    // Build new text from decisions
+    let result = '';
+    for (let i = 0; i < prfState.diffs.length; i++) {
+      const d = prfState.diffs[i];
+      const dec = prfState.decisions[i];
+
+      if (d.type === 'equal') {
+        result += d.value;
+      } else if (d.type === 'del') {
+        if (dec === 'accepted') {
+          // accepted del = remove this text (use the 'add' replacement if paired)
+          // skip — the paired 'add' will supply the replacement
+          const nextIsAdd = (i + 1 < prfState.diffs.length && prfState.diffs[i + 1].type === 'add');
+          if (!nextIsAdd) {
+            // standalone del accepted = remove text
+            continue;
+          }
+        } else {
+          // rejected or pending del = keep original text
+          result += d.value;
+        }
+      } else if (d.type === 'add') {
+        if (dec === 'accepted') {
+          result += d.value;
+        }
+        // rejected or pending add = don't include
+      }
+    }
+
+    // Apply to input tab
+    const tabs = window.inputTabs || [];
+    const tab = tabs.find(t => t.id === prfState.inputTabId);
+    if (tab) {
+      tab.content = result;
+      if (window.activeTabId === prfState.inputTabId && window.inputArea) {
+        window.inputArea.value = result;
+        if (typeof updatePreview === 'function') updatePreview();
+        if (typeof updateInputStats === 'function') updateInputStats();
+      }
+      if (typeof saveTabsToStorage === 'function') saveTabsToStorage();
+    }
+
+    alert('選択した変更を入力タブに適用しました。');
+    window.closeProofreadMode();
+  };
+
+  // ===== Esc key =====
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const overlay = document.getElementById('proofread-overlay');
+      if (overlay && overlay.classList.contains('show')) {
+        e.preventDefault(); e.stopPropagation();
+        window.closeProofreadMode();
+        return;
+      }
+      const dialog = document.getElementById('proofread-dialog-overlay');
+      if (dialog && dialog.getAttribute('aria-hidden') === 'false') {
+        e.preventDefault(); e.stopPropagation();
+        window.closeProofreadDialog();
+      }
+    }
+  }, true);
+
 })();
 </script>
 
